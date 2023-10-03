@@ -1,0 +1,89 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: ${JPA_SHOW_SQL}
+    open-in-view: false
+    generate-ddl: true
+    hibernate:
+      ddl-auto: ${JPA_GENERATE_SCHEMA}
+    properties:
+      hibernate:
+        format_sql: ${JPA_FORMAT_SQL}
+        order_inserts: true
+        jdbc:
+          batch_size: ${JPA_BATCH_SIZE}
+  servlet:
+    multipart:
+      max-file-size: "1000MB"
+      max-request-size: "1000MB"
+  flyway:
+    enabled: true # Change to false for test unit
+
+  datasource:
+    url: "${DB_URL}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+  messages:
+    basename: lang/messages
+    encoding: UTF-8
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+server:
+  port: ${REST_SERVER_PORT}
+  servlet:
+    context-path: ${CONTEXT_PATH}
+
+logging:
+  level:
+    org:
+      springframework:
+        web: error
+      hibernate: error
+    com:
+      mexico:
+        sas:
+          admin:
+            api: ${LOGGER_LEVEL}
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %logger.%M - %msg%n"
+    file: "%d{HH:mm:ss} %logger.%M - %msg%n"
+  file:
+    name: /tmp/sas-admin/logs/api-service.log
+
+api:
+  security:
+    cipher-secret: ${SECURITY_CIPHER_SECRET}
+    jwt:
+      secretId: ${JWT_SECRET_ID}
+      secretKey: ${JWT_SECRET_KEY}
+      expiration: ${JWT_EXPIRATION}
+    pathAllowed: ${PATHS_ALLOWED}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        exclude: shutdown
+  endpoint:
+    loggers:
+      enabled: true
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
+    env:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
