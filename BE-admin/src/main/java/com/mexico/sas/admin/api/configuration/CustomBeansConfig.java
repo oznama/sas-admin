@@ -1,11 +1,13 @@
 package com.mexico.sas.admin.api.configuration;
 
+import com.mexico.sas.admin.api.i18n.I18nResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.concurrent.Executor;
 
@@ -27,5 +29,12 @@ public class CustomBeansConfig {
         executor.setThreadNamePrefix("ExecutorAsync-");
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean getValidator() {
+        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+        bean.setValidationMessageSource(I18nResolver.messageSource);
+        return bean;
     }
 }
