@@ -1,4 +1,4 @@
-# kikoya-microservices
+# SAS Admin Microservices
 
 ## Prerequisites
 
