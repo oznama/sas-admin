@@ -11,8 +11,6 @@
 ## Build
 
 ```bash
-cd BE-admin
-
 ## On windows 
 gradlew bootBuildImage
 
@@ -27,8 +25,6 @@ sudo ./gradlew bootBuildImage
 For execute unit test, open **_application.yml_** and **turn off flyway** 
 
 ```bash
-cd BE-admin
-
 ## On windows 
 gradlew test
 gradlew test --test ClassName
