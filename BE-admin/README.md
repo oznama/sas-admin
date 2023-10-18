@@ -27,13 +27,13 @@ For execute unit test, open **_application.yml_** and **turn off flyway**
 ```bash
 ## On windows 
 gradlew test
-gradlew test --test ClassName
-gradlew test --test ClassName.methodName
+gradlew test --tests ClassName
+gradlew test --tests ClassName.methodName
 
 ## On Linux
 sudo ./gradlew test
-sudo ./gradlew test --test ClassName
-sudo ./gradlew test --test ClassName.methodName
+sudo ./gradlew test --tests ClassName
+sudo ./gradlew test --tests ClassName.methodName
 ```
 
 ### Docker compose
