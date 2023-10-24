@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "tbl_app_usr")
 @Data
-public class App_usr {
+public class AppUsr {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
