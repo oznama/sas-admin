@@ -13,6 +13,12 @@ public class Operation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    private Long id_app_usr;
-    private Long id_project;
+
+    @ManyToOne
+    @JoinColumn(name = "id_app_usr", nullable = false)
+    private AppUsr appUsr;
+
+    @ManyToOne
+    @JoinColumn(name = "id_project", nullable = false)
+    private Project project;
 }

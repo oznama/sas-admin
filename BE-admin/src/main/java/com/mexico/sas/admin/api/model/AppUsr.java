@@ -12,6 +12,12 @@ public class AppUsr {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    private Long id_aplicacion;
-    private Long id_usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_aplicacion", nullable = false)
+    private Application application;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private User user;
 }
