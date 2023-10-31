@@ -27,7 +27,7 @@ public class Compra {
     @Column(length = 255)
     private String observaciones;
     private BigDecimal impFaltante;
-s
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idRequisicion", nullable = false)
     private Requisicion requisicion;
