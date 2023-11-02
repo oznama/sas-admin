@@ -1,9 +1,16 @@
 import PropTypes from 'prop-types';
 
 export const Loading = ({isLoading}) => {
+
+  const buildSpinner = () => (
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+      </div>
+  );
+
   return (
-    isLoading && (<h2>Cargando...</h2> )
-  )
+    isLoading && buildSpinner()
+  );
 }
 
 Loading.propTypes = {

@@ -1,7 +1,10 @@
-import { useFetchProjects } from "../../../hooks/useFetchProjects";
-import { Loading } from "./Loading";
+import { useNavigate } from 'react-router-dom';
+import { useFetchProjects } from '../../../hooks/useFetchProjects';
+import { Loading } from './Loading';
 
 export const TableProject = () => {
+
+    const navigate = useNavigate();
 
     const { projects, isLoading } = useFetchProjects();
 
@@ -16,8 +19,7 @@ export const TableProject = () => {
     // }
 
     const handledSelect = id => {
-        console.log('Clicked', id);
-        // Show detail
+        navigate(`/project/${id}/edit`);
     }
 
     const renderRows = () => projects.map(({
@@ -33,7 +35,7 @@ export const TableProject = () => {
         leader
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
-            <td>{ clave }</td>
+            <th scope="row">{ clave }</th>
             <td>{ name }</td>
             <td>{ description }</td>
             <td>{ createdBy }</td>
@@ -48,31 +50,52 @@ export const TableProject = () => {
         </tr>
     ));
 
+    const pagination = () => (
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+                </li>
+            </ul>
+        </nav>
+    );
+
     return (
         <>
             { <Loading isLoading={ isLoading } /> }
 
-            <table>
+            <table class="table">
                 <thead>
                     <tr>
-                        <th>Clave</th>
-                        <th>Nombre</th>
-                        <th>Descripci&oacute;n</th>
-                        <th>Creado por</th>
-                        <th>Fecha creaci&oacute;n</th>
-                        <th>Fecha entrega (Propuesta)</th>
-                        <th>Fecha entrega (Dise&ntilde;o)</th>
-                        <th>Fecha entrega (Desarrollo)</th>
-                        <th>Cliente</th>
-                        <th>L&iacute;der Dise&ntilde;o</th>
-                        <th>Project Manager</th>
-                        <th>L&iacute;der Desarrollo</th>
+                        <th scope="col">Clave</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Descripci&oacute;n</th>
+                        <th scope="col">Creado por</th>
+                        <th scope="col">Fecha creaci&oacute;n</th>
+                        <th scope="col">Fecha entrega (Propuesta)</th>
+                        <th scope="col">Fecha entrega (Dise&ntilde;o)</th>
+                        <th scope="col">Fecha entrega (Desarrollo)</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">L&iacute;der Dise&ntilde;o</th>
+                        <th scope="col">Project Manager</th>
+                        <th scope="col">L&iacute;der Desarrollo</th>
                     </tr>
                 </thead>
                 <tbody>
                     { renderRows() }
                 </tbody>
             </table>
+            { pagination() }
         </>
     )
 }
