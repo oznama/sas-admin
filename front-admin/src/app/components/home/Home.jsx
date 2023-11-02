@@ -12,8 +12,8 @@ const Home = () => {
     }
 
     const renderAddButton = () => (
-        <div className="btnDiv">
-            <button type="button" class="btn btn-primary" onClick={ handleAddProject }>Nuevo</button>
+        <div className="d-flex flex-row-reverse">
+            <button type="button" className="btn btn-primary" onClick={ handleAddProject }>Nuevo</button>
         </div>
     );
 
@@ -22,7 +22,9 @@ const Home = () => {
             <NavBarPage />
             <div className='container'>
                 <div>
-                    <h1>Proyectos</h1>
+                    <div className="d-flex justify-content-center">
+                        <h1 className="fs-4 card-title fw-bold mb-4">Proyectos</h1>
+                    </div>
                     { renderAddButton() }
                 </div>
                 <TableProject />
