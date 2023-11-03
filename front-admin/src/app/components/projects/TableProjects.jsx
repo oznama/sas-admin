@@ -22,14 +22,14 @@ export const TableProject = () => {
         navigate(`/project/${id}/edit`);
     }
 
-    const renderStatus = (status, value) => {
-        const backColor = status === 3 ? 'bg-danger' : ( status === 2 ? 'bg-warning' : 'bg-success' );
+    const renderStatus = (status) => {
+        const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
         // TODO Remove by value
-        const statusDesc = status === 3 ? 'Fuera de tiempo' : ( status === 2 ? 'Pendiente de pago' : 'En proceso' );
+        const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
         return (<span className={ `w-100 p-2 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
-    const renderRows = () => projects.map(({
+    const renderRows = () => projects && projects.content && projects.content.map(({
         id,
         clave,
         name,
@@ -39,13 +39,14 @@ export const TableProject = () => {
         dueDate,
         client,
         pm,
-        leader
+        leader,
+        status
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
             <th className="text-left" scope="row">{ clave }</th>
             <td className="text-left">{ name }</td>
             <td className="text-left">{ description }</td>
-            <td className="text-center">{ renderStatus(id, '') }</td>
+            <td className="text-center">{ renderStatus(status, '') }</td>
             <td className="text-left">{ createdBy }</td>
             <td className="text-center">{ creationDate }</td>
             <td className="text-center"></td>

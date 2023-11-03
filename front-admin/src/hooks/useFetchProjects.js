@@ -3,17 +3,17 @@ import { getProjects } from "../app/api/ApiDummy";
 
 export const useFetchProjects = () => {
 
-    const [projects, setProjects] = useState([]);
+    const [projects, setProjects] = useState({});
     const [isLoading, setIsLoading] = useState(true);
 
-    const getImages = async() => {
+    const getPageProjects = async() => {
         const allProjects = await getProjects();
         setProjects(allProjects);
         setIsLoading(false);
     }
 
     useEffect( () => {
-        getImages();
+        getPageProjects();
     }, []);
 
     return {
