@@ -20,6 +20,7 @@ public class ProjectDummy {
     private String leader;
     private String client;
     private String pm;
+    private int status;
 
     public ProjectDummy(Long id) {
         this.id = id;

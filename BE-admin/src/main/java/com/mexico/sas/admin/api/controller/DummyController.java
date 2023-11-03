@@ -1,5 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
+import com.mexico.sas.admin.api.dto.UserDto;
+import com.mexico.sas.admin.api.dto.UserPaggeableDto;
 import com.mexico.sas.admin.api.dummy.ProjectDummy;
 import com.mexico.sas.admin.api.dummy.ProjectDummyRepository;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -8,6 +10,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +28,15 @@ public class DummyController {
     private ProjectDummyRepository projectDummyRepository;
 
     @GetMapping
-    @ApiOperation(httpMethod = "GET", value = "Servicio para todos los proyectos dummies", nickname = "/findAll")
+    @ApiOperation(httpMethod = "GET",
+            value = "Servicio para recuperar todos los proyectos dummy paginados",
+            nickname = "/findAll")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success", response = ProjectDummy.class, responseContainer = "List") })
-    public ResponseEntity<List<ProjectDummy>> findAll() throws CustomException {
-        log.info("Finding projects dummies");
-        return ResponseEntity.ok(projectDummyRepository.findAll());
+            @ApiResponse(code = 200, message = "Success", response = UserDto.class, responseContainer = "List")
+    })
+    public ResponseEntity<Page<ProjectDummy>> findAll(Pageable pageable) throws CustomException {
+        log.info("Finding all users");
+        return ResponseEntity.ok(projectDummyRepository.findAll(pageable));
     }
 
     @GetMapping("/{id}")
