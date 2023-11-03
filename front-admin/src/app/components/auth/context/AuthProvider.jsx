@@ -2,33 +2,69 @@ import { useReducer } from 'react';
 import { AuthContext } from './AuthContext'
 import { authReducer } from './authReducer';
 import { types } from '../types/types';
+import { doLogin, doLogout } from '../../../api/ApiAuth';
 
-const initialState = {
-  logged: false,
+const init = () => {
+  const user = JSON.parse( localStorage.getItem('user') );
+  const token = localStorage.getItem('token');
+  
+  return {
+    logged: !!user,
+    user,
+    token,
+  }
 }
 
 export const AuthProvider = ({ children }) => {
 
-  const [ authState, dispatch ] = useReducer( authReducer, initialState );
+  const [ authState, dispatch ] = useReducer( authReducer, {}, init );
 
   const login = async( userForm ) => {
 
-    console.log('Request to Login...', userForm);
+    doLogin(userForm).then( response => {
+      let action = {}
+      if( response.code ) {
+        action = {
+          type: types.error,
+          payload: response,
+        }
+      } else {
+        action = {
+          type: types.login,
+          payload: response,
+        };
+    
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', response.accessToken);
+      }
+      dispatch(action);
+    }).catch( error => {
+      console.log(error);
+    });
+    
+  }
 
-    const action = {
-      type: types.login,
-      payload: userForm,
-    };
+  const logout = () => {
 
-    console.log
+    const token = localStorage.getItem('token');
+    doLogout(token).then( response => {
+      const action = { type: types.logout }
 
-    dispatch(action);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+
+      dispatch(action);
+    }).catch( error => {
+      console.log(error);
+    })
+    
   }
 
   return (
     <AuthContext.Provider value={{
       ...authState,
-      login: login
+      login,
+      logout,
     }}>
         { children }
     </AuthContext.Provider>

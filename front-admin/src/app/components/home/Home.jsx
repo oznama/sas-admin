@@ -1,9 +1,8 @@
 import './home.main.css'
-import { TableProject } from '../custom/TableProjects';
+import { TableProject } from '../projects/TableProjects';
 import { useNavigate } from 'react-router-dom';
-import { NavBarPage } from '../custom/NavBar/NavBarPage';
 
-const Home = () => {
+export const Home = () => {
 
     const navigate = useNavigate();
 
@@ -18,19 +17,14 @@ const Home = () => {
     );
 
     return (
-        <div>
-            <NavBarPage />
-            <div className='container'>
-                <div>
-                    <div className="d-flex justify-content-center">
-                        <h1 className="fs-4 card-title fw-bold mb-4">Proyectos</h1>
-                    </div>
-                    { renderAddButton() }
+        <>
+            <div>
+                <div className="d-flex justify-content-center">
+                    <h1 className="fs-4 card-title fw-bold mb-4">Proyectos</h1>
                 </div>
-                <TableProject />
+                { renderAddButton() }
             </div>
-        </div>
-    )
-}
-
-export default Home
+            <TableProject />
+        </>
+    );
+};

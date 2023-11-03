@@ -2,16 +2,18 @@ import { useNavigate } from 'react-router-dom';
 import './login.main.css';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { Footer } from '../../custom/Footer';
+import { renderErrorMessage } from '../../../helpers/handleErrors';
 
 export const LoginPage = () => {
 
-    const { login } = useContext( AuthContext );
-    const navigate = useNavigate();
+    const { login, message, errors } = useContext( AuthContext );
 
+    const navigate = useNavigate();
+    
     const onLogin = event => {
         event.preventDefault();
         const data = new FormData(event.target);
-        console.log('Data', data);
         const request = Object.fromEntries(data.entries());
         login(request);
 
@@ -29,16 +31,17 @@ export const LoginPage = () => {
                         <div className="card shadow-lg">
                             <div className="card-body p-5">
                                 <h1 className="fs-4 card-title fw-bold mb-4">Iniciar Sesi&oacute;n</h1>
+                                { renderErrorMessage(message, errors) }
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
-                                        <label className="mb-2 text-muted">Usuario</label>
-                                        <input className="form-control" name="email" required />
+                                        <label className="mb-2 text-muted">Email</label>
+                                        <input className="form-control" name="email" type="email" required />
                                         <div className="invalid-feedback">
-                                            Usuario invalido
+                                            eMail invalido
                                         </div>
                                     </div>
-
                                     <div className="mb-2">
+                                        <label className="mb-2 text-muted">Password</label>
                                         <input type="password" className="form-control" name="password" required />
                                         <div className="invalid-feedback">
                                             Password obligatorio
@@ -63,9 +66,7 @@ export const LoginPage = () => {
                                 </form>
                             </div>
                         </div>
-                        <div className="text-center mt-5 text-muted">
-                            Copyright &copy; 2023 &mdash; SAS
-                        </div>
+                        { <Footer /> }
                     </div>
                 </div>
             </div>
