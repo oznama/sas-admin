@@ -11,7 +11,7 @@ export const Home = () => {
     }
 
     const renderAddButton = () => (
-        <div className="d-flex flex-row-reverse">
+        <div className="d-flex flex-row-reverse pb-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddProject }>Nuevo</button>
         </div>
     );
@@ -20,7 +20,7 @@ export const Home = () => {
         <>
             <div>
                 <div className="d-flex justify-content-center">
-                    <h1 className="fs-4 card-title fw-bold mb-4">Proyectos</h1>
+                    <h1 className="fs-4 card-title fw-bold mb-1">Proyectos</h1>
                 </div>
                 { renderAddButton() }
             </div>

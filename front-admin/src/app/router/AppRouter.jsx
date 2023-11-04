@@ -10,7 +10,7 @@ export const AppRouter = () => {
         <>
             <Loading />
             <NavBarPage />
-            <div className='w-100 p-5'>
+            <div className='w-100 p-2'>
                 <Routes>
                     <Route path="home" element={ <Home /> } />
                     <Route path="project/add" element={ <ProjectPage /> } />

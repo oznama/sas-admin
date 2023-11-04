@@ -4,7 +4,6 @@ import { LoadingContext } from "../context/LoadingContext";
 export const Loading = () => {
 
   const { isLoading } = useContext( LoadingContext );
-  console.log('isLoading', isLoading);
 
   const styleChangeSizeSpinner = () => ({
     width: '3.5rem', 

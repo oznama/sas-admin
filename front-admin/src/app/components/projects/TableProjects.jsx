@@ -1,20 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { useFetchProjects } from '../../../hooks/useFetchProjects';
 import { Pagination } from '../custom/pagination/page/Pagination';
+import { LoadingContext } from '../custom/loading/context/LoadingContext';
+import { getProjects } from '../../api/ApiDummy';
 
 export const TableProject = ({
-    pageSize = 10
+    pageSize = 10,
+    sort = 'creationDate,desc',
 }) => {
 
     const navigate = useNavigate();
 
+    const { changeLoading } = useContext( LoadingContext );
     const [currentPage, setCurrentPage] = useState(0);
-    const { projects, isLoading } = useFetchProjects(currentPage, pageSize, 'createdBy,desc');
+    const [projects, setProjects] = useState([]);
+    const [totalProjects, setTotalProjects] = useState(0);
+
+    const fetchProjects = (page) => {
+        changeLoading(true);
+        getProjects(page, pageSize, sort)
+            .then( response => {
+                console.log(response);
+                setProjects(response.content);
+                setTotalProjects(response.totalElements);
+                changeLoading(false);
+            }).catch( error => {
+                console.log('Error Fetching projects', error);
+                changeLoading(false);
+                // show Error Dialog
+            });
+    }
+
+    useEffect(() => {
+      fetchProjects(currentPage);
+    }, [currentPage]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
+        fetchProjects(currentPage);
     }
     
 
@@ -36,10 +60,10 @@ export const TableProject = ({
         const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
         // TODO Remove by value
         const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
-        return (<span className={ `w-100 p-2 rounded ${backColor} text-white` }>{ statusDesc }</span>);
+        return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
-    const renderRows = () => projects && projects.content && projects.content.map(({
+    const renderRows = () => projects && projects.map(({
         id,
         clave,
         name,
@@ -59,13 +83,13 @@ export const TableProject = ({
             <td className="text-center">{ renderStatus(status, '') }</td>
             <td className="text-left">{ createdBy }</td>
             <td className="text-center">{ creationDate }</td>
+            {/* <td className="text-center"></td>
             <td className="text-center"></td>
-            <td className="text-center"></td>
-            <td className="text-center">{ dueDate }</td>
-            <td className="text-left">{ client }</td>
-            <td className="text-left"></td>
+            <td className="text-center">{ dueDate }</td> */}
+            <th className="text-left">{ client }</th>
+            {/* <td className="text-left"></td> */}
             <td className="text-left">{ pm }</td>
-            <td className="text-left">{ leader }</td>
+            {/* <td className="text-left">{ leader }</td> */}
         </tr>
     ));
 
@@ -73,8 +97,8 @@ export const TableProject = ({
         <>
             <div className='table-responsive text-nowrap'>
 
-                <table className="table table-striped table-hover">
-                    <thead>
+                <table className="table table-sm table-bordered table-striped table-hover">
+                    <thead className="thead-dark">
                         <tr>
                             <th className="text-center fs-6" scope="col">Clave</th>
                             <th className="text-center fs-6" scope="col">Nombre</th>
@@ -82,13 +106,13 @@ export const TableProject = ({
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">Creado por</th>
                             <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
-                            <th className="text-center fs-6" scope="col">Fecha entrega (Propuesta)</th>
+                            {/* <th className="text-center fs-6" scope="col">Fecha entrega (Propuesta)</th>
                             <th className="text-center fs-6" scope="col">Fecha entrega (Dise&ntilde;o)</th>
-                            <th className="text-center fs-6" scope="col">Fecha entrega (Desarrollo)</th>
+                            <th className="text-center fs-6" scope="col">Fecha entrega (Desarrollo)</th> */}
                             <th className="text-center fs-6" scope="col">Cliente</th>
-                            <th className="text-center fs-6" scope="col">L&iacute;der Dise&ntilde;o</th>
+                            {/* <th className="text-center fs-6" scope="col">L&iacute;der Dise&ntilde;o</th> */}
                             <th className="text-center fs-6" scope="col">Project Manager</th>
-                            <th className="text-center fs-6" scope="col">L&iacute;der Desarrollo</th>
+                            {/* <th className="text-center fs-6" scope="col">L&iacute;der Desarrollo</th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -99,7 +123,7 @@ export const TableProject = ({
             </div>
             <Pagination
                 currentPage={ currentPage + 1 }
-                totalCount={ projects.totalElements }
+                totalCount={ totalProjects }
                 pageSize={ pageSize }
                 onPageChange={ page => onPaginationClick(page) } 
             />
