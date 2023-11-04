@@ -1,3 +1,6 @@
+// Reference: https://www.freecodecamp.org/news/build-a-custom-pagination-component-in-react/
+// Reference: https://github.com/mayankshubham/react-pagination/tree/master
+
 import { useMemo } from "react"
 
 export const DOTS = '...';

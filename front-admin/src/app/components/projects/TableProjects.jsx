@@ -1,12 +1,22 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useFetchProjects } from '../../../hooks/useFetchProjects';
-import { Loading } from '../custom/Loading';
+import { Pagination } from '../custom/pagination/page/Pagination';
 
-export const TableProject = () => {
+export const TableProject = ({
+    pageSize = 10
+}) => {
 
     const navigate = useNavigate();
 
-    const { projects, isLoading } = useFetchProjects();
+    const [currentPage, setCurrentPage] = useState(0);
+    const { projects, isLoading } = useFetchProjects(currentPage, pageSize, 'createdBy,desc');
+
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+    }
+    
 
     // const addNewElement = newElement => {
     //     Manera 1 para agregar un nuevo elemento al estado
@@ -59,32 +69,8 @@ export const TableProject = () => {
         </tr>
     ));
 
-    const pagination = () => (
-        <div className="d-flex justify-content-end">
-            <nav aria-label="Page navigation example">
-                <ul className="pagination">
-                    <li className="page-item">
-                    <a className="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                    </li>
-                    <li className="page-item"><a className="page-link" href="#">1</a></li>
-                    <li className="page-item"><a className="page-link" href="#">2</a></li>
-                    <li className="page-item"><a className="page-link" href="#">3</a></li>
-                    <li className="page-item">
-                    <a className="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    );
-
     return (
         <>
-            { <Loading isLoading={ isLoading } /> }
-
             <div className='table-responsive text-nowrap'>
 
                 <table className="table table-striped table-hover">
@@ -111,7 +97,16 @@ export const TableProject = () => {
                 </table>
 
             </div>
-            { pagination() }
+            <Pagination
+                currentPage={ currentPage + 1 }
+                totalCount={ projects.totalElements }
+                pageSize={ pageSize }
+                onPageChange={ page => onPaginationClick(page) } 
+            />
         </>
     )
+}
+
+TableProject.propTypes = {
+    pageSize: PropTypes.number,
 }

@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getProjects } from "../app/api/ApiDummy";
+import { LoadingContext } from "../app/components/custom/loading/context/LoadingContext";
 
 export const useFetchProjects = () => {
 
+    const { changeLoading } = useContext( LoadingContext );
     const [projects, setProjects] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
 
-    const getPageProjects = async() => {
-        const allProjects = await getProjects();
+    const getPageProjects = async(page=0, size=10, sort='id,asc') => {
+        changeLoading(true);
+        const allProjects = await getProjects(page, size, sort);
         setProjects(allProjects);
-        setIsLoading(false);
+        changeLoading(false);
     }
 
     useEffect( () => {
@@ -18,7 +20,6 @@ export const useFetchProjects = () => {
 
     return {
         projects,
-        isLoading
     }
 
 }

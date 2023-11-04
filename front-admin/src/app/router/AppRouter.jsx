@@ -3,10 +3,12 @@ import { Home } from '../components/home/Home';
 import { ProjectPage } from '../components/projects/ProjectPage';
 import { NavBarPage } from '../components/custom/NavBarPage';
 import { Footer } from '../components/custom/Footer';
+import { Loading } from '../components/custom/loading/page/Loading';
 
 export const AppRouter = () => {
     return (
         <>
+            <Loading />
             <NavBarPage />
             <div className='w-100 p-5'>
                 <Routes>
