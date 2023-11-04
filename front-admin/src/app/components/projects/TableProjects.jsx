@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { LoadingContext } from '../custom/loading/context/LoadingContext';
 import { getProjects } from '../../api/ApiDummy';
+import { renderErrorMessage } from '../../helpers/handleErrors';
 
 export const TableProject = ({
     pageSize = 10,
@@ -16,19 +17,18 @@ export const TableProject = ({
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
+    const [msgError, setMsgError] = useState();
 
     const fetchProjects = (page) => {
         changeLoading(true);
         getProjects(page, pageSize, sort)
             .then( response => {
-                console.log(response);
                 setProjects(response.content);
                 setTotalProjects(response.totalElements);
                 changeLoading(false);
             }).catch( error => {
-                console.log('Error Fetching projects', error);
                 changeLoading(false);
-                // show Error Dialog
+                setMsgError(`Imposible cargar los proyectos, contacta al administrador del sistema!`);
             });
     }
 
@@ -95,6 +95,7 @@ export const TableProject = ({
 
     return (
         <>
+            { renderErrorMessage(msgError, null) }
             <div className='table-responsive text-nowrap'>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
