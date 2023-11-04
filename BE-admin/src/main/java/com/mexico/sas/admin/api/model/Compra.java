@@ -13,7 +13,7 @@ public class Compra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    private Long ordenCompra;
+    private Long id;
     private Date fechaOrdCompra;
     private Date fechaInstalacion;
     private Integer porcentaje;
@@ -28,7 +28,7 @@ public class Compra {
     private String observaciones;
     private BigDecimal impFaltante;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idRequisicion", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_requisicion")
     private Requisicion requisicion;
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_project")
@@ -25,7 +26,6 @@ public class Project {
     private Date fechaFactura;
     private Date FechaInstalacion;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_requisicion", referencedColumnName = "idRequisicion")
-    private Requisicion requisicion;
+    @OneToMany(mappedBy = "project")
+    private List<Requisicion> requisiciones;
 }
