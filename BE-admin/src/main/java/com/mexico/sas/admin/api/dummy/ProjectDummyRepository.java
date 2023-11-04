@@ -42,7 +42,7 @@ public class ProjectDummyRepository {
                 persons.get("pm"),
                 getStatus()
         ));
-        for (int i = 10; i < 100; i++) {
+        for (int i = 10; i < 700; i++) {
             dates = getRandomDates();
             persons = getPersons(i);
             TABLE.add(new ProjectDummy(
@@ -115,7 +115,16 @@ public class ProjectDummyRepository {
     }
 
     public Page<ProjectDummy> findAll(Pageable pageable) {
-        return new PageImpl<>(TABLE, pageable, TABLE.size());
+        Integer pageSize = pageable.getPageSize();
+        List<ProjectDummy> tablePagged= new ArrayList<>(TABLE);
+        if (pageSize == null || pageSize <= 0 || pageSize > tablePagged.size())
+            pageSize = tablePagged.size();
+        int numPages = (int) Math.ceil((double)tablePagged.size() / (double)pageSize);
+        List<List<ProjectDummy>> pages = new ArrayList<>(numPages);
+        for (int pageNum = 0; pageNum < numPages;)
+            pages.add(tablePagged.subList(pageNum * pageSize, Math.min(++pageNum * pageSize, tablePagged.size())));
+        return new PageImpl<>(pages.get(pageable.getPageNumber()), pageable, TABLE.size());
+
     }
 
     public ProjectDummy findById(Long id) {
