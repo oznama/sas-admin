@@ -12,12 +12,11 @@ public class Requisicion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    private Long idRequisicion;
+    private Long id;
     private Date fechaRequisicion;
-    @Column(unique = true)
-    private Long id_proyecto;
 
-    @OneToOne(mappedBy = "requisicion")
+    @ManyToOne
+    @JoinColumn(name = "id_proyecto")
     private Project project;
 
     @OneToMany(mappedBy = "requisicion", cascade = CascadeType.ALL)

@@ -6,8 +6,8 @@ CREATE TABLE tbl_application (
 
 CREATE TABLE tbl_app_usr (
     id bigserial,
-    id_aplicacion INT,
-    id_usuario INT,
+    id_aplicacion INT8,
+    id_usuario INT8,
     PRIMARY KEY (id),
     FOREIGN KEY (id_aplicacion) REFERENCES tbl_application(id),
     FOREIGN KEY (id_usuario) REFERENCES users(id)
@@ -15,10 +15,10 @@ CREATE TABLE tbl_app_usr (
 
 CREATE TABLE tbl_operation (
     id bigserial,
-    id_app_usr INT,
-    id_project INT,
+    id_app_usr INT8,
+    id_project INT8,
     PRIMARY KEY (id),
     FOREIGN KEY (id_app_usr) REFERENCES tbl_app_usr(id),
-    FOREIGN KEY (id_proyecto) REFERENCES tbl_project(id)
+    FOREIGN KEY (id_project) REFERENCES tbl_project(id)
 );
 
