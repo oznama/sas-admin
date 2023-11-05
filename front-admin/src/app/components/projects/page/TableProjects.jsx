@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Pagination } from '../custom/pagination/page/Pagination';
-import { LoadingContext } from '../custom/loading/context/LoadingContext';
-import { getProjects } from '../../api/ApiDummy';
-import { renderErrorMessage } from '../../helpers/handleErrors';
+import { Pagination } from '../../custom/pagination/page/Pagination';
+import { LoadingContext } from '../../custom/loading/context/LoadingContext';
+import { getProjects } from '../../../api/ApiDummy';
+import { renderErrorMessage } from '../../../helpers/handleErrors';
 
 export const TableProject = ({
     pageSize = 10,
@@ -73,23 +73,18 @@ export const TableProject = ({
         dueDate,
         client,
         pm,
-        leader,
         status
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
-            <th className="text-left" scope="row">{ clave }</th>
-            <td className="text-left">{ name }</td>
-            <td className="text-left">{ description }</td>
+            <th className="text-start" scope="row">{ clave }</th>
+            <td className="text-start">{ name }</td>
+            <td className="text-start">{ description }</td>
             <td className="text-center">{ renderStatus(status, '') }</td>
-            <td className="text-left">{ createdBy }</td>
+            <td className="text-start">{ createdBy }</td>
             <td className="text-center">{ creationDate }</td>
-            {/* <td className="text-center"></td>
-            <td className="text-center"></td>
-            <td className="text-center">{ dueDate }</td> */}
-            <th className="text-left">{ client }</th>
-            {/* <td className="text-left"></td> */}
-            <td className="text-left">{ pm }</td>
-            {/* <td className="text-left">{ leader }</td> */}
+            <th className="text-start">{ client }</th>
+            <td className="text-start">{ pm }</td>
+            <td className="text-center">{ dueDate }</td>
         </tr>
     ));
 
@@ -107,13 +102,9 @@ export const TableProject = ({
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">Creado por</th>
                             <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
-                            {/* <th className="text-center fs-6" scope="col">Fecha entrega (Propuesta)</th>
-                            <th className="text-center fs-6" scope="col">Fecha entrega (Dise&ntilde;o)</th>
-                            <th className="text-center fs-6" scope="col">Fecha entrega (Desarrollo)</th> */}
                             <th className="text-center fs-6" scope="col">Cliente</th>
-                            {/* <th className="text-center fs-6" scope="col">L&iacute;der Dise&ntilde;o</th> */}
                             <th className="text-center fs-6" scope="col">Project Manager</th>
-                            {/* <th className="text-center fs-6" scope="col">L&iacute;der Desarrollo</th> */}
+                            <th className="text-center fs-6" scope="col">Cierre</th>
                         </tr>
                     </thead>
                     <tbody>

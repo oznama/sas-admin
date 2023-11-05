@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import './login.main.css';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Footer } from '../../custom/Footer';
