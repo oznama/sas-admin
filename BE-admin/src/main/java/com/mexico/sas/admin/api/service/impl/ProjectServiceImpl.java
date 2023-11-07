@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service.impl;
 
+import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.dto.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
@@ -11,6 +12,8 @@ import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.User;
 import com.mexico.sas.admin.api.repository.ProjectRepository;
+import com.mexico.sas.admin.api.service.ClientService;
+import com.mexico.sas.admin.api.service.EmployeeService;
 import com.mexico.sas.admin.api.service.ProjectService;
 import com.mexico.sas.admin.api.service.UserService;
 import com.mexico.sas.admin.api.util.Utils;
@@ -34,6 +37,12 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ClientService clientService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     @Override
     public Page<ProjectPageableDto> findAll(Pageable pageable) {
@@ -77,13 +86,15 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         project.setUserId(getCurrentUserId());
         validationSave(projectDto, project);
         try {
-            log.debug("Project to save: {}", project);
+            log.debug("Project to save, key: {}", project.getKey());
             repository.save(project);
-            log.debug("Project created with id: {}", project.getId());
+            projectDto.setId(project.getId());
+            log.debug("Project created with id: {}", projectDto.getId());
         } catch (Exception e) {
-            throw new CustomException(e.getMessage());
+            String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
+            log.error(msgError, e.getMessage());
+            throw new CustomException(msgError);
         }
-        projectDto.setId(project.getId());
     }
 
     private void validationSave(ProjectDto projectDto, Project project) throws ValidationRequestException {
@@ -92,18 +103,33 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         // Valiadcion de key
         try {
             findByKey(project.getKey());
-            errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.key, I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED)));
+            errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.key, I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, project.getKey())));
         } catch (CustomException ignored) {
 
         }
 
-        // TODO Agregar catalogo de estados
-        project.setStatus(2000200002l);
-        // TODO Agregar validacion para que no inserte clientes que no existen
-        project.setClient(new Client(projectDto.getClientId()));
-        // TODO Agregar validacion para que el pm sea empleado del cliente
-        project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
+        // Validacion clientId
+        try {
+            clientService.findById(projectDto.getClientId());
+            project.setClient(new Client(projectDto.getClientId()));
 
+            // Validacion Project Manager
+            try {
+                employeeService.findByClientAndId(projectDto.getClientId() , projectDto.getProjectManagerId());
+                project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
+            } catch (CustomException ne) {
+                errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.projectManagerId, ne.getMessage()));
+            }
+
+        } catch (CustomException e) {
+            errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.clientId, e.getMessage()));
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ValidationRequestException(errors);
+        }
+
+        project.setStatus(CatalogKeys.ESTATUS_MACHINE_ENABLED);
         project.setCreationDate(new Date());
     }
 }

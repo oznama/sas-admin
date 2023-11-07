@@ -52,4 +52,6 @@ public interface I18nKeys {
     String CLIENT_NOT_FOUND = "client.not.found";
     String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
+    String PROJECT_NOT_CREATED = "project.not.created";
+    String EMPLOYEE_NOT_FOUND = "employee.not.found";
 }

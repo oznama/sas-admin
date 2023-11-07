@@ -1,6 +1,7 @@
 -- Usuarios
 INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (1, 'admin', 'admin', 'admin@sas-mexico.com', '555522558866', current_timestamp, 'true');
 INSERT INTO user_security (user_id, password, creation_date) VALUES (1, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
+SELECT setval('users_id_seq', 1);
 
 -- Catalogos
 
@@ -65,5 +66,9 @@ INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_dat
 INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 6, 1, current_timestamp);
 INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 7, 1, current_timestamp);
 INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 8, 1, current_timestamp);
+
+SELECT setval('permission_id_seq', 8);
+SELECT setval('sso_role_id_seq', 1);
+--SELECT setval('sso_roles_permissions_id_seq', 8);
 
 UPDATE users SET role_id = 1 WHERE id = 1;

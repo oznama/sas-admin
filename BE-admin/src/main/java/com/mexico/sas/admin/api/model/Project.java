@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,12 +10,12 @@ import java.util.Date;
 @Entity
 @Table(name = "projects")
 @Data
-@ToString
+@DynamicInsert
 public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, unique = true)
     private Long id;
     @Column(name = "p_key", length = 15)
     private String key;

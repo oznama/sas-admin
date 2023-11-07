@@ -24,7 +24,7 @@ CREATE TABLE employees (
 
 CREATE TABLE projects (
     id bigserial not null,
-    p_key varchar(15) not null,
+    p_key varchar(15) not null unique,
     description varchar(255) not null,
     status int8 not null,
     client_id int8 not null,

@@ -3,6 +3,7 @@ package com.mexico.sas.admin.api.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -12,7 +13,7 @@ import java.util.List;
 @Table(name = "employees")
 @Data
 @NoArgsConstructor
-@ToString
+@DynamicInsert
 public class Employee {
 
     @Id
