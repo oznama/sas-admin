@@ -48,4 +48,8 @@ public interface I18nKeys {
     String GENERAL_WORD_OF = "general.word.of";
 
     String LABEL_DATE_PARAM = "label.date.param";
+
+    String CLIENT_NOT_FOUND = "client.not.found";
+    String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
+    String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
 }

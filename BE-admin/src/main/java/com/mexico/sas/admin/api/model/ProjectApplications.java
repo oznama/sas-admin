@@ -1,28 +1,27 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
-import lombok.ToString;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "projects")
+@Table(name = "project_applications")
 @Data
-@ToString
-public class Project {
+public class ProjectApplications {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    @Column(name = "p_key", length = 15)
-    private String key;
-    @Column(length = 255)
-    private String description;
-    private Long status;
-    private Date installationDate;
-
+    @Column(nullable = false)
+    private Long applicationId;
+    private BigDecimal amount;
+    private Integer hours;
+    private Date designDate;
+    private Date developmentDate;
+    private Date endDate;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
@@ -34,9 +33,13 @@ public class Project {
 
     @ManyToOne
     @JoinColumn
-    private Client client;
+    private Project project;
 
     @ManyToOne
     @JoinColumn
-    private Employee projectManager;
+    private User leader;
+
+    @ManyToOne
+    @JoinColumn
+    private User developer;
 }
