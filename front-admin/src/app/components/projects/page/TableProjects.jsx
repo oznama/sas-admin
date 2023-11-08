@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Pagination } from '../../custom/pagination/page/Pagination';
 import { LoadingContext } from '../../custom/loading/context/LoadingContext';
-import { getProjects } from '../../../api/ApiDummy';
+import { getProjects } from '../../../services/ProjectService';
 import { renderErrorMessage } from '../../../helpers/handleErrors';
 
 export const TableProject = ({
@@ -56,35 +56,35 @@ export const TableProject = ({
         navigate(`/project/${id}/edit`);
     }
 
-    const renderStatus = (status) => {
-        const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
-        // TODO Remove by value
-        const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
-        return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
-    }
+    // const renderStatus = (status) => {
+    //     const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
+    //     // TODO Remove by value
+    //     const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
+    //     return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
+    // }
 
     const renderRows = () => projects && projects.map(({
         id,
-        clave,
-        name,
+        key,
+        // name,
         description,
         createdBy,
         creationDate,
-        dueDate,
+        installationDate,
         client,
-        pm,
+        projectManager,
         status
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
-            <th className="text-start" scope="row">{ clave }</th>
-            <td className="text-start">{ name }</td>
+            <th className="text-start" scope="row">{ key }</th>
+            {/* <td className="text-start">{ name }</td> */}
             <td className="text-start">{ description }</td>
-            <td className="text-center">{ renderStatus(status, '') }</td>
+            {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             <td className="text-start">{ createdBy }</td>
             <td className="text-center">{ creationDate }</td>
             <th className="text-start">{ client }</th>
-            <td className="text-start">{ pm }</td>
-            <td className="text-center">{ dueDate }</td>
+            <td className="text-start">{ projectManager }</td>
+            <td className="text-center">{ installationDate }</td>
         </tr>
     ));
 
@@ -97,14 +97,14 @@ export const TableProject = ({
                     <thead className="thead-dark">
                         <tr>
                             <th className="text-center fs-6" scope="col">Clave</th>
-                            <th className="text-center fs-6" scope="col">Nombre</th>
+                            {/* <th className="text-center fs-6" scope="col">Nombre</th> */}
                             <th className="text-center fs-6" scope="col">Descripci&oacute;n</th>
-                            <th className="text-center fs-6" scope="col">Status</th>
+                            {/* <th className="text-center fs-6" scope="col">Status</th> */}
                             <th className="text-center fs-6" scope="col">Creado por</th>
                             <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Cliente</th>
                             <th className="text-center fs-6" scope="col">Project Manager</th>
-                            <th className="text-center fs-6" scope="col">Cierre</th>
+                            <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
                         </tr>
                     </thead>
                     <tbody>

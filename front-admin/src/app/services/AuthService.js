@@ -1,4 +1,4 @@
-const url = import.meta.env.VITE_API_URL;
+import { api } from '../api/Api';
 
 export const doLogin = async(data) => {
     const request = {
@@ -6,7 +6,7 @@ export const doLogin = async(data) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     }
-    const response = await fetch( `${url}sso/login`, request );
+    const response = await api( 'sso/login', request );
     const jsonResponse = await response.json();
     return jsonResponse;
 };
@@ -16,7 +16,7 @@ export const doLogout = async(token) => {
         headers: { Authorization: `Bearer ${token}`,
         }
     }
-    const response = await fetch( `${url}sso/logout`, request );
+    const response = await api( 'sso/logout', request );
     const jsonResponse = await response.json();
     return jsonResponse;
 }

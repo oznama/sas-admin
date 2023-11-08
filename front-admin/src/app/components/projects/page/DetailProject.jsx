@@ -1,101 +1,173 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
-import { TextArea } from '../../custom/TextArea';
+// import { TextArea } from '../../custom/TextArea';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
+import { save } from '../../../services/ProjectService';
+import { getSelect } from '../../../services/ClientService';
+import { LoadingContext } from '../../custom/loading/context/LoadingContext';
+import { renderErrorMessage } from '../../../helpers/handleErrors';
+import { AuthContext } from '../../auth/context/AuthContext';
+import { checkResponse } from '../../../helpers/handleResponse';
 
-export const DetailProject = () => {
+export const DetailProject = ({
+    project
+}) => {
+
+    console.log(project);
+
     const navigate = useNavigate();
+    const { changeLoading } = useContext( LoadingContext );
     const [pKey, setPKey] = useState('');
-    const [name, setName] = useState('');
-    const [status, setStatus] = useState('1');
     const [description, setDescription] = useState('');
-    const [createdBy, setCreatedBy] = useState('Selene Pascali');
+    const [createdBy, setCreatedBy] = useState('');
     const [dateCreated, setDateCreated] = useState(new Date());
     const [client, setClient] = useState('-1');
     const [pm, setPm] = useState('-1');
-    const [catStatus, setCatStatus] = useState([
-        { id: '1', value: 'Nuevo' },
-        { id: '2', value: 'Control de cambio' },
-        { id: '3', value: 'Extensión' },,
-    ]);
-    const [clients, setClients] = useState([
-        { id: '1', value: 'SAS' },
-        { id: '2', value: 'Prosa' },
-        { id: '3', value: 'Multiva' },
-    ]);
-    const [pms, setPms] = useState([
-        { id: '1', value: 'Jaime Carreño' },
-        { id: '2', value: 'Rogelio Zavaleta' },
-    ]);
+    const [installationDate, setInstallationDate] = useState();
+    const [clients, setClients] = useState([]);
+    const [pms, setPms] = useState([]);
+    const [msgError, setMsgError] = useState();
+    const [errors, setErros] = useState();
+
+    const isModeEdit = () => ( project && project.id !== undefined );
+
+    const fetchCatalogClient = () => {
+        changeLoading(true);
+        getSelect()
+            .then( response => {
+                checkResponse(response);
+                setClients(response);
+                changeLoading(false);
+            }).catch( error => {
+                changeLoading(false);
+                setMsgError(`Imposible cargar catalogo de clientes, contacta al administrador del sistema!`);
+            });
+    };
+
+    const { logout } = useContext( AuthContext );
+
+    const onLogout = () => {
+      logout();
+      navigate('/login', { replace: true })
+    }
+
+    const setProjectToForm = () => {
+        setPKey(project.key);
+        setDescription(project.description);
+        setCreatedBy(project.createdBy);
+        setClient(project.clientId);
+        setPm(project.projectManagerId);
+        setInstallationDate(project.installationDate);
+    }
+
+    useEffect(() => {
+        fetchCatalogClient();
+        setProjectToForm();
+    }, []);
 
 
     // ALL Functions to helper
     const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
-    const upperFirstChar = word => word[0].toUpperCase() + word.substring(1).toLowerCase();
-    const upperAllFirtsChars = word => {
-        const words = word.split(" ");
-        for (let i = 0; i < words.length; i++) {
-        words[i] = words[i][0].toUpperCase() + words[i].substr(1);
-        }
-        words.join(" ");
-        return wors;
-    }
+    // const upperFirstChar = word => word[0].toUpperCase() + word.substring(1).toLowerCase();
+    // const upperAllFirtsChars = word => {
+    //     const words = word.split(" ");
+    //     for (let i = 0; i < words.length; i++) {
+    //     words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+    //     }
+    //     words.join(" ");
+    //     return wors;
+    // }
 
     const onChangePKey = ({ target }) => setPKey(handleText(target).toUpperCase());
-    const onChangeName = ({ target }) => setName(target.value);
     const onChangeDesc = ({ target }) => setDescription(target.value);
-    const onChangeStatus = ({target }) => setStatus(target.value);
     const onChangeCreatedDate = (date) => setDateCreated(date);
-    const onChangeClient = ({ target }) => setClient(target.value);
+    const onChangeInstallationDate = (date) => setInstallationDate(date);
+    const onChangeClient = ({ target }) => {
+        setClient(target.value);
+        const index = target.value - 1;
+        if( index < 0 ) {
+            setPm("-1");
+            setPms([]);
+        } else {
+            setPms( clients[index].employess);
+        }
+    }
     const onChangePm = ({ target }) => setPm(target.value);
     
-    const onSubmit = formData => {
-        console.log(formData);
+    const onSubmit = event => {
+        event.preventDefault();
+        const data = new FormData(event.target);
+        const request = Object.fromEntries(data.entries());
+        
+        save(request).then( response => {
+            if(response.code && response.code === 401) {
+                onLogout();
+            } else if (response.code && response.code !== 200) {
+                if( response.message ) {
+                    setMsgError(response.message)
+                } else if (response.errors) {
+                    setErros(response.errors);
+                }
+            } else {
+                navigate('/', { replace: true });
+            }
+        }).catch(error => {
+            setMsgError(error.message);
+        });
     }
+
+    const renderCreatedBy = () => isModeEdit() && (
+        <div className='col-3'>
+            <InputText name='createdBy' label='Creado por' value={ createdBy } disabled />
+        </div>
+    )
+    
+    const renderCreationDate = () => isModeEdit() && (
+        <div className='col-3'>
+            <DatePicker name='creationDate' label="Fecha" value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
+        </div>
+    )
 
     return (
         <div>
-        <form onSubmit={ onSubmit }>
-            <div className='text-center'>
-            <div className="row text-start">
-                <div className='col-2'>
-                <InputText label='Clave' placeholder='Ingresa clave' value={ pKey } onChange={ onChangePKey } maxLength={ 12 } />
+            { renderErrorMessage(msgError, errors, true) }
+            <form onSubmit={ onSubmit }>
+                <div className='text-center'>
+                <div className="row text-start">
+                    <div className='col-3'>
+                        <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ isModeEdit() } value={ pKey } onChange={ onChangePKey } maxLength={ 12 } />
+                    </div>
+                    <div className='col-6'>
+                        <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' value={ description } onChange={ onChangeDesc } maxLength={ 70 } />
+                    </div>
+                    <div className='col-3'>
+                        <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
+                    </div>
                 </div>
-                <div className='col-6'>
-                <InputText label='Nombre' placeholder='Ingresa nombre' value={ name } onChange={ onChangeName } maxLength={ 70 } />
+                {/* <div className="row text-start">
+                    <div className='col-12'>
+                    <TextArea label='Descripci&oacute;n' placeholder='Agrega alguna descripci&oacute;n al proyecto' value={ description } onChange={ onChangeDesc } />
+                    </div>
+                </div> */}
+                <div className="row text-start">
+                    { renderCreatedBy() }
+                    { renderCreationDate() }
+                    <div className='col-3'>
+                    <Select name="clientId" label="Cliente" options={ clients } value={ client } onChange={ onChangeClient } />
+                    </div>
+                    <div className='col-3'>
+                    <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } onChange={ onChangePm } />
+                    </div>
                 </div>
-                <div className='col-4'>
-                <Select label="Tipo" options={ catStatus } value={ status } onChange={ onChangeStatus } />
                 </div>
-            </div>
-            <div className="row text-start">
-                <div className='col-12'>
-                <TextArea label='Descripci&oacute;n' placeholder='Agrega alguna descripci&oacute;n al proyecto' value={ description } onChange={ onChangeDesc } />
+                <div className="pt-3 d-flex flex-row-reverse">
+                    <button type="submit" className="btn btn-primary">Guardar</button>
+                    &nbsp;
+                    <button type="button" className="btn btn-danger" onClick={ () => navigate(`/home`) }>Cancelar</button>
                 </div>
-            </div>
-            <div className="row text-start">
-                <div className='col-3'>
-                <InputText label='Creado por' value={ createdBy } disabled />
-                </div>
-                <div className='col-3'>
-                <DatePicker label="Fecha" value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
-                </div>
-                <div className='col-3'>
-                <Select label="Cliente" options={ clients } value={ client } onChange={ onChangeClient } />
-                </div>
-                <div className='col-3'>
-                <Select label="Project Manager" options={ pms } value={ pm } onChange={ onChangePm } />
-                </div>
-            </div>
-            </div>
-            <div className="pt-3 d-flex flex-row-reverse">
-                <button type="submit" className="btn btn-primary">Guardar</button>
-                &nbsp;
-                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/home`) }>Cancelar</button>
-            </div>
-        </form>
+            </form>
         </div>
     )
 }

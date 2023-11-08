@@ -25,12 +25,12 @@ export const NavBarPage = () => {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <NavLink className="nav-item nav-link active" to="#">
-                Opcion 1
+                Catalogos
               </NavLink>
             </li>
             <li className="nav-item dropdown">
               <NavLink className="nav-item nav-link" to="#">
-                Opcion 2
+                Seguridad
               </NavLink>
             </li>
           </ul>

@@ -2,7 +2,7 @@ import { useReducer } from 'react';
 import { AuthContext } from './AuthContext'
 import { authReducer } from './authReducer';
 import { types } from '../types/types';
-import { doLogin, doLogout } from '../../../api/ApiAuth';
+import { doLogin, doLogout } from '../../../services/AuthService';
 
 const init = () => {
   const user = JSON.parse( localStorage.getItem('user') );

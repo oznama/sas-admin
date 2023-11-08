@@ -5,24 +5,25 @@ import { NavBarPage } from '../components/custom/NavBarPage';
 import { Footer } from '../components/custom/Footer';
 import { Loading } from '../components/custom/loading/page/Loading';
 import { DetailApplications } from '../components/applications/page/DetailApplications';
+import { LoadingProvider } from '../components/custom/loading/context/LoadingProvider';
 
 export const AppRouter = () => {
     return (
-        <>
+        <LoadingProvider>
             <Loading />
             <NavBarPage />
             <div className='w-100 p-2'>
                 <Routes>
                     <Route path="home" element={ <Home /> } />
                     <Route path="project/add" element={ <ProjectPage /> } />
-                    <Route path="project/:projectId/edit" element={ <ProjectPage /> } />
+                    <Route path="project/:id/edit" element={ <ProjectPage /> } />
                     <Route path="application/add" element={ <DetailApplications /> } />
-                    <Route path="application/:applicationId/edit" element={ <DetailApplications /> } />
+                    <Route path="application/:id/edit" element={ <DetailApplications /> } />
 
                     <Route path="/" element={ <Navigate to="/home" /> } />
                 </Routes>
             </div>
             <Footer />
-        </>
+        </LoadingProvider>
     );
 }

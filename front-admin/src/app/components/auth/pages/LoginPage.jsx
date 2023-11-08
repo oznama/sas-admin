@@ -30,7 +30,7 @@ export const LoginPage = () => {
                         <div className="card shadow-lg">
                             <div className="card-body p-5">
                                 <h1 className="fs-4 card-title fw-bold mb-4">Iniciar Sesi&oacute;n</h1>
-                                { renderErrorMessage(message, errors) }
+                                { renderErrorMessage(message, errors, null) }
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
                                         <label className="mb-2 text-muted">Email</label>

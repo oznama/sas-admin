@@ -7,9 +7,18 @@ const renderErrorsMessage = errors => (
     ))
 );
 
-export const renderErrorMessage = (message, errors) => {
+const renderErrorsMessageSimple = errors => (
+    errors.map( (element, index) => (
+        <li key={ index }>{element.message}</li>
+    ))
+);
+
+export const renderErrorMessage = (message, errors, simple) => {
     const children = message ? (<span>{ message }</span>) : 
-        (errors ? ( <ul>{ renderErrorsMessage(errors) }</ul> ) : null );
+        (errors && simple 
+            ? ( <ul>{ renderErrorsMessageSimple(errors) }</ul> )
+            : (errors ? ( <ul>{ renderErrorsMessage(errors) }</ul> ) : null )
+        );
     return !children ? null :
         (<Alert children={ children } type={ alertType.error } />);
 };

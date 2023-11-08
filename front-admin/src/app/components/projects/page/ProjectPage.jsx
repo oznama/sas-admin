@@ -1,13 +1,21 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { TableApplications } from '../../applications/page/TableApplications';
+import { ProjectContext } from '../context/ProjectContext';
+import { ProjectProvider } from '../context/ProjectProvider';
 
 export const ProjectPage = () => {
 
   const navigate = useNavigate();
+  const { getById, project } = useContext( ProjectContext );
+  const { id } = useParams();
 
   const [selectedTab, setSelectedTab] = useState(1);
+
+  useEffect(() => {
+    getById(id);
+  }, []);
 
   const handleAddApplication = () => {
       navigate(`/application/add`);
@@ -33,14 +41,16 @@ export const ProjectPage = () => {
   )
 
   return (
-    <div className='px-5'>
-      <div className='d-flex justify-content-between'>
-        <h1 className="fs-4 card-title fw-bold mb-4">Proyecto Nuevo</h1>
-        { renderTabs() }
+    <ProjectProvider>
+      <div className='px-5'>
+        <div className='d-flex justify-content-between'>
+          <h1 className="fs-4 card-title fw-bold mb-4">Proyecto Nuevo</h1>
+          { renderTabs() }
+        </div>
+        { (selectedTab === 2) ? renderAddButton() : null }
+        { (selectedTab === 2) ? ( <TableApplications applications={ project.applications } /> ) : ( <DetailProject project={ project } /> )  }
       </div>
-      { (selectedTab === 2) ? renderAddButton() : null }
-      { (selectedTab === 2) ? ( <TableApplications /> ) : ( <DetailProject /> )  }
-    </div>
+    </ProjectProvider>
   )
 
 }

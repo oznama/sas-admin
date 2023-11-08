@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 
 export const InputText = ({
+    name,
     label, 
     placeholder, 
     value,
@@ -12,6 +13,7 @@ export const InputText = ({
     <>
         <label className="form-label">{ label }</label>
         <input className="form-control"
+            name={ name }
             type="text"
             placeholder={ placeholder } 
             value={ value } 
@@ -23,6 +25,7 @@ export const InputText = ({
 }
 
 InputText.propTypes = {
+    name: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     placeholder: PropTypes.string,
     value: PropTypes.string.isRequired,
