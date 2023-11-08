@@ -1,6 +1,6 @@
 -- Usuarios
 INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (1, 'admin', 'admin', 'admin@sas-mexico.com', '555522558866', current_timestamp, 'true');
-INSERT INTO user_security (user_id, password, creation_date) VALUES (1, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
+INSERT INTO user_security (user_id, password) VALUES (1, 'Ea6SCcSRF9rJUxhtMk3bXg==');
 SELECT setval('users_id_seq', 1);
 
 -- Catalogos

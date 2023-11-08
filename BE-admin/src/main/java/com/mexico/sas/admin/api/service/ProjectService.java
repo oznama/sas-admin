@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProjectService {
     Page<ProjectPageableDto> findAll(Pageable pageable);
+
+    ProjectFindDto findById(Long id) throws CustomException;
     ProjectFindDto findByKey(String key) throws CustomException;
     void save(ProjectDto projectDto) throws CustomException;
 

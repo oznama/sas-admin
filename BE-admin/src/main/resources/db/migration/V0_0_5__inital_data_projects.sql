@@ -6,12 +6,12 @@ INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUE
 INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (6, 'Gerardo', 'Lopez', 'gerardo.lopez@sas-mexico.com', '555522558866', current_timestamp, 'true');
 INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (7, 'Oziel', 'Naranjo', 'oziel.naranjo@sas-mexico.com', '555522558866', current_timestamp, 'true');
 
-INSERT INTO user_security (user_id, password, creation_date) VALUES (2, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (3, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (4, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (5, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (6, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (7, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
+INSERT INTO user_security (user_id, password) VALUES (2, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO user_security (user_id, password) VALUES (3, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO user_security (user_id, password) VALUES (4, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO user_security (user_id, password) VALUES (5, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO user_security (user_id, password) VALUES (6, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO user_security (user_id, password) VALUES (7, 'Ea6SCcSRF9rJUxhtMk3bXg==');
 
 SELECT setval('users_id_seq', 7);
 
@@ -70,6 +70,10 @@ INSERT INTO projects (id, p_key, description, status, client_id, project_manager
 INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id, user_id, creation_date) VALUES (6, 'A-20-1784-22', 'FIRST DATA FISERV - ALTA ADQUIRENTE BACKEND E INTEGRACIÓN DE OPERATIVAS ISO-AGREGADOR', 1, 1, 1, 3, current_timestamp);
 INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id, user_id, creation_date) VALUES (7, 'C-24-1653-22', 'Fase II Facturación automática Sigue mi Tarjeta', 2, 1, 4, 3, current_timestamp);
 INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id, user_id, creation_date) VALUES (8, 'C-20-1970-22', 'ALTA DE Bin Visa 45178000 para caja popular APASEO DEL ALTO CON FAST FUNDS', 3, 1, 3, 3, current_timestamp);
+-- Aplicaciones en proyecto
+INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date, user_id, creation_date) VALUES(1, 2000800015, 5.00, 4, 4, 33, '2022-12-12 00:00:00.0', '2022-12-30 00:00:00.0', '2022-12-30 00:00:00.0', 2, current_timestamp);
+INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date, user_id, creation_date) VALUES(8, 2000800017, 496.88, 5, 5, 40, '2023-01-30 00:00:00.0', '2023-02-15 00:00:00.0', '2023-02-15 00:00:00.0', 2, current_timestamp);
+INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date, user_id, creation_date) VALUES(8, 2000800002, 1568.82, 6, 6, 24, '2023-01-12 00:00:00.0', '2023-02-17 00:00:00.0', '2023-02-17 00:00:00.0', 2, current_timestamp);
 
 SELECT setval('projects_id_seq', 8);
 

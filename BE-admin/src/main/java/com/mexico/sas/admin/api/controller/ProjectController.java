@@ -1,9 +1,10 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.ProjectDto;
+import com.mexico.sas.admin.api.dto.ProjectFindDto;
+import com.mexico.sas.admin.api.dto.ProjectPageableDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.service.ProjectService;
-import com.mexico.sas.admin.api.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -31,7 +32,7 @@ public class ProjectController {
       value = "Servicio para crear proyecto",
       nickname = "/save")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = UserFindDto.class)
+          @ApiResponse(code = 201, message = "Success", response = ProjectDto.class)
   })
   public ResponseEntity<ProjectDto> save(@Valid @RequestBody ProjectDto projectDto) throws CustomException {
     log.info("Saving project");
@@ -73,27 +74,27 @@ public class ProjectController {
 //    return ResponseEntity.ok(id);
 //  }
 
-//  @GetMapping("/{id}")
-//  @ApiOperation(httpMethod = "GET",
-//          value = "Servicio para recuperar usuario por id",
-//          nickname = "/findById")
-//  @ApiResponses(value = {
-//          @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
-//  })
-//  public ResponseEntity<UserFindDto> findById(@PathVariable("id") Long id) throws CustomException {
-//    log.info("Finding users by id");
-//    return ResponseEntity.ok(service.findById(id));
-//  }
+  @GetMapping("/{id}")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar proyecto por id",
+          nickname = "/findById")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectFindDto.class)
+  })
+  public ResponseEntity<ProjectFindDto> findById(@PathVariable("id") Long id) throws CustomException {
+    log.info("Finding project by id");
+    return ResponseEntity.ok(service.findById(id));
+  }
 
   @GetMapping
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar todos los proyectos",
           nickname = "/findAll")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = UserDto.class, responseContainer = "List")
+          @ApiResponse(code = 200, message = "Success", response = ProjectPageableDto.class, responseContainer = "List")
   })
   public ResponseEntity<Page<ProjectPageableDto>> findAll(Pageable pageable) throws CustomException {
-    log.info("Finding all users");
+    log.info("Finding all projects");
     return ResponseEntity.ok(service.findAll(pageable));
   }
 

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,11 +17,11 @@ public class ProjectFindDto implements Serializable {
     private String description;
     private Long status;
     private String createdBy;
-    @JsonFormat(pattern="dd/MM/yyyy")
     private Date creationDate;
-    private String client;
-    private String projectManager;
-    @JsonFormat(pattern="dd/MM/yyyy")
     private Date installationDate;
+    private Long clientId;
+    private Long projectManagerId;
+
+    private List<ApplicationFindDto> applications;
 
 }

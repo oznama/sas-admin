@@ -84,7 +84,6 @@ create table user_security (
     password varchar(255),
     last_session timestamp,
     user_id int8 not null,
-    creation_date timestamp not null,
     primary key (user_id)
 );
 

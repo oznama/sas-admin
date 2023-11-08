@@ -20,6 +20,8 @@ public class ProjectDto implements Serializable {
     private Long clientId;
     private Long projectManagerId;
     @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date creationDate;
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private Date installationDate;
 
 }

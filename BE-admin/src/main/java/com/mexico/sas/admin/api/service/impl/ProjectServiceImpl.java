@@ -7,15 +7,10 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.model.Client;
-import com.mexico.sas.admin.api.model.Employee;
-import com.mexico.sas.admin.api.model.Project;
-import com.mexico.sas.admin.api.model.User;
+import com.mexico.sas.admin.api.model.*;
+import com.mexico.sas.admin.api.repository.ProjectApplicationsRepository;
 import com.mexico.sas.admin.api.repository.ProjectRepository;
-import com.mexico.sas.admin.api.service.ClientService;
-import com.mexico.sas.admin.api.service.EmployeeService;
-import com.mexico.sas.admin.api.service.ProjectService;
-import com.mexico.sas.admin.api.service.UserService;
+import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +29,12 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
 
     @Autowired
     private ProjectRepository repository;
+
+    @Autowired
+    private ProjectApplicationsRepository projectApplicationsRepository;
+
+    @Autowired
+    private CatalogService catalogService;
 
     @Autowired
     private UserService userService;
@@ -71,6 +72,32 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         });
 
         return new PageImpl<>(projectsPageableDto, pageable, repository.count());
+    }
+
+    @Override
+    public ProjectFindDto findById(Long id) throws CustomException {
+        Project project = repository.findById(id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, id)));
+        ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
+        UserFindDto creater = userService.findById(project.getUserId());
+        projectFindDto.setCreatedBy(buildFullname(creater.getName(), null, creater.getSurname(), creater.getSecondSurname()));
+        projectFindDto.setClientId(project.getClient().getId());
+        projectFindDto.setProjectManagerId(project.getProjectManager().getId());
+        List<ProjectApplications> projectApplications = projectApplicationsRepository.findByProject(project);
+        List<ApplicationFindDto> applications = new ArrayList<>();
+        projectApplications.forEach( pa -> {
+            try {
+                ApplicationFindDto applicationFindDto = from_M_To_N(pa, ApplicationFindDto.class);
+                applicationFindDto.setApplication(catalogService.findById(pa.getApplicationId()).getValue());
+                applicationFindDto.setLeader(buildFullname( pa.getLeader().getName(), null, pa.getLeader().getSurname(), pa.getLeader().getSecondSurname()));
+                applicationFindDto.setDeveloper(buildFullname( pa.getDeveloper().getName(), null, pa.getDeveloper().getSurname(), pa.getDeveloper().getSecondSurname()));
+                applications.add(applicationFindDto);
+            } catch (CustomException e) {
+                log.error(e.getMessage());
+            }
+        });
+        projectFindDto.setApplications(applications);
+        return projectFindDto;
     }
 
     @Override
@@ -130,6 +157,8 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         }
 
         project.setStatus(CatalogKeys.ESTATUS_MACHINE_ENABLED);
-        project.setCreationDate(new Date());
+
+        if(project.getCreationDate() == null)
+            project.setCreationDate(new Date());
     }
 }
