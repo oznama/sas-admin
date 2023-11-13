@@ -33,6 +33,11 @@ export const TableApplications = ({ projectId, applications }) => {
         endDate,
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
+            <td className="text-center">
+                <button type="button" class="btn btn-primary">
+                    <span><i className="bi bi-pencil"></i></span>
+                </button>
+            </td>
             <th className="text-start" scope="row">{ application }</th>
             <td className="text-end text-primary">{ amount }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
@@ -42,6 +47,11 @@ export const TableApplications = ({ projectId, applications }) => {
             <td className="text-center">{ designDate }</td>
             <td className="text-center">{ developmentDate }</td>
             <td className="text-center">{ endDate }</td>
+            <td className="text-center">
+                <button type="button" class="btn btn-danger">
+                    <span><i className="bi bi-trash"></i></span>
+                </button>
+            </td>
         </tr>
     ));
 
@@ -53,6 +63,7 @@ export const TableApplications = ({ projectId, applications }) => {
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
+                            <th className="text-center fs-6" scope="col">Editar</th>
                             <th className="text-center fs-6" scope="col">Aplicaci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
@@ -62,6 +73,7 @@ export const TableApplications = ({ projectId, applications }) => {
                             <th className="text-center fs-6" scope="col">Analisis y Dise&ntilde;o</th>
                             <th className="text-center fs-6" scope="col">Construcci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Cierre</th>
+                            <th className="text-center fs-6" scope="col">Borrar</th>
                         </tr>
                     </thead>
                     <tbody>

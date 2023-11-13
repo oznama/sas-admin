@@ -9,11 +9,9 @@ import { getSelect } from '../../../services/ClientService';
 import { renderErrorMessage } from '../../../helpers/handleErrors';
 import { AuthContext } from '../../auth/context/AuthContext';
 import { checkResponse } from '../../../helpers/handleResponse';
-import { handleText, numberToString } from '../../../helpers/utils';
+import { handleDateStr, handleText, numberToString } from '../../../helpers/utils';
 
 export const DetailProject = ({ project }) => {
-
-    console.log( project );
 
     const navigate = useNavigate();
     const [pKey, setPKey] = useState(project.key);
@@ -22,7 +20,7 @@ export const DetailProject = ({ project }) => {
     const [dateCreated, setDateCreated] = useState(new Date());
     const [client, setClient] = useState(numberToString(project.clientId, '-1'));
     const [pm, setPm] = useState(numberToString(project.projectManagerId, '-1'));
-    const [installationDate, setInstallationDate] = useState();
+    const [installationDate, setInstallationDate] = useState(handleDateStr(project.installationDate));
     const [clients, setClients] = useState([]);
     const [pms, setPms] = useState([]);
     const [msgError, setMsgError] = useState();
@@ -34,20 +32,15 @@ export const DetailProject = ({ project }) => {
         getSelect()
             .then( response => {
                 checkResponse(response);
-                setClients(response);
+                setClients( response );
+                if (client !== '-1' && pm !== '-1') {
+                    const index = Number(client) - 1;
+                    setPms( response[index].employess );
+                }
             }).catch( error => {
                 console.log(error);
             });
     };
-
-    const loadProjectManagers = ( index ) => {
-        if( index < 0 ) {
-            setPm("-1");
-            setPms([]);
-        } else {
-            setPms( clients[index].employess );
-        }
-    }
 
     const { logout } = useContext( AuthContext );
 
@@ -67,7 +60,7 @@ export const DetailProject = ({ project }) => {
     const onChangeClient = ({ target }) => {
         setClient(target.value);
         const index = target.value - 1;
-        loadProjectManagers(index);
+        setPms( clients[index].employess );
     }
     const onChangePm = ({ target }) => setPm(target.value);
     
@@ -101,7 +94,7 @@ export const DetailProject = ({ project }) => {
     
     const renderCreationDate = () => isModeEdit() && (
         <div className='col-3'>
-            <DatePicker name='creationDate' label="Fecha" value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
+            <DatePicker name='creationDate' label="Fecha" disabled value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
         </div>
     )
 

@@ -13,3 +13,11 @@ export const upperAllFirtsChars = word => {
     words.join(" ");
     return wors;
 }
+
+export const handleDateStr = ( strDate ) => (
+    ( strDate === undefined || strDate === null || strDate === '') ? null : convertDateToUTC(new Date(strDate))
+)
+
+const convertDateToUTC = ( date ) => (
+    new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds())
+);
