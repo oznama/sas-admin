@@ -1,13 +1,13 @@
 import { api } from '../api/Api';
 
-const context = 'internal';
+const context = 'users';
 
-export const getCatalog = async(parentId) => {
+export const getUsersByRole = async(roleId) => {
     const token = localStorage.getItem('token');
     const request = {
         headers: { Authorization: `Bearer ${token}` }
     }
-    const urlInternal = `${context}/${parentId}/childs`;
-    const response = await api( urlInternal, request );
+    const url = `${context}/select/${roleId}`;
+    const response = await api( url, request );
     return await response.json();
 };

@@ -6,45 +6,48 @@ import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
 import { save } from '../../../services/ProjectService';
 import { getSelect } from '../../../services/ClientService';
-import { LoadingContext } from '../../custom/loading/context/LoadingContext';
 import { renderErrorMessage } from '../../../helpers/handleErrors';
 import { AuthContext } from '../../auth/context/AuthContext';
 import { checkResponse } from '../../../helpers/handleResponse';
+import { handleText, numberToString } from '../../../helpers/utils';
 
-export const DetailProject = ({
-    project
-}) => {
+export const DetailProject = ({ project }) => {
 
-    console.log(project);
+    console.log( project );
 
     const navigate = useNavigate();
-    const { changeLoading } = useContext( LoadingContext );
-    const [pKey, setPKey] = useState('');
-    const [description, setDescription] = useState('');
-    const [createdBy, setCreatedBy] = useState('');
+    const [pKey, setPKey] = useState(project.key);
+    const [description, setDescription] = useState(project.description);
+    const [createdBy, setCreatedBy] = useState(project.createdBy);
     const [dateCreated, setDateCreated] = useState(new Date());
-    const [client, setClient] = useState('-1');
-    const [pm, setPm] = useState('-1');
+    const [client, setClient] = useState(numberToString(project.clientId, '-1'));
+    const [pm, setPm] = useState(numberToString(project.projectManagerId, '-1'));
     const [installationDate, setInstallationDate] = useState();
     const [clients, setClients] = useState([]);
     const [pms, setPms] = useState([]);
     const [msgError, setMsgError] = useState();
     const [errors, setErros] = useState();
 
-    const isModeEdit = () => ( project && project.id !== undefined );
+    const isModeEdit = () => ( project.id && project.id > 0);
 
     const fetchCatalogClient = () => {
-        changeLoading(true);
         getSelect()
             .then( response => {
                 checkResponse(response);
                 setClients(response);
-                changeLoading(false);
             }).catch( error => {
-                changeLoading(false);
-                setMsgError(`Imposible cargar catalogo de clientes, contacta al administrador del sistema!`);
+                console.log(error);
             });
     };
+
+    const loadProjectManagers = ( index ) => {
+        if( index < 0 ) {
+            setPm("-1");
+            setPms([]);
+        } else {
+            setPms( clients[index].employess );
+        }
+    }
 
     const { logout } = useContext( AuthContext );
 
@@ -53,32 +56,9 @@ export const DetailProject = ({
       navigate('/login', { replace: true })
     }
 
-    const setProjectToForm = () => {
-        setPKey(project.key);
-        setDescription(project.description);
-        setCreatedBy(project.createdBy);
-        setClient(project.clientId);
-        setPm(project.projectManagerId);
-        setInstallationDate(project.installationDate);
-    }
-
     useEffect(() => {
         fetchCatalogClient();
-        setProjectToForm();
     }, []);
-
-
-    // ALL Functions to helper
-    const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
-    // const upperFirstChar = word => word[0].toUpperCase() + word.substring(1).toLowerCase();
-    // const upperAllFirtsChars = word => {
-    //     const words = word.split(" ");
-    //     for (let i = 0; i < words.length; i++) {
-    //     words[i] = words[i][0].toUpperCase() + words[i].substr(1);
-    //     }
-    //     words.join(" ");
-    //     return wors;
-    // }
 
     const onChangePKey = ({ target }) => setPKey(handleText(target).toUpperCase());
     const onChangeDesc = ({ target }) => setDescription(target.value);
@@ -87,12 +67,7 @@ export const DetailProject = ({
     const onChangeClient = ({ target }) => {
         setClient(target.value);
         const index = target.value - 1;
-        if( index < 0 ) {
-            setPm("-1");
-            setPms([]);
-        } else {
-            setPms( clients[index].employess);
-        }
+        loadProjectManagers(index);
     }
     const onChangePm = ({ target }) => setPm(target.value);
     
@@ -104,7 +79,7 @@ export const DetailProject = ({
         save(request).then( response => {
             if(response.code && response.code === 401) {
                 onLogout();
-            } else if (response.code && response.code !== 200) {
+            } else if (response.code && response.code !== 201) {
                 if( response.message ) {
                     setMsgError(response.message)
                 } else if (response.errors) {

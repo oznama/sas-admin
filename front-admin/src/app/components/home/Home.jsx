@@ -1,11 +1,16 @@
+import { useContext } from 'react';
 import { TableProject } from '../projects/page/TableProjects';
 import { useNavigate } from 'react-router-dom';
+import { ProjectContext } from '../projects/context/ProjectContext';
 
 export const Home = () => {
+
+    const { projectNew } = useContext( ProjectContext );
 
     const navigate = useNavigate();
 
     const handleAddProject = () => {
+        projectNew();
         navigate(`/project/add`);
     }
 

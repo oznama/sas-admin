@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Pagination } from '../../custom/pagination/page/Pagination';
 import { LoadingContext } from '../../custom/loading/context/LoadingContext';
+import { ProjectContext } from '../context/ProjectContext';
 import { getProjects } from '../../../services/ProjectService';
 import { renderErrorMessage } from '../../../helpers/handleErrors';
 
@@ -11,9 +11,9 @@ export const TableProject = ({
     sort = 'creationDate,desc',
 }) => {
 
-    const navigate = useNavigate();
-
     const { changeLoading } = useContext( LoadingContext );
+    const { getById } = useContext( ProjectContext );
+
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
@@ -53,7 +53,7 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        navigate(`/project/${id}/edit`);
+        getById(id);
     }
 
     // const renderStatus = (status) => {

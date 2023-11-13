@@ -3,16 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { renderErrorMessage } from '../../../helpers/handleErrors';
 
-export const TableApplications = ({
-    applications,
-}) => {
+export const TableApplications = ({ projectId, applications }) => {
 
     const navigate = useNavigate();
 
     const [msgError, setMsgError] = useState();
 
     const handledSelect = id => {
-        navigate(`/application/${id}/edit`);
+        navigate(`/project/${ projectId }/application/${ id }/edit`);
     }
 
     // const renderStatus = (status) => {

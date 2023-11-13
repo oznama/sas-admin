@@ -46,17 +46,18 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
 
-    const token = localStorage.getItem('token');
-    doLogout(token).then( response => {
+    // TODO No esta funcionando correctamente esto
+    // const token = localStorage.getItem('token');
+    // doLogout(token).then( response => {
       const action = { type: types.logout }
 
       localStorage.removeItem('user');
       localStorage.removeItem('token');
 
       dispatch(action);
-    }).catch( error => {
-      console.log(error);
-    })
+    // }).catch( error => {
+    //   console.log(error);
+    // })
     
   }
 
