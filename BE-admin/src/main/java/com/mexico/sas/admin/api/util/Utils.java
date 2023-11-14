@@ -3,10 +3,8 @@ package com.mexico.sas.admin.api.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.ResponseErrorDetailDto;
 import com.mexico.sas.admin.api.dto.user.UserDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.security.AuthorizationFilter;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
@@ -270,28 +268,19 @@ public class Utils extends LogMovementUtils {
         return userDto;
     }
 
-    protected void validationDates(String startDate, String endDate, String pattern) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
+    protected void validationDates(String startDate, String endDate, String pattern) throws CustomException {
         if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-            try {
-                Date iDate = stringToDate(startDate, pattern);
-                Date eDate = stringToDate(endDate, pattern);
-                if (iDate != null && eDate != null) {
-                    boolean datesCorects = iDate.before(eDate) || iDate.equals(eDate);
-                    long diffDates = getMonthsBetweenDates(iDate, eDate);
-                    boolean dateInMonth = diffDates == GeneralKeys.REPORT_PERIOD_MONTH_VALID ? validDays(iDate, eDate) :
-                            (diffDates < GeneralKeys.REPORT_PERIOD_MONTH_VALID ? true : false);
-                    if (!(datesCorects && dateInMonth)) {
-                        errors.add(new ResponseErrorDetailDto(I18nResolver.getMessage(I18nKeys.LABEL_DATE_PARAM), I18nResolver.getMessage(I18nKeys.VALIDATION_VALUE_INVALID)));
-                    }
+            Date iDate = stringToDate(startDate, pattern);
+            Date eDate = stringToDate(endDate, pattern);
+            if (iDate != null && eDate != null) {
+                boolean datesCorects = iDate.before(eDate) || iDate.equals(eDate);
+                long diffDates = getMonthsBetweenDates(iDate, eDate);
+                boolean dateInMonth = diffDates == GeneralKeys.REPORT_PERIOD_MONTH_VALID ? validDays(iDate, eDate) :
+                        (diffDates < GeneralKeys.REPORT_PERIOD_MONTH_VALID ? true : false);
+                if (!(datesCorects && dateInMonth)) {
+                    throw new CustomException(I18nResolver.getMessage(I18nKeys.VALIDATION_VALUE_INVALID));
                 }
-            } catch (CustomException e) {
-                errors.add(new ResponseErrorDetailDto(I18nResolver.getMessage(I18nKeys.LABEL_DATE_PARAM), e.getMessage()));
             }
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationRequestException(errors);
         }
     }
 

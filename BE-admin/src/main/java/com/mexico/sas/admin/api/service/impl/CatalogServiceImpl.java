@@ -9,7 +9,6 @@ import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
-import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Catalog;
@@ -117,7 +116,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
             save(Catalog.class.getSimpleName(), id, null, getCurrentUserId(), new Date(),
                     CatalogKeys.LOG_EVENT_DELETE, CatalogKeys.LOG_DETAIL_DELETE);
         } catch (Exception e) {
-            handleCatalogIdNotFound(id, I18nKeys.CATALOG_NOT_DELETED);
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
         }
     }
 
@@ -261,114 +260,68 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         return catalogDtos;
     }
 
-    private void validationSave(CatalogDto catalogDto, Catalog catalog) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
-        try {
-            long nextId = 1;
-            if (catalogDto.getCatalogParent() != null) {
-                log.debug("Catalog parent not null: {}", catalogDto.getCatalogParent());
-                Catalog catalogParent = findEntityById(catalogDto.getCatalogParent());
-                catalog.setCatalogParent(catalogParent);
-                if (catalogDto.getCatalogParent() > 1000000000l) {
-                    Optional<Catalog> lastChild = repository.findFirstByCatalogParentOrderByIdDesc(catalogParent);
-                    if (lastChild.isPresent()) {
-                        nextId = lastChild.get().getId() + 1;
-                    } else {
-                        long parentSeq = catalogDto.getCatalogParent() - CatalogKeys.PARENT_BASE;
-                        nextId = CatalogKeys.CHILD_BASE + (parentSeq * CatalogKeys.CHILD_SEQ_BASE) + nextId;
-                    }
+    private void validationSave(CatalogDto catalogDto, Catalog catalog) throws CustomException {
+        long nextId = 1;
+        if (catalogDto.getCatalogParent() != null) {
+            log.debug("Catalog parent not null: {}", catalogDto.getCatalogParent());
+            Catalog catalogParent = findEntityById(catalogDto.getCatalogParent());
+            catalog.setCatalogParent(catalogParent);
+            if (catalogDto.getCatalogParent() > 1000000000l) {
+                Optional<Catalog> lastChild = repository.findFirstByCatalogParentOrderByIdDesc(catalogParent);
+                if (lastChild.isPresent()) {
+                    nextId = lastChild.get().getId() + 1;
                 } else {
-                    log.warn("Catalog id is not preload!");
+                    long parentSeq = catalogDto.getCatalogParent() - CatalogKeys.PARENT_BASE;
+                    nextId = CatalogKeys.CHILD_BASE + (parentSeq * CatalogKeys.CHILD_SEQ_BASE) + nextId;
                 }
             } else {
-                Optional<Catalog> last = repository.findFirstByCatalogParentIsNullOrderByIdDesc();
-                if (last.isPresent()) {
-                    nextId = last.get().getId() + 1;
-                }
+                log.warn("Catalog id is not preload!");
             }
-            log.debug("NEXT catalog id: {}", nextId);
-            catalog.setId(nextId); // Se asigna el id + 1
-        } catch (CustomException e) {
-            errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.catalogParent, e.getMessage()));
+        } else {
+            Optional<Catalog> last = repository.findFirstByCatalogParentIsNullOrderByIdDesc();
+            if (last.isPresent()) {
+                nextId = last.get().getId() + 1;
+            }
         }
+        log.debug("NEXT catalog id: {}", nextId);
+        catalog.setId(nextId); // Se asigna el id + 1
 
-        try {
-            findByIdAndCatalogParent(catalogDto.getStatus().getId(), CatalogKeys.ESTATUS_MACHINE);
-            catalog.setStatus(catalogDto.getStatus().getId());
-        } catch (CustomException e) {
-            errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.status, e.getMessage()));
-        }
+        findByIdAndCatalogParent(catalogDto.getStatus().getId(), CatalogKeys.ESTATUS_MACHINE);
+        catalog.setStatus(catalogDto.getStatus().getId());
+
 
         if(catalogDto.getType() == null && catalogDto.getType().getId() == null) {
             catalog.setType(CatalogKeys.CAT_TYPES_EXT);
         } else {
-            try {
-                findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
-                catalog.setType(catalogDto.getType().getId());
-            } catch (CustomException e) {
-                errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.type, e.getMessage()));
-            }
+            findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
+            catalog.setType(catalogDto.getType().getId());
         }
 
         if(catalogDto.getModules()!= null && !catalogDto.getModules().isEmpty()) {
             log.debug("Validing modules ...");
-            catalogDto.getModules().forEach(module -> {
-                try {
-                    findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
-
-                } catch (CustomException e) {
-                    errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.modules, e.getMessage()));
-                }
-            });
-        }
-
-        if(!errors.isEmpty()) {
-            log.debug("Errors: {}", errors);
-            throw new ValidationRequestException(errors);
-        }
-        catalog.setIsRequired( catalog.getIsRequired() == null ? false : catalog.getIsRequired() );
-    }
-
-    private Catalog validationUpdate(CatalogUpdateDto catalogDto) throws ValidationRequestException {
-        Catalog catalog = null;
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
-        try {
-            catalog = findEntityById(catalogDto.getId());
-        } catch (CustomException e) {
-            errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.id,
-                    I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, catalogDto.getId())));
-            throw new ValidationRequestException(errors);
-        }
-
-        if(catalogDto.getType() != null && catalogDto.getType().getId() != null) {
-            try {
-                findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
-                catalog.setType(catalogDto.getType().getId());
-            } catch (CustomException e) {
-                errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.type, e.getMessage()));
+            for(CatalogSimpleDto module : catalogDto.getModules()) {
+                findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
             }
         }
 
-        if(catalogDto.getModules()!= null && !catalogDto.getModules().isEmpty()) {
-            catalogDto.getModules().forEach(module -> {
-                try {
-                    findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
-                } catch (CustomException e) {
-                    errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.modules, e.getMessage()));
-                }
-            });
-        }
-
-        if(!errors.isEmpty()) {
-            throw new ValidationRequestException(errors);
-        }
-        return catalog;
+        catalog.setIsRequired( catalog.getIsRequired() == null ? false : catalog.getIsRequired() );
     }
 
-    private void handleCatalogIdNotFound(Long id, String property) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
-        errors.add(new ResponseErrorDetailDto(CatalogDto.Fields.id, I18nResolver.getMessage(property, id)));
-        throw new ValidationRequestException(errors);
+    private Catalog validationUpdate(CatalogUpdateDto catalogDto) throws CustomException {
+        Catalog catalog = findEntityById(catalogDto.getId());
+
+        if(catalogDto.getType() != null && catalogDto.getType().getId() != null) {
+            findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
+            catalog.setType(catalogDto.getType().getId());
+        }
+
+        if(catalogDto.getModules()!= null && !catalogDto.getModules().isEmpty()) {
+            for(CatalogSimpleDto module : catalogDto.getModules()) {
+                findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
+            }
+        }
+
+        return catalog;
     }
 
     private List<CatalogDto> parseCatalogDto(List<Catalog> catalogs) {

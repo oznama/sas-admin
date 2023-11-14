@@ -1,12 +1,11 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
-import com.mexico.sas.admin.api.dto.*;
 import com.mexico.sas.admin.api.dto.project.*;
 import com.mexico.sas.admin.api.dto.user.UserFindDto;
+import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
-import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.*;
@@ -179,37 +178,21 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         return projectApplicationDto;
     }
 
-    private void validationSave(ProjectDto projectDto, Project project) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
+    private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
 
-        // Valiadcion de key
         try {
             findByKey(project.getKey());
-            errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.key, I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, project.getKey())));
-        } catch (CustomException ignored) {
-
-        }
-
-        // Validacion clientId
-        try {
-            clientService.findById(projectDto.getClientId());
-            project.setClient(new Client(projectDto.getClientId()));
-
-            // Validacion Project Manager
-            try {
-                employeeService.findByClientAndId(projectDto.getClientId() , projectDto.getProjectManagerId());
-                project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
-            } catch (CustomException ne) {
-                errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.projectManagerId, ne.getMessage()));
-            }
-
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, projectDto.getKey()), null);
         } catch (CustomException e) {
-            errors.add(new ResponseErrorDetailDto(ProjectDto.Fields.clientId, e.getMessage()));
+            if ( e instanceof BadRequestException)
+                throw e;
         }
 
-        if(!errors.isEmpty()) {
-            throw new ValidationRequestException(errors);
-        }
+        clientService.findById(projectDto.getClientId());
+        project.setClient(new Client(projectDto.getClientId()));
+
+        employeeService.findByClientAndId(projectDto.getClientId() , projectDto.getProjectManagerId());
+        project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
 
         project.setStatus(CatalogKeys.ESTATUS_MACHINE_ENABLED);
 
@@ -217,17 +200,11 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             project.setCreationDate(new Date());
     }
 
-    private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
-
-        // Valiadcion de key
+    private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
+        // TODO
         projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
         projectApplication.setLeader(new User(projectApplicationDto.getLeaderId()));
         projectApplication.setDeveloper(new User(projectApplicationDto.getDeveloperId()));
-
-        if(!errors.isEmpty()) {
-            throw new ValidationRequestException(errors);
-        }
 
         if(projectApplication.getCreationDate() == null)
             projectApplication.setCreationDate(new Date());

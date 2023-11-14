@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.*;
 import com.mexico.sas.admin.api.dto.log.LogUserDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
@@ -290,43 +289,26 @@ public class UserServiceImpl extends Utils implements UserService {
     return userSelectFindDtos;
   }
 
-  private void validationSave(UserDto userDto, User user) throws ValidationRequestException {
-    List<ResponseErrorDetailDto> errors = new ArrayList<>();
-
+  private void validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion de rol
-    try {
-      user.setRole(roleService.findEntityById(userDto.getRole()));
-    } catch (CustomException e) {
-      errors.add(new ResponseErrorDetailDto(UserDto.Fields.role, e.getMessage()));
-    }
+    user.setRole(roleService.findEntityById(userDto.getRole()));
 
-    // Valiadcion de correo
+    // Valiadacion de correo
     try {
       findByEmail(userDto.getEmail());
-      errors.add(new ResponseErrorDetailDto(UserDto.Fields.email, I18nResolver.getMessage(I18nKeys.VALIDATION_EMAIL_DUPLICATED)));
-    } catch (CustomException ignored) {
-
+      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_EMAIL_DUPLICATED, userDto.getEmail()), null);
+    } catch (CustomException e) {
+      if(e instanceof BadRequestException)
+        throw e;
     }
 
-    if(!errors.isEmpty()) {
-      throw new ValidationRequestException(errors);
-    }
     user.setCreationDate(new Date());
   }
 
-  private void validationUpdate(UserUpdateDto userDto, User user) throws ValidationRequestException {
-    List<ResponseErrorDetailDto> errors = new ArrayList<>();
+  private void validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
 
     // Validacion de rol
-    try {
-      user.setRole(roleService.findEntityById(userDto.getRole()));
-    } catch (CustomException e) {
-      errors.add(new ResponseErrorDetailDto(UserDto.Fields.role, e.getMessage()));
-    }
-
-    if(!errors.isEmpty()) {
-      throw new ValidationRequestException(errors);
-    }
+    user.setRole(roleService.findEntityById(userDto.getRole()));
   }
 
   private Page<User> findByFilter(String filter, Boolean active, Pageable pageable) {
