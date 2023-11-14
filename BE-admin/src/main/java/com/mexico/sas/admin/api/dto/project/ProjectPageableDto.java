@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

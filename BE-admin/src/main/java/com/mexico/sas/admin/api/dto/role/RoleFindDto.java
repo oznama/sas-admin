@@ -1,5 +1,6 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.role;
 
+import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

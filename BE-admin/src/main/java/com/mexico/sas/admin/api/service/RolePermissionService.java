@@ -1,8 +1,8 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.RolePermissionDto;
+import com.mexico.sas.admin.api.dto.role.RolePermissionDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.dto.RolePermissionsEnaDisDto;
+import com.mexico.sas.admin.api.dto.role.RolePermissionsEnaDisDto;
 import com.mexico.sas.admin.api.model.RolePermission;
 
 import java.util.List;

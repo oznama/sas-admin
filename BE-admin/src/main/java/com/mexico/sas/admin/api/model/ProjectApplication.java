@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -9,7 +10,8 @@ import java.util.Date;
 @Entity
 @Table(name = "project_applications")
 @Data
-public class ProjectApplications {
+@ToString
+public class ProjectApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

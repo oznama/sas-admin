@@ -6,12 +6,14 @@ import java.util.List;
 import javax.persistence.*;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "users")
 @Data
+@NoArgsConstructor
 @FieldNameConstants
 @DynamicInsert
 public class User implements Serializable {
@@ -49,5 +51,9 @@ public class User implements Serializable {
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
   private UserConfirmationToken userConfirmationToken;
+
+  public User(Long id) {
+    this.id = id;
+  }
 
 }

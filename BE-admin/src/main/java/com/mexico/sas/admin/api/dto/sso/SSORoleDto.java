@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.sso;
 
 import java.io.Serializable;
 import java.util.Collection;

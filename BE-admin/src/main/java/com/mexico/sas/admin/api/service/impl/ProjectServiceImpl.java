@@ -2,13 +2,15 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.project.*;
+import com.mexico.sas.admin.api.dto.user.UserFindDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.*;
-import com.mexico.sas.admin.api.repository.ProjectApplicationsRepository;
+import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
 import com.mexico.sas.admin.api.repository.ProjectRepository;
 import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.util.Utils;
@@ -31,7 +33,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     private ProjectRepository repository;
 
     @Autowired
-    private ProjectApplicationsRepository projectApplicationsRepository;
+    private ProjectApplicationRepository projectApplicationRepository;
 
     @Autowired
     private CatalogService catalogService;
@@ -83,15 +85,16 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         projectFindDto.setCreatedBy(buildFullname(creater.getName(), null, creater.getSurname(), creater.getSecondSurname()));
         projectFindDto.setClientId(project.getClient().getId());
         projectFindDto.setProjectManagerId(project.getProjectManager().getId());
-        List<ProjectApplications> projectApplications = projectApplicationsRepository.findByProject(project);
-        List<ApplicationFindDto> applications = new ArrayList<>();
+        List<ProjectApplication> projectApplications = projectApplicationRepository.findByProject(project);
+        List<ProjectApplicationFindDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {
-                ApplicationFindDto applicationFindDto = from_M_To_N(pa, ApplicationFindDto.class);
-                applicationFindDto.setApplication(catalogService.findById(pa.getApplicationId()).getValue());
-                applicationFindDto.setLeader(buildFullname( pa.getLeader().getName(), null, pa.getLeader().getSurname(), pa.getLeader().getSecondSurname()));
-                applicationFindDto.setDeveloper(buildFullname( pa.getDeveloper().getName(), null, pa.getDeveloper().getSurname(), pa.getDeveloper().getSecondSurname()));
-                applications.add(applicationFindDto);
+                ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(pa, ProjectApplicationFindDto.class);
+                projectApplicationFindDto.setApplication(catalogService.findById(pa.getApplicationId()).getValue());
+                projectApplicationFindDto.setLeader(buildFullname( pa.getLeader().getName(), null, pa.getLeader().getSurname(), pa.getLeader().getSecondSurname()));
+                projectApplicationFindDto.setDeveloper(buildFullname( pa.getDeveloper().getName(), null, pa.getDeveloper().getSurname(), pa.getDeveloper().getSecondSurname()));
+                projectApplicationFindDto.setAmount(formatCurrency(pa.getAmount().doubleValue()));
+                applications.add(projectApplicationFindDto);
             } catch (CustomException e) {
                 log.error(e.getMessage());
             }
@@ -122,6 +125,58 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             log.error(msgError, e.getMessage());
             throw new CustomException(msgError);
         }
+    }
+
+    @Override
+    public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
+        Project project = repository.findById(projectId).orElseThrow( () ->
+                new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, projectId)));
+        if( !project.getDescription().equals(projectUpdateDto.getDescription()) ) {
+            project.setDescription(projectUpdateDto.getDescription());
+        }
+        if( !project.getClient().getId().equals(projectUpdateDto.getClientId()) ) {
+            project.setClient(new Client(projectUpdateDto.getClientId()));
+        }
+        if( !project.getProjectManager().getId().equals(projectUpdateDto.getProjectManagerId()) ) {
+            project.setProjectManager(new Employee(projectUpdateDto.getProjectManagerId()));
+        }
+        if( !project.getInstallationDate().equals(projectUpdateDto.getInstallationDate()) ) {
+            project.setInstallationDate(projectUpdateDto.getInstallationDate());
+        }
+        repository.save(project);
+    }
+
+    @Override
+    public void save(ProjectApplicationDto projectApplicationDto) throws CustomException {
+        log.debug("DTO ::: {}", projectApplicationDto);
+        ProjectApplication projectApplication = from_M_To_N(projectApplicationDto, ProjectApplication.class);
+        projectApplication.setUserId(getCurrentUserId());
+        validationSave(projectApplicationDto, projectApplication);
+        try {
+            log.debug("Application {} for project id {} to save",
+                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
+            log.debug("Entity ::: {}", projectApplication);
+            projectApplicationRepository.save(projectApplication);
+            projectApplicationDto.setId(projectApplication.getId());
+            log.debug("Application for project created with id: {}", projectApplicationDto.getId());
+        } catch (Exception e) {
+            String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_CREATED,
+                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
+            log.error(msgError, e.getMessage());
+            throw new CustomException(msgError);
+        }
+    }
+
+    @Override
+    public ProjectApplicationDto findById(Long projectId, Long applicationId) throws CustomException {
+        findById(projectId);
+        ProjectApplication projectApplication = projectApplicationRepository.findById(applicationId).orElseThrow(() ->
+                new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId)));
+        ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
+        projectApplicationDto.setProjectId(projectApplication.getProject().getId());
+        projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
+        projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
+        return projectApplicationDto;
     }
 
     private void validationSave(ProjectDto projectDto, Project project) throws ValidationRequestException {
@@ -160,5 +215,21 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
 
         if(project.getCreationDate() == null)
             project.setCreationDate(new Date());
+    }
+
+    private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws ValidationRequestException {
+        List<ResponseErrorDetailDto> errors = new ArrayList<>();
+
+        // Valiadcion de key
+        projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
+        projectApplication.setLeader(new User(projectApplicationDto.getLeaderId()));
+        projectApplication.setDeveloper(new User(projectApplicationDto.getDeveloperId()));
+
+        if(!errors.isEmpty()) {
+            throw new ValidationRequestException(errors);
+        }
+
+        if(projectApplication.getCreationDate() == null)
+            projectApplication.setCreationDate(new Date());
     }
 }

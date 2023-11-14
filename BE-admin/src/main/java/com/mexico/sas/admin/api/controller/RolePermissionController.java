@@ -1,8 +1,8 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
-import com.mexico.sas.admin.api.dto.RolePermissionDto;
-import com.mexico.sas.admin.api.dto.RolePermissionsEnaDisDto;
+import com.mexico.sas.admin.api.dto.role.RolePermissionDto;
+import com.mexico.sas.admin.api.dto.role.RolePermissionsEnaDisDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;

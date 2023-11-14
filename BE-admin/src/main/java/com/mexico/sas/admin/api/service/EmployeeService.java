@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.EmployeeFindDto;
-import com.mexico.sas.admin.api.dto.EmployeeFindSelectDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 
 import java.util.List;

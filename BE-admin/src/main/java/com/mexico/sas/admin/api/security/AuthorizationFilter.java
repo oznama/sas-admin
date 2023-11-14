@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.security;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.UserDto;
+import com.mexico.sas.admin.api.dto.user.UserDto;
 import com.mexico.sas.admin.api.exception.AuthenticationException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import io.jsonwebtoken.Claims;

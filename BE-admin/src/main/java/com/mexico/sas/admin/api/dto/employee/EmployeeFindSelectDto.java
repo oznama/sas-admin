@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

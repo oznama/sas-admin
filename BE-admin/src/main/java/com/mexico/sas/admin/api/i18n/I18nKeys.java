@@ -55,4 +55,7 @@ public interface I18nKeys {
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
     String PROJECT_NOT_CREATED = "project.not.created";
     String EMPLOYEE_NOT_FOUND = "employee.not.found";
+
+    String PROJECT_APPLICATION_NOT_CREATED = "project.application.not.created";
+    String PROJECT_APPLICATION_NOT_FOUNT = "project.application.not.found";
 }

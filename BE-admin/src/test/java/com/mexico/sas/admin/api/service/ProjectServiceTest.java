@@ -1,6 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.ProjectDto;
+import com.mexico.sas.admin.api.dto.project.ProjectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.user.security;
 
 import lombok.Getter;
 import lombok.Setter;

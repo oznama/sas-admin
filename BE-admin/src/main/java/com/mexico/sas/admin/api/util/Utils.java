@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.ResponseErrorDetailDto;
-import com.mexico.sas.admin.api.dto.UserDto;
+import com.mexico.sas.admin.api.dto.user.UserDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.ValidationRequestException;
 import com.mexico.sas.admin.api.security.AuthorizationFilter;

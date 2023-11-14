@@ -6,6 +6,10 @@ import java.util.stream.Collectors;
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.log.LogUserDto;
+import com.mexico.sas.admin.api.dto.permission.PermissionDto;
+import com.mexico.sas.admin.api.dto.role.RoleDto;
+import com.mexico.sas.admin.api.dto.user.*;
 import com.mexico.sas.admin.api.exception.*;
 import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.repository.UserConfirmationTokenRepository;
@@ -268,6 +272,22 @@ public class UserServiceImpl extends Utils implements UserService {
       }
     });
     return userDtos;
+  }
+
+  @Override
+  public List<UserSelectFindDto> getForSelect(Long roleId) {
+    List<UserSelectFindDto> userSelectFindDtos = new ArrayList<>();
+    List<User> users = repository.findByRoleIdAndActiveIsTrueAndEliminateFalse(roleId);
+    users.forEach( user -> {
+      try {
+        UserSelectFindDto userSelectFindDto = from_M_To_N(user, UserSelectFindDto.class);
+        userSelectFindDto.setValue(buildFullname(user.getName(), null, user.getSurname(), user.getSecondSurname()));
+        userSelectFindDtos.add(userSelectFindDto);
+      } catch (CustomException e) {
+        log.error("Impossible add user {} to list, error: {}", user.getId(), e.getMessage());
+      }
+    });
+    return userSelectFindDtos;
   }
 
   private void validationSave(UserDto userDto, User user) throws ValidationRequestException {

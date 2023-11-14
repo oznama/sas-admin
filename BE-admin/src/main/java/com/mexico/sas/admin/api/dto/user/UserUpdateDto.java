@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mexico.sas.admin.api.constants.Regex;

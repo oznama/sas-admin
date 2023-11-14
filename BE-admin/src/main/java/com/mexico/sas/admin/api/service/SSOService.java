@@ -1,9 +1,9 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.SSORequestDto;
-import com.mexico.sas.admin.api.dto.SSOResponseDto;
+import com.mexico.sas.admin.api.dto.sso.SSORequestDto;
+import com.mexico.sas.admin.api.dto.sso.SSOResponseDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.dto.SSOUserDto;
+import com.mexico.sas.admin.api.dto.sso.SSOUserDto;
 
 public interface SSOService {
 

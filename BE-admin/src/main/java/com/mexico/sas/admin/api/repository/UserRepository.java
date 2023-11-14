@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> , JpaSpecifica
 
   Optional<User> findByEmailIgnoreCaseAndEliminateFalse(String email);
 
+  List<User> findByRoleIdAndActiveIsTrueAndEliminateFalse(Long roleId);
+
   @Query(value = "select distinct u from User u inner join LogMovement l on l.userId = u.id where l.tableName = :tableName and l.recordId = :recordId")
   List<User> findUsersLog(@Param("tableName") String tableName, @Param("recordId") String recordId);
 

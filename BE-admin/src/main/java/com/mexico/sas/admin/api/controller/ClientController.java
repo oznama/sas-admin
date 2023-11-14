@@ -1,22 +1,16 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.client.ClientFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.i18n.I18nKeys;
-import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.ClientService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j

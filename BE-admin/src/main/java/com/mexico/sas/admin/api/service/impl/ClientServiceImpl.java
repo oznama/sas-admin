@@ -1,14 +1,12 @@
 package com.mexico.sas.admin.api.service.impl;
 
-import com.mexico.sas.admin.api.dto.ClientFindDto;
-import com.mexico.sas.admin.api.dto.ClientFindSelectDto;
-import com.mexico.sas.admin.api.dto.EmployeeFindSelectDto;
+import com.mexico.sas.admin.api.dto.client.ClientFindDto;
+import com.mexico.sas.admin.api.dto.client.ClientFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Client;
-import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.ClientRepository;
 import com.mexico.sas.admin.api.service.ClientService;
 import com.mexico.sas.admin.api.service.EmployeeService;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

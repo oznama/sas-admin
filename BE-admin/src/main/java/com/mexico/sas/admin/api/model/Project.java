@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
@@ -10,6 +11,7 @@ import java.util.Date;
 @Entity
 @Table(name = "projects")
 @Data
+@NoArgsConstructor
 @DynamicInsert
 public class Project {
 
@@ -40,4 +42,8 @@ public class Project {
     @ManyToOne
     @JoinColumn
     private Employee projectManager;
+
+    public Project(Long id) {
+        this.id = id;
+    }
 }

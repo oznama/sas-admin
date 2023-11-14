@@ -13,14 +13,11 @@ import java.util.Date;
 @Setter
 @ToString
 @FieldNameConstants
-public class ProjectDto implements Serializable {
+public class ProjectUpdateDto implements Serializable {
     private Long id;
-    private String key;
     private String description;
     private Long clientId;
     private Long projectManagerId;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date creationDate;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date installationDate;
 

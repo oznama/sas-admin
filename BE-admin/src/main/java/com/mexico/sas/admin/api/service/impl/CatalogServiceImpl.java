@@ -2,6 +2,10 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.catalog.CatalogDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogPaggedDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogSimpleDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;

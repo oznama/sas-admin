@@ -1,6 +1,7 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import lombok.Getter;
 import lombok.Setter;
 

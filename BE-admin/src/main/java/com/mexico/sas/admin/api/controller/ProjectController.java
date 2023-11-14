@@ -1,8 +1,6 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.ProjectDto;
-import com.mexico.sas.admin.api.dto.ProjectFindDto;
-import com.mexico.sas.admin.api.dto.ProjectPageableDto;
+import com.mexico.sas.admin.api.dto.project.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
@@ -40,18 +38,19 @@ public class ProjectController {
     return ResponseEntity.status(HttpStatus.CREATED).body(projectDto);
   }
 
-//  @PutMapping(path = "/{id}", headers = "Accept=application/json")
-//  @ResponseStatus(code = HttpStatus.OK)
-//  @ApiOperation(httpMethod = "PUT",
-//      value = "Servicio para actualizar usuario",
-//      nickname = "/update/{id}")
-//  @ApiResponses(value = {
-//          @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
-//  })
-//  public ResponseEntity<UserFindDto> update(@PathVariable("id") Long id, @Valid @RequestBody UserUpdateDto userUpdateDto) throws CustomException {
-//    log.info("Updating user");
-//    return ResponseEntity.ok().body(service.update(id, userUpdateDto));
-//  }
+  @PutMapping(path = "/{id}", headers = "Accept=application/json")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "PUT",
+      value = "Servicio para actualizar proyecto",
+      nickname = "/update/{id}")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectUpdateDto.class)
+  })
+  public ResponseEntity<ProjectUpdateDto> update(@PathVariable("id") Long id, @Valid @RequestBody ProjectUpdateDto projectUpdateDto) throws CustomException {
+    log.info("Updating project");
+    service.update(id, projectUpdateDto);
+    return ResponseEntity.ok().body(projectUpdateDto);
+  }
 
 //  @PatchMapping("/{id}/lock")
 //  @ResponseStatus(code = HttpStatus.OK)
@@ -96,6 +95,33 @@ public class ProjectController {
   public ResponseEntity<Page<ProjectPageableDto>> findAll(Pageable pageable) throws CustomException {
     log.info("Finding all projects");
     return ResponseEntity.ok(service.findAll(pageable));
+  }
+
+  @PostMapping(path = "/application", headers = "Accept=application/json")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @ApiOperation(httpMethod = "POST",
+          value = "Servicio para crear aplicacion de proyecto",
+          nickname = "/saveApplication")
+  @ApiResponses(value = {
+          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationDto.class)
+  })
+  public ResponseEntity<ProjectApplicationDto> saveApplication(@Valid @RequestBody ProjectApplicationDto projectApplicationDto) throws CustomException {
+    log.info("Saving project");
+    service.save(projectApplicationDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(projectApplicationDto);
+  }
+
+  @GetMapping("/{projectId}/application/{id}")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar aplicacion de proyecto por id",
+          nickname = "/findApplicationById")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationDto.class)
+  })
+  public ResponseEntity<ProjectApplicationDto> findById(@PathVariable("projectId") Long projectId,
+                                                        @PathVariable("id") Long applicationId) throws CustomException {
+    log.info("Finding project by id");
+    return ResponseEntity.ok(service.findById(projectId, applicationId));
   }
 
 }

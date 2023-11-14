@@ -49,6 +49,14 @@ INSERT INTO catalog (id, value, description, type, user_id, creation_date, catal
 INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800018, 'PDF 2', '', 2000200002, 1, current_timestamp, 1000000008);
 INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800019, 'MDT', '', 2000200002, 1, current_timestamp, 1000000008);
 
+-- Estatus Proyecyo-Aplicacion
+INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000009, 'Catalogo aplicacion', 'Estados del flujo de una aplicacion en proyecto', 2000200002, 1, current_timestamp);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900001, 'Nuevo', 'Nuevo', 2000200002, 1, current_timestamp, 1000000009);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900002, 'Diseño', 'En diseño', 2000200002, 1, current_timestamp, 1000000009);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900003, 'Desarrollo', 'En construccion', 2000200002, 1, current_timestamp, 1000000009);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900004, 'Entregado', 'Terminado', 2000200002, 1, current_timestamp, 1000000009);
+
+
 -- Cliente
 INSERT INTO clients (id, name, user_id, creation_date) VALUES (1, 'PROSA', 1, current_timestamp);
 

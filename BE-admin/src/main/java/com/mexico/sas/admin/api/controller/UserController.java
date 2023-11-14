@@ -1,6 +1,6 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.user.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,7 +29,7 @@ public class UserController {
   @ResponseStatus(code = HttpStatus.CREATED)
   @ApiOperation(httpMethod = "POST",
       value = "Servicio para crear usuario",
-      nickname = "/save")
+      nickname = "save")
   @ApiResponses(value = {
           @ApiResponse(code = 201, message = "Success", response = UserFindDto.class)
   })
@@ -41,7 +42,7 @@ public class UserController {
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
       value = "Servicio para actualizar usuario",
-      nickname = "/update/{id}")
+      nickname = "update")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
   })
@@ -54,7 +55,7 @@ public class UserController {
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PATCH",
           value = "Servicio para bloquear/desbloquear usuario",
-          nickname = "/lock")
+          nickname = "lock")
   public ResponseEntity<?> lock(@PathVariable("id") Long id, @RequestBody UserEnaDisDto userEnaDisDto) throws CustomException {
     log.info("Changing user status");
     return ResponseEntity.ok().body(service.setActive(id, userEnaDisDto.getLock()));
@@ -74,7 +75,7 @@ public class UserController {
   @GetMapping("/{id}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar usuario por id",
-          nickname = "/findById")
+          nickname = "findById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
   })
@@ -85,16 +86,28 @@ public class UserController {
 
   @GetMapping
   @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar todos los usuarios por tipo",
-          nickname = "/findAll")
+          value = "Servicio para recuperar todos los usuarios por filtro",
+          nickname = "findAll")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = UserDto.class, responseContainer = "List")
+          @ApiResponse(code = 200, message = "Success", response = UserPaggeableDto.class, responseContainer = "List")
   })
   public ResponseEntity<Page<UserPaggeableDto>> findAll(@RequestParam(required = false) String filter,
                                                         @RequestParam(required = false) Boolean active,
                                                         Pageable pageable) throws CustomException {
     log.info("Finding all users");
     return ResponseEntity.ok(service.findAll(filter, active, pageable));
+  }
+
+  @GetMapping("/select/{roleId}")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar catalogo usuario por rol",
+          nickname = "select")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = UserSelectFindDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<List<UserSelectFindDto>> select(@PathVariable("roleId") Long roleId) {
+    log.info("Finding all users");
+    return ResponseEntity.ok(service.getForSelect(roleId));
   }
 
 }

@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.role;
 
 import java.io.Serializable;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.RetrivePasswordDto;
-import com.mexico.sas.admin.api.dto.UserSecurityPasswordDto;
+import com.mexico.sas.admin.api.dto.user.security.RetrivePasswordDto;
+import com.mexico.sas.admin.api.dto.user.security.UserSecurityPasswordDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.service.UserSecurityService;
 import io.swagger.annotations.ApiOperation;

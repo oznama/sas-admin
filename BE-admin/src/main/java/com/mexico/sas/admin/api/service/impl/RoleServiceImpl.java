@@ -1,9 +1,9 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
-import com.mexico.sas.admin.api.dto.PermissionFindDto;
-import com.mexico.sas.admin.api.dto.RoleDto;
-import com.mexico.sas.admin.api.dto.RoleFindDto;
+import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
+import com.mexico.sas.admin.api.dto.role.RoleDto;
+import com.mexico.sas.admin.api.dto.role.RoleFindDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;

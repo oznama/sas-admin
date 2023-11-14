@@ -1,6 +1,5 @@
-package com.mexico.sas.admin.api.dto;
+package com.mexico.sas.admin.api.dto.project;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +21,6 @@ public class ProjectFindDto implements Serializable {
     private Long clientId;
     private Long projectManagerId;
 
-    private List<ApplicationFindDto> applications;
+    private List<ProjectApplicationFindDto> applications;
 
 }

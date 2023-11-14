@@ -1,6 +1,8 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.log.LogUserDto;
+import com.mexico.sas.admin.api.dto.permission.PermissionDto;
+import com.mexico.sas.admin.api.dto.user.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.User;
 import org.springframework.data.domain.Page;
@@ -22,4 +24,6 @@ public interface UserService {
   void deleteLogic(Long id) throws CustomException;
   boolean hasPermission(List<PermissionDto> permissionDtos, String requestUri, String method);
   List<LogUserDto> getUsersAccess(String tableName, String recordId);
+
+  List<UserSelectFindDto> getForSelect(Long roleId);
 }
