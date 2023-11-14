@@ -88,12 +88,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         List<ProjectApplicationFindDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {
-                ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(pa, ProjectApplicationFindDto.class);
-                projectApplicationFindDto.setApplication(catalogService.findById(pa.getApplicationId()).getValue());
-                projectApplicationFindDto.setLeader(buildFullname( pa.getLeader().getName(), null, pa.getLeader().getSurname(), pa.getLeader().getSecondSurname()));
-                projectApplicationFindDto.setDeveloper(buildFullname( pa.getDeveloper().getName(), null, pa.getDeveloper().getSurname(), pa.getDeveloper().getSecondSurname()));
-                projectApplicationFindDto.setAmount(formatCurrency(pa.getAmount().doubleValue()));
-                applications.add(projectApplicationFindDto);
+                applications.add(getProjectApplicationFindDto(pa));
             } catch (CustomException e) {
                 log.error(e.getMessage());
             }
@@ -139,7 +134,8 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         if( !project.getProjectManager().getId().equals(projectUpdateDto.getProjectManagerId()) ) {
             project.setProjectManager(new Employee(projectUpdateDto.getProjectManagerId()));
         }
-        if( !project.getInstallationDate().equals(projectUpdateDto.getInstallationDate()) ) {
+        if( (project.getInstallationDate() == null && projectUpdateDto.getInstallationDate() != null) ||
+                (!project.getInstallationDate().equals(projectUpdateDto.getInstallationDate())) ) {
             project.setInstallationDate(projectUpdateDto.getInstallationDate());
         }
         repository.save(project);
@@ -167,10 +163,16 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     }
 
     @Override
-    public ProjectApplicationDto findById(Long projectId, Long applicationId) throws CustomException {
-        findById(projectId);
-        ProjectApplication projectApplication = projectApplicationRepository.findById(applicationId).orElseThrow(() ->
-                new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId)));
+    public ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException {
+        ProjectApplication projectApplication = projectApplicationRepository.findById(id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
+        return getProjectApplicationFindDto(projectApplication);
+    }
+
+    @Override
+    public ProjectApplicationDto findByProjectIdAndId(Long projectId, Long applicationId) throws CustomException {
+        ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndApplicationId(new Project(projectId), applicationId)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId)));
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
@@ -201,12 +203,31 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     }
 
     private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
-        // TODO
+
+        try {
+            findByProjectIdAndId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
+                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
+                    projectApplicationDto.getProjectId()), null);
+        } catch (CustomException e) {
+            if(e instanceof BadRequestException)
+                throw e;
+        }
+
         projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
-        projectApplication.setLeader(new User(projectApplicationDto.getLeaderId()));
-        projectApplication.setDeveloper(new User(projectApplicationDto.getDeveloperId()));
+        projectApplication.setLeader(userService.findEntityById(projectApplicationDto.getLeaderId()));
+        projectApplication.setDeveloper(userService.findEntityById(projectApplicationDto.getDeveloperId()));
 
         if(projectApplication.getCreationDate() == null)
             projectApplication.setCreationDate(new Date());
+    }
+
+    private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
+        ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
+        projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
+        projectApplicationFindDto.setLeader(buildFullname( projectApplication.getLeader().getName(), null, projectApplication.getLeader().getSurname(), projectApplication.getLeader().getSecondSurname()));
+        projectApplicationFindDto.setDeveloper(buildFullname( projectApplication.getDeveloper().getName(), null, projectApplication.getDeveloper().getSurname(), projectApplication.getDeveloper().getSecondSurname()));
+        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
+        return projectApplicationFindDto;
     }
 }

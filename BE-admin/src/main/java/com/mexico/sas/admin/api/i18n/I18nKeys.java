@@ -58,4 +58,5 @@ public interface I18nKeys {
 
     String PROJECT_APPLICATION_NOT_CREATED = "project.application.not.created";
     String PROJECT_APPLICATION_NOT_FOUNT = "project.application.not.found";
+    String PROJECT_APPLICATION_DUPLICATED = "project.application.duplicated";
 }

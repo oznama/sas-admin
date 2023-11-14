@@ -14,6 +14,7 @@ public interface ProjectService {
     void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException;
 
     void save(ProjectApplicationDto projectApplicationDto) throws CustomException;
-    ProjectApplicationDto findById(Long projectId, Long applicationId) throws CustomException;
+    ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException;
+    ProjectApplicationDto findByProjectIdAndId(Long projectId, Long applicationId) throws CustomException;
 
 }

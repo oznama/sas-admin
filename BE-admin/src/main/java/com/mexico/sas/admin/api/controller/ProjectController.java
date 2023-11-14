@@ -103,12 +103,12 @@ public class ProjectController {
           value = "Servicio para crear aplicacion de proyecto",
           nickname = "/saveApplication")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationDto.class)
+          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationFindDto.class)
   })
-  public ResponseEntity<ProjectApplicationDto> saveApplication(@Valid @RequestBody ProjectApplicationDto projectApplicationDto) throws CustomException {
+  public ResponseEntity<ProjectApplicationFindDto> saveApplication(@Valid @RequestBody ProjectApplicationDto projectApplicationDto) throws CustomException {
     log.info("Saving project");
     service.save(projectApplicationDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(projectApplicationDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(service.findByApplicationId(projectApplicationDto.getId()));
   }
 
   @GetMapping("/{projectId}/application/{id}")
@@ -121,7 +121,7 @@ public class ProjectController {
   public ResponseEntity<ProjectApplicationDto> findById(@PathVariable("projectId") Long projectId,
                                                         @PathVariable("id") Long applicationId) throws CustomException {
     log.info("Finding project by id");
-    return ResponseEntity.ok(service.findById(projectId, applicationId));
+    return ResponseEntity.ok(service.findByProjectIdAndId(projectId, applicationId));
   }
 
 }
