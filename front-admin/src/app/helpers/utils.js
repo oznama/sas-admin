@@ -11,13 +11,27 @@ export const upperAllFirtsChars = word => {
     words[i] = words[i][0].toUpperCase() + words[i].substr(1);
     }
     words.join(" ");
-    return wors;
+    return words;
 }
 
-export const handleDateStr = ( strDate ) => (
-    ( strDate === undefined || strDate === null || strDate === '') ? null : convertDateToUTC(new Date(strDate))
-)
+export const handleDate = ( date, currentDate ) => {
+    const invalidDate = ( date === undefined || date === null || date === '');
+    if ( invalidDate ) {
+        return currentDate ? new Date() : null;
+    }
+    return new Date(date);
+}
 
-const convertDateToUTC = ( date ) => (
-    new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds())
-);
+export const handleDateStr = ( strDate, currentDate ) => {
+    const invalidDate = ( strDate === undefined || strDate === null || strDate === '');
+    if ( invalidDate ) {
+        return currentDate ? new Date() : null;
+    }
+    const dateCreated = convertDateToUTC(strDate);
+    return dateCreated;
+}
+
+const convertDateToUTC = ( strDate ) => {
+    const dateParts = strDate.split("/");
+    return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
+};

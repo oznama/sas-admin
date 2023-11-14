@@ -1,34 +1,38 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Pagination } from '../../custom/pagination/page/Pagination';
-import { LoadingContext } from '../../custom/loading/context/LoadingContext';
-import { ProjectContext } from '../context/ProjectContext';
-import { getProjects } from '../../../services/ProjectService';
-import { renderErrorMessage } from '../../../helpers/handleErrors';
+import { Pagination } from '../custom/pagination/page/Pagination';
+import { getProjectById, getProjects } from '../../services/ProjectService';
+import { useDispatch } from 'react-redux';
+import { changeLoading } from '../../../store/loading/loadingSlice';
+import { setMessage } from '../../../store/alert/alertSlice';
+import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { useNavigate } from 'react-router-dom';
 
 export const TableProject = ({
     pageSize = 10,
     sort = 'creationDate,desc',
 }) => {
 
-    const { changeLoading } = useContext( LoadingContext );
-    const { getById } = useContext( ProjectContext );
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
-    const [msgError, setMsgError] = useState();
 
     const fetchProjects = (page) => {
-        changeLoading(true);
+        dispatch(changeLoading(true));
         getProjects(page, pageSize, sort)
             .then( response => {
+                if( response.code && response.code === 401 ) {
+                    dispatch(setMessage(response.message));
+                }
                 setProjects(response.content);
                 setTotalProjects(response.totalElements);
-                changeLoading(false);
+                dispatch(changeLoading(false));
             }).catch( error => {
-                changeLoading(false);
-                setMsgError(`Imposible cargar los proyectos, contacta al administrador del sistema!`);
+                dispatch(changeLoading(false));
+                dispatch(setMessage('Imposible cargar los proyectos, contacta al administrador del sistema!'))
             });
     }
 
@@ -53,7 +57,18 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        getById(id);
+        getProjectById(id).then( response => {
+            if( response.code ) {
+              dispatch(setMessage(response.message));
+            } else {
+              dispatch(setProject(response));
+              dispatch(setCurrentTab(1));
+              navigate(`/project/${id}/edit`);
+            }
+        }).catch( error => {
+            console.log(error);
+            dispatch(setMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador'));
+        });
     }
 
     // const renderStatus = (status) => {
@@ -90,7 +105,6 @@ export const TableProject = ({
 
     return (
         <>
-            { renderErrorMessage(msgError, null) }
             <div className='table-responsive text-nowrap'>
 
                 <table className="table table-sm table-bordered table-striped table-hover">

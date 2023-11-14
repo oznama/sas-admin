@@ -33,6 +33,17 @@ export const save = async(data) => {
     return jsonResponse;
 };
 
+export const update = async(id, data) => {
+    const request = {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    }
+    const response = await api( `${context}/${id}`, request );
+    const jsonResponse = await response.json();
+    return jsonResponse;
+}
+
 export const saveApplication = async(data) => {
     const request = {
         method: "POST",
@@ -42,4 +53,14 @@ export const saveApplication = async(data) => {
     const response = await api( `${context}/application`, request );
     const jsonResponse = await response.json();
     return jsonResponse;
+};
+
+export const getProjectApplicationById = async(projectId, id) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlProject = `${context}/${projectId}/application/${id}`;
+    const response = await api( urlProject, request );
+    const projectApplication = await response.json();
+    return projectApplication;
 };

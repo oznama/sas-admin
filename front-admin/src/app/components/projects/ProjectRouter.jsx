@@ -1,7 +1,7 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ProjectPage } from './ProjectPage'
-import { ApplicationRouter } from '../../applications/ApplicationRouter'
+import { ApplicationRouter } from '../applications/ApplicationRouter'
 
 export const ProjectRouter = () => (
     <Routes>

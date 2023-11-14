@@ -1,9 +1,8 @@
-import { useContext } from "react";
-import { LoadingContext } from "../context/LoadingContext";
+import { useSelector } from "react-redux";
 
 export const Loading = () => {
 
-  const { isLoading } = useContext( LoadingContext );
+  const isLoading = useSelector( (state) => state.loading.isLoading)
 
   const styleChangeSizeSpinner = () => ({
     width: '3.5rem', 

@@ -1,16 +1,17 @@
-import { useContext } from 'react';
-import { TableProject } from '../projects/page/TableProjects';
+import { TableProject } from '../projects/TableProjects';
 import { useNavigate } from 'react-router-dom';
-import { ProjectContext } from '../projects/context/ProjectContext';
+import { Alert } from '../custom/alerts/page/Alert';
+import { alertType } from '../custom/alerts/types/types';
+import { useDispatch } from 'react-redux';
+import { cleanProject } from '../../../store/project/projectSlice';
 
 export const Home = () => {
 
-    const { projectNew } = useContext( ProjectContext );
-
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleAddProject = () => {
-        projectNew();
+        dispatch(cleanProject());
         navigate(`/project/add`);
     }
 
@@ -30,6 +31,7 @@ export const Home = () => {
                 </div>
                 { renderAddButton() }
             </div>
+            <Alert type={ alertType.error } />
             <TableProject />
         </div>
     );

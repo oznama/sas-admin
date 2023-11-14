@@ -5,46 +5,49 @@ import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalog } from '../../../services/CatalogService';
 import { getUsersByRole } from '../../../services/UserService';
-import { checkResponse } from '../../../helpers/handleResponse';
 import { saveApplication } from '../../../services/ProjectService';
+import { handleDateStr, numberToString } from '../../../helpers/utils';
+import { useSelector } from 'react-redux';
 
 export const DetailApplications = () => {
+
+  const projectApplication = useSelector( (state) => state.projectReducer.projectApplication );
+  const { projectId } = useParams();
+
   const navigate = useNavigate();
-  const { projectId, id } = useParams();
-  const [aplication, setAplication] = useState('-1');
-  const [amount, setAmount] = useState('$0');
-  const [status, setStatus] = useState('2000900001');
-  const [leader, setLeader] = useState('-1');
-  const [developer, setDeveloper] = useState('-1');
-  const [hours, setHours] = useState('0');
-  const [endDate, setEndDate] = useState();
-  const [designerDate, setDesignerDate] = useState(new Date());
-  const [buildDate, setBuildDate] = useState(new Date());
-  const [catStatus, setCatStatus] = useState([]);
+  const [aplication, setAplication] = useState(numberToString(projectApplication.applicationId, '-1'));
+  const [amount, setAmount] = useState(numberToString(projectApplication.amount, '$0'));
+  // const [status, setStatus] = useState('2000900001');
+  const [leader, setLeader] = useState(numberToString(projectApplication.leaderId, '-1'));
+  const [developer, setDeveloper] = useState(numberToString(projectApplication.developerId, '-1'));
+  const [hours, setHours] = useState(numberToString(projectApplication.hours, '0'));
+  const [endDate, setEndDate] = useState(handleDateStr(projectApplication.endDate, false));
+  const [designDate, setdesignDate] = useState(handleDateStr(projectApplication.designDate, true));
+  const [developmentDate, setDevelopmentDate] = useState(handleDateStr(projectApplication.developmentDate, true));
+  // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
+
+  const isModeEdit = () => ( projectApplication.id && projectApplication.id > 0);
 
   const fetchSelects = () => {
     
     getCatalog(1000000008)
       .then( response => {
-        checkResponse(response);
         setCatApliations(response);
       }).catch( error => {
         console.log(error);
       });
 
-    getCatalog(1000000009)
-      .then( response => {
-        checkResponse(response);
-        setCatStatus(response);
-      }).catch( error => {
-        console.log(error);
-      });
+    // getCatalog(1000000009)
+    //   .then( response => {
+    //     setCatStatus(response);
+    //   }).catch( error => {
+    //     console.log(error);
+    //   });
     
     getUsersByRole(2)
       .then( response => {
-        checkResponse(response);
         setCatEmployees(response);
       }).catch( error => {
         console.log(error);
@@ -62,33 +65,41 @@ export const DetailApplications = () => {
   const onChangeDeveloper = ({ target }) => setDeveloper(target.value);
   const onChangeHours = ({ target }) => setHours(target.value);
   const onChangeEndDate = (date) => setEndDate(date);
-  const onChangeDesignerDate = (date) => setDesignerDate(date);
-  const onChangeBuildDate = (date) => setBuildDate(date);
+  const onChangeDesignDate = (date) => designDate(date);
+  const onChangeDevelopmentDate = (date) => setDevelopmentDate(date);
 
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    request.projectId = projectId;
-    request.id = id != undefined ? id : null;
+    request.projectId = projectApplication.projectId;
+    // request.id = id != undefined ? id : null;
     
     saveApplication(request).then( response => {
         if(response.code && response.code === 401) {
-            onLogout();
+          setMsgError(response.message);
         } else if (response.code && response.code !== 201) {
-            if( response.message ) {
-                setMsgError(response.message)
-            } else if (response.errors) {
-                setErros(response.errors);
-            }
+          if( response.message ) {
+              setMsgError(response.message)
+          } else if (response.errors) {
+              setErros(response.errors);
+          }
         } else {
-            navigate(`/project/${projectId}/edit`, { replace: true });
+          navigate(`/project/${projectApplication.projectId}/edit`, { replace: true });
         }
     }).catch(error => {
         setMsgError(error.message);
     });
   }
 
+  const renderSaveButton = () => {
+    if(isModeEdit) {
+      return null;
+    } else {
+      return (<button type="submit" className="btn btn-primary">Guardar</button>) ;
+    }
+  };
+ 
   return (
     <div className='px-5'>
       <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
@@ -96,41 +107,41 @@ export const DetailApplications = () => {
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-4'>
-              <Select name="applicationId" label="Aplicaci&oacute;n" options={ catAplications } value={ aplication } onChange={ onChangeAplication } />
+              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit() } options={ catAplications } value={ aplication } onChange={ onChangeAplication } />
             </div>
             <div className='col-4'>
-              <InputText name="amount" label='Monto' placeholder='Ingresa monto' value={ amount } onChange={ onChangeAmount } maxLength={ 10 } />
+              <InputText name="amount" label='Monto' placeholder='Ingresa monto' disabled={ isModeEdit() } value={ amount } onChange={ onChangeAmount } maxLength={ 10 } />
             </div>
-            <div className='col-4'>
+            {/* <div className='col-4'>
               <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+            </div> */}
+            <div className='col-4'>
+              <InputText name="hours" label='Horas' placeholder='Ingresa monto' disabled={ isModeEdit() } value={ hours } onChange={ onChangeHours } maxLength={ 10 } />
             </div>
           </div>
           <div className="row text-start">
-            <div className='col-4'>
-            <Select name="leaderId" label="L&iacute;der" options={ catEmployees } value={ leader } onChange={ onChangeLeader } />
+            <div className='col-6'>
+            <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit() } options={ catEmployees } value={ leader } onChange={ onChangeLeader } />
             </div>
-            <div className='col-4'>
-              <Select name="developerId" label="Desarrollador" options={ catEmployees } value={ developer } onChange={ onChangeDeveloper } />
-            </div>
-            <div className='col-4'>
-              <InputText name="hours" label='Horas' placeholder='Ingresa monto' value={ hours } onChange={ onChangeHours } maxLength={ 10 } />
+            <div className='col-6'>
+              <Select name="developerId" label="Desarrollador" disabled={ isModeEdit() } options={ catEmployees } value={ developer } onChange={ onChangeDeveloper } />
             </div>
           </div>
 
           <div className="row text-start">
             <div className='col-4'>
-              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" value={ designerDate } onChange={ (date) => onChangeDesignerDate(date) } />
+              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit() } value={ designDate } onChange={ (date) => onChangeDesignDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker name="developmentDate" label="Construcci&oacute;n" value={ buildDate } onChange={ (date) => onChangeBuildDate(date) } />
+              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit() } value={ developmentDate } onChange={ (date) => onChangeDevelopmentDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker name="endDate" label="Cierre" value={ endDate } onChange={ (date) => onChangeEndDate(date) } />
+              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit() } onChange={ (date) => onChangeEndDate(date) } />
             </div>
           </div>
         </div>
         <div className="pt-3 d-flex flex-row-reverse">
-            <button type="submit" className="btn btn-primary">Guardar</button>
+            { renderSaveButton() }
             &nbsp;
             <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
         </div>

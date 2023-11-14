@@ -1,16 +1,27 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { renderErrorMessage } from '../../../helpers/handleErrors';
+import { getProjectApplicationById } from '../../../services/ProjectService';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../../store/alert/alertSlice';
+import { setProjectApplication } from '../../../../store/project/projectSlice';
+import { useNavigate } from 'react-router-dom';
 
 export const TableApplications = ({ projectId, applications }) => {
 
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const [msgError, setMsgError] = useState();
-
     const handledSelect = id => {
-        navigate(`/project/${ projectId }/application/${ id }/edit`);
+        getProjectApplicationById(projectId, id).then( response => {
+            if( response.code ) {
+              dispatch(setMessage(response.message));
+            } else {
+              dispatch(setProjectApplication(response));
+              const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
+              navigate(urlRedirect);
+            }
+        }).catch( error => {
+            dispatch(setMessage('Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador'));
+        });
     }
 
     // const renderStatus = (status) => {
@@ -33,11 +44,11 @@ export const TableApplications = ({ projectId, applications }) => {
         endDate,
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
-            <td className="text-center">
-                <button type="button" class="btn btn-primary">
+            {/* <td className="text-center">
+                <button type="button" className="btn btn-primary">
                     <span><i className="bi bi-pencil"></i></span>
                 </button>
-            </td>
+            </td> */}
             <th className="text-start" scope="row">{ application }</th>
             <td className="text-end text-primary">{ amount }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
@@ -48,7 +59,7 @@ export const TableApplications = ({ projectId, applications }) => {
             <td className="text-center">{ developmentDate }</td>
             <td className="text-center">{ endDate }</td>
             <td className="text-center">
-                <button type="button" class="btn btn-danger">
+                <button type="button" className="btn btn-danger">
                     <span><i className="bi bi-trash"></i></span>
                 </button>
             </td>
@@ -57,13 +68,11 @@ export const TableApplications = ({ projectId, applications }) => {
 
     return (
         <>
-            { renderErrorMessage(msgError, null, null) }
             <div className='table-responsive text-nowrap'>
-
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
-                            <th className="text-center fs-6" scope="col">Editar</th>
+                            {/* <th className="text-center fs-6" scope="col">Editar</th> */}
                             <th className="text-center fs-6" scope="col">Aplicaci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}

@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { Footer } from '../../custom/Footer';
-import { renderErrorMessage } from '../../../helpers/handleErrors';
+import { useDispatch, useSelector } from 'react-redux';
+import { Footer } from '../custom/Footer';
+import { alertType } from '../custom/alerts/types/types';
+import { Alert } from '../custom/alerts/page/Alert';
+import { login } from '../../../store/auth/authSlice';
+import { setMessage } from '../../../store/alert/alertSlice';
+import { doLogin } from '../../services/AuthService';
 
 export const LoginPage = () => {
 
-    const { login, message, errors } = useContext( AuthContext );
+    const dispatch = useDispatch();
 
     const navigate = useNavigate();
     
@@ -14,9 +17,18 @@ export const LoginPage = () => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        login(request);
-
-        navigate('/', { replace: true });
+        doLogin(request).then( response => {
+            if( response.code ) {
+                dispatch(setMessage(response.message));
+            } else {
+                dispatch(login(response));
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('token', response.accessToken);
+                navigate('/', { replace: true });
+            }
+        }).catch( error => {
+            dispatch(setMessage('Ha ocurrido un error, contactar al area de sistemas'));
+        });
     }
 
     return (
@@ -30,7 +42,7 @@ export const LoginPage = () => {
                         <div className="card shadow-lg">
                             <div className="card-body p-5">
                                 <h1 className="fs-4 card-title fw-bold mb-4">Iniciar Sesi&oacute;n</h1>
-                                { renderErrorMessage(message, errors, null) }
+                                <Alert type={ alertType.error } />
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
                                         <label className="mb-2 text-muted">Email</label>

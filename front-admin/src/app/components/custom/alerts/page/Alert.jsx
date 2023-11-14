@@ -1,21 +1,24 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { cleanMessage } from '../../../../../store/alert/alertSlice';
 
-export const Alert = ({ type, children }) => {
+export const Alert = ({ type }) => {
 
-  const [show, setShow] = useState(true);
+  const message = useSelector( (state) => state.alert.message)
+  const dispatch = useDispatch();
   
   useEffect(() => {
-    const timeId = setTimeout(() => setShow(false), 5000);
+    const timeId = setTimeout(() => dispatch(cleanMessage()), 5000);
     return () => clearTimeout(timeId);
   }, []);
 
-  if (!show) {
+  if (message === '') {
     return null;
   }
   return (
     <div className={ `alert alert-${ type }` } role="alert">
-      { children }
+      { message }
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-export const Select = ({ name, label, value, options, onChange }) => {
+export const Select = ({ name, label, disabled, value, options, onChange }) => {
 
     const renderItems = () => options && options.map( option  => (
         <option key={ option.id } value={ option.id }>{ option.value }</option>
@@ -9,7 +9,7 @@ export const Select = ({ name, label, value, options, onChange }) => {
   return (
     <>
         <label className="form-label">{ label }</label>
-        <select className="form-select" aria-label="Default select example" name={ name } value={ value } onChange={ onChange }>
+        <select className="form-select" aria-label="Default select example" name={ name } disabled={ disabled } value={ value } onChange={ onChange }>
             <option key= '-1' value='-1'>Seleccionar...</option>
             { renderItems() }
         </select>
@@ -24,3 +24,7 @@ Select.propTypes = {
     options: PropTypes.array,
     onChange: PropTypes.func.isRequired,
 };
+
+Select.defaultProps = {
+    disabled: false,
+  }

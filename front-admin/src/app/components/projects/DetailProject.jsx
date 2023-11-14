@@ -1,15 +1,12 @@
-import { useContext, useEffect, useState } from 'react';
-import { InputText } from '../../custom/InputText';
-import { Select } from '../../custom/Select';
+import { useEffect, useState } from 'react';
+import { InputText } from '../custom/InputText';
+import { Select } from '../custom/Select';
 // import { TextArea } from '../../custom/TextArea';
-import { DatePicker } from '../../custom/DatePicker';
+import { DatePicker } from '../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
-import { save } from '../../../services/ProjectService';
-import { getSelect } from '../../../services/ClientService';
-import { renderErrorMessage } from '../../../helpers/handleErrors';
-import { AuthContext } from '../../auth/context/AuthContext';
-import { checkResponse } from '../../../helpers/handleResponse';
-import { handleDateStr, handleText, numberToString } from '../../../helpers/utils';
+import { save, update } from '../../services/ProjectService';
+import { getSelect } from '../../services/ClientService';
+import { handleDate, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 
 export const DetailProject = ({ project }) => {
 
@@ -17,21 +14,18 @@ export const DetailProject = ({ project }) => {
     const [pKey, setPKey] = useState(project.key);
     const [description, setDescription] = useState(project.description);
     const [createdBy, setCreatedBy] = useState(project.createdBy);
-    const [dateCreated, setDateCreated] = useState(new Date());
+    const [dateCreated, setDateCreated] = useState(handleDate(project.creationDate, true));
     const [client, setClient] = useState(numberToString(project.clientId, '-1'));
     const [pm, setPm] = useState(numberToString(project.projectManagerId, '-1'));
-    const [installationDate, setInstallationDate] = useState(handleDateStr(project.installationDate));
+    const [installationDate, setInstallationDate] = useState(handleDate(project.installationDate, false));
     const [clients, setClients] = useState([]);
     const [pms, setPms] = useState([]);
-    const [msgError, setMsgError] = useState();
-    const [errors, setErros] = useState();
 
     const isModeEdit = () => ( project.id && project.id > 0);
 
     const fetchCatalogClient = () => {
         getSelect()
             .then( response => {
-                checkResponse(response);
                 setClients( response );
                 if (client !== '-1' && pm !== '-1') {
                     const index = Number(client) - 1;
@@ -41,13 +35,6 @@ export const DetailProject = ({ project }) => {
                 console.log(error);
             });
     };
-
-    const { logout } = useContext( AuthContext );
-
-    const onLogout = () => {
-      logout();
-      navigate('/login', { replace: true })
-    }
 
     useEffect(() => {
         fetchCatalogClient();
@@ -69,9 +56,17 @@ export const DetailProject = ({ project }) => {
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
         
+        if ( isModeEdit() ) {
+            updateProject(request);
+        } else {
+            saveProject(request);
+        }
+    }
+
+    const saveProject = request => {
         save(request).then( response => {
             if(response.code && response.code === 401) {
-                onLogout();
+                 // Make handler session 401
             } else if (response.code && response.code !== 201) {
                 if( response.message ) {
                     setMsgError(response.message)
@@ -84,7 +79,26 @@ export const DetailProject = ({ project }) => {
         }).catch(error => {
             setMsgError(error.message);
         });
-    }
+    };
+
+    const updateProject = request => {
+        update(project.id, request).then( response => {
+            if(response.code && response.code === 401) {
+                onLogout();
+            } else if (response.code && response.code !== 200) {
+                if( response.message ) {
+                    setMsgError(response.message)
+                } else if (response.errors) {
+                    setErros(response.errors);
+                }
+            } else {
+                // Mensaje de guardado
+                console.log('Proyecto actualizado!');
+            }
+        }).catch(error => {
+            setMsgError(error.message);
+        });
+    };
 
     const renderCreatedBy = () => isModeEdit() && (
         <div className='col-3'>
@@ -100,7 +114,6 @@ export const DetailProject = ({ project }) => {
 
     return (
         <div>
-            { renderErrorMessage(msgError, errors, true) }
             <form onSubmit={ onSubmit }>
                 <div className='text-center'>
                 <div className="row text-start">

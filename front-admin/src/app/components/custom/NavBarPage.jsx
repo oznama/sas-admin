@@ -1,16 +1,26 @@
-import { useContext, useState } from 'react';
-import { AuthContext } from '../auth/context/AuthContext';
-
 import './custom.main.css';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { doLogout } from '../../services/AuthService';
+import { logout } from '../../../store/auth/authSlice';
 
 export const NavBarPage = () => {
 
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
-  const { user, logout } = useContext( AuthContext );
+  const user = useSelector( (state) => state.auth.user );
 
   const onLogout = () => {
-    logout();
+    // TODO No esta funcionando correctamente esto
+    // const token = localStorage.getItem('token');
+    // doLogout(token).then( response => {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    // }).catch( error => {
+    //   console.log(error);
+    // })
+    dispatch(logout());
     navigate('/login', { replace: true })
   }
 

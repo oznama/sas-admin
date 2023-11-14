@@ -1,18 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
-import { useContext, useState } from 'react';
-import { TableApplications } from '../../applications/page/TableApplications';
-import { ProjectContext } from '../context/ProjectContext';
+import { useState } from 'react';
+import { TableApplications } from '../applications/page/TableApplications';
+import { useDispatch, useSelector } from 'react-redux';
+import { cleanProjectApplication, setCurrentTab } from '../../../store/project/projectSlice';
+import { Alert } from '../custom/alerts/page/Alert';
+import { alertType } from '../custom/alerts/types/types';
 
 export const ProjectPage = () => {
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { project } = useContext( ProjectContext );
-  const [selectedTab, setSelectedTab] = useState(1);
-
-
+  const project = useSelector( (state) => state.projectReducer.project );
+  const selectedTab = useSelector ( (state) => state.projectReducer.currentTab );
+  
   const handleAddApplication = () => {
+    dispatch(cleanProjectApplication());
       navigate(`/project/${ project.id }/application/add`);
   }
 
@@ -26,10 +29,10 @@ export const ProjectPage = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
-      <li className="nav-item" onClick={ () => setSelectedTab(1) }>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
         <a className={ `nav-link ${ (selectedTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
       </li>
-      <li className="nav-item" onClick={ () => setSelectedTab(2) }>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
         <a className={ `nav-link ${ (selectedTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
       </li>
     </ul>
@@ -40,6 +43,7 @@ export const ProjectPage = () => {
       <div className='px-5'>
         <div className='d-flex justify-content-between'>
           <h1 className="fs-4 card-title fw-bold mb-4">Proyecto Nuevo</h1>
+          <Alert type={ alertType.error } />
           { ( project.id ) ? renderTabs() : null }
         </div>
         { (selectedTab === 2 && project.id ) ? renderAddButton() : null }
