@@ -5,8 +5,10 @@ import { getProjectById, getProjects } from '../../services/ProjectService';
 import { useDispatch } from 'react-redux';
 import { changeLoading } from '../../../store/loading/loadingSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
-import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setApplications, setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
+import { alertType } from '../custom/alerts/types/types';
+import { buildPayloadMessage } from '../../helpers/utils';
 
 export const TableProject = ({
     pageSize = 10,
@@ -25,14 +27,14 @@ export const TableProject = ({
         getProjects(page, pageSize, sort)
             .then( response => {
                 if( response.code && response.code === 401 ) {
-                    dispatch(setMessage(response.message));
+                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
                 }
                 setProjects(response.content);
                 setTotalProjects(response.totalElements);
                 dispatch(changeLoading(false));
             }).catch( error => {
                 dispatch(changeLoading(false));
-                dispatch(setMessage('Imposible cargar los proyectos, contacta al administrador del sistema!'))
+                dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar los proyectos, contacte al administrador', alertType.error)));
             });
     }
 
@@ -59,15 +61,16 @@ export const TableProject = ({
     const handledSelect = id => {
         getProjectById(id).then( response => {
             if( response.code ) {
-              dispatch(setMessage(response.message));
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
               dispatch(setProject(response));
+              dispatch(setApplications(response.applications));
               dispatch(setCurrentTab(1));
               navigate(`/project/${id}/edit`);
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador'));
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
         });
     }
 

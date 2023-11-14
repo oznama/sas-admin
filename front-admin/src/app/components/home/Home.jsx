@@ -1,7 +1,6 @@
 import { TableProject } from '../projects/TableProjects';
 import { useNavigate } from 'react-router-dom';
 import { Alert } from '../custom/alerts/page/Alert';
-import { alertType } from '../custom/alerts/types/types';
 import { useDispatch } from 'react-redux';
 import { cleanProject } from '../../../store/project/projectSlice';
 
@@ -31,7 +30,7 @@ export const Home = () => {
                 </div>
                 { renderAddButton() }
             </div>
-            <Alert type={ alertType.error } />
+            <Alert />
             <TableProject />
         </div>
     );

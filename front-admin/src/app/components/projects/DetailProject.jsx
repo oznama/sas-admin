@@ -6,11 +6,16 @@ import { DatePicker } from '../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
 import { save, update } from '../../services/ProjectService';
 import { getSelect } from '../../services/ClientService';
-import { handleDate, handleDateStr, handleText, numberToString } from '../../helpers/utils';
+import { buildPayloadMessage, handleDate, handleText, numberToString } from '../../helpers/utils';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMessage } from '../../../store/alert/alertSlice';
+import { alertType } from '../custom/alerts/types/types';
 
-export const DetailProject = ({ project }) => {
+export const DetailProject = () => {
 
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const project = useSelector( state => state.projectReducer.project );
     const [pKey, setPKey] = useState(project.key);
     const [description, setDescription] = useState(project.description);
     const [createdBy, setCreatedBy] = useState(project.createdBy);
@@ -55,7 +60,6 @@ export const DetailProject = ({ project }) => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        
         if ( isModeEdit() ) {
             updateProject(request);
         } else {
@@ -66,37 +70,39 @@ export const DetailProject = ({ project }) => {
     const saveProject = request => {
         save(request).then( response => {
             if(response.code && response.code === 401) {
-                 // Make handler session 401
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else if (response.code && response.code !== 201) {
                 if( response.message ) {
-                    setMsgError(response.message)
+                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
                 } else if (response.errors) {
-                    setErros(response.errors);
+                    console.log(response.errors);
+                    dispatch(setMessage(buildPayloadMessage('No se ha podido crear el proyecto', alertType.error)));
                 }
             } else {
+                dispatch(setMessage(buildPayloadMessage('¡Proyecto creado correctamente!', alertType.success)));
                 navigate('/', { replace: true });
             }
         }).catch(error => {
-            setMsgError(error.message);
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el proyecto, contacte al administrador', alertType.error)));
         });
     };
 
     const updateProject = request => {
         update(project.id, request).then( response => {
             if(response.code && response.code === 401) {
-                onLogout();
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else if (response.code && response.code !== 200) {
                 if( response.message ) {
-                    setMsgError(response.message)
+                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
                 } else if (response.errors) {
-                    setErros(response.errors);
+                    console.log(response.errors);
+                    dispatch(setMessage(buildPayloadMessage('No se ha podido actualizar el proyecto', alertType.error)));
                 }
             } else {
-                // Mensaje de guardado
-                console.log('Proyecto actualizado!');
+                dispatch(setMessage(buildPayloadMessage('¡Proyecto actualizado correctamente!', alertType.success)));
             }
         }).catch(error => {
-            setMsgError(error.message);
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un errro al actualizar el proyecto, contacte al administrador', alertType.error)));
         });
     };
 
@@ -114,17 +120,22 @@ export const DetailProject = ({ project }) => {
 
     return (
         <div>
-            <form onSubmit={ onSubmit }>
+            <form className="needs-validation" onSubmit={ onSubmit }>
                 <div className='text-center'>
                 <div className="row text-start">
                     <div className='col-3'>
-                        <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ isModeEdit() } value={ pKey } onChange={ onChangePKey } maxLength={ 12 } />
+                        <InputText name='key' label='Clave' placeholder='Ingresa clave' 
+                            disabled={ isModeEdit() } value={ pKey } required
+                            onChange={ onChangePKey } maxLength={ 12 } />
                     </div>
                     <div className='col-6'>
-                        <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' value={ description } onChange={ onChangeDesc } maxLength={ 70 } />
+                        <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
+                            value={ description } required
+                            onChange={ onChangeDesc } maxLength={ 70 } />
                     </div>
                     <div className='col-3'>
-                        <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
+                        <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required
+                            value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                     </div>
                 </div>
                 {/* <div className="row text-start">
@@ -136,10 +147,10 @@ export const DetailProject = ({ project }) => {
                     { renderCreatedBy() }
                     { renderCreationDate() }
                     <div className='col-3'>
-                    <Select name="clientId" label="Cliente" options={ clients } value={ client } onChange={ onChangeClient } />
+                    <Select name="clientId" label="Cliente" options={ clients } value={ client } required onChange={ onChangeClient } />
                     </div>
                     <div className='col-3'>
-                    <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } onChange={ onChangePm } />
+                    <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } />
                     </div>
                 </div>
                 </div>

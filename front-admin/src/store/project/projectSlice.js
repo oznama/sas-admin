@@ -11,18 +11,19 @@ export const projectSlice = createSlice({
             description: "",
             createdBy: "",
             creationDate: null,
-            clientId: "-1",
-            projectManagerId: "-1",
+            clientId: "",
+            projectManagerId: "",
             installationDate: null,
         },
+        applications: [],
         projectApplication: {
             id: null,
-            projectId: "-1",
-            applicationId: "-1",
-            amount: "$0",
-            hours: "0",
-            leaderId: "-1",
-            developerId: "-1",
+            projectId: "",
+            applicationId: "",
+            amount: "",
+            hours: "",
+            leaderId: "",
+            developerId: "",
             designDate: null,
             developmentDate: null,
             endDate: null
@@ -39,23 +40,32 @@ export const projectSlice = createSlice({
                 description: "",
                 createdBy: "",
                 creationDate: null,
-                clientId: "-1",
-                projectManagerId: "-1",
+                clientId: "",
+                projectManagerId: "",
                 installationDate: null,
             }
+        },
+        setApplications: (state, action) => {
+            state.applications = action.payload;
+        },
+        addAplication: (state, action) => {
+            state.applications.push(action.payload);
+        },
+        cleanApplications: (state) => {
+            state.applications = [];
         },
         setProjectApplication: (state, action) => {
             state.projectApplication = action.payload;
         },
-        cleanProjectApplication: ( state ) => {
+        cleanProjectApplication: ( state, action ) => {
             state.projectApplication = {
                 id: null,
-                projectId: "-1",
-                applicationId: "-1",
-                amount: "$0",
-                hours: "0",
-                leaderId: "-1",
-                developerId: "-1",
+                projectId: action.payload,
+                applicationId: "",
+                amount: "",
+                hours: "",
+                leaderId: "",
+                developerId: "",
                 designDate: null,
                 developmentDate: null,
                 endDate: null
@@ -70,6 +80,9 @@ export const projectSlice = createSlice({
 export const { 
     setProject,
     cleanProject,
+    setApplications,
+    addAplication,
+    cleanApplications,
     setProjectApplication,
     cleanProjectApplication,
     setCurrentTab,

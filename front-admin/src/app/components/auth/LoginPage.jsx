@@ -6,6 +6,7 @@ import { Alert } from '../custom/alerts/page/Alert';
 import { login } from '../../../store/auth/authSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { doLogin } from '../../services/AuthService';
+import { buildPayloadMessage } from '../../helpers/utils';
 
 export const LoginPage = () => {
 
@@ -19,7 +20,7 @@ export const LoginPage = () => {
         const request = Object.fromEntries(data.entries());
         doLogin(request).then( response => {
             if( response.code ) {
-                dispatch(setMessage(response.message));
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
                 dispatch(login(response));
                 localStorage.setItem('user', JSON.stringify(response.user));
@@ -27,7 +28,7 @@ export const LoginPage = () => {
                 navigate('/', { replace: true });
             }
         }).catch( error => {
-            dispatch(setMessage('Ha ocurrido un error, contactar al area de sistemas'));
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error, contacta al area de sistemas', alertType.error)));
         });
     }
 
@@ -42,7 +43,7 @@ export const LoginPage = () => {
                         <div className="card shadow-lg">
                             <div className="card-body p-5">
                                 <h1 className="fs-4 card-title fw-bold mb-4">Iniciar Sesi&oacute;n</h1>
-                                <Alert type={ alertType.error } />
+                                <Alert />
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
                                         <label className="mb-2 text-muted">Email</label>

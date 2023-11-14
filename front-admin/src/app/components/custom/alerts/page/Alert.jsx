@@ -1,32 +1,18 @@
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { cleanMessage } from '../../../../../store/alert/alertSlice';
 
-export const Alert = ({ type }) => {
+export const Alert = () => {
 
-  const message = useSelector( (state) => state.alert.message)
+  const { message, type } = useSelector(state => state.alert);
   const dispatch = useDispatch();
-  
-  useEffect(() => {
-    const timeId = setTimeout(() => dispatch(cleanMessage()), 5000);
-    return () => clearTimeout(timeId);
-  }, []);
 
   if (message === '') {
     return null;
   }
   return (
-    <div className={ `alert alert-${ type }` } role="alert">
+    <div className={ `alert alert-${ type } alert-dismissible fade show` } role="alert">
       { message }
+      <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={ () => dispatch(cleanMessage()) } ></button>
     </div>
   )
-}
-
-Alert.propTypes = {
-  type: PropTypes.string,
-}
-
-Alert.defaultProps = {
-  type: 'secondary',
 }

@@ -1,26 +1,34 @@
 import PropTypes from 'prop-types';
 import { getProjectApplicationById } from '../../../services/ProjectService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
 import { setProjectApplication } from '../../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
+import { alertType } from '../../custom/alerts/types/types';
+import { buildPayloadMessage } from '../../../helpers/utils';
 
-export const TableApplications = ({ projectId, applications }) => {
+export const TableApplications = ({ projectId }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const applications = useSelector( state => state.projectReducer.applications);
 
     const handledSelect = id => {
         getProjectApplicationById(projectId, id).then( response => {
             if( response.code ) {
-              dispatch(setMessage(response.message));
+              dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
               dispatch(setProjectApplication(response));
               const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
               navigate(urlRedirect);
             }
         }).catch( error => {
-            dispatch(setMessage('Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador'));
+            dispatch(setMessage(
+                buildPayloadMessage(
+                    'Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador', 
+                    alertType.error
+                )
+            ));
         });
     }
 

@@ -1,4 +1,7 @@
     
+export const mountMax = 999999;
+export const numberMaxLength = 3;
+
 export const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
 
 export const numberToString = ( number, valueDefault ) => ( (number && number !== undefined) ? number.toString() : valueDefault );
@@ -22,10 +25,10 @@ export const handleDate = ( date, currentDate ) => {
     return new Date(date);
 }
 
-export const handleDateStr = ( strDate, currentDate ) => {
+export const handleDateStr = ( strDate ) => {
     const invalidDate = ( strDate === undefined || strDate === null || strDate === '');
     if ( invalidDate ) {
-        return currentDate ? new Date() : null;
+        return null;
     }
     const dateCreated = convertDateToUTC(strDate);
     return dateCreated;
@@ -35,3 +38,8 @@ const convertDateToUTC = ( strDate ) => {
     const dateParts = strDate.split("/");
     return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
 };
+
+export const buildPayloadMessage = (msg, typ) => ({
+    message: msg,
+    type: typ
+});
