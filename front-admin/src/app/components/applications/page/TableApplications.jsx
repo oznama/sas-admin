@@ -11,7 +11,7 @@ export const TableApplications = ({ projectId }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const applications = useSelector( state => state.projectReducer.applications);
+    const applications = useSelector( state => state.projectReducer.project.applications);
 
     const handledSelect = id => {
         getProjectApplicationById(projectId, id).then( response => {

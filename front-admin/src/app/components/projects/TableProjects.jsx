@@ -5,7 +5,7 @@ import { getProjectById, getProjects } from '../../services/ProjectService';
 import { useDispatch } from 'react-redux';
 import { changeLoading } from '../../../store/loading/loadingSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
-import { setApplications, setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
 import { buildPayloadMessage } from '../../helpers/utils';
@@ -64,7 +64,6 @@ export const TableProject = ({
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
               dispatch(setProject(response));
-              dispatch(setApplications(response.applications));
               dispatch(setCurrentTab(1));
               navigate(`/project/${id}/edit`);
             }

@@ -15,7 +15,6 @@ export const projectSlice = createSlice({
             projectManagerId: "",
             installationDate: null,
         },
-        applications: [],
         projectApplication: {
             id: null,
             projectId: "",
@@ -45,14 +44,8 @@ export const projectSlice = createSlice({
                 installationDate: null,
             }
         },
-        setApplications: (state, action) => {
-            state.applications = action.payload;
-        },
         addAplication: (state, action) => {
-            state.applications.push(action.payload);
-        },
-        cleanApplications: (state) => {
-            state.applications = [];
+            state.project.applications.push(action.payload);
         },
         setProjectApplication: (state, action) => {
             state.projectApplication = action.payload;
@@ -80,9 +73,7 @@ export const projectSlice = createSlice({
 export const { 
     setProject,
     cleanProject,
-    setApplications,
     addAplication,
-    cleanApplications,
     setProjectApplication,
     cleanProjectApplication,
     setCurrentTab,
