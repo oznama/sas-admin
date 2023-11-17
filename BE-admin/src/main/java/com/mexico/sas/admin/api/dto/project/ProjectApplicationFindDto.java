@@ -31,6 +31,4 @@ public class ProjectApplicationFindDto implements Serializable {
     private String leader;
     private String developer;
 
-    private List<LogMovementDto> history;
-
 }

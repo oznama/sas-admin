@@ -52,6 +52,7 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
         logMovements.forEach( logMovement -> {
             try {
                 LogMovementDto logMovementDto = new LogMovementDto();
+                logMovementDto.setId(logMovement.getId());
                 logMovementDto.setDate(logMovement.getCreationDate());
                 UserFindDto userDto = userService.findById(logMovement.getUserId());
                 logMovementDto.setUserName(buildFullname(userDto.getName(), userDto.getSurname()));

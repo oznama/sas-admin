@@ -198,6 +198,8 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
         projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
+        projectApplicationDto.setHistory(logMovementService
+                .findByTableAndRecordId(ProjectApplication.class.getSimpleName(), projectApplication.getId()));
         return projectApplicationDto;
     }
 
@@ -259,8 +261,6 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
                         projectApplication.getDeveloper().getSurname(),
                         projectApplication.getDeveloper().getSecondSurname()));
         projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationFindDto.setHistory(logMovementService
-                .findByTableAndRecordId(ProjectApplication.class.getSimpleName(), projectApplication.getId()));
         return projectApplicationFindDto;
     }
 }
