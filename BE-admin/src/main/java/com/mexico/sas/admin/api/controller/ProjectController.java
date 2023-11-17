@@ -119,9 +119,9 @@ public class ProjectController {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationDto.class)
   })
   public ResponseEntity<ProjectApplicationDto> findById(@PathVariable("projectId") Long projectId,
-                                                        @PathVariable("id") Long applicationId) throws CustomException {
+                                                        @PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
-    return ResponseEntity.ok(service.findByProjectIdAndId(projectId, applicationId));
+    return ResponseEntity.ok(service.findByProjectIdAndId(projectId, id));
   }
 
 }

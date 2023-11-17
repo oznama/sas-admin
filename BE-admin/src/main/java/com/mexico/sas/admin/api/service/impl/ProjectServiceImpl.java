@@ -124,7 +124,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             projectDto.setId(project.getId());
             log.debug("Project created with id: {}", projectDto.getId());
             save(Project.class.getSimpleName(), project.getId(), project.getUserId(), project.getCreationDate(),
-                    CatalogKeys.LOG_DETAIL_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
+                    CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
             log.error(msgError, e.getMessage());
@@ -167,7 +167,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             projectApplicationRepository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(),
                     projectApplication.getUserId(), projectApplication.getCreationDate(),
-                    CatalogKeys.LOG_DETAIL_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
+                    CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
             projectApplicationDto.setId(projectApplication.getId());
             log.debug("Application for project created with id: {}", projectApplicationDto.getId());
         } catch (Exception e) {
@@ -191,9 +191,9 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     }
 
     @Override
-    public ProjectApplicationDto findByProjectIdAndId(Long projectId, Long applicationId) throws CustomException {
-        ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndApplicationId(new Project(projectId), applicationId)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId)));
+    public ProjectApplicationDto findByProjectIdAndId(Long projectId, Long id) throws CustomException {
+        ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndId(new Project(projectId), id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());

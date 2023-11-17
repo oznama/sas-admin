@@ -57,6 +57,7 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
                 logMovementDto.setUserName(buildFullname(userDto.getName(), userDto.getSurname()));
                 logMovementDto.setEvent(catalogService.findByIdAndCatalogParent(logMovement.getEventId(), CatalogKeys.LOG_EVENT).getValue());
                 logMovementDto.setDetail(catalogService.findByIdAndCatalogParent(logMovement.getDetailId(), CatalogKeys.LOG_DETAIL).getValue());
+                logMovementDto.setDescription(logMovement.getDescription());
                 logMovementDtos.add(logMovementDto);
             } catch (Exception e) {
                 log.warn("Log Movement id {} not added to list, error parsing: {}", logMovement.getId(), e.getMessage());

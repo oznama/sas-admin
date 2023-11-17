@@ -28,6 +28,7 @@ public class LogMovementUtils {
     protected void save(String tableName, Long recordId, Long userId, Date creationDate, Long eventId, Long detailId) {
         try {
             LogMovementRepository logMovementRepository = (LogMovementRepository) BeanUtils.getBean(LOG_MOVEMENT_BEAN);
+            // TODO Make mechanism for description detail
             logMovementRepository.save(buildLogMovement(tableName, recordId, userId, creationDate, eventId, detailId));
         } catch (Exception e) {
             log.error("Error saving in LogMovement, error: {}", e.getMessage());
