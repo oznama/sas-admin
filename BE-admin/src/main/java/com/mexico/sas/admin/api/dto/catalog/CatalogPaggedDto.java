@@ -23,5 +23,4 @@ public class CatalogPaggedDto implements Serializable {
     private Boolean isRequired;
     private CatalogSimpleDto status;
     private CatalogSimpleDto type;
-    private List<CatalogSimpleDto> modules;
 }

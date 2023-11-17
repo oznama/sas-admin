@@ -1,12 +1,14 @@
 package com.mexico.sas.admin.api.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mexico.sas.admin.api.dto.log.LogMovementDto;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -28,5 +30,7 @@ public class ProjectApplicationFindDto implements Serializable {
     private Date creationDate;
     private String leader;
     private String developer;
+
+    private List<LogMovementDto> history;
 
 }

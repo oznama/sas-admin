@@ -46,6 +46,9 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private LogMovementService logMovementService;
+
     @Override
     public Page<ProjectPageableDto> findAll(Pageable pageable) {
 
@@ -77,8 +80,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
 
     @Override
     public ProjectFindDto findById(Long id) throws CustomException {
-        Project project = repository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, id)));
+        Project project = findEntityById(id);
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
         UserFindDto creater = userService.findById(project.getUserId());
         projectFindDto.setCreatedBy(buildFullname(creater.getName(), null, creater.getSurname(), creater.getSecondSurname()));
@@ -94,6 +96,7 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             }
         });
         projectFindDto.setApplications(applications);
+        projectFindDto.setHistory(logMovementService.findByTableAndRecordId(Project.class.getSimpleName(), id));
         return projectFindDto;
     }
 
@@ -102,6 +105,12 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
         Project project = repository.findByKey(key)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_BYKEY_NOT_FOUND, key)));
         return from_M_To_N(project, ProjectFindDto.class);
+    }
+
+    @Override
+    public Project findEntityById(Long id) throws CustomException {
+        return repository.findById(id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, id)));
     }
 
     @Override
@@ -114,6 +123,8 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             repository.save(project);
             projectDto.setId(project.getId());
             log.debug("Project created with id: {}", projectDto.getId());
+            save(Project.class.getSimpleName(), project.getId(), project.getUserId(), project.getCreationDate(),
+                    CatalogKeys.LOG_DETAIL_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
             log.error(msgError, e.getMessage());
@@ -139,6 +150,8 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
             project.setInstallationDate(projectUpdateDto.getInstallationDate());
         }
         repository.save(project);
+        save(Project.class.getSimpleName(), project.getId(), project.getUserId(), project.getCreationDate(),
+                CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_UPDATE);
     }
 
     @Override
@@ -152,6 +165,9 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
                     projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
             log.debug("Entity ::: {}", projectApplication);
             projectApplicationRepository.save(projectApplication);
+            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(),
+                    projectApplication.getUserId(), projectApplication.getCreationDate(),
+                    CatalogKeys.LOG_DETAIL_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
             projectApplicationDto.setId(projectApplication.getId());
             log.debug("Application for project created with id: {}", projectApplicationDto.getId());
         } catch (Exception e) {
@@ -164,9 +180,14 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
 
     @Override
     public ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException {
-        ProjectApplication projectApplication = projectApplicationRepository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
+        ProjectApplication projectApplication = findEntityByApplicationId(id);
         return getProjectApplicationFindDto(projectApplication);
+    }
+
+    @Override
+    public ProjectApplication findEntityByApplicationId(Long id) throws CustomException {
+        return projectApplicationRepository.findById(id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
     }
 
     @Override
@@ -225,9 +246,21 @@ public class ProjectServiceImpl extends Utils implements ProjectService {
     private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
         projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
-        projectApplicationFindDto.setLeader(buildFullname( projectApplication.getLeader().getName(), null, projectApplication.getLeader().getSurname(), projectApplication.getLeader().getSecondSurname()));
-        projectApplicationFindDto.setDeveloper(buildFullname( projectApplication.getDeveloper().getName(), null, projectApplication.getDeveloper().getSurname(), projectApplication.getDeveloper().getSecondSurname()));
+        projectApplicationFindDto.setLeader(
+                buildFullname(
+                        projectApplication.getLeader().getName(),
+                        null,
+                        projectApplication.getLeader().getSurname(),
+                        projectApplication.getLeader().getSecondSurname()));
+        projectApplicationFindDto.setDeveloper(
+                buildFullname(
+                        projectApplication.getDeveloper().getName(),
+                        null,
+                        projectApplication.getDeveloper().getSurname(),
+                        projectApplication.getDeveloper().getSecondSurname()));
         projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
+        projectApplicationFindDto.setHistory(logMovementService
+                .findByTableAndRecordId(ProjectApplication.class.getSimpleName(), projectApplication.getId()));
         return projectApplicationFindDto;
     }
 }

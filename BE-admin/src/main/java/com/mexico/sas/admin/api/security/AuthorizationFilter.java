@@ -67,32 +67,17 @@ public class AuthorizationFilter extends OncePerRequestFilter {
   private void validateSecurity(HttpServletRequest request) throws AuthenticationException {
     log.debug("Validiting token ...");
     String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    String authApiKey = request.getHeader(GeneralKeys.HEADER_API_KEY);
     if(hasToken(authHeader)) {
       log.debug("Request has token!");
-      String token = authHeader.replace(GeneralKeys.CONSTANT_BEARER, "");
-      if (!TokenBlackList.isValid(token)) {
-        clearSecurityContext(I18nResolver.getMessage(I18nKeys.USER_SECURITY_TOKEN_NOT_FOUND));
-      } else {
-        Claims claims = customJWT.getClaims(token);
-        String email = claims.getSubject();
-        UserDto userDto = null;
-        try {
-          userDto = userService.findByEmail(email);
-        } catch (CustomException e) {
-          throw new AuthenticationException("User not valid");
-        }
-        if (userDto != null && userService.hasPermission(userDto.getPermissions()
-                .stream().filter(permissionDto -> permissionDto.getActive())
-                .collect(Collectors.toList()), requestUri, method)) {
-          UsernamePasswordAuthenticationToken authenticationToken =
-                  new UsernamePasswordAuthenticationToken(userDto, null, null);
-          //new UsernamePasswordAuthenticationToken(claims.getSubject(), null, null);
-          SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-          log.debug("Token valid!");
-        } else
-          throw new AuthenticationException(String.format("User %s don't have permissions", claims.getSubject()));
-        log.debug("Applying filter!");
+      Claims claims = customJWT.getClaims(authHeader.replace(GeneralKeys.CONSTANT_BEARER, ""));
+      String email = claims.getSubject();
+      try {
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userService.findByEmail(email), null, null);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        log.debug("Token valid!");
+      } catch (CustomException e) {
+        throw new AuthenticationException("User not valid");
       }
     } else
       clearSecurityContext("Request not has token");

@@ -5,13 +5,11 @@ import java.util.stream.Collectors;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.log.LogUserDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.user.*;
 import com.mexico.sas.admin.api.exception.*;
 import com.mexico.sas.admin.api.model.*;
-import com.mexico.sas.admin.api.repository.UserConfirmationTokenRepository;
 import com.mexico.sas.admin.api.repository.UserRepository;
 import com.mexico.sas.admin.api.repository.UserSecurityRepository;
 import com.mexico.sas.admin.api.security.Crypter;
@@ -44,9 +42,6 @@ public class UserServiceImpl extends Utils implements UserService {
   private UserSecurityRepository userSecurityRepository;
 
   @Autowired
-  private UserConfirmationTokenRepository userConfirmationTokenRepository;
-
-  @Autowired
   private RoleService roleService;
 
   @Autowired
@@ -63,7 +58,7 @@ public class UserServiceImpl extends Utils implements UserService {
     validationSave(userDto, user);
     try {
       repository.save(user);
-      save(User.class.getSimpleName(), user.getId(), null, user.getUserId(), user.getCreationDate(),
+      save(User.class.getSimpleName(), user.getId(), user.getUserId(), user.getCreationDate(),
               CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
     } catch (Exception e) {
       String msgError = I18nResolver.getMessage(I18nKeys.USER_NOT_CREATED, user.getEmail());
@@ -74,11 +69,9 @@ public class UserServiceImpl extends Utils implements UserService {
 
     UserSecurity userSecurity = new UserSecurity();
     userSecurity.setId(user.getId());
+    userSecurity.setPassword(GeneralKeys.PSW_TEMPORAL);
     userSecurity.setUser(user);
     userSecurityRepository.save(userSecurity);
-
-    UserConfirmationToken userConfirmationToken = new UserConfirmationToken(user);
-    userConfirmationTokenRepository.save(userConfirmationToken);
 
     return findById(user.getId());
   }
@@ -90,7 +83,7 @@ public class UserServiceImpl extends Utils implements UserService {
     BeanUtils.copyProperties(userUpdateDto, user, "id");
     validationUpdate(userUpdateDto, user);
     repository.save(user);
-    save(User.class.getSimpleName(), user.getId(), null, getCurrentUserId(), new Date(),
+    save(User.class.getSimpleName(), user.getId(), getCurrentUserId(), new Date(),
             CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_UPDATE);
     log.debug("User {} updated!", user.getId());
     return findById(user.getId());
@@ -187,7 +180,7 @@ public class UserServiceImpl extends Utils implements UserService {
     }
     try {
       repository.setActive(id, !lock);
-      save(User.class.getSimpleName(), id, null, getCurrentUserId(), new Date(),
+      save(User.class.getSimpleName(), id, getCurrentUserId(), new Date(),
               CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_STATUS);
       return findById(id);
     } catch (Exception e) {
@@ -200,7 +193,7 @@ public class UserServiceImpl extends Utils implements UserService {
     try {
       getUser(id);
       repository.deleteLogic(id);
-      save(User.class.getSimpleName(), id, null, getCurrentUserId(), new Date(),
+      save(User.class.getSimpleName(), id, getCurrentUserId(), new Date(),
               CatalogKeys.LOG_EVENT_DELETE, CatalogKeys.LOG_DETAIL_DELETE_LOGIC);
     } catch (Exception e) {
       log.error("Error deleting user", e);
@@ -235,42 +228,6 @@ public class UserServiceImpl extends Utils implements UserService {
       }
     });
     return permissionsDto;
-  }
-
-  public boolean hasPermission(List<PermissionDto> permissionDtos, String requestUri, String method) {
-    for(PermissionDto permission : permissionDtos) {
-      try {
-        List<String> pathsAllowed = Arrays.asList(permission.getPathsAllowed().split(","));
-        log.debug("Paths allowed: {}", pathsAllowed);
-        if(!pathsAllowed.isEmpty() && pathsAllowed.stream().anyMatch(p -> {
-          String[] pathSplited = p.split("_");
-          if(pathSplited.length == 2){
-            log.debug("Comparing request uri {}_{} vs path allowed {}", requestUri,method, p);
-            return requestUri.contains(pathSplited[0]) && method.equalsIgnoreCase(pathSplited[1]);
-          } else {
-            log.debug("Comparing request uri {} vs path allowed {}", requestUri, p);
-            return requestUri.contains(p);
-          }
-        }))
-          return true;
-      } catch (NullPointerException ignored) {
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public List<LogUserDto> getUsersAccess(String tableName, String recordId) {
-    List<User> users = repository.findUsersLog(tableName, recordId);
-    List<LogUserDto> userDtos = new ArrayList<>();
-    users.forEach(u -> {
-      try {
-        userDtos.add(from_M_To_N(u, LogUserDto.class));
-      } catch (CustomException e) {
-        log.warn("Impossible parse user {}, error: {}", u.getId(), e.getMessage());
-      }
-    });
-    return userDtos;
   }
 
   @Override

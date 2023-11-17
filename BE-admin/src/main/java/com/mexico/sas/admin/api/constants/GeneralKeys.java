@@ -6,13 +6,6 @@ package com.mexico.sas.admin.api.constants;
 public interface GeneralKeys {
 
     String CONSTANT_BEARER = "Bearer ";
-    String HEADER_VALIDATE_URL = "Validate-Uri";
-    String HEADER_VALIDATE_METHOD = "Validate-Method";
-    String HEADER_API_KEY = "api-key";
-
-    String QUERY_PARAM_TOKEN = "token";
-
-    String QUERY_PARAM_MESSAGE = "message";
 
     String PERMISSION_SPECIAL = "SPECIAL";
 
@@ -37,4 +30,6 @@ public interface GeneralKeys {
     Long ROOT_USER_ID = 1l; // User root id, and too Admin Role Id
 
     String DIAGONAL = "/";
+
+    String PSW_TEMPORAL = "Ea6SCcSRF9rJUxhtMk3bXg=="; // 12345678 with current enc
 }

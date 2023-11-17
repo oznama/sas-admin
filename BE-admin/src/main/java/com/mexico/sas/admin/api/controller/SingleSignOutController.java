@@ -41,39 +41,4 @@ public class SingleSignOutController {
     log.info("Calling REST Service Login...");
     return ResponseEntity.ok(service.login(ssoRequestDto));
   }
-
-  @ApiIgnore
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para validar token",
-          nickname = "/validateTokem")
-  @GetMapping("validateToken")
-  public ResponseEntity<Boolean> validateToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
-                                         @RequestHeader(GeneralKeys.HEADER_VALIDATE_URL) String validateUrl,
-                                         @RequestHeader(GeneralKeys.HEADER_VALIDATE_METHOD) String method) throws CustomException {
-    log.info("Calling REST Service Valiadte token...");
-    return ResponseEntity.ok(service.validateToken(authorization.replace(GeneralKeys.CONSTANT_BEARER, ""),
-            validateUrl, method));
-  }
-
-  @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para desauntenticar usuarios",
-          nickname = "/logout")
-  @GetMapping("logout")
-  public ResponseEntity<?> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) throws CustomException {
-    log.info("Calling REST Service Log Out...");
-    service.logout(authorization.replace(GeneralKeys.CONSTANT_BEARER, ""));
-    return ResponseEntity.ok().build();
-  }
-
-  @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar informacion de usuario",
-          nickname = "/info")
-  @GetMapping("info")
-  public ResponseEntity<SSOUserDto> getInfoUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) throws CustomException {
-    log.info("Calling REST Service User info...");
-    return ResponseEntity.ok(service.getUserInformation(authorization.replace(GeneralKeys.CONSTANT_BEARER, "")));
-  }
-
 }

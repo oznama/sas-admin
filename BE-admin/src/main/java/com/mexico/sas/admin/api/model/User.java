@@ -49,9 +49,6 @@ public class User implements Serializable {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
   private UserSecurity userSecurity;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-  private UserConfirmationToken userConfirmationToken;
-
   public User(Long id) {
     this.id = id;
   }

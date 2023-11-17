@@ -12,8 +12,6 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Catalog;
-import com.mexico.sas.admin.api.model.CatalogModule;
-import com.mexico.sas.admin.api.repository.CatalogModuleRepository;
 import com.mexico.sas.admin.api.repository.CatalogRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.util.Utils;
@@ -23,7 +21,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Oziel Naranjo
@@ -34,9 +31,6 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
 
     @Autowired
     private CatalogRepository repository;
-
-    @Autowired
-    private CatalogModuleRepository catalogModuleRepository;
 
     @Override
     public CatalogDto save(CatalogDto catalogDto) throws CustomException {
@@ -50,9 +44,8 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
 
         try{
             repository.save(catalog);
-            save(Catalog.class.getSimpleName(), catalog.getId(), null, catalog.getUserId(), catalog.getCreationDate(),
+            save(Catalog.class.getSimpleName(), catalog.getId(), catalog.getUserId(), catalog.getCreationDate(),
                     CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
-            saveModels(catalog.getId(), catalog.getUserId(), catalogDto.getModules());
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.CATALOG_DUPLICATED, catalogDto.getDescription()), catalogDto);
         } catch (Exception e) {
@@ -82,9 +75,8 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
 
             repository.save(catalog);
             Long userId = getCurrentUserId();
-            save(Catalog.class.getSimpleName(), catalog.getId(), null, userId, new Date(),
+            save(Catalog.class.getSimpleName(), catalog.getId(), userId, new Date(),
                     CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_UPDATE);
-            saveModels(catalog.getId(), userId, catalogDto.getModules());
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
         }
@@ -100,7 +92,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, updateStatusDto.getStatusId())));;
         log.debug("Updating proposal status: {}", updateStatusDto);
         repository.updateStatus(updateStatusDto.getId(), updateStatusDto.getStatusId());
-        save(Catalog.class.getSimpleName(), updateStatusDto.getId(), null,
+        save(Catalog.class.getSimpleName(), updateStatusDto.getId(),
                 getCurrentUserId(), new Date(),
                 updateStatusDto.getStatusId().equals(CatalogKeys.ESTATUS_MACHINE_ELIMINATED) ?
                         CatalogKeys.LOG_EVENT_DELETE : CatalogKeys.LOG_EVENT_UPDATE,
@@ -113,7 +105,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         findEntityById(id);
         try{
             repository.deleteById(id);
-            save(Catalog.class.getSimpleName(), id, null, getCurrentUserId(), new Date(),
+            save(Catalog.class.getSimpleName(), id, getCurrentUserId(), new Date(),
                     CatalogKeys.LOG_EVENT_DELETE, CatalogKeys.LOG_DETAIL_DELETE);
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
@@ -192,35 +184,8 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         return catalogSimpleDto;
     }
 
-    @Override
-    public List<CatalogSimpleDto> getModulesDto(Long catalogId) {
-        List<CatalogSimpleDto> catalogSimpleDtos = new ArrayList<>();
-        List<CatalogModule> catalogModules = catalogModuleRepository.findByCatalogId(catalogId);
-        if(catalogModules.isEmpty()) {
-            return catalogSimpleDtos;
-        }
-        catalogModules.forEach(catalogModule -> {
-            try {
-                Catalog module = findEntityById(catalogModule.getCatalogModuleId());
-                CatalogSimpleDto catalogSimpleDto = from_M_To_N(module, CatalogSimpleDto.class);
-                catalogSimpleDto.setDescription(module.getValue());
-                catalogSimpleDtos.add(catalogSimpleDto);
-            } catch (CustomException e) {
-                log.warn("Impossible parsing catalog, error: {}", e.getMessage());
-            }
-        });
-        return catalogSimpleDtos;
-    }
-
-    @Override
-    public CatalogModule findEntityCatalogModule(Long id) throws CustomException {
-        return catalogModuleRepository.findById(id).orElseThrow(() ->
-                new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, id)));
-    }
-
     private CatalogDto parseCatalogDto(Catalog catalog) throws CustomException {
         CatalogDto catalogDto = from_M_To_N(catalog, CatalogDto.class);
-        catalogDto.setLastUpdate(getLastMovementDate(Catalog.class.getSimpleName(), catalog.getId(), null));
         if(catalog.getCatalogParent() != null && catalog.getCatalogParent().getId() != null)
             catalogDto.setCatalogParent(catalog.getCatalogParent().getId());
         if(catalog.getStatus()!=null) {
@@ -229,7 +194,6 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         if(catalog.getType()!=null) {
             catalogDto.setType(getCatalogSimpleDto(catalog.getType()));
         }
-        catalogDto.setModules(getModulesDto(catalog.getId()));
         return catalogDto;
     }
 
@@ -243,7 +207,6 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
             log.debug("Setting type status {}...", catalog.getType());
             catalogDto.setType(getCatalogSimpleDto(catalog.getType()));
         }
-        catalogDto.setModules(getModulesDto(catalog.getId()));
         log.debug("Catalog {} finded!", catalogDto.getId());
         return catalogDto;
     }
@@ -297,13 +260,6 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
             catalog.setType(catalogDto.getType().getId());
         }
 
-        if(catalogDto.getModules()!= null && !catalogDto.getModules().isEmpty()) {
-            log.debug("Validing modules ...");
-            for(CatalogSimpleDto module : catalogDto.getModules()) {
-                findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
-            }
-        }
-
         catalog.setIsRequired( catalog.getIsRequired() == null ? false : catalog.getIsRequired() );
     }
 
@@ -313,12 +269,6 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         if(catalogDto.getType() != null && catalogDto.getType().getId() != null) {
             findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
             catalog.setType(catalogDto.getType().getId());
-        }
-
-        if(catalogDto.getModules()!= null && !catalogDto.getModules().isEmpty()) {
-            for(CatalogSimpleDto module : catalogDto.getModules()) {
-                findByIdAndCatalogParent(module.getId(), CatalogKeys.CAT_MODULES);
-            }
         }
 
         return catalog;
@@ -346,26 +296,5 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
             }
         } );
         return catalogs;
-    }
-
-    private void saveModels(Long catalogId, Long userId, List<CatalogSimpleDto> modules) {
-        if(catalogId != null && modules != null && !modules.isEmpty()) {
-            catalogModuleRepository.deleteByCatalogId(catalogId);
-        }
-        if(modules != null && !modules.isEmpty()) {
-            Date creationDate = new Date();
-            List<CatalogModule> catalogModules = new ArrayList<>();
-            modules.forEach(module -> {
-                CatalogModule catalogModule = new CatalogModule();
-                catalogModule.setCatalogId(catalogId);
-                catalogModule.setCatalogModuleId(module.getId());
-                catalogModule.setUserId(userId);
-                catalogModule.setCreationDate(creationDate);
-                catalogModules.add(catalogModule);
-            });
-            catalogModuleRepository.saveAll(catalogModules);
-            saveAll(CatalogModule.class.getSimpleName(), catalogModules.stream().map(CatalogModule::getId).collect(Collectors.toList()),
-                    userId, creationDate);
-        }
     }
 }

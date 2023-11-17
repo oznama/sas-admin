@@ -25,37 +25,31 @@ UPDATE users SET role_id = 2 WHERE id = 7;
 
 SELECT setval('sso_role_id_seq', 2);
 
--- Catalogos
-
 ---- Aplicaciones
-INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000008, 'Aplicaciones', '', 2000200002, 1, current_timestamp);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800001, 'ACT', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800002, 'CTM', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800003, 'IFO', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800004, 'PROALERTA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800005, 'PTLF', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800006, 'PTLFH', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800007, 'PYW', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800008, 'REPORTES UPTIME', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800009, 'REPRED / RED WEB', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800010, 'SAC', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800011, 'SAC2', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800012, 'SAW', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800013, 'SCA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800014, 'SCL', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800015, 'SIA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800016, 'SIF', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800017, 'PMT', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800018, 'PDF 2', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800019, 'MDT', '', 2000200002, 1, current_timestamp, 1000000008);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000005, 'Aplicaciones', '', 2000200002, 1, current_timestamp);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500001, 'ACT', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500002, 'CTM', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500003, 'IFO', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500004, 'PROALERTA', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500005, 'PTLF', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500006, 'PTLFH', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500007, 'PYW', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500008, 'REPORTES UPTIME', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500009, 'REPRED / RED WEB', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500010, 'SAC', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500011, 'SAC2', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500012, 'SAW', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500013, 'SCA', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500014, 'SCL', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500015, 'SIA', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500016, 'SIF', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500017, 'PMT', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500018, 'PDF 2', '', 2000200002, 1, current_timestamp, 1000000005);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000500019, 'MDT', '', 2000200002, 1, current_timestamp, 1000000005);
 
 -- Estatus Proyecyo-Aplicacion
-INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000009, 'Catalogo aplicacion', 'Estados del flujo de una aplicacion en proyecto', 2000200002, 1, current_timestamp);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900001, 'Nuevo', 'Nuevo', 2000200002, 1, current_timestamp, 1000000009);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900002, 'Diseño', 'En diseño', 2000200002, 1, current_timestamp, 1000000009);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900003, 'Desarrollo', 'En construccion', 2000200002, 1, current_timestamp, 1000000009);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000900004, 'Entregado', 'Terminado', 2000200002, 1, current_timestamp, 1000000009);
-
+INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000006, 'Catalogo aplicacion', 'Estados del flujo de una aplicacion en proyecto', 2000200002, 1, current_timestamp);
+INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000600001, 'Nuevo', 'Nuevo', 2000200002, 1, current_timestamp, 1000000006);
 
 -- Cliente
 INSERT INTO clients (id, name, user_id, creation_date) VALUES (1, 'PROSA', 1, current_timestamp);
@@ -84,32 +78,3 @@ INSERT INTO project_applications (project_id, application_id, amount, leader_id,
 INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date, user_id, creation_date) VALUES(8, 2000800002, 1568.82, 6, 6, 24, '2023-01-12 00:00:00.0', '2023-02-17 00:00:00.0', '2023-02-17 00:00:00.0', 2, current_timestamp);
 
 SELECT setval('projects_id_seq', 8);
-
--- Seguridad para servicio de Proyecto
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (9, 'PROJ-NEW', 'Puede registrar proyectos', '/projects_POST', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (10, 'PROJ-UPD', 'Puede registrar proyectos', '/projects_PUT', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (11, 'PROJ-STA', 'Puede desactivar proyectos', '/projects_PATCH', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (12, 'PROJ-DEL', 'Puede eliminar proyectos', '/projects_DELETE', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (13, 'PROJ-GET', 'Puede consultar proyectos', '/projects_GET', 1, current_timestamp);
-
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 9, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 10, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 11, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 12, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 13, 1, current_timestamp);
-
--- Seguridad para servicio de Cliente
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (14, 'CLI-NEW', 'Puede registrar clientes', '/clients_POST', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (15, 'CLI-UPD', 'Puede registrar clientes', '/clients_PUT', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (16, 'CLI-STA', 'Puede desactivar clientes', '/clients_PATCH', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (17, 'CLI-DEL', 'Puede eliminar clientes', '/clients_DELETE', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (18, 'CLI-GET', 'Puede consultar clientes', '/clients_GET', 1, current_timestamp);
-
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 14, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 15, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 16, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 17, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 18, 1, current_timestamp);
-
--- Update secuencia permission
-SELECT setval('permission_id_seq', 18);

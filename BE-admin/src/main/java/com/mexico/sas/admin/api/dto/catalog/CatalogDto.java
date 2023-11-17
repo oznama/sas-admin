@@ -43,8 +43,5 @@ public class CatalogDto implements Serializable {
     private CatalogSimpleDto type;
 
     private Date creationDate;
-    private Date lastUpdate;
-
-    private List<CatalogSimpleDto> modules;
 
 }

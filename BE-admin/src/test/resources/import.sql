@@ -46,26 +46,8 @@ INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_par
 -- Catalogo de modulos
 INSERT INTO catalog(id, value, description, type, user_id, creation_date) VALUES (1000000030, 'Modulos', 'Catalogo de modulos', 2001200002, 1, current_timestamp);
 
--- Permisos
-INSERT INTO permission (id, name, description, visible, paths_allowed, user_id, creation_date) VALUES (1, 'SPECIAL', 'Permiso especial', 'false', '/role,/logs', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (2, 'USR_NEW_EDIT', 'Permiso para crear/editar usuarios', '/users_POST,/users_PUT,/users_PATCH,/users_GET', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (3, 'USR_DEL', 'Permiso para eliminar usuarios', '/user_DELETE', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (4, 'CAT-NEW', CONCAT('Puede registrar nuevos campos en cat',E'\u00E1','logos'), '/internal_POST', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (5, 'CAT-UPD', CONCAT('Puede modificar campos en cat',E'\u00E1','logos'), '/internal_PUT', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (6, 'CAT-STA', CONCAT('Puede activar cat',E'\u00E1','logos'), '/internal_PATCH', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (7, 'CAT-DEL', CONCAT('Puede eliminar registros de cat',E'\u00E1','logos'), '/internal_DELETE', 1, current_timestamp);
-INSERT INTO permission (id, name, description, paths_allowed, user_id, creation_date) VALUES (8, 'CAT-GET', CONCAT('Puede consultar cat',E'\u00E1','logos'), '/internal_GET', 1, current_timestamp);
 -- Roles
 INSERT INTO sso_role (name, description, user_id, creation_date) VALUES ('ADMIN', 'Usuario Administrador', 1, current_timestamp);
--- Roles-Permisos
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 1, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 2, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 3, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 4, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 5, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 6, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 7, 1, current_timestamp);
-INSERT INTO sso_roles_permissions (role_id, permission_id, user_id, creation_date) VALUES (1, 8, 1, current_timestamp);
 
 UPDATE users SET role_id = 1 WHERE id = 1;
 

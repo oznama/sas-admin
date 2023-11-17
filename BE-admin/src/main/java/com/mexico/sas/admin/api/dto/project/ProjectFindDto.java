@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.dto.project;
 
+import com.mexico.sas.admin.api.dto.log.LogMovementDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,5 +23,6 @@ public class ProjectFindDto implements Serializable {
     private Long projectManagerId;
 
     private List<ProjectApplicationFindDto> applications;
+    private List<LogMovementDto> history;
 
 }

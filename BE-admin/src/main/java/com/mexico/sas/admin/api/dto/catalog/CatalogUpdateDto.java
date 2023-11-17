@@ -33,6 +33,4 @@ public class CatalogUpdateDto implements Serializable {
     @Valid
     private CatalogSimpleDto type;
 
-    private List<CatalogSimpleDto> modules;
-
 }

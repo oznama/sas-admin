@@ -20,11 +20,12 @@ public class LogMovement implements Serializable {
     private Long id;
 
     private String tableName;
-    private String recordId;
+    private Long recordId;
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     private Long userId;
     private Long eventId;
     private Long detailId;
+    private String description;
 
 }

@@ -50,7 +50,7 @@ public class RoleServiceImpl extends Utils implements RoleService {
       throw new CustomException(msgError);
     }
     roleDto.setId(role.getId());
-    save(Role.class.getSimpleName(), role.getId(), null, role.getUserId(), role.getCreationDate(),
+    save(Role.class.getSimpleName(), role.getId(), role.getUserId(), role.getCreationDate(),
             CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
     log.debug("Role created with id {}", roleDto.getId());
   }

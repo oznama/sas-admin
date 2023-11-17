@@ -24,7 +24,6 @@ public class Permission implements Serializable {
   @Column(unique = true)
   private String name;
   private String description;
-  private String pathsAllowed;
   @Column(columnDefinition = "boolean default true")
   private Boolean visible;
   private Long userId;

@@ -19,8 +19,6 @@ public class PermissionDto implements Serializable {
   private String name;
   private String description;
   @JsonIgnore
-  private String pathsAllowed;
-  @JsonIgnore
   private Long type;
   @JsonProperty("type")
   private String typeDescription;

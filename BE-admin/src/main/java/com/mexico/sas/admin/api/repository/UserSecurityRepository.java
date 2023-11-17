@@ -14,23 +14,11 @@ import java.util.Optional;
 @Repository
 public interface UserSecurityRepository extends JpaRepository<UserSecurity, Long> {
 
-    Optional<UserSecurity> findByUser(User user);
-
     Optional<UserSecurity> findByUserAndPassword(User user, String password);
-
-    @Transactional
-    @Modifying
-    @Query("update UserSecurity us set us.emailVerified = true where us.id = :id")
-    void setEmailVerified(@Param(value = "id") Long id);
 
     @Transactional
     @Modifying
     @Query("update UserSecurity us set us.password = :password where us.id = :id")
     void setPassword(@Param(value = "id") Long id, @Param(value = "password") String password);
-
-    @Transactional
-    @Modifying
-    @Query("update UserSecurity us set us.password = :password, us.emailVerified = true where us.id = :id")
-    void setPasswordAndEmailVerified(@Param(value = "id") Long id, @Param(value = "password") String password);
 
 }

@@ -37,7 +37,7 @@ public class RolePermissionServiceImpl extends Utils implements RolePermissionSe
       throw new CustomException(msgError);
     }
     rolePermissionDto.setId(rolePermission.getId());
-    save(RolePermission.class.getSimpleName(), rolePermission.getId(), null, rolePermission.getUserId(),
+    save(RolePermission.class.getSimpleName(), rolePermission.getId(), rolePermission.getUserId(),
             rolePermission.getCreationDate(), CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
     log.debug("Relation role-permission created with id {}", rolePermissionDto.getId());
   }
@@ -51,7 +51,7 @@ public class RolePermissionServiceImpl extends Utils implements RolePermissionSe
         repository.setActive(rp.getId(), rp.getActive());
         final Map<Long, Boolean> result = new HashMap<>();
         result.put(rp.getId(), Boolean.TRUE);
-        save(RolePermission.class.getSimpleName(), rp.getId(), null, getCurrentUserId(),
+        save(RolePermission.class.getSimpleName(), rp.getId(), getCurrentUserId(),
                 currentDate, CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_STATUS);
         results.add(result);
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class RolePermissionServiceImpl extends Utils implements RolePermissionSe
     RolePermission rolePermission = findEntityById(id);
     try {
       repository.delete(rolePermission);
-      save(RolePermission.class.getSimpleName(), rolePermission.getId(), null, getCurrentUserId(),
+      save(RolePermission.class.getSimpleName(), rolePermission.getId(), getCurrentUserId(),
               new Date(), CatalogKeys.LOG_EVENT_DELETE, CatalogKeys.LOG_DETAIL_DELETE);
     } catch (Exception e) {
       throw new CustomException(e.getMessage());
