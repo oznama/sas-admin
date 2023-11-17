@@ -1,11 +1,10 @@
-import { api } from '../api/Api';
+import { api, getHeaders } from '../api/Api';
 
 const context = 'clients';
 
 export const getSelect = async() => {
-    const token = localStorage.getItem('token');
     const request = {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
     }
     const urlClients = `${context}/select`;
     const response = await api( urlClients, request );

@@ -62,7 +62,8 @@ export const projectSlice = createSlice({
                 designDate: null,
                 developmentDate: null,
                 endDate: null
-            }
+            };
+            state.currentTab = 1;
         },
         setCurrentTab: (state, action) => {
             state.currentTab = action.payload;

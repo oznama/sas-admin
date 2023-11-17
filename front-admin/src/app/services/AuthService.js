@@ -10,13 +10,3 @@ export const doLogin = async(data) => {
     const jsonResponse = await response.json();
     return jsonResponse;
 };
-
-export const doLogout = async(token) => {
-    const request = {
-        headers: { Authorization: `Bearer ${token}`,
-        }
-    }
-    const response = await api( 'sso/logout', request );
-    const jsonResponse = await response.json();
-    return jsonResponse;
-}

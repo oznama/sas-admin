@@ -23,7 +23,6 @@ export const LoginPage = () => {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
                 dispatch(login(response));
-                localStorage.setItem('user', JSON.stringify(response.user));
                 localStorage.setItem('token', response.accessToken);
                 navigate('/', { replace: true });
             }

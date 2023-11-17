@@ -12,6 +12,7 @@ import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
 import { Alert } from '../../custom/alerts/page/Alert';
 import { addAplication } from '../../../../store/project/projectSlice';
+import { TableLog } from '../../custom/TableLog';
 
 export const DetailApplications = () => {
 
@@ -20,12 +21,13 @@ export const DetailApplications = () => {
   const { projectId } = useParams();
 
   const navigate = useNavigate();
-  const [aplication, setAplication] = useState(numberToString(projectApplication.applicationId, '-1'));
-  const [amount, setAmount] = useState(projectApplication.amount);
+  const [currentTab, setCurrentTab] = useState(1);
+  const [aplication, setAplication] = useState(numberToString(projectApplication.applicationId, ''));
+  const [amount, setAmount] = useState(numberToString(projectApplication.amount, ''));
   // const [status, setStatus] = useState('2000900001');
-  const [leader, setLeader] = useState(numberToString(projectApplication.leaderId, '-1'));
-  const [developer, setDeveloper] = useState(numberToString(projectApplication.developerId, '-1'));
-  const [hours, setHours] = useState(projectApplication.hours);
+  const [leader, setLeader] = useState(numberToString(projectApplication.leaderId, ''));
+  const [developer, setDeveloper] = useState(numberToString(projectApplication.developerId, ''));
+  const [hours, setHours] = useState(numberToString(projectApplication.hours, ''));
   const [endDate, setEndDate] = useState(handleDateStr(projectApplication.endDate));
   const [designDate, setDesignDate] = useState(handleDateStr(projectApplication.designDate));
   const [developmentDate, setDevelopmentDate] = useState(handleDateStr(projectApplication.developmentDate));
@@ -37,7 +39,7 @@ export const DetailApplications = () => {
 
   const fetchSelects = () => {
     
-    getCatalog(1000000008)
+    getCatalog(1000000005)
       .then( response => {
         setCatApliations(response);
       }).catch( error => {
@@ -51,7 +53,7 @@ export const DetailApplications = () => {
     //     console.log(error);
     //   });
     
-    getUsersByRole(2)
+    getUsersByRole(3)
       .then( response => {
         setCatEmployees(response);
       }).catch( error => {
@@ -108,12 +110,20 @@ export const DetailApplications = () => {
       return (<button type="submit" className="btn btn-primary">Guardar</button>) ;
     }
   };
- 
-  return (
-    <div className='px-5'>
-      <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
-      <Alert />
-      <form onSubmit={ onSubmit }>
+
+  const renderTabs = () => (
+    <ul className="nav nav-tabs">
+      <li className="nav-item" onClick={ () => setCurrentTab(1) }>
+        <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
+      </li>
+      <li className="nav-item" onClick={ () => setCurrentTab(2) }>
+        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+      </li>
+    </ul>
+  )
+
+  const renderDetail = () => (
+    <form onSubmit={ onSubmit }>
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-4'>
@@ -156,6 +166,16 @@ export const DetailApplications = () => {
             <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
         </div>
       </form>
+  )
+ 
+  return (
+    <div className='px-5'>
+      <div className='d-flex justify-content-between'>
+        <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
+        { renderTabs() }
+      </div>
+      <Alert />
+      { (currentTab === 2) ? (<TableLog history={ projectApplication.history } />) : renderDetail() }
     </div>
   )
 }

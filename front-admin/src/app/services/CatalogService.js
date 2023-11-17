@@ -1,11 +1,10 @@
-import { api } from '../api/Api';
+import { api, getHeaders } from '../api/Api';
 
 const context = 'internal';
 
 export const getCatalog = async(parentId) => {
-    const token = localStorage.getItem('token');
     const request = {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getHeaders()
     }
     const urlInternal = `${context}/${parentId}/childs`;
     const response = await api( urlInternal, request );

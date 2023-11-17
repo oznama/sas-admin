@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 export const PublicRoute = ({ children }) => {
 
-    const logged = useSelector( ( state ) => state.auth.logged );
+    const { logged } = useSelector( state => state.auth );
 
-    return (!logged) ? children : <Navigate to="/home" />
+    return logged ? <Navigate to="/" /> : children;
 }

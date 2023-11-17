@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 export const PrivateRoute = ({ children }) => {
 
-    const logged = useSelector( ( state ) => state.auth.logged );
+    const { logged } = useSelector( state => state.auth );
     
-    return (logged) ? children : <Navigate to="/login" />
+    return logged ? children : <Navigate to="/login" />;
 }

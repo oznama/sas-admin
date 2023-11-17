@@ -4,6 +4,7 @@ import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
 import { cleanProjectApplication, setCurrentTab } from '../../../store/project/projectSlice';
 import { Alert } from '../custom/alerts/page/Alert';
+import { TableLog } from '../custom/TableLog';
 
 export const ProjectPage = () => {
 
@@ -32,6 +33,9 @@ export const ProjectPage = () => {
       <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
       </li>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
+        <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
+      </li>
     </ul>
   )
 
@@ -44,7 +48,11 @@ export const ProjectPage = () => {
         </div>
         <Alert />
         { (currentTab === 2 && project.id ) ? renderAddButton() : null }
-        { (currentTab === 2) ? ( <TableApplications projectId = { project.id } /> ) : ( <DetailProject /> )  }
+        { 
+          (currentTab === 2) ? ( <TableApplications projectId = { project.id } /> ) : ( 
+            (currentTab === 3) ? (<TableLog history={ project.history } />) : (<DetailProject />) 
+          )
+        }
       </div>
     </>
   )
