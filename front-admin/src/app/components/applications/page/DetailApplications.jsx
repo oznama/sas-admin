@@ -1,105 +1,182 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getCatalog } from '../../../services/CatalogService';
+import { getEmployess } from '../../../services/EmployeeService';
+import { saveApplication } from '../../../services/ProjectService';
+import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength } from '../../../helpers/utils';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMessage } from '../../../../store/alert/alertSlice';
+import { alertType } from '../../custom/alerts/types/types';
+import { Alert } from '../../custom/alerts/page/Alert';
+import { addAplication } from '../../../../store/project/projectSlice';
+import { TableLog } from '../../custom/TableLog';
 
 export const DetailApplications = () => {
-  const navigate = useNavigate();
-  const [aplication, setAplication] = useState('-1');
-  const [amount, setAmount] = useState('$0');
-  const [status, setStatus] = useState('1');
-  const [leader, setLeader] = useState('-1');
-  const [developer, setDeveloper] = useState('-1');
-  const [hours, setHours] = useState('0');
-  const [startDate, setStartDate] = useState(new Date());
-  const [designerDate, setDesignerDate] = useState(new Date());
-  const [buildDate, setBuildDate] = useState(new Date());
 
-  const [catStatus, setCatStatus] = useState([
-    { id: '1', value: 'Nuevo' },
-    { id: '2', value: 'Especificación técnica' },
-    { id: '3', value: 'Diseño' },
-    { id: '4', value: 'Desarrollo' },
-    { id: '5', value: 'Pendiente de pago' },
-    { id: '6', value: 'Cerrado' },
-  ]);
-  const [catAplications, setCatApliations] = useState([
-    { id: '1', value: 'PMT' },
-    { id: '2', value: 'SIA' },
-    { id: '3', value: 'SAC2' },
-    { id: '4', value: 'RED' },
-    { id: '5', value: 'CTM' },
-  ]);
-  const [catEmployees, setCatEmployees] = useState([
-    { id: '1', value: 'Alejandra Labra' },
-    { id: '2', value: 'Alvaro Mendoza' },
-    { id: '3', value: 'Angel Calzada' },
-    { id: '4', value: 'Gerardo Lopez' },
-    { id: '5', value: 'Juan Baños' },
-    { id: '6', value: 'Oziel Naranjo' },
-  ])
+  const dispatch = useDispatch();
+  const { permissions } = useSelector( state => state.auth );
+  const { projectApplication } = useSelector( state => state.projectReducer );
+  const { projectId } = useParams();
+
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState(1);
+  const [aplication, setAplication] = useState(numberToString(projectApplication.applicationId, ''));
+  const [amount, setAmount] = useState(numberToString(projectApplication.amount, ''));
+  // const [status, setStatus] = useState('2000900001');
+  const [leader, setLeader] = useState(numberToString(projectApplication.leaderId, ''));
+  const [developer, setDeveloper] = useState(numberToString(projectApplication.developerId, ''));
+  const [hours, setHours] = useState(numberToString(projectApplication.hours, ''));
+  const [endDate, setEndDate] = useState(handleDateStr(projectApplication.endDate));
+  const [designDate, setDesignDate] = useState(handleDateStr(projectApplication.designDate));
+  const [developmentDate, setDevelopmentDate] = useState(handleDateStr(projectApplication.developmentDate));
+  // const [catStatus, setCatStatus] = useState([]);
+  const [catAplications, setCatApliations] = useState([]);
+  const [catEmployees, setCatEmployees] = useState([]);
+
+  const isModeEdit = () => ( projectApplication.id && projectApplication.id > 0 && !permissions.canEditProjApp );
+
+  const fetchSelects = () => {
+    
+    getCatalog(1000000005)
+      .then( response => {
+        setCatApliations(response);
+      }).catch( error => {
+        console.log(error);
+      });
+
+    // getCatalog(1000000009)
+    //   .then( response => {
+    //     setCatStatus(response);
+    //   }).catch( error => {
+    //     console.log(error);
+    //   });
+    
+    getEmployess()
+      .then( response => {
+        setCatEmployees(response);
+      }).catch( error => {
+        console.log(error);
+      });
+  };
+
+  useEffect(() => {
+    fetchSelects();
+  }, []);
 
   const onChangeAplication = ({ target }) => setAplication(target.value);
-  const onChangeAmount = ({ target }) => setAmount(target.value);
+  const onChangeAmount = ({ target }) => {
+    if( Number(target.value) <= mountMax ) {
+      setAmount(target.value);
+    }
+  }
   const onChangeStatus = ({target }) => setStatus(target.value);
   const onChangeLeader = ({ target }) => setLeader(target.value);
   const onChangeDeveloper = ({ target }) => setDeveloper(target.value);
-  const onChangeHours = ({ target }) => setHours(target.value);
-  const onChangeStartDate = (date) => setStartDate(date);
-  const onChangeDesignerDate = (date) => setDesignerDate(date);
-  const onChangeBuildDate = (date) => setBuildDate(date);
+  const onChangeHours = ({ target }) => {
+    if( target.value.length  <= numberMaxLength ) {
+      setHours(target.value);
+    }
+  }
+  const onChangeEndDate = (date) => setEndDate(date);
+  const onChangeDesignDate = (date) => setDesignDate(date);
+  const onChangeDevelopmentDate = (date) => setDevelopmentDate(date);
 
-  const onSubmit = formData => {
-    console.log(formData);
+  const onSubmit = event => {
+    event.preventDefault();
+    const data = new FormData(event.target);
+    const request = Object.fromEntries(data.entries());
+    request.projectId = projectApplication.projectId;
+    // request.id = id != undefined ? id : null;
+    
+    saveApplication(request).then( response => {
+        if(response.code && response.code !== 201) {
+          dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        } else {
+          dispatch(setMessage(buildPayloadMessage('¡Aplicacion agregada a proyecto correctamente!', alertType.success)));
+          dispatch(addAplication(response));
+          navigate(`/project/${projectApplication.projectId}/edit`, { replace: true });
+        }
+    }).catch(error => {
+      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error, contacte al administrador', alertType.error)));
+    });
   }
 
-  return (
-    <div className='px-5'>
-      <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
-      <form onSubmit={ onSubmit }>
+  const renderSaveButton = () => {
+    if(isModeEdit()) {
+      return null;
+    } else {
+      return (<button type="submit" className="btn btn-primary">Guardar</button>) ;
+    }
+  };
+
+  const renderTabs = () => (
+    <ul className="nav nav-tabs">
+      <li className="nav-item" onClick={ () => setCurrentTab(1) }>
+        <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
+      </li>
+      <li className="nav-item" onClick={ () => setCurrentTab(2) }>
+        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+      </li>
+    </ul>
+  )
+
+  const renderDetail = () => (
+    <form onSubmit={ onSubmit }>
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-4'>
-              <Select label="Aplicaci&oacute;n" options={ catAplications } value={ aplication } onChange={ onChangeAplication } />
+              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit() } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
             </div>
             <div className='col-4'>
-              <InputText label='Monto' placeholder='Ingresa monto' value={ amount } onChange={ onChangeAmount } maxLength={ 10 } />
+              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit() } value={ amount } required onChange={ onChangeAmount } />
             </div>
+            {/* <div className='col-4'>
+              <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+            </div> */}
             <div className='col-4'>
-              <Select label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+              <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit() } required value={ hours } onChange={ onChangeHours } />
             </div>
           </div>
           <div className="row text-start">
-            <div className='col-4'>
-            <Select label="L&iacute;der" options={ catEmployees } value={ leader } onChange={ onChangeLeader } />
+            <div className='col-6'>
+            <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit() } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
             </div>
-            <div className='col-4'>
-              <Select label="Desarrollador" options={ catEmployees } value={ developer } onChange={ onChangeDeveloper } />
-            </div>
-            <div className='col-4'>
-              <InputText label='Horas' placeholder='Ingresa monto' value={ hours } onChange={ onChangeHours } maxLength={ 10 } />
+            <div className='col-6'>
+              <Select name="developerId" label="Desarrollador" disabled={ isModeEdit() } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
             </div>
           </div>
 
           <div className="row text-start">
             <div className='col-4'>
-            <DatePicker label="Inicio" value={ startDate } onChange={ (date) => onChangeStartDate(date) } />
+              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit() } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker label="Analisis y dise&ntilde;o" value={ designerDate } onChange={ (date) => onChangeDesignerDate(date) } />
+              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit() } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker label="Construcci&oacute;n" value={ buildDate } onChange={ (date) => onChangeBuildDate(date) } />
+              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit() } required onChange={ (date) => onChangeEndDate(date) } />
             </div>
           </div>
         </div>
         <div className="pt-3 d-flex flex-row-reverse">
-            <button type="submit" className="btn btn-primary">Guardar</button>
+            { renderSaveButton() }
             &nbsp;
-            <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/1/edit`) }>Cancelar</button>
+            <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
         </div>
       </form>
+  )
+ 
+  return (
+    <div className='px-5'>
+      <div className='d-flex justify-content-between'>
+        <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
+        { renderTabs() }
+      </div>
+      <Alert />
+      { (currentTab === 2) ? (<TableLog history={ projectApplication.history } />) : renderDetail() }
     </div>
   )
 }

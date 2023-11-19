@@ -9,22 +9,33 @@ import { registerLocale, setDefaultLocale } from 'react-datepicker';
 import es from 'date-fns/locale/es';
 registerLocale('es', es)
 
-export const DatePicker = ({ label, value, onChange }) => {
-  return (
+export const DatePicker = ({
+  name, 
+  label, 
+  value, 
+  required,
+  onChange, 
+  disabled 
+}) => {
+  
+    return (
     <>
         <label className="form-label">{ label }</label>
         <br/>
-        <DatePickerReact className="form-control" 
-          selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' />
+        <DatePickerReact className="form-control" name={ name } disabled={ disabled } required={ required }
+          selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' autoComplete='off' />
     </>
   )
 }
 
 DatePicker.propTypes = {
+    name: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
-    vañue: PropTypes.string,
+    required: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 }
 
 DatePicker.defaultProps = {
+  disabled: false,
+  required: false,
 }

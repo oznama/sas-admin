@@ -16,27 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> , JpaSpecificationExecutor<User> {
-
   Optional<User> findByIdAndEliminateFalse(Long id);
-
-  Optional<User> findByEmailIgnoreCaseAndEliminateFalse(String email);
-
-  @Query(value = "select distinct u from User u inner join LogMovement l on l.userId = u.id where l.tableName = :tableName and l.recordId = :recordId")
-  List<User> findUsersLog(@Param("tableName") String tableName, @Param("recordId") String recordId);
-
+  Optional<User> findByEmployeeId(Long employeeId);
+  Optional<User> findByEmployeeIdAndPasswordAndEliminateFalse(Long employeId, String password);
+  List<User> findByRoleIdAndActiveIsTrueAndEliminateFalse(Long roleId);
   Page<User> findByEliminateFalse(Pageable pageable);
-
   Page<User> findByActiveAndEliminateFalse(Boolean active, Pageable pageable);
-
   Long countByActiveAndEliminateFalse(Boolean active);
-
   Long countByEliminateFalse();
-
   @Transactional
   @Modifying
   @Query("update User u set u.active = :active where u.id = :id")
   void setActive(@Param(value = "id") Long id, @Param(value = "active") Boolean active);
-
   @Transactional
   @Modifying
   @Query("update User u set u.eliminate = true where u.id = :id")

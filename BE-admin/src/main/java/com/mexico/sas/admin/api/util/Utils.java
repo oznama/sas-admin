@@ -2,11 +2,11 @@ package com.mexico.sas.admin.api.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.ResponseErrorDetailDto;
-import com.mexico.sas.admin.api.dto.UserDto;
+import com.mexico.sas.admin.api.dto.SecurityContextPrincipal;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.exception.ValidationRequestException;
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.security.AuthorizationFilter;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
@@ -37,7 +37,7 @@ import java.util.*;
  * @author Oziel Naranjo
  */
 @Slf4j
-public class Utils extends LogMovementUtils {
+public class Utils {
 
     /**
      * Parsing objects with BeanUtils copyPropertoes
@@ -177,15 +177,24 @@ public class Utils extends LogMovementUtils {
         return files;
     }
 
-    protected String buildFullname(String name, String secondName, String surname, String secondSurname) {
+    private static String buildFullname(String name, String secondName, String surname, String secondSurname) {
         secondName = StringUtils.isEmpty(secondName) ? "" : " " + secondName;
         secondSurname = StringUtils.isEmpty(secondSurname) ? "" : " " + secondSurname;
         return String.format("%s%s %s%s", name, secondName, surname, secondSurname);
     }
 
-    protected String buildFullname(String name, String secondName) {
-        secondName = StringUtils.isEmpty(secondName) ? "" : " " + secondName;
-        return String.format("%s%s", name, secondName);
+    protected String buildFullname(Employee employee) {
+        return Utils.buildFullname(employee.getName(),
+                employee.getSecondName(),
+                employee.getSurname(),
+                employee.getSecondSurname());
+    }
+
+    public static String getFullname(Employee employee) {
+        return Utils.buildFullname(employee.getName(),
+                employee.getSecondName(),
+                employee.getSurname(),
+                employee.getSecondSurname());
     }
 
     protected String buildDateWithFormatDD_MMMM_YYYY(Date date, String separator) throws CustomException {
@@ -247,17 +256,17 @@ public class Utils extends LogMovementUtils {
     }
 
     protected Long getCurrentUserId() {
-        return getCurrentUser().getId();
+        return getCurrentUser().getUserId();
     }
 
-    protected UserDto getCurrentUser() {
+    protected SecurityContextPrincipal getCurrentUser() {
         log.debug("Getting CURRENT USER ID In security context ...!");
-        UserDto userDto = null;
+        SecurityContextPrincipal user = null;
         try {
             SecurityContext securityContext = SecurityContextHolder.getContext();
-            userDto = (UserDto) securityContext.getAuthentication().getPrincipal();
-            log.debug("UserId get: {}", userDto.getId());
-            return userDto;
+            user = (SecurityContextPrincipal) securityContext.getAuthentication().getPrincipal();
+            log.debug("UserId get: {}", user.getUserId());
+            return user;
         } catch (NullPointerException e) {
             log.warn("Problem to get security context because is null");
         } catch (Exception e) {
@@ -265,33 +274,23 @@ public class Utils extends LogMovementUtils {
         }
 
         // Only for test
-        userDto = new UserDto();
-        userDto.setId(GeneralKeys.ROOT_USER_ID);
-        return userDto;
+        user = new SecurityContextPrincipal(GeneralKeys.ROOT_USER_ID);
+        return user;
     }
 
-    protected void validationDates(String startDate, String endDate, String pattern) throws ValidationRequestException {
-        List<ResponseErrorDetailDto> errors = new ArrayList<>();
+    protected void validationDates(String startDate, String endDate, String pattern) throws CustomException {
         if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-            try {
-                Date iDate = stringToDate(startDate, pattern);
-                Date eDate = stringToDate(endDate, pattern);
-                if (iDate != null && eDate != null) {
-                    boolean datesCorects = iDate.before(eDate) || iDate.equals(eDate);
-                    long diffDates = getMonthsBetweenDates(iDate, eDate);
-                    boolean dateInMonth = diffDates == GeneralKeys.REPORT_PERIOD_MONTH_VALID ? validDays(iDate, eDate) :
-                            (diffDates < GeneralKeys.REPORT_PERIOD_MONTH_VALID ? true : false);
-                    if (!(datesCorects && dateInMonth)) {
-                        errors.add(new ResponseErrorDetailDto(I18nResolver.getMessage(I18nKeys.LABEL_DATE_PARAM), I18nResolver.getMessage(I18nKeys.VALIDATION_VALUE_INVALID)));
-                    }
+            Date iDate = stringToDate(startDate, pattern);
+            Date eDate = stringToDate(endDate, pattern);
+            if (iDate != null && eDate != null) {
+                boolean datesCorects = iDate.before(eDate) || iDate.equals(eDate);
+                long diffDates = getMonthsBetweenDates(iDate, eDate);
+                boolean dateInMonth = diffDates == GeneralKeys.REPORT_PERIOD_MONTH_VALID ? validDays(iDate, eDate) :
+                        (diffDates < GeneralKeys.REPORT_PERIOD_MONTH_VALID ? true : false);
+                if (!(datesCorects && dateInMonth)) {
+                    throw new CustomException(I18nResolver.getMessage(I18nKeys.VALIDATION_VALUE_INVALID));
                 }
-            } catch (CustomException e) {
-                errors.add(new ResponseErrorDetailDto(I18nResolver.getMessage(I18nKeys.LABEL_DATE_PARAM), e.getMessage()));
             }
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationRequestException(errors);
         }
     }
 
@@ -312,6 +311,20 @@ public class Utils extends LogMovementUtils {
         input = input.replaceAll("[\u00d9\u00da\u00db\u00dc]","U");
 
         return input;
+    }
+
+    protected List<Long> bossesPositions() {
+        List<Long> bosses = new ArrayList<>();
+        bosses.add(CatalogKeys.EMPLOYEE_POSITION_DR);
+        bosses.add(CatalogKeys.EMPLOYEE_POSITION_SD);
+        bosses.add(CatalogKeys.EMPLOYEE_POSITION_GR);
+        return bosses;
+    }
+
+    protected List<Long> bossesAndPmPositions() {
+        List<Long> bosses = bossesPositions();
+        bosses.add(CatalogKeys.EMPLOYEE_POSITION_PM);
+        return bosses;
     }
 
 }

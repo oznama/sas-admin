@@ -17,18 +17,14 @@ import java.util.Optional;
  */
 @Repository
 public interface CatalogRepository extends JpaRepository<Catalog, Long> {
-
     List<Catalog> findByCatalogParentIsNull();
     List<Catalog> findByCatalogParent(Catalog catalogParent);
     List<Catalog> findByCatalogParentIn(List<Catalog> catalogsParent);
-
     Optional<Catalog> findById(Long id);
     Optional<Catalog> findByIdAndCatalogParent(Long id, Catalog catalogParent);
     Optional<Catalog> findByIdAndCatalogParentIn(Long id, List<Catalog> catalogsParent);
-
     Optional<Catalog> findFirstByCatalogParentIsNullOrderByIdDesc();
     Optional<Catalog> findFirstByCatalogParentOrderByIdDesc(Catalog catalogParent);
-
     @Transactional
     @Modifying
     @Query("update Catalog c set c.status = :status where c.id = :id")

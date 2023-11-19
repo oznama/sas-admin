@@ -1,9 +1,12 @@
 package com.mexico.sas.admin.api.service;
 
 import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.catalog.CatalogDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogPaggedDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogSimpleDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Catalog;
-import com.mexico.sas.admin.api.model.CatalogModule;
 
 import java.util.List;
 
@@ -26,6 +29,4 @@ public interface CatalogService {
     List<CatalogPaggedDto> findChilds(List<Long> catalogsParentId) throws CustomException;
     CatalogDto findByIdInCatalogsParent(Long id, List<Long> catalogsParentId) throws CustomException;
     CatalogSimpleDto getCatalogSimpleDto(Long id);
-    List<CatalogSimpleDto> getModulesDto(Long catalogId);
-    CatalogModule findEntityCatalogModule(Long id) throws CustomException;
 }

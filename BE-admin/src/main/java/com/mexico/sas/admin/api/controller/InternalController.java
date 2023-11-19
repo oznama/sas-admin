@@ -1,6 +1,9 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.*;
+import com.mexico.sas.admin.api.dto.catalog.CatalogDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogPaggedDto;
+import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;

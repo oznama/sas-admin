@@ -3,22 +3,16 @@ package com.mexico.sas.admin.api.service.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.*;
-import com.mexico.sas.admin.api.exception.BadRequestException;
+import com.mexico.sas.admin.api.dto.company.CompanyFindDto;
+import com.mexico.sas.admin.api.dto.permission.PermissionDto;
+import com.mexico.sas.admin.api.dto.sso.*;
+import com.mexico.sas.admin.api.dto.user.UserDto;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.security.CustomJWT;
-import com.mexico.sas.admin.api.security.TokenBlackList;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import com.mexico.sas.admin.api.i18n.I18nKeys;
-import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.service.SSOService;
-import com.mexico.sas.admin.api.service.UserService;
+import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,40 +28,19 @@ public class SSOServiceImpl extends Utils implements SSOService {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private EmployeeService employeeService;
+
+  @Autowired
+  private CompanyService companyService;
+
+  @Autowired
+  private CatalogService catalogService;
+
   @Override
   public SSOResponseDto login(SSORequestDto ssoRequestDto) throws CustomException {
     log.debug("Validing user ...");
     return buildSSOResponse(ssoRequestDto);
-  }
-
-  @Override
-  public boolean validateToken(String token, String validateUrl, String method) {
-    log.debug("Validating token with url {} with method {}", validateUrl, method);
-    try {
-      UserDto userDto = getUserFromToken(token);
-      boolean allowed = userService.hasPermission(userDto.getPermissions()
-              .stream().filter(permissionDto -> permissionDto.getActive())
-              .collect(Collectors.toList()), validateUrl, method);
-      return allowed && TokenBlackList.isValid(token);
-    } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | CustomException e) {
-      log.error(I18nResolver.getMessage(I18nKeys.USER_SECURITY_TOKEN_NOT_FOUND));
-      return false;
-    }
-  }
-
-  @Override
-  public void logout(String token) throws CustomException {
-    log.debug("Invaliding token...");
-    if(TokenBlackList.isValid(token))
-      TokenBlackList.inactivate(token);
-    else
-      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.USER_SECURITY_TOKEN_NOT_FOUND), null);
-  }
-
-  @Override
-  public SSOUserDto getUserInformation(String token) throws CustomException {
-    log.debug("Getting information with token: {}", token.substring(0, 10));
-    return getSSOUserDto(getUserFromToken(token));
   }
 
   /**
@@ -78,10 +51,10 @@ public class SSOServiceImpl extends Utils implements SSOService {
    */
   private SSOResponseDto buildSSOResponse(SSORequestDto ssoRequestDto) throws CustomException {
     SSOResponseDto ssoResponseDto = new SSOResponseDto();
-    UserDto userDto = userService.findByEmailAndPassword(ssoRequestDto.getEmail(), ssoRequestDto.getPassword());
-    ssoResponseDto.setUser(getSSOUserDto(userDto));
+    Employee employee = employeeService.findEntityByEmail(ssoRequestDto.getEmail());
+    UserDto userDto = userService.findByEmployeeAndPassword(employee, ssoRequestDto.getPassword());
+    ssoResponseDto.setUser(getSSOUserDto(userDto, employee));
     ssoResponseDto.setAccessToken(customJWT.getToken(ssoRequestDto.getEmail()));
-    TokenBlackList.add(ssoResponseDto.getAccessToken()); // Adding token in blacklist
     return ssoResponseDto;
   }
 
@@ -102,18 +75,17 @@ public class SSOServiceImpl extends Utils implements SSOService {
     return ssoPermissionDtos;
   }
 
-  private SSOUserDto getSSOUserDto(UserDto userDto) throws CustomException {
+  private SSOUserDto getSSOUserDto(UserDto userDto, Employee employee) throws CustomException {
     SSOUserDto ssoUserDto = from_M_To_N(userDto, SSOUserDto.class);
+    ssoUserDto.setName(buildFullname(employee));
+    CompanyFindDto companyFindDto = companyService.findById(employee.getCompanyId());
+    ssoUserDto.setCompanyId(companyFindDto.getId());
+    ssoUserDto.setCompany(companyFindDto.getName());
+    if (Optional.ofNullable(employee.getPositionId()).isPresent())
+      ssoUserDto.setPosition(catalogService.findById(employee.getPositionId()).getValue());
     ssoUserDto.setRole(from_M_To_N(userDto.getRoleDto(), SSORoleDto.class));
     ssoUserDto.getRole().setPermissions(getPermissions(userDto.getPermissions()));
     return ssoUserDto;
-  }
-
-  private UserDto getUserFromToken(String token) throws CustomException {
-    token = token.startsWith(GeneralKeys.CONSTANT_BEARER) ? token.replace(GeneralKeys.CONSTANT_BEARER, "") : token;
-    Claims claims = customJWT.getClaims(token);
-    String email = claims.getSubject();
-    return userService.findByEmail(email);
   }
 
 }

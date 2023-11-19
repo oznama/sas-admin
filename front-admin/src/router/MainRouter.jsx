@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
-import { LoginPage } from '../app/components/auth/pages/LoginPage';
-import { AppRouter } from '../app/router/AppRouter';
+import { LoginPage } from '../app/components/auth/LoginPage';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
+import { MainPage } from '../app/components/MainPage';
 
 export const MainRouter = () => (
   <Routes>
@@ -14,7 +14,7 @@ export const MainRouter = () => (
 
       <Route path='/*' element={
         <PrivateRoute>
-          <AppRouter />
+          <MainPage />
         </PrivateRoute>
       } />
       

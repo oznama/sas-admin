@@ -24,12 +24,12 @@ public class Permission implements Serializable {
   @Column(unique = true)
   private String name;
   private String description;
-  private String pathsAllowed;
   @Column(columnDefinition = "boolean default true")
   private Boolean visible;
-  private Long userId;
   @Temporal(TemporalType.TIMESTAMP)
+  @Column(columnDefinition = "boolean default current_timestamp")
   private Date creationDate;
+  private Long createdBy;
 
   @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
   private List<RolePermission> permissions;

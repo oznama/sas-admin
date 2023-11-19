@@ -1,31 +1,48 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
-@Table(name = "tbl_project")
+@Table(name = "projects")
 @Data
+@NoArgsConstructor
+@DynamicInsert
 public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, unique = true)
     private Long id;
-    @Column(length = 15, unique = true)
-    private String clave;
+    @Column(name = "p_key", length = 15)
+    private String key;
     @Column(length = 255)
-    private String name;
-    private Integer HorasTrabajo;
-    private Date FechaInicio;
-    private Date FechaAnalisis;
-    private Date FechaConstruccion;
-    private Date fechaFactura;
-    private Date FechaInstalacion;
+    private String description;
+    private Long status;
+    private Date installationDate;
 
-    @OneToMany(mappedBy = "project")
-    private List<Requisicion> requisiciones;
+    @Column(columnDefinition = "boolean default true")
+    private Boolean active;
+    @Column(columnDefinition = "boolean default false")
+    private Boolean eliminate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
+    private Date creationDate;
+    private Long createdBy;
+
+    @ManyToOne
+    @JoinColumn
+    private Company company;
+
+    @ManyToOne
+    @JoinColumn
+    private Employee projectManager;
+
+    public Project(Long id) {
+        this.id = id;
+    }
 }
