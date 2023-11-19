@@ -2,7 +2,6 @@ package com.mexico.sas.admin.api.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
 
 import lombok.Data;
@@ -23,31 +22,20 @@ public class User implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false, nullable = false)
   private Long id;
-  @Column(updatable = false, nullable = false)
-  private String email;
-  @Column(nullable = false)
-  private String name;
-  @Column(nullable = false)
-  private String surname;
-  private String secondSurname;
-  @Column(nullable = false)
-  private String phone;
-  private String image;
+  private String password;
   @Column(columnDefinition = "boolean default true")
   private Boolean active;
   @Column(columnDefinition = "boolean default false")
   private Boolean eliminate;
-  private Long userId;
-  @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
+  @Column(columnDefinition = "boolean default current_timestamp")
   private Date creationDate;
+  private Long createdBy;
+  private Long employeeId;
 
   @ManyToOne
   @JoinColumn
   private Role role;
-
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-  private UserSecurity userSecurity;
 
   public User(Long id) {
     this.id = id;

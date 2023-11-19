@@ -11,6 +11,8 @@ import java.util.List;
  * @author Oziel Naranjo
  */
 public interface LogMovementService {
+    LogMovementDto findFirstMovement(String tableName, Long recordId);
+    LogMovementDto findLastMovement(String tableName, Long recordId);
     Page<LogMovementDto> findByTableAndRecordId(String tableName, Long recordId, Pageable pageable) throws CustomException;
     List<LogMovementDto> findByTableAndRecordId(String tableName, Long recordId) throws CustomException;
 }

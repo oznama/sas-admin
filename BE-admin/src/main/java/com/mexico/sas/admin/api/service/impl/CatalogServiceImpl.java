@@ -14,7 +14,7 @@ import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Catalog;
 import com.mexico.sas.admin.api.repository.CatalogRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
-import com.mexico.sas.admin.api.util.Utils;
+import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,7 +27,7 @@ import java.util.*;
  */
 @Slf4j
 @Service
-public class CatalogServiceImpl extends Utils implements CatalogService {
+public class CatalogServiceImpl extends LogMovementUtils implements CatalogService {
 
     @Autowired
     private CatalogRepository repository;
@@ -39,13 +39,9 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
 
         validationSave(catalogDto, catalog);
 
-        catalog.setUserId(getCurrentUserId());
-        catalog.setCreationDate(new Date());
-
         try{
             repository.save(catalog);
-            save(Catalog.class.getSimpleName(), catalog.getId(), catalog.getUserId(), catalog.getCreationDate(),
-                    CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
+            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_INSERT, "TODO");
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.CATALOG_DUPLICATED, catalogDto.getDescription()), catalogDto);
         } catch (Exception e) {
@@ -74,9 +70,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
                 catalog.setIsRequired(catalogDto.getIsRequired());
 
             repository.save(catalog);
-            Long userId = getCurrentUserId();
-            save(Catalog.class.getSimpleName(), catalog.getId(), userId, new Date(),
-                    CatalogKeys.LOG_EVENT_UPDATE, CatalogKeys.LOG_DETAIL_UPDATE);
+            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_UPDATE, "TODO");
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
         }
@@ -93,11 +87,8 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         log.debug("Updating proposal status: {}", updateStatusDto);
         repository.updateStatus(updateStatusDto.getId(), updateStatusDto.getStatusId());
         save(Catalog.class.getSimpleName(), updateStatusDto.getId(),
-                getCurrentUserId(), new Date(),
                 updateStatusDto.getStatusId().equals(CatalogKeys.ESTATUS_MACHINE_ELIMINATED) ?
-                        CatalogKeys.LOG_EVENT_DELETE : CatalogKeys.LOG_EVENT_UPDATE,
-                updateStatusDto.getStatusId().equals(CatalogKeys.ESTATUS_MACHINE_ELIMINATED) ?
-                        CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS);
+                        CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS, "TODO");
     }
 
     @Override
@@ -105,8 +96,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         findEntityById(id);
         try{
             repository.deleteById(id);
-            save(Catalog.class.getSimpleName(), id, getCurrentUserId(), new Date(),
-                    CatalogKeys.LOG_EVENT_DELETE, CatalogKeys.LOG_DETAIL_DELETE);
+            save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
         }
@@ -261,6 +251,7 @@ public class CatalogServiceImpl extends Utils implements CatalogService {
         }
 
         catalog.setIsRequired( catalog.getIsRequired() == null ? false : catalog.getIsRequired() );
+        catalog.setCreatedBy(getCurrentUserId());
     }
 
     private Catalog validationUpdate(CatalogUpdateDto catalogDto) throws CustomException {

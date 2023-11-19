@@ -30,6 +30,7 @@ public interface GeneralKeys {
     Long ROOT_USER_ID = 1l; // User root id, and too Admin Role Id
 
     String DIAGONAL = "/";
+    String JUMP_LINE = "\n";
 
     String PSW_TEMPORAL = "Ea6SCcSRF9rJUxhtMk3bXg=="; // 12345678 with current enc
 }

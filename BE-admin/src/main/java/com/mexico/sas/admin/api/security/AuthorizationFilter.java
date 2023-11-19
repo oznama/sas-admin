@@ -1,22 +1,23 @@
 package com.mexico.sas.admin.api.security;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.user.UserDto;
+import com.mexico.sas.admin.api.dto.SecurityContextPrincipal;
 import com.mexico.sas.admin.api.exception.AuthenticationException;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.model.Employee;
+import com.mexico.sas.admin.api.model.User;
+import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.service.UserService;
+import com.mexico.sas.admin.api.util.Utils;
 import io.jsonwebtoken.Claims;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mexico.sas.admin.api.i18n.I18nKeys;
-import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthorizationFilter extends OncePerRequestFilter {
 
   public static Locale LOCALE = Locale.US;
+
+  @Autowired
+  private EmployeeService employeeService;
 
   @Autowired
   private UserService userService;
@@ -49,7 +53,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     setLocale(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
     log.debug("Filter auth for url [{}] with method: {} ...", requestUri, method);
     try {
-      mechanisSecurity(request, response, filterChain);
+      validateSecurity(request);
+      filterChain.doFilter(request, response);
     } catch (AuthenticationException e) {
       log.error("User not authorized, cause: {}", e.getMessage());
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -58,22 +63,22 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     }
   }
 
-  private void mechanisSecurity(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-          throws AuthenticationException, ServletException, IOException {
-    validateSecurity(request);
-    filterChain.doFilter(request, response);
-  }
-
   private void validateSecurity(HttpServletRequest request) throws AuthenticationException {
     log.debug("Validiting token ...");
     String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    if(hasToken(authHeader)) {
+    if(StringUtils.hasText(authHeader) && authHeader.startsWith(GeneralKeys.CONSTANT_BEARER)) {
       log.debug("Request has token!");
       Claims claims = customJWT.getClaims(authHeader.replace(GeneralKeys.CONSTANT_BEARER, ""));
       String email = claims.getSubject();
       try {
+        Employee employee = employeeService.findEntityByEmail(email);
+        User user = userService.findEntityByEmployeeId(employee.getId());
+        SecurityContextPrincipal principal = new SecurityContextPrincipal();
+        principal.setUserId(user.getId());
+        principal.setName(Utils.getFullname(employee));
+        principal.setCompanyId(employee.getCompanyId());
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(userService.findByEmail(email), null, null);
+                new UsernamePasswordAuthenticationToken(principal, user.getPassword(), null);
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         log.debug("Token valid!");
       } catch (CustomException e) {
@@ -81,12 +86,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
       }
     } else
       clearSecurityContext("Request not has token");
-  }
-
-  private boolean hasToken(String authHeader) {
-    boolean isToken = StringUtils.hasText(authHeader) && authHeader.startsWith(GeneralKeys.CONSTANT_BEARER);
-    log.debug("Request has token? {}", isToken);
-    return isToken;
   }
 
   private void clearSecurityContext(String msgDebug) {

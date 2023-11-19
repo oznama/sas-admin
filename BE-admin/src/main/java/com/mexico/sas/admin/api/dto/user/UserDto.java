@@ -28,33 +28,17 @@ public class UserDto implements Serializable {
 
   private Long id;
 
-  @NotBlank(message = "{validation.email.required}")
-  @Email(message = "{validation.format.invalid}")
-  private String email;
+  @NotBlank(message = "{validation.field.required}")
+  private String password;
 
-  @NotBlank(message = "{validation.name.required}")
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String name;
+  private Long employeeId;
 
-  @NotBlank(message = "{validation.lastname.required}")
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String surname;
-
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String secondSurname;
-
-  @NotBlank(message = "{validation.phone.required}")
-  @Pattern(regexp = Regex.PHONE_NUMBER, message = "{validation.format.invalid} {validation.only.number}")
-  private String phone;
-  private String image;
   @JsonIgnore
   private Boolean active;
   @ApiModelProperty(notes = "Roles (1 Administrador)", example = "1")
   private Long role;
   @JsonIgnore
   private RoleDto roleDto;
-  @JsonIgnore
-  private Date lastSession;
   @JsonIgnore
   private List<PermissionDto> permissions;
 

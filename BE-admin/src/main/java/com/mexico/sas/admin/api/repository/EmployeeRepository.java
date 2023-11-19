@@ -1,6 +1,5 @@
 package com.mexico.sas.admin.api.repository;
 
-import com.mexico.sas.admin.api.model.Client;
 import com.mexico.sas.admin.api.model.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,7 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    Optional<Employee> findByClientAndId(Client client, Long id);
 
-    List<Employee> findByClientAndActiveIsTrueAndEliminateIsFalse(Client client);
+    Optional<Employee> findByEmailIgnoreCaseAndActiveIsTrueAndEliminateIsFalse(String email);
+    Optional<Employee> findByCompanyIdAndIdAndActiveIsTrueAndEliminateIsFalse(Long companyId, Long id);
+    List<Employee> findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(Long companyId, List<Long> positionIds);
+    List<Employee> findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(Long companyId, Long positionId);
 }

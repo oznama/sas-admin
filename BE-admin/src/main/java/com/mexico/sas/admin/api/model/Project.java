@@ -2,7 +2,6 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -30,14 +29,14 @@ public class Project {
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
-    private Long userId;
-    @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
     private Date creationDate;
+    private Long createdBy;
 
     @ManyToOne
     @JoinColumn
-    private Client client;
+    private Company company;
 
     @ManyToOne
     @JoinColumn

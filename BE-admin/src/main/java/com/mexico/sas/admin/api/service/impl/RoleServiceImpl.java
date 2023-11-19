@@ -8,13 +8,13 @@ import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.repository.RoleRepository;
-import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Role;
 import com.mexico.sas.admin.api.model.RolePermission;
 import com.mexico.sas.admin.api.service.RoleService;
-import com.mexico.sas.admin.api.util.Utils;
+import com.mexico.sas.admin.api.service.UserService;
+import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,25 +24,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
 @Service
-public class RoleServiceImpl extends Utils implements RoleService {
+public class RoleServiceImpl extends LogMovementUtils implements RoleService {
 
   @Autowired
   private RoleRepository repository;
 
   @Autowired
-  private CatalogService catalogService;
+  private UserService userService;
 
   @Override
   public void save(RoleDto roleDto) throws CustomException {
     log.debug("Saving role {} ...", roleDto);
     Role role = from_M_To_N(roleDto, Role.class);
-    role.setCreationDate(new Date());
-    role.setUserId(getCurrentUserId());
+    role.setCreatedBy(getCurrentUserId());
     repository.save(role);
     if(role.getId() == null) {
       String msgError = I18nResolver.getMessage(I18nKeys.ROLE_NOT_CREATED, role.getName());
@@ -50,8 +48,7 @@ public class RoleServiceImpl extends Utils implements RoleService {
       throw new CustomException(msgError);
     }
     roleDto.setId(role.getId());
-    save(Role.class.getSimpleName(), role.getId(), role.getUserId(), role.getCreationDate(),
-            CatalogKeys.LOG_EVENT_INSERT, CatalogKeys.LOG_DETAIL_INSERT);
+    save(Role.class.getSimpleName(), role.getId(), CatalogKeys.LOG_DETAIL_INSERT, "TODO");
     log.debug("Role created with id {}", roleDto.getId());
   }
 

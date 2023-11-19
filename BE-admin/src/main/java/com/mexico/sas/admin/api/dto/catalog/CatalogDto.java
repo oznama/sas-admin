@@ -42,6 +42,4 @@ public class CatalogDto implements Serializable {
     @NotNull(message = "{validation.field.required}")
     private CatalogSimpleDto type;
 
-    private Date creationDate;
-
 }

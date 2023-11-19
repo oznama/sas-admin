@@ -1,8 +1,8 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.client.ClientFindSelectDto;
+import com.mexico.sas.admin.api.dto.company.CompanyFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.service.ClientService;
+import com.mexico.sas.admin.api.service.CompanyService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -15,11 +15,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/clients")
-public class ClientController {
+@RequestMapping("/companies")
+public class CompanyController {
 
   @Autowired
-  private ClientService service;
+  private CompanyService service;
 
 //  @PostMapping(headers = "Accept=application/json")
 //  @ResponseStatus(code = HttpStatus.CREATED)
@@ -61,11 +61,11 @@ public class ClientController {
 //  }
 
   @GetMapping("/select")
-  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar clientes para select", nickname = "/select")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empresas para select", nickname = "/select")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = ClientFindSelectDto.class, responseContainer = "List") })
-  public ResponseEntity<List<ClientFindSelectDto>> select() throws CustomException {
-    log.info("Getting catalog client");
+          @ApiResponse(code = 200, message = "Success", response = CompanyFindSelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<CompanyFindSelectDto>> select() throws CustomException {
+    log.info("Getting catalog company");
     return ResponseEntity.ok(service.getForSelect());
   }
 

@@ -1,4 +1,4 @@
-package com.mexico.sas.admin.api.dto.client;
+package com.mexico.sas.admin.api.dto.company;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ClientFindSelectDto implements Serializable {
+public class CompanyFindSelectDto implements Serializable {
     private Long id;
     @JsonProperty("value")
     private String name;

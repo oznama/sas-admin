@@ -20,23 +20,8 @@ public class UserUpdateDto implements Serializable {
 
   @JsonIgnore
   private Long id;
-
-  @NotBlank(message = "{validation.name.required}")
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String name;
-
-  @NotBlank(message = "{validation.lastname.requred}")
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String surname;
-
-  @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
-  private String secondSurname;
-
-  @NotBlank(message = "{validation.phone.required}")
-  @Pattern(regexp = Regex.ONLY_NUMBERS, message = "{validation.format.invalid} {validation.only.number}")
-  private String phone;
+  private String password;
   @ApiModelProperty(notes = "Roles (1 Administrador", example = "1")
   private Long role;
-  private String image;
 
 }

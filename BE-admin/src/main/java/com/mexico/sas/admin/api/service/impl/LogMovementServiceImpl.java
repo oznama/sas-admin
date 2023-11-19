@@ -2,7 +2,6 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.dto.log.*;
-import com.mexico.sas.admin.api.dto.user.UserFindDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.repository.LogMovementRepository;
@@ -33,6 +32,16 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
     private CatalogService catalogService;
 
     @Override
+    public LogMovementDto findFirstMovement(String tableName, Long recordId) {
+        return parseEntityToDto(repository.findFirstByTableNameAndRecordIdOrderByCreationDateAsc(tableName, recordId).orElse(null));
+    }
+
+    @Override
+    public LogMovementDto findLastMovement(String tableName, Long recordId) {
+        return parseEntityToDto(repository.findFirstByTableNameAndRecordIdOrderByCreationDateDesc(tableName, recordId).orElse(null));
+    }
+
+    @Override
     public Page<LogMovementDto> findByTableAndRecordId(String tableName, Long recordId, Pageable pageable) throws CustomException {
         return parseLogMovementList(repository.findByTableNameAndRecordId(tableName, recordId, pageable), pageable);
     }
@@ -47,23 +56,30 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
         return new PageImpl<>(parseLogMovementList(logMovements), pageable, logMovements.getTotalElements());
     }
 
-    private List<LogMovementDto> parseLogMovementList(Page<LogMovement> logMovements) throws CustomException {
+    private List<LogMovementDto> parseLogMovementList(Page<LogMovement> logMovements) {
         final List<LogMovementDto> logMovementDtos = new ArrayList<>();
-        logMovements.forEach( logMovement -> {
+        logMovements.forEach( logMovement -> logMovementDtos.add(parseEntityToDto(logMovement)) );
+        return logMovementDtos;
+    }
+
+    private LogMovementDto parseEntityToDto(LogMovement logMovement) {
+        LogMovementDto logMovementDto = new LogMovementDto();
+        if( logMovement != null ) {
             try {
-                LogMovementDto logMovementDto = new LogMovementDto();
                 logMovementDto.setId(logMovement.getId());
                 logMovementDto.setDate(logMovement.getCreationDate());
-                UserFindDto userDto = userService.findById(logMovement.getUserId());
-                logMovementDto.setUserName(buildFullname(userDto.getName(), userDto.getSurname()));
-                logMovementDto.setEvent(catalogService.findByIdAndCatalogParent(logMovement.getEventId(), CatalogKeys.LOG_EVENT).getValue());
-                logMovementDto.setDetail(catalogService.findByIdAndCatalogParent(logMovement.getDetailId(), CatalogKeys.LOG_DETAIL).getValue());
+                logMovementDto.setUserName(logMovement.getUserFullname());
+                try {
+                    logMovementDto.setEvent(catalogService.findByIdAndCatalogParent(logMovement.getEventId(), CatalogKeys.LOG_DETAIL).getValue());
+                } catch (Exception e) {
+                    log.warn("Error to set event {}, error: {}", logMovement.getEventId(), e.getMessage());
+                }
+                // TODO Build description with String format
                 logMovementDto.setDescription(logMovement.getDescription());
-                logMovementDtos.add(logMovementDto);
             } catch (Exception e) {
-                log.warn("Log Movement id {} not added to list, error parsing: {}", logMovement.getId(), e.getMessage());
+                log.warn("Error to parse entity {}, Error: {}", logMovement.getId(), e.getMessage());
             }
-        } );
-        return logMovementDtos;
+        }
+        return logMovementDto;
     }
 }

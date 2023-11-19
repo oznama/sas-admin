@@ -19,10 +19,10 @@ public class RolePermission implements Serializable {
   private Long id;
   @Column(columnDefinition = "boolean default true")
   private Boolean active;
-
   @Temporal(TemporalType.TIMESTAMP)
+  @Column(columnDefinition = "boolean default current_timestamp")
   private Date creationDate;
-  private Long userId;
+  private Long createdBy;
 
   @ManyToOne
   @JoinColumn(name = "permission_id")

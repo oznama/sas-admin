@@ -16,7 +16,7 @@ import java.util.Date;
 public class ProjectUpdateDto implements Serializable {
     private Long id;
     private String description;
-    private Long clientId;
+    private Long companyId;
     private Long projectManagerId;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date installationDate;

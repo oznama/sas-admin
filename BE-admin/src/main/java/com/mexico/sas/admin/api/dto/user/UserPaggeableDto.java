@@ -19,14 +19,7 @@ public class UserPaggeableDto implements Serializable {
   private static final long serialVersionUID = -3672986088951196795L;
 
   private Long id;
-  private String name;
-  private String surname;
-  private String secondSurname;
-  private String email;
-  private String phone;
-  private String image;
   private RoleDto role;
-  private Date lastSession;
   private Boolean active;
   @JsonIgnore
   private List<PermissionDto> actions;

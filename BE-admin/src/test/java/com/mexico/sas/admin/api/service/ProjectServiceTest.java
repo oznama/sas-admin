@@ -26,7 +26,7 @@ public class ProjectServiceTest {
         ProjectDto projectDto = new ProjectDto();
         projectDto.setKey("CLAVE_01");
         projectDto.setDescription("Migración de BINES a 8 Posiciones para BANORTE");
-        projectDto.setClientId(1l);
+        projectDto.setCompanyId(1l);
         projectDto.setProjectManagerId(1l);
         service.save(projectDto);
         assertNotNull(projectDto.getId());

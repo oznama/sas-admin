@@ -18,6 +18,9 @@ public class SSOUserDto implements Serializable {
   private String name;
   private String email;
   private String image;
+  private Long companyId;
+  private String company;
+  private String position;
   private SSORoleDto role;
 
   public SSOUserDto(Long id) {

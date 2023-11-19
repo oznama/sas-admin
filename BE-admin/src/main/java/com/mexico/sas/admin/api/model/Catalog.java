@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Entity
 @Table
 @Data
+@DynamicInsert
 public class Catalog implements Serializable {
 
     private static final long serialVersionUID = -6489856986708125925L;
@@ -24,10 +26,10 @@ public class Catalog implements Serializable {
     private Boolean isRequired;
     private Long status;
     private Long type;
-    private Long userId;
-    @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
     private Date creationDate;
+    private Long createdBy;
 
     @ManyToOne
     @JoinColumn

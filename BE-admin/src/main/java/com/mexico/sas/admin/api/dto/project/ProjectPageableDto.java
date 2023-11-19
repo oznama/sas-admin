@@ -20,7 +20,7 @@ public class ProjectPageableDto implements Serializable {
     private String createdBy;
     @JsonFormat(pattern="dd/MM/yyyy")
     private Date creationDate;
-    private String client;
+    private String company;
     private String projectManager;
     @JsonFormat(pattern="dd/MM/yyyy")
     private Date installationDate;

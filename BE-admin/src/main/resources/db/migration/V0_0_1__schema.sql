@@ -1,18 +1,46 @@
 create sequence hibernate_sequence start 1 increment 1;
 
-create table users (
-    id  bigserial not null,
-    email varchar(255) not null,
-    name varchar(255) not null,
-    surname varchar(255) not null,
-    second_surname varchar(255),
-    phone varchar(255) not null,
+CREATE TABLE companies (
+    id bigserial not null,
+    name varchar(150) not null,
+    rfc varchar(15),
+    address varchar(255),
+    phone varchar(15),
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(id)
+);
+
+CREATE TABLE employees (
+    id bigserial not null,
+    email varchar(255) not null unique,
+    name varchar(50) not null,
+    second_name varchar(50),
+    surname varchar(50) not null,
+    second_surname varchar(50),
+    phone varchar(255),
     image varchar(255),
     active boolean default true,
     eliminate boolean default false,
-    user_id int8,
-    creation_date timestamp not null,
+    company_id int8,
+    boss_id int8,
+    position_id int8,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(id)
+);
+
+create table users (
+    id bigserial not null,
+    password varchar(255) not null,
+    active boolean default true,
+    eliminate boolean default false,
+    employee_id int8,
     role_id int8,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
     primary key (id)
 );
 
@@ -23,9 +51,9 @@ create table catalog (
     is_required boolean default false,
     status int8 default 2000100001,
     type int8 default 2000200001,
-    user_id int8 not null,
-    creation_date timestamp not null,
     catalog_parent_id int8,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
     primary key (id)
 );
 
@@ -34,8 +62,8 @@ create table permission (
     name varchar(255),
     description varchar(255),
     visible boolean default true,
-    user_id int8 not null,
-    creation_date timestamp not null,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
     primary key (id)
 );
 
@@ -44,8 +72,8 @@ create table sso_role (
     id  bigserial not null,
     name varchar(255),
     description varchar(255),
-    user_id int8 not null,
-    creation_date timestamp not null,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
     primary key (id)
 );
 
@@ -54,58 +82,80 @@ create table sso_roles_permissions (
     role_id int8,
     permission_id int8,
     active boolean default true,
-    user_id int8 not null,
-    creation_date timestamp not null,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
     primary key (id)
 );
 
-create table user_security (
-    password varchar(255),
-    last_session timestamp,
-    user_id int8 not null,
-    primary key (user_id)
+CREATE TABLE projects (
+    id bigserial not null,
+    p_key varchar(15) not null unique,
+    description varchar(255) not null,
+    status int8 not null,
+    company_id int8 not null,
+    project_manager_id int8 not null,
+    installation_date timestamp,
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(id)
+);
+
+CREATE TABLE project_applications (
+    id bigserial not null,
+    project_id int8 not null,
+    application_id int8 not null,
+    amount decimal(15,2) not null,
+    leader_id int8 not null,
+    developer_id int8 not null,
+    hours int,
+    design_date timestamp,
+    development_date timestamp,
+    end_date timestamp,
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key (id)
 );
 
 CREATE TABLE log_movement (
     id bigserial not null,
     table_name varchar(255) not null,
     record_id int8 not null,
-    user_id int8 not null,
-    creation_date timestamp not null,
+    created_by int8 not null,
+    user_fullname varchar(255) not null,
+    creation_date timestamp default current_timestamp,
     event_id int8 not null,
-    detail_id int8 not null,
     description varchar(255),
     primary key (id)
 );
 
-alter table catalog add constraint fk_catalog_parent
-foreign key (catalog_parent_id) references catalog;
-
-alter table catalog add constraint fk_catalog_user
-foreign key (user_id) references users;
+alter table catalog add constraint fk_catalog_parent foreign key (catalog_parent_id) references catalog;
 
 alter table permission add constraint unique_perm_name unique (name);
-alter table permission add constraint permission_user foreign key (user_id) references users;
 
-alter table sso_role add constraint sso_role_user foreign key (user_id) references users;
+alter table sso_roles_permissions add constraint fk_sso_permission foreign key (permission_id) references permission;
 
-alter table sso_roles_permissions add constraint fk_sso_permission
-foreign key (permission_id) references permission;
+alter table sso_roles_permissions add constraint fk_sso_role foreign key (role_id) references sso_role;
 
-alter table sso_roles_permissions add constraint fk_sso_role
-foreign key (role_id) references sso_role;
+alter table users add constraint fk_user_role foreign key (role_id) references sso_role;
 
-alter table sso_roles_permissions add constraint sso_role_permissions_user
-foreign key (user_id) references users;
+alter table users add constraint fk_users_employee foreign key (employee_id) references employees;
 
-alter table users add constraint fk_user_role
-foreign key (role_id) references sso_role;
+alter table log_movement add constraint log_movement_user foreign key (created_by) references users;
 
-alter table users add constraint users_user foreign key (user_id) references users;
+alter table employees add constraint fk_employee_company foreign key (company_id) references companies;
 
-alter table user_security add constraint fk_sec_user
-foreign key (user_id) references users;
+alter table employees add constraint fk_employee_boss foreign key (boss_id) references employees;
 
-alter table user_security add constraint user_security_user foreign key (user_id) references users;
+alter table projects add constraint fk_project_company foreign key (company_id) references companies;
 
-alter table log_movement add constraint log_movement_user foreign key (user_id) references users;
+alter table projects add constraint fk_project_pm foreign key (project_manager_id) references employees;
+
+alter table project_applications add constraint fk_proj_app_project foreign key (project_id) references projects;
+
+alter table project_applications add constraint fk_proj_app_leader foreign key (leader_id) references employees;
+
+alter table project_applications add constraint fk_proj_app_developer foreign key (developer_id) references employees;

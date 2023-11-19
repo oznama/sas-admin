@@ -23,6 +23,5 @@ public class LogMovementDto implements Serializable {
     @JsonFormat(pattern = "dd/MM/yyyy hh:mm:ss")
     private Date date;
     private String event;
-    private String detail;
     private String description;
 }

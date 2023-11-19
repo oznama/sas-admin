@@ -20,10 +20,6 @@ public interface CatalogKeys {
     Long CAT_TYPES_EXT = 2000200002L;
 
     // Catalog Log
-    Long LOG_EVENT = 1000000003L;
-    Long LOG_EVENT_INSERT = 2000300001L;
-    Long LOG_EVENT_UPDATE = 2000300002L;
-    Long LOG_EVENT_DELETE = 2000300003L;
     Long LOG_DETAIL = 1000000004L;
     Long LOG_DETAIL_INSERT = 2000400001L;
     Long LOG_DETAIL_UPDATE = 2000400002L;
@@ -31,8 +27,17 @@ public interface CatalogKeys {
     Long LOG_DETAIL_STATUS = 2000400004L;
     Long LOG_DETAIL_DELETE_LOGIC = 2000400005L;
 
-    // Cat Modules
-    Long CAT_MODULES = 1000000030L;
+    // Cat Status Project
+    Long PROJ_STAT_NEW = 2000300001L;
+
+    // Company SAS
+    Long COMPANY_SAS = 1L;
+
+    // Employee position
+    Long EMPLOYEE_POSITION_DR = 2000600001L;
+    Long EMPLOYEE_POSITION_SD = 2000600002L;
+    Long EMPLOYEE_POSITION_GR = 2000600003L;
+    Long EMPLOYEE_POSITION_PM = 2000600004L;
 
 
 }

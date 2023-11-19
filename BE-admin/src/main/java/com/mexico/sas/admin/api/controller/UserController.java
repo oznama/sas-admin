@@ -98,16 +98,4 @@ public class UserController {
     return ResponseEntity.ok(service.findAll(filter, active, pageable));
   }
 
-  @GetMapping("/select/{roleId}")
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar catalogo usuario por rol",
-          nickname = "select")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = UserSelectFindDto.class, responseContainer = "List")
-  })
-  public ResponseEntity<List<UserSelectFindDto>> select(@PathVariable("roleId") Long roleId) {
-    log.info("Finding all users");
-    return ResponseEntity.ok(service.getForSelect(roleId));
-  }
-
 }

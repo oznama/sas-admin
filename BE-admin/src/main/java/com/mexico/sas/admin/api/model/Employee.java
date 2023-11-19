@@ -2,12 +2,10 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -20,25 +18,29 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
+    @Column(updatable = false, nullable = false, unique = true)
+    private String email;
     @Column(nullable = false)
     private String name;
     private String secondName;
     @Column(nullable = false)
     private String surname;
     private String secondSurname;
+    private String phone;
+    private String image;
+    private Long positionId;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
     private Date creationDate;
-    private Long userId;
+    private Long createdBy;
+    private Long companyId;
+    private Long bossId;
 
     public Employee(Long id) {
         this.id = id;
     }
-
-    @ManyToOne
-    @JoinColumn
-    private Client client;
 }

@@ -1,6 +1,6 @@
 package com.mexico.sas.admin.api.repository;
 
-import com.mexico.sas.admin.api.model.Client;
+import com.mexico.sas.admin.api.model.Company;
 import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.model.Project;
 import org.junit.jupiter.api.DisplayName;
@@ -29,10 +29,8 @@ public class ProjectRepositoryTest {
         Project project = new Project();
         project.setKey("CLAVE_01");
         project.setDescription("Descripcion prueba");
-        project.setClient(new Client(1l));
+        project.setCompany(new Company(1l));
         project.setProjectManager(new Employee(1l));
-        project.setUserId(1l);
-        project.setCreationDate(new Date());
         project.setStatus(2000200002l);
         repository.save(project);
         assertNotNull(project.getId());

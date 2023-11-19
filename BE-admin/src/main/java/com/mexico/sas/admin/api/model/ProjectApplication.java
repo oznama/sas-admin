@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
-import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -10,7 +10,7 @@ import java.util.Date;
 @Entity
 @Table(name = "project_applications")
 @Data
-@ToString
+@DynamicInsert
 public class ProjectApplication {
 
     @Id
@@ -28,10 +28,10 @@ public class ProjectApplication {
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
-    private Long userId;
-    @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
     private Date creationDate;
+    private Long createdBy;
 
     @ManyToOne
     @JoinColumn
@@ -39,9 +39,9 @@ public class ProjectApplication {
 
     @ManyToOne
     @JoinColumn
-    private User leader;
+    private Employee leader;
 
     @ManyToOne
     @JoinColumn
-    private User developer;
+    private Employee developer;
 }

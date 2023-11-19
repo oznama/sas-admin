@@ -6,10 +6,12 @@ import java.util.List;
 import javax.persistence.*;
 
 import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "sso_role")
 @Data
+@DynamicInsert
 public class Role implements Serializable {
 
   private static final long serialVersionUID = 1012891236169488092L;
@@ -21,8 +23,9 @@ public class Role implements Serializable {
   private String name;
   private String description;
   @Temporal(TemporalType.TIMESTAMP)
+  @Column(columnDefinition = "boolean default current_timestamp")
   private Date creationDate;
-  private Long userId;
+  private Long createdBy;
 
   @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<RolePermission> permissions;

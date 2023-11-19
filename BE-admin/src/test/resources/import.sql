@@ -1,111 +1,118 @@
+-- Compañias
+INSERT INTO companies (id, name) VALUES (1, 'SAS');
+INSERT INTO companies (id, name) VALUES (2, 'PROSA');
+
+SELECT setval('companies_id_seq', 2);
+
+-- Empleados
+INSERT INTO employees (id, email, name, surname, company_id) VALUES (1, 'admin@sas-mexico.com', 'admin', 'admin', 1);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, position_id) VALUES (2, 'jaime.careno@sas-mexico.com', 'Jaime', CONCAT('Carre',E'\u00F1','o'), 'Mendez', 1, 2000600001);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (3, 'selene.pascali@sas-mexico.com', 'Selene', 'Pascalis', 'Garcia', 1, 2, 2000600002);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (4, 'angel.calzada@sas-mexico.com', 'Angel', 'Calzada', 1, 3, 2000600005);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (5, 'alvaro.mendoza@sas-mexico.com', 'Alvaro', 'Mendoza', 1, 3, 2000600006);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (6, 'juan.banos@sas-mexico.com', 'Juan', CONCAT('Ba',E'\u00F1','os'), 1, 3, 2000600006);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000600006);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000600006);
+
+INSERT INTO employees (id, email, name, surname, company_id, position_id) VALUES (9, 'rogelio.zavaleta@prosa.com.mx', 'Rogelio', 'Zavaleta', 2, 2000600003);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (10, 'fernando.chavez@prosa.com.mx', 'Fernando', 'Chavez', 'Nava', 2, 9, 2000600005);
+INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, position_id) VALUES (11, 'karen.lopez@prosa.com.mx', 'Karen', 'Paulina', 'Lopez', 'Medina', 2, 2000600007);
+INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, boss_id, position_id) VALUES (12, 'miguel.poblete@prosa.com.mx', 'Miguel', 'Angel', 'Poblete', 'Marroquin', 2, 11, 2000600007);
+
+SELECT setval('employees_id_seq', 12);
+
+-- Roles
+INSERT INTO sso_role (id, name, description) VALUES (1, 'ROOT', 'Usuario root');
+INSERT INTO sso_role (id, name, description) VALUES (2, 'ADMIN', 'Usuario Administrador');
+INSERT INTO sso_role (id, name, description) VALUES (3, 'USER', 'Usuario general');
+
+SELECT setval('sso_role_id_seq', 3);
+
 -- Usuarios
-INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (1, 'admin', 'admin', 'admin@sas-mexico.com', '555522558866', current_timestamp, 'true');
--- INSERT INTO user_security (user_id, password) VALUES (1, '12345678');
-INSERT INTO user_security (user_id, password, creation_date) VALUES (1, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
+INSERT INTO users (employee_id, password) VALUES (1, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO users (employee_id, password) VALUES (2, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO users (employee_id, password) VALUES (3, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO users (employee_id, password) VALUES (8, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+
+INSERT INTO users (employee_id, password) VALUES (9, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+INSERT INTO users (employee_id, password) VALUES (10, 'Ea6SCcSRF9rJUxhtMk3bXg==');
+
+UPDATE users SET role_id = 1 WHERE employee_id = 1;
+UPDATE users SET role_id = 2 WHERE employee_id = 2;
+UPDATE users SET role_id = 2 WHERE employee_id = 3;
+UPDATE users SET role_id = 3 WHERE employee_id = 8;
+UPDATE users SET role_id = 2 WHERE employee_id = 9;
+UPDATE users SET role_id = 3 WHERE employee_id = 10;
 
 -- Catalogos
 
 ---- Maquina de estados
-INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000001, 'Catalogo de estatus', 'Maquina de estado', 2000200002, 1, current_timestamp);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000100001, 'Activo', 'Registro activo', 2000200002, 1, current_timestamp, 1000000001);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000100002, 'Inactivo', 'Registro inactivo', 2000200002, 1, current_timestamp, 1000000001);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000100003, 'Eliminado', 'Registro eliminado', 2000200002, 1, current_timestamp, 1000000001);
+INSERT INTO catalog (id, value, description) VALUES (1000000001, 'Catalogo de estatus', 'Maquina de estado');
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100001, 'Activo', 'Registro activo', 1000000001);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100002, 'Inactivo', 'Registro inactivo', 1000000001);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100003, 'Eliminado', 'Registro eliminado', 1000000001);
 
 ---- Catalogo de tipos de catalogo
-INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000002, 'Modulos', 'Catalogo de modulos', 2000200002, 1, current_timestamp);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000200001, 'Interno', 'Tipo de catalogo interno', 2001200002, 1, current_timestamp, 1000000002);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000200002, 'Externo', 'Tipo de catalogo externo', 2001200002, 1, current_timestamp, 1000000002);
+INSERT INTO catalog (id, value, description) VALUES (1000000002, 'Tipo Catalogo', 'Tipo de catalogo interno o externo');
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200001, 'Interno', 'Tipo de catalogo interno', 1000000002);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200002, 'Externo', 'Tipo de catalogo externo', 1000000002);
 
+-- Estatus Proyecto
+INSERT INTO catalog (id, value, description, type) VALUES (1000000003, 'Estatus proyecto', 'Estados del proyecto', 2000200002);
+INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000300001, 'Nuevo', 'Nuevo', 2000200002, 1000000003);
 
----- Formato fecha
-INSERT INTO catalog (id, value, description, user_id, creation_date) VALUES (1000000003, 'FORMATOS FECHA', 'Formatos fecha', 1, current_timestamp);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000300001, 'dd/MM/yy', 'dd/mm/aa', 1, current_timestamp, 1000000003);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000300002, 'dd/MM/yyyy', 'dd/mm/aaaa', 1, current_timestamp, 1000000003);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000300003, 'dd/MM/yyyy HH:mm:ss', 'dd/mm/aaaa hh:mm:ss', 1, current_timestamp, 1000000003);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000300004, 'yyyy-MM-dd', 'aaaa-mm-dd', 1, current_timestamp, 1000000003);
-
----- URL
-INSERT INTO catalog (id, value, description, user_id, creation_date) VALUES (1000000004, 'Urls', 'Catalogo de urls', 1, current_timestamp);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000400001, 'https://localhost:8990/api/users/security/confirm-account', 'Url servicio confirmar usuario', 1, current_timestamp, 1000000004);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000400002, 'https://localhost:5137/generate-password', 'Url front para asignar password', 1, current_timestamp, 1000000004);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000400003, 'https://localhost:5137/error-token', 'Url front para link expirado', 1, current_timestamp, 1000000004);
-
----- Crear catalogo bitacora (eventos, detalle)
-INSERT INTO catalog (id, value, description, user_id, creation_date) VALUES (1000000005, 'Bitacora evento', 'Catalogo de eventos de bitacora', 1, current_timestamp);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000500001, 'Insert', 'Insert', 1, current_timestamp, 1000000005);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000500002, 'Update', 'Update', 1, current_timestamp, 1000000005);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000500003, 'Delete', 'Delete', 1, current_timestamp, 1000000005);
-
-INSERT INTO catalog (id, value, description, user_id, creation_date) VALUES (1000000006, 'LOG_DETAIL', 'Catalogo de detalle de bitacora', 1, current_timestamp);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000600001, 'Insert', 'New record', 1, current_timestamp, 1000000006);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000600002, 'Update', 'Change data', 1, current_timestamp, 1000000006);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000600003, 'Delete', 'Physical delete', 1, current_timestamp, 1000000006);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000600004, 'Status', 'Status change', 1, current_timestamp, 1000000006);
-INSERT INTO catalog (id, value, description, user_id, creation_date, catalog_parent_id) VALUES (2000600005, 'Eliminate', 'Logic delete', 1, current_timestamp, 1000000006);
-
--- Catalogo de modulos
-INSERT INTO catalog(id, value, description, type, user_id, creation_date) VALUES (1000000030, 'Modulos', 'Catalogo de modulos', 2001200002, 1, current_timestamp);
-
--- Roles
-INSERT INTO sso_role (name, description, user_id, creation_date) VALUES ('ADMIN', 'Usuario Administrador', 1, current_timestamp);
-
-UPDATE users SET role_id = 1 WHERE id = 1;
-
----------------------------------------------------------------------
-------------------------------- SAS ADMIN ---------------------------
----------------------------------------------------------------------
-
--- Usuarios
-INSERT INTO users (id, name, surname, email, phone, creation_date, active, role_id) VALUES (2, 'Jaime', 'Carreno', 'jaime.careno@sas-mexico.com', '555522558866', current_timestamp, 'true', 1);
-INSERT INTO users (id, name, surname, email, phone, creation_date, active, role_id) VALUES (3, 'Selene', 'Pascali', 'selene.pascali@sas-mexico.com', '555522558866', current_timestamp, 'true', 1);
-INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (4, 'Angel', 'Calzada', 'angel.calzado@sas-mexico.com', '555522558866', current_timestamp, 'true');
-INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (5, 'Alvaro', 'Mendoza', 'alvaro.mendoza@sas-mexico.com', '555522558866', current_timestamp, 'true');
-INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (6, 'Gerardo', 'Lopez', 'gerardo.lopez@sas-mexico.com', '555522558866', current_timestamp, 'true');
-INSERT INTO users (id, name, surname, email, phone, creation_date, active) VALUES (7, 'Oziel', 'Naranjo', 'oziel.naranjo@sas-mexico.com', '555522558866', current_timestamp, 'true');
-
-INSERT INTO user_security (user_id, password, creation_date) VALUES (2, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (3, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (4, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (5, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (6, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-INSERT INTO user_security (user_id, password, creation_date) VALUES (7, 'Ea6SCcSRF9rJUxhtMk3bXg==', current_timestamp);
-
--- Roles
-INSERT INTO sso_role (id, name, description, user_id, creation_date) VALUES (2, 'DEV', 'Desarrollador', 1, current_timestamp);
-
-UPDATE users SET role_id = 2 WHERE id = 4;
-UPDATE users SET role_id = 2 WHERE id = 5;
-UPDATE users SET role_id = 2 WHERE id = 6;
-UPDATE users SET role_id = 2 WHERE id = 7;
-
--- Catalogos
+---- Crear catalogo bitacora
+INSERT INTO catalog (id, value, description) VALUES (1000000004, 'Bitacora detalle', 'Catalogo de detalle de bitacora');
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400001, 'Insert', 'New record', 1000000004);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400002, 'Update', 'Change data', 1000000004);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400003, 'Delete', 'Physical delete', 1000000004);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400004, 'Status', 'Status change', 1000000004);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400005, 'Eliminate', 'Logic delete', 1000000004);
 
 ---- Aplicaciones
-INSERT INTO catalog (id, value, description, type, user_id, creation_date) VALUES (1000000008, 'Aplicaciones', '', 2000200002, 1, current_timestamp);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800001, 'ACT', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800002, 'CTM', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800003, 'IFO', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800004, 'PROALERTA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800005, 'PTLF', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800006, 'PTLFH', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800007, 'PYW', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800008, 'REPORTES UPTIME', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800009, 'REPRED / RED WEB', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800010, 'SAC', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800011, 'SAC2', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800012, 'SAW', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800013, 'SCA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800014, 'SCL', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800015, 'SIA', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800016, 'SIF', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800017, 'PMT', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800018, 'PDF 2', '', 2000200002, 1, current_timestamp, 1000000008);
-INSERT INTO catalog (id, value, description, type, user_id, creation_date, catalog_parent_id) VALUES (2000800019, 'MDT', '', 2000200002, 1, current_timestamp, 1000000008);
+INSERT INTO catalog (id, value, description, type) VALUES (1000000005, 'Aplicaciones', '', 2000200002);
+INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500001, 'ACT', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500002, 'CTM', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500003, 'IFO', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500004, 'PROALERTA', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500005, 'PTLF', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500006, 'PTLFH', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500007, 'PYW', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500008, 'REPORTES UPTIME', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500009, 'REPRED / RED WEB', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500010, 'SAC', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500011, 'SAC2', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500012, 'SAW', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500013, 'SCA', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500014, 'SCL', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500015, 'SIA', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500016, 'SIF', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500017, 'PMT', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500018, 'PDF 2', '', 2000200002, 1000000005);
+--INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500019, 'MDT', '', 2000200002, 1000000005);
 
--- Cliente
-INSERT INTO clients (id, name, user_id, creation_date) VALUES (1, 'PROSA', 1, current_timestamp);
--- Empleados
-INSERT INTO employees (id, name, surname, user_id, creation_date, client_id) VALUES (1, 'Rogelio', 'Zavaleta', 1, current_timestamp, 1);
-INSERT INTO employees (id, name, surname, second_surname, user_id, creation_date, client_id) VALUES (2, 'Fernando', 'Chavez', 'Nava', 1, current_timestamp, 1);
-INSERT INTO employees (id, name, second_name, surname, second_surname, user_id, creation_date, client_id) VALUES (3, 'Karen', 'Paulina', 'Lopez', 'Medina', 1, current_timestamp, 1);
-INSERT INTO employees (id, name, second_name, surname, second_surname, user_id, creation_date, client_id) VALUES (4, 'Miguel', 'Angel', 'Poblete', 'Marroquin', 1, current_timestamp, 1);
+-- Puesto de trabajo
+INSERT INTO catalog (id, value, description, type) VALUES (1000000006, 'Pruesto trabajo', 'Jerarquia laboral', 2000200002);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600001, 'Director', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600002, 'Subdirector', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600003, 'Gerente', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600004, 'PM', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600005, 'Lider', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600006, 'Desarrollador', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600007, 'Analista', 2000200002, 1000000006);
+
+-- Proyectos
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (1, 'T-62-9900-22', 'Generación de reportes por módulo en SIA para MIFEL', 1, 1, 1, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (2, 'C-20-1809-22', 'BradesCard, Alta Del Servicio De Lote De Aclaraciones', 2, 1, 2, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (3, 'H-62-9865-22', 'Automatización de respaldos para el Producto de Banca', 1, 1, 1, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (4, 'N-77-1783-22', 'Cámara MC/Producto CC – Implementación de MasterCard como Cámara de Compensación Adquirente POS', 1, 1, 1, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (5, 'C-24-1853-22', 'Automatización del servicio S9005 Transacciones de Cargo Automático y envío de detalle a cliente', 4, 1, 3, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (6, 'A-20-1784-22', 'FIRST DATA FISERV - ALTA ADQUIRENTE BACKEND E INTEGRACIÓN DE OPERATIVAS ISO-AGREGADOR', 1, 1, 1, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (7, 'C-24-1653-22', 'Fase II Facturación automática Sigue mi Tarjeta', 2, 1, 4, 3, current_timestamp);
+--INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (8, 'C-20-1970-22', 'ALTA DE Bin Visa 45178000 para caja popular APASEO DEL ALTO CON FAST FUNDS', 3, 1, 3, 3, current_timestamp);
+-- Aplicaciones en proyecto
+--INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date) VALUES(1, 2000500015, 5.00, 4, 4, 33, '2022-12-12 00:00:00.0', '2022-12-30 00:00:00.0', '2022-12-30 00:00:00.0', 2, current_timestamp);
+--INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date) VALUES(8, 2000500017, 496.88, 5, 5, 40, '2023-01-30 00:00:00.0', '2023-02-15 00:00:00.0', '2023-02-15 00:00:00.0', 2, current_timestamp);
+--INSERT INTO project_applications (project_id, application_id, amount, leader_id, developer_id, hours, design_date, development_date, end_date) VALUES(8, 2000500002, 1568.82, 6, 6, 24, '2023-01-12 00:00:00.0', '2023-02-17 00:00:00.0', '2023-02-17 00:00:00.0', 2, current_timestamp);
+
+--SELECT setval('projects_id_seq', 8);

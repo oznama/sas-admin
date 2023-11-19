@@ -12,6 +12,7 @@ import java.util.Date;
 @ToString
 public class EmployeeFindDto implements Serializable {
     private Long id;
+    private String email;
     private String name;
     private String secondName;
     private String surname;
@@ -20,5 +21,6 @@ public class EmployeeFindDto implements Serializable {
     private Boolean eliminate;
     private Date creationDate;
     private Long userId;
-    private Long clientId;
+    private Long companyId;
+    private Long positionId;
 }

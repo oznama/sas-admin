@@ -12,12 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface RolePermisionRepository extends JpaRepository<RolePermission, Long> {
-
   Collection<RolePermission> findByRoleId(Long roleId);
-
   @Transactional
   @Modifying
   @Query("update RolePermission rp set rp.active = :active where rp.id = :id")
   void setActive(@Param(value = "id") Long id, @Param(value = "active") Boolean active);
-
 }

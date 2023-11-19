@@ -15,6 +15,7 @@ public interface I18nKeys {
     String USER_NOT_CREATED = "user.not.created";
     String USER_NOT_MATCH = "user.not.match";
     String USER_NOT_FOUND = "user.not.found";
+    String USER_EMPLOYEE_NOT_FOUND = "user.employee.not.found";
     String USER_UPDATE_NOT_ENABLED = "user.update.not.enabled";
     String USER_UPDATE_NOT_DISABLED = "user.update.not.disabled";
     String USER_SECURITY_NOT_CREATED = "user.security.not.created";
@@ -49,7 +50,7 @@ public interface I18nKeys {
 
     String LABEL_DATE_PARAM = "label.date.param";
 
-    String CLIENT_NOT_FOUND = "client.not.found";
+    String COMPANY_NOT_FOUND = "company.not.found";
     String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
     String PROJECT_NOT_FOUND = "project.not.found";
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
@@ -59,4 +60,6 @@ public interface I18nKeys {
     String PROJECT_APPLICATION_NOT_CREATED = "project.application.not.created";
     String PROJECT_APPLICATION_NOT_FOUNT = "project.application.not.found";
     String PROJECT_APPLICATION_DUPLICATED = "project.application.duplicated";
+    String PROJECT_LOG_CREATED = "project.log.creation";
+    String LOG_GENERAL_UPDATE = "log.general.update";
 }

@@ -19,7 +19,7 @@ public class ProjectFindDto implements Serializable {
     private String createdBy;
     private Date creationDate;
     private Date installationDate;
-    private Long clientId;
+    private Long companyId;
     private Long projectManagerId;
 
     private List<ProjectApplicationFindDto> applications;

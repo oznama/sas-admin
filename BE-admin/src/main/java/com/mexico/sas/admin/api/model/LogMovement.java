@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Entity
 @Table
 @Data
+@DynamicInsert
 public class LogMovement implements Serializable {
 
     @Id
@@ -22,10 +24,11 @@ public class LogMovement implements Serializable {
     private String tableName;
     private Long recordId;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(columnDefinition = "boolean default current_timestamp")
     private Date creationDate;
-    private Long userId;
+    private Long createdBy;
+    private String userFullname;
     private Long eventId;
-    private Long detailId;
     private String description;
 
 }

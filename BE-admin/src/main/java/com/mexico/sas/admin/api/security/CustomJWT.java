@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +25,9 @@ public class CustomJWT {
   public String getToken(String username) throws LoginException {
     log.debug("Creating token for {}", username);
     try {
-      Date creationDate = new Date(System.currentTimeMillis());
-      Date expirationDate = new Date(System.currentTimeMillis() + expiration);
-      log.debug(" ::: Token created at {} ::: ", creationDate);
-      log.debug(" ::: Token expire to {} ::: ", expirationDate);
       return Jwts.builder().setId(id).setSubject(username)
-          .setIssuedAt(creationDate)
-          .setExpiration(expirationDate)
+          .setIssuedAt(new Date(System.currentTimeMillis()))
+          .setExpiration(new Date(System.currentTimeMillis() + expiration))
           .signWith(SignatureAlgorithm.HS512, key.getBytes(StandardCharsets.UTF_8)).compact();
     } catch (Exception e) {
       log.error(String.format("Error creating token, error: %s", e.getMessage()), e);

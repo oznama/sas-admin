@@ -1,6 +1,5 @@
 package com.mexico.sas.admin.api.repository;
 
-import com.mexico.sas.admin.api.dto.project.ProjectApplicationDto;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.ProjectApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
