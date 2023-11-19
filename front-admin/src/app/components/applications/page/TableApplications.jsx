@@ -11,7 +11,8 @@ export const TableApplications = ({ projectId }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const applications = useSelector( state => state.projectReducer.project.applications);
+    const { permissions } = useSelector( state => state.auth );
+    const { applications } = useSelector( state => state.projectReducer.project);
 
     const handledSelect = id => {
         getProjectApplicationById(projectId, id).then( response => {
@@ -66,11 +67,15 @@ export const TableApplications = ({ projectId }) => {
             <td className="text-center">{ designDate }</td>
             <td className="text-center">{ developmentDate }</td>
             <td className="text-center">{ endDate }</td>
-            <td className="text-center">
-                <button type="button" className="btn btn-danger">
-                    <span><i className="bi bi-trash"></i></span>
-                </button>
-            </td>
+            {
+                permissions.canDelProjApp && (
+                    <td className="text-center">
+                        <button type="button" className="btn btn-danger">
+                            <span><i className="bi bi-trash"></i></span>
+                        </button>
+                    </td>
+                )
+            }
         </tr>
     ));
 
@@ -90,7 +95,7 @@ export const TableApplications = ({ projectId }) => {
                             <th className="text-center fs-6" scope="col">Analisis y Dise&ntilde;o</th>
                             <th className="text-center fs-6" scope="col">Construcci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Cierre</th>
-                            <th className="text-center fs-6" scope="col">Borrar</th>
+                            { permissions.canDelProjApp && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                         </tr>
                     </thead>
                     <tbody>

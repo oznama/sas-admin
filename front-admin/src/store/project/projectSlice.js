@@ -11,7 +11,7 @@ export const projectSlice = createSlice({
             description: "",
             createdBy: "",
             creationDate: null,
-            clientId: "",
+            companyId: "",
             projectManagerId: "",
             installationDate: null,
         },
@@ -39,7 +39,7 @@ export const projectSlice = createSlice({
                 description: "",
                 createdBy: "",
                 creationDate: null,
-                clientId: "",
+                companyId: "",
                 projectManagerId: "",
                 installationDate: null,
             }

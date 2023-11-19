@@ -3,20 +3,23 @@ import PropTypes from 'prop-types';
 export const TableLog = ({
     history,
 }) => {
+
+    const renderDescription = (description) => {
+        const lines = description.split('\n');
+        const lis = lines.map( (line, index) => ( <li key={ index }>{ line }</li> ) )
+        return (<ul>{ lis }</ul>);
+    }
+
     const renderRows = () => history && history.map(({
         id,
         userName,
         date,
-        event,
-        detail,
         description
     }) => (
         <tr key={ id }>
-            <th className="text-start" scope="row">{ userName }</th>
-            <td className="text-center">{ event }</td>
-            <td className="text-center">{ detail }</td>
+            <td className="text-start">{ renderDescription(description) }</td>
+            <td className="text-start" scope="row">{ userName }</td>
             <td className="text-center">{ date }</td>
-            <th className="text-start">{ description }</th>
         </tr>
     ));
 
@@ -26,11 +29,9 @@ export const TableLog = ({
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>
-                        <th className="text-center fs-6" scope="col">Usuario</th>
-                        <th className="text-center fs-6" scope="col">Acci&oacute;n</th>
                         <th className="text-center fs-6" scope="col">Movimiento</th>
+                        <th className="text-center fs-6" scope="col">Por</th>
                         <th className="text-center fs-6" scope="col">Fecha</th>
-                        <th className="text-center fs-6" scope="col">Detalle</th>
                     </tr>
                 </thead>
                 <tbody>

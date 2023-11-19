@@ -12,7 +12,7 @@ export const InputText = ({
     disabled,
 }) => {
   return (
-    <>
+    <div className='mb-3'>
       <label className="form-label">{ label }</label>
       <div className="input-group has-validation">
         <input className="form-control"
@@ -26,7 +26,7 @@ export const InputText = ({
           onChange={ onChange }>
         </input>
       </div>
-    </>
+    </div>
   )
 }
 

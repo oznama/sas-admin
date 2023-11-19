@@ -27,6 +27,7 @@ export const LoginPage = () => {
                 navigate('/', { replace: true });
             }
         }).catch( error => {
+            console.log(error);
             dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error, contacta al area de sistemas', alertType.error)));
         });
     }

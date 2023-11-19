@@ -5,7 +5,7 @@ import { Select } from '../custom/Select';
 import { DatePicker } from '../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
 import { save, update } from '../../services/ProjectService';
-import { getSelect } from '../../services/ClientService';
+import { getSelect } from '../../services/CompanyService';
 import { buildPayloadMessage, handleDate, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../store/alert/alertSlice';
@@ -15,25 +15,29 @@ export const DetailProject = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { permissions } = useSelector( state => state.auth );
     const project = useSelector( state => state.projectReducer.project );
     const [pKey, setPKey] = useState(project.key);
     const [description, setDescription] = useState(project.description);
     const [createdBy, setCreatedBy] = useState(project.createdBy);
     const [dateCreated, setDateCreated] = useState(handleDate(project.creationDate, true));
-    const [client, setClient] = useState(numberToString(project.clientId, '-1'));
+    const [company, setCompany] = useState(numberToString(project.companyId, '-1'));
     const [pm, setPm] = useState(numberToString(project.projectManagerId, '-1'));
     const [installationDate, setInstallationDate] = useState(handleDate(project.installationDate, false));
-    const [clients, setClients] = useState([]);
+    const [companies, setCompanies] = useState([]);
     const [pms, setPms] = useState([]);
 
-    const isModeEdit = () => ( project.id && project.id > 0);
+    const isModeEdit = (project.id && project.id > 0);
 
     const fetchCatalogClient = () => {
         getSelect()
             .then( response => {
-                setClients( response );
-                if (client !== '-1' && pm !== '-1') {
-                    const index = Number(client) - 1;
+                setCompanies( response );
+                if (response.length === 1) {
+                    setCompany(numberToString(response[0].id, ''));
+                    setPms(response[0].employess);
+                } else if (company !== '-1' && pm !== '-1') {
+                    const index = Number(company) - 1;
                     setPms( response[index].employess );
                 }
             }).catch( error => {
@@ -49,10 +53,10 @@ export const DetailProject = () => {
     const onChangeDesc = ({ target }) => setDescription(target.value);
     const onChangeCreatedDate = (date) => setDateCreated(date);
     const onChangeInstallationDate = (date) => setInstallationDate(date);
-    const onChangeClient = ({ target }) => {
-        setClient(target.value);
+    const onChangeCompany = ({ target }) => {
+        setCompany(target.value);
         const index = target.value - 1;
-        setPms( clients[index].employess );
+        setPms( companies[index].employess );
     }
     const onChangePm = ({ target }) => setPm(target.value);
     
@@ -60,7 +64,7 @@ export const DetailProject = () => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        if ( isModeEdit() ) {
+        if ( isModeEdit ) {
             updateProject(request);
         } else {
             saveProject(request);
@@ -106,54 +110,39 @@ export const DetailProject = () => {
         });
     };
 
-    const renderCreatedBy = () => isModeEdit() && (
-        <div className='col-3'>
-            <InputText name='createdBy' label='Creado por' value={ createdBy } disabled />
-        </div>
+    const renderCreatedBy = () => isModeEdit && (
+        <InputText name='createdBy' label='Creado por' value={ createdBy } disabled />
     )
     
-    const renderCreationDate = () => isModeEdit() && (
-        <div className='col-3'>
-            <DatePicker name='creationDate' label="Fecha" disabled value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
-        </div>
+    const renderCreationDate = () => isModeEdit && (
+        <DatePicker name='creationDate' label="Fecha" disabled value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
+    )
+
+    const renderSelectClient = () => permissions.isAdminSas && (
+        <Select name="companyId" label="Cliente" options={ companies } value={ company } disabled={ isModeEdit && permissions.canEditProjCli } required onChange={ onChangeCompany } />
     )
 
     return (
-        <div>
+        <div className='d-grid gap-2 col-6 mx-auto'>
             <form className="needs-validation" onSubmit={ onSubmit }>
-                <div className='text-center'>
-                <div className="row text-start">
-                    <div className='col-3'>
-                        <InputText name='key' label='Clave' placeholder='Ingresa clave' 
-                            disabled={ isModeEdit() } value={ pKey } required
-                            onChange={ onChangePKey } maxLength={ 12 } />
-                    </div>
-                    <div className='col-6'>
-                        <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
-                            value={ description } required
-                            onChange={ onChangeDesc } maxLength={ 70 } />
-                    </div>
-                    <div className='col-3'>
-                        <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required
-                            value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
-                    </div>
-                </div>
+                
+                <InputText name='key' label='Clave' placeholder='Ingresa clave' 
+                    disabled={ isModeEdit } value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
+                <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
+                    value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
+                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required
+                    value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 {/* <div className="row text-start">
                     <div className='col-12'>
                     <TextArea label='Descripci&oacute;n' placeholder='Agrega alguna descripci&oacute;n al proyecto' value={ description } onChange={ onChangeDesc } />
                     </div>
                 </div> */}
-                <div className="row text-start">
-                    { renderCreatedBy() }
-                    { renderCreationDate() }
-                    <div className='col-3'>
-                    <Select name="clientId" label="Cliente" options={ clients } value={ client } required onChange={ onChangeClient } />
-                    </div>
-                    <div className='col-3'>
-                    <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } />
-                    </div>
-                </div>
-                </div>
+
+                { renderCreatedBy() }
+                { renderCreationDate() }
+                { renderSelectClient() }
+                <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } />
+
                 <div className="pt-3 d-flex flex-row-reverse">
                     <button type="submit" className="btn btn-primary">Guardar</button>
                     &nbsp;

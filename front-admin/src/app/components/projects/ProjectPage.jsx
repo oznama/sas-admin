@@ -10,6 +10,7 @@ export const ProjectPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { permissions } = useSelector( state => state.auth );
   const {project, currentTab} = useSelector( state => state.projectReducer );
   
   const handleAddApplication = () => {
@@ -17,7 +18,7 @@ export const ProjectPage = () => {
     navigate(`/project/${ project.id }/application/add`);
   }
 
-  const renderAddButton = () => (
+  const renderAddButton = () => permissions.canCreateProjApp && (
       <div className="d-flex flex-row-reverse p-2">
           <button type="button" className="btn btn-primary" onClick={ handleAddApplication }>
               <span className="bi bi-plus"></span>

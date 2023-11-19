@@ -9,9 +9,8 @@ export const NavBarPage = () => {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
-  const user = useSelector( (state) => state.auth.user );
+  const { user, permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(0);
-  const roleId = user?.role?.id;
 
   const onLogout = () => {
     localStorage.removeItem('token');
@@ -19,16 +18,7 @@ export const NavBarPage = () => {
     navigate('/login', { replace: true })
   }
 
-  const renderTabApplications = () => roleId && (roleId === 1 || roleId === 2) && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(1) } to="application">
-        Aplicaciones
-      </NavLink>
-    </li>
-  );
-
-  const renderTablCatalogs = () => roleId && roleId === 1 && (
+  const renderTablCatalogs = () => permissions.canAdminCat && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 2) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(2) } to="catalog">
@@ -37,16 +27,16 @@ export const NavBarPage = () => {
     </li>
   );
 
-  const renderTablRoles = () => roleId && roleId === 1 && (
+  const renderTabApplications = () => permissions.canAdminApp && (
     <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 3) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(3) } to="security-rol">
-        Roles
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(1) } to="application">
+        Aplicaciones
       </NavLink>
     </li>
   );
 
-  const renderTablUsers = () => roleId && (roleId === 1 || roleId === 2) && (
+  const renderTablUsers = () => permissions.canAdminUsr && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(4) } to="security-user">
@@ -63,9 +53,8 @@ export const NavBarPage = () => {
         
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            { renderTabApplications() }
             { renderTablCatalogs() }
-            { renderTablRoles() }
+            { renderTabApplications() }
             { renderTablUsers() }
           </ul>
         </div>
@@ -77,7 +66,8 @@ export const NavBarPage = () => {
             </button>
           </div>
           <div className="p-2 bd-highlight">
-            <span className="text-white">{ user?.name }</span>
+            <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
+            <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getProjectById, getProjects } from '../../services/ProjectService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { changeLoading } from '../../../store/loading/loadingSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
@@ -17,6 +17,8 @@ export const TableProject = ({
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const { permissions } = useSelector( state => state.auth );
 
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
@@ -46,7 +48,6 @@ export const TableProject = ({
         setCurrentPage(page);
         fetchProjects(currentPage);
     }
-    
 
     // const addNewElement = newElement => {
     //     Manera 1 para agregar un nuevo elemento al estado
@@ -88,7 +89,7 @@ export const TableProject = ({
         createdBy,
         creationDate,
         installationDate,
-        client,
+        company,
         projectManager,
         status
     }) => (
@@ -97,9 +98,9 @@ export const TableProject = ({
             {/* <td className="text-start">{ name }</td> */}
             <td className="text-start">{ description }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
-            <td className="text-start">{ createdBy }</td>
+            { permissions.isAdminSas && (<td className="text-start">{ createdBy }</td>) }
             <td className="text-center">{ creationDate }</td>
-            <th className="text-start">{ client }</th>
+            { permissions.isAdminSas && (<th className="text-start">{ company }</th>) }
             <td className="text-start">{ projectManager }</td>
             <td className="text-center">{ installationDate }</td>
         </tr>
@@ -116,9 +117,9 @@ export const TableProject = ({
                             {/* <th className="text-center fs-6" scope="col">Nombre</th> */}
                             <th className="text-center fs-6" scope="col">Descripci&oacute;n</th>
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
-                            <th className="text-center fs-6" scope="col">Creado por</th>
+                            { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Creado por</th>) }
                             <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
-                            <th className="text-center fs-6" scope="col">Cliente</th>
+                            { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Cliente</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
                         </tr>

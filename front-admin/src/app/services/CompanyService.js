@@ -1,6 +1,6 @@
 import { api, getHeaders } from '../api/Api';
 
-const context = 'clients';
+const context = 'companies';
 
 export const getSelect = async() => {
     const request = {

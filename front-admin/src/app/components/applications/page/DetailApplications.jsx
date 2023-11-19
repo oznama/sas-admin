@@ -4,7 +4,7 @@ import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalog } from '../../../services/CatalogService';
-import { getUsersByRole } from '../../../services/UserService';
+import { getEmployess } from '../../../services/EmployeeService';
 import { saveApplication } from '../../../services/ProjectService';
 import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,7 +17,8 @@ import { TableLog } from '../../custom/TableLog';
 export const DetailApplications = () => {
 
   const dispatch = useDispatch();
-  const projectApplication = useSelector( (state) => state.projectReducer.projectApplication );
+  const { permissions } = useSelector( state => state.auth );
+  const { projectApplication } = useSelector( state => state.projectReducer );
   const { projectId } = useParams();
 
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export const DetailApplications = () => {
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
 
-  const isModeEdit = () => ( projectApplication.id && projectApplication.id > 0);
+  const isModeEdit = () => ( projectApplication.id && projectApplication.id > 0 && !permissions.canEditProjApp );
 
   const fetchSelects = () => {
     
@@ -53,7 +54,7 @@ export const DetailApplications = () => {
     //     console.log(error);
     //   });
     
-    getUsersByRole(3)
+    getEmployess()
       .then( response => {
         setCatEmployees(response);
       }).catch( error => {
