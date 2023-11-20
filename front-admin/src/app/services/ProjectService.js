@@ -55,6 +55,17 @@ export const saveApplication = async(data) => {
     return jsonResponse;
 };
 
+export const updateApplication = async(id, data) => {
+    const request = {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    }
+    const response = await api( `${context}/application/${id}`, request );
+    const jsonResponse = await response.json();
+    return jsonResponse;
+};
+
 export const getProjectApplicationById = async(projectId, id) => {
     const request = {
         headers: getHeaders()

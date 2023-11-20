@@ -3,9 +3,9 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCatalog } from '../../../services/CatalogService';
+import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
-import { saveApplication } from '../../../services/ProjectService';
+import { saveApplication, updateApplication } from '../../../services/ProjectService';
 import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
@@ -36,11 +36,11 @@ export const DetailApplications = () => {
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
 
-  const isModeEdit = () => ( projectApplication.id && projectApplication.id > 0 && !permissions.canEditProjApp );
+  const isModeEdit = ( projectApplication.id && projectApplication.id > 0 && !permissions.canEditProjApp );
 
   const fetchSelects = () => {
     
-    getCatalog(1000000005)
+    getCatalogChilds(1000000005)
       .then( response => {
         setCatApliations(response);
       }).catch( error => {
@@ -88,24 +88,42 @@ export const DetailApplications = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    request.projectId = projectApplication.projectId;
-    // request.id = id != undefined ? id : null;
-    
+    if ( projectApplication.id && permissions.canEditProjApp ) {
+      update(request);
+    } else if ( permissions.canCreateProjApp ) {
+      request.projectId = projectApplication.projectId;
+      save(request);
+    }    
+  }
+
+  const save = request => {
     saveApplication(request).then( response => {
-        if(response.code && response.code !== 201) {
-          dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
-        } else {
-          dispatch(setMessage(buildPayloadMessage('¡Aplicacion agregada a proyecto correctamente!', alertType.success)));
-          dispatch(addAplication(response));
-          navigate(`/project/${projectApplication.projectId}/edit`, { replace: true });
-        }
+      if(response.code && response.code !== 201) {
+        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+      } else {
+        dispatch(setMessage(buildPayloadMessage('¡Aplicacion agregada a proyecto correctamente!', alertType.success)));
+        dispatch(addAplication(response));
+        navigate(`/project/${projectApplication.projectId}/edit`, { replace: true });
+      }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error, contacte al administrador', alertType.error)));
+      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear aplicación, contacte al administrador', alertType.error)));
+    });
+  }
+
+  const update = request => {
+    updateApplication(projectApplication.id, request).then( response => {
+      if(response.code && response.code !== 201) {
+        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+      } else {
+        dispatch(setMessage(buildPayloadMessage('¡Aplicacion actualizada correctamente!', alertType.success)));
+      }
+    }).catch(error => {
+      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar aplicación, contacte al administrador', alertType.error)));
     });
   }
 
   const renderSaveButton = () => {
-    if(isModeEdit()) {
+    if(isModeEdit) {
       return null;
     } else {
       return (<button type="submit" className="btn btn-primary">Guardar</button>) ;
@@ -128,36 +146,36 @@ export const DetailApplications = () => {
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-4'>
-              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit() } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
+              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
             </div>
             <div className='col-4'>
-              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit() } value={ amount } required onChange={ onChangeAmount } />
+              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ amount } required onChange={ onChangeAmount } />
             </div>
             {/* <div className='col-4'>
               <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
             </div> */}
             <div className='col-4'>
-              <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit() } required value={ hours } onChange={ onChangeHours } />
+              <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit } required value={ hours } onChange={ onChangeHours } />
             </div>
           </div>
           <div className="row text-start">
             <div className='col-6'>
-            <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit() } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+            <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
             </div>
             <div className='col-6'>
-              <Select name="developerId" label="Desarrollador" disabled={ isModeEdit() } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
+              <Select name="developerId" label="Desarrollador" disabled={ isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
             </div>
           </div>
 
           <div className="row text-start">
             <div className='col-4'>
-              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit() } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
+              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit() } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
+              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
             </div>
             <div className='col-4'>
-              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit() } required onChange={ (date) => onChangeEndDate(date) } />
+              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
             </div>
           </div>
         </div>

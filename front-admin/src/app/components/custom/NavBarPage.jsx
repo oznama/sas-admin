@@ -39,7 +39,7 @@ export const NavBarPage = () => {
   const renderTablUsers = () => permissions.canAdminUsr && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(4) } to="security-user">
+        onClick={ () => setCurrentTab(4) } to="user">
         Usuarios
       </NavLink>
     </li>

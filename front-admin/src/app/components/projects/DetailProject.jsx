@@ -106,7 +106,7 @@ export const DetailProject = () => {
                 dispatch(setMessage(buildPayloadMessage('¡Proyecto actualizado correctamente!', alertType.success)));
             }
         }).catch(error => {
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un errro al actualizar el proyecto, contacte al administrador', alertType.error)));
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el proyecto, contacte al administrador', alertType.error)));
         });
     };
 

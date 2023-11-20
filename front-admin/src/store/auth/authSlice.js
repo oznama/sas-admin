@@ -21,8 +21,6 @@ export const authSlice = createSlice({
         login: (state, action) => {
             state.user = action.payload.user;
             state.logged = true;
-            console.log(action.payload.user.role.permissions);
-            console.log(action.payload.user.role.permissions.some( p => p.name === 6));
             state.permissions = {
                 isAdminSas: action.payload.user.companyId === 1 && (action.payload.user.role.id >= 1 && action.payload.user.role.id <=3 ),
                 canAdminCat: action.payload.user.role.permissions.some( p => p.name === 'Admin-Cat'),

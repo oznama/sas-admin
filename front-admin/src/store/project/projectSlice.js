@@ -42,7 +42,8 @@ export const projectSlice = createSlice({
                 companyId: "",
                 projectManagerId: "",
                 installationDate: null,
-            }
+            },
+            state.currentTab = 1;
         },
         addAplication: (state, action) => {
             state.project.applications.push(action.payload);
