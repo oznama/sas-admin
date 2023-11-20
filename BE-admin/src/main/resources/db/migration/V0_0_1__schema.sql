@@ -128,7 +128,7 @@ CREATE TABLE log_movement (
     user_fullname varchar(255) not null,
     creation_date timestamp default current_timestamp,
     event_id int8 not null,
-    description varchar(255),
+    description varchar,
     primary key (id)
 );
 

@@ -12,6 +12,8 @@ import java.util.List;
 @Setter
 public class ProjectFindDto implements Serializable {
 
+    private static final long serialVersionUID = -8944765314269699196L;
+
     private Long id;
     private String key;
     private String description;

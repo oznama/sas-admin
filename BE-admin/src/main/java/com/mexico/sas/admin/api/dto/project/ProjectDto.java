@@ -14,6 +14,8 @@ import java.util.Date;
 @ToString
 @FieldNameConstants
 public class ProjectDto implements Serializable {
+    private static final long serialVersionUID = 6304036644034478431L;
+
     private Long id;
     private String key;
     private String description;

@@ -13,6 +13,8 @@ import java.util.Date;
 @ToString
 public class ProjectPageableDto implements Serializable {
 
+    private static final long serialVersionUID = 1344296518161744919L;
+
     private Long id;
     private String key;
     private String description;

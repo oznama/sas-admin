@@ -5,6 +5,7 @@ import com.mexico.sas.admin.api.dto.log.LogMovementDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,12 +15,12 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class ProjectApplicationDto implements Serializable {
+@FieldNameConstants
+public class ProjectApplicationUpdateDto implements Serializable {
 
-    private static final long serialVersionUID = 3848139802518781042L;
+    private static final long serialVersionUID = 1277148987583745666L;
 
     private Long id;
-    private Long projectId;
     private Long applicationId;
     private BigDecimal amount;
     private Integer hours;
@@ -31,6 +32,4 @@ public class ProjectApplicationDto implements Serializable {
     private Date developmentDate;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date endDate;
-
-    private List<LogMovementDto> history;
 }

@@ -62,4 +62,5 @@ public interface I18nKeys {
     String PROJECT_APPLICATION_DUPLICATED = "project.application.duplicated";
     String PROJECT_LOG_CREATED = "project.log.creation";
     String LOG_GENERAL_UPDATE = "log.general.update";
+    String PROJECT_APPLICATION_LOG_CREATED = "project.application.creation";
 }

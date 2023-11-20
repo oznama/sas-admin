@@ -13,6 +13,8 @@ import java.util.List;
 @Getter
 @Setter
 public class ProjectApplicationFindDto implements Serializable {
+    private static final long serialVersionUID = 2997336432117891262L;
+
     private Long id;
     private String application;
     private String amount;

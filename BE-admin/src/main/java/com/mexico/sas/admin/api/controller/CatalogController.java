@@ -23,8 +23,8 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/internal")
-public class InternalController {
+@RequestMapping("/catalogs")
+public class CatalogController {
 
   @Autowired
   private CatalogService service;

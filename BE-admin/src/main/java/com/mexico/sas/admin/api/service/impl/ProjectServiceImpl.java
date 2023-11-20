@@ -123,8 +123,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
-        Project project = repository.findById(projectId).orElseThrow( () ->
-                new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, projectId)));
+        Project project = findEntityById(projectId);
         StringBuilder sb = new StringBuilder();
         if( !project.getDescription().equals(projectUpdateDto.getDescription()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.description,
@@ -156,7 +155,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public void save(ProjectApplicationDto projectApplicationDto) throws CustomException {
-        log.debug("DTO ::: {}", projectApplicationDto);
         ProjectApplication projectApplication = from_M_To_N(projectApplicationDto, ProjectApplication.class);
         validationSave(projectApplicationDto, projectApplication);
         try {
@@ -165,7 +163,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             log.debug("Entity ::: {}", projectApplication);
             projectApplicationRepository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    "TODO");
+                    I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_LOG_CREATED));
             projectApplicationDto.setId(projectApplication.getId());
             log.debug("Application for project created with id: {}", projectApplicationDto.getId());
         } catch (Exception e) {
@@ -177,21 +175,78 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     }
 
     @Override
+    public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
+        ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
+        StringBuilder sb = new StringBuilder();
+        if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.applicationId,
+                    projectApplication.getApplicationId(), projectApplicationUpdateDto.getApplicationId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
+        }
+        if( !projectApplication.getAmount().equals(projectApplicationUpdateDto.getAmount()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
+                    projectApplication.getAmount(), projectApplicationUpdateDto.getAmount())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
+        }
+        if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,
+                    projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setLeader(new Employee(projectApplicationUpdateDto.getLeaderId()));
+        }
+        if( !projectApplication.getDeveloper().getId().equals(projectApplicationUpdateDto.getDeveloperId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developerId,
+                    projectApplication.getDeveloper().getId(), projectApplicationUpdateDto.getDeveloperId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setDeveloper(new Employee(projectApplicationUpdateDto.getDeveloperId()));
+        }
+        if( !projectApplication.getDesignDate().equals(projectApplicationUpdateDto.getDesignDate()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
+                    projectApplication.getDesignDate(), projectApplicationUpdateDto.getDesignDate())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setDesignDate(projectApplicationUpdateDto.getDesignDate());
+        }
+        if( !projectApplication.getDevelopmentDate().equals(projectApplicationUpdateDto.getDevelopmentDate()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developmentDate,
+                    projectApplication.getDevelopmentDate(), projectApplicationUpdateDto.getDevelopmentDate())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setDevelopmentDate(projectApplicationUpdateDto.getDevelopmentDate());
+        }
+        if( !projectApplication.getEndDate().equals(projectApplicationUpdateDto.getEndDate()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.endDate,
+                    projectApplication.getEndDate(), projectApplicationUpdateDto.getEndDate())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setEndDate(projectApplicationUpdateDto.getEndDate());
+        }
+
+        if(!sb.toString().isEmpty()) {
+            projectApplicationRepository.save(projectApplication);
+            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, sb.toString().trim());
+        }
+    }
+
+    @Override
     public ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException {
-        ProjectApplication projectApplication = findEntityByApplicationId(id);
-        return getProjectApplicationFindDto(projectApplication);
+        return getProjectApplicationFindDto(findEntityByApplicationId(id));
     }
 
     @Override
     public ProjectApplication findEntityByApplicationId(Long id) throws CustomException {
+        log.debug("Finding project application: {}", id);
         return projectApplicationRepository.findById(id)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
     }
 
     @Override
-    public ProjectApplicationDto findByProjectIdAndId(Long projectId, Long id) throws CustomException {
-        ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndId(new Project(projectId), id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
+    public ProjectApplicationDto findByProjectAndId(Long projectId, Long id) throws CustomException {
+        log.debug("Finding project application with projectId: {} and id: {}", projectId, id);
+        return parseFromEntity(projectApplicationRepository.findByProjectAndId(new Project(projectId), id)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id))));
+    }
+
+    @Override
+    public ProjectApplicationDto findByProjectAndApplicationId(Long projectId, Long applicationId) throws CustomException {
+        log.debug("Finding project application with projectId: {} and applicationId: {}", projectId, applicationId);
+        return parseFromEntity(projectApplicationRepository.findByProjectAndApplicationId(new Project(projectId), applicationId)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId))));
+    }
+
+    private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
@@ -232,7 +287,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
 
         try {
-            findByProjectIdAndId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
+            findByProjectAndApplicationId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
                     catalogService.findById(projectApplication.getApplicationId()).getValue(),
                     projectApplicationDto.getProjectId()), null);

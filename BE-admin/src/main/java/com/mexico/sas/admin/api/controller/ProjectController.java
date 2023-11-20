@@ -106,9 +106,23 @@ public class ProjectController {
           @ApiResponse(code = 201, message = "Success", response = ProjectApplicationFindDto.class)
   })
   public ResponseEntity<ProjectApplicationFindDto> saveApplication(@Valid @RequestBody ProjectApplicationDto projectApplicationDto) throws CustomException {
-    log.info("Saving project");
+    log.info("Saving project application");
     service.save(projectApplicationDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(service.findByApplicationId(projectApplicationDto.getId()));
+  }
+
+  @PutMapping(path = "/application/{id}", headers = "Accept=application/json")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @ApiOperation(httpMethod = "POST",
+          value = "Servicio para actualizar aplicacion de proyecto",
+          nickname = "/updateApplication")
+  @ApiResponses(value = {
+          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationUpdateDto.class)
+  })
+  public ResponseEntity<ProjectApplicationUpdateDto> updateApplication(@PathVariable("id") Long id, @Valid @RequestBody ProjectApplicationUpdateDto projectApplicationDto) throws CustomException {
+    log.info("Updating project application");
+    service.update(id, projectApplicationDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(projectApplicationDto);
   }
 
   @GetMapping("/{projectId}/application/{id}")
@@ -118,10 +132,10 @@ public class ProjectController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationDto.class)
   })
-  public ResponseEntity<ProjectApplicationDto> findById(@PathVariable("projectId") Long projectId,
+  public ResponseEntity<ProjectApplicationDto> findByApplicationId(@PathVariable("projectId") Long projectId,
                                                         @PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
-    return ResponseEntity.ok(service.findByProjectIdAndId(projectId, id));
+    return ResponseEntity.ok(service.findByProjectAndId(projectId, id));
   }
 
 }
