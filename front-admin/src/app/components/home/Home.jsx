@@ -2,7 +2,7 @@ import { TableProject } from '../projects/TableProjects';
 import { useNavigate } from 'react-router-dom';
 import { Alert } from '../custom/alerts/page/Alert';
 import { useDispatch, useSelector } from 'react-redux';
-import { cleanProject } from '../../../store/project/projectSlice';
+import { setCurrentTab } from '../../../store/project/projectSlice';
 
 export const Home = () => {
 
@@ -10,10 +10,9 @@ export const Home = () => {
     const navigate = useNavigate();
 
     const { permissions } = useSelector( state => state.auth );
-    console.log(permissions);
 
     const handleAddProject = () => {
-        dispatch(cleanProject());
+        dispatch(setCurrentTab(1));
         navigate(`/project/add`);
     }
 

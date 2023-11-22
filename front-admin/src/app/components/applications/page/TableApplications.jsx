@@ -1,36 +1,40 @@
 import PropTypes from 'prop-types';
-import { getProjectApplicationById } from '../../../services/ProjectService';
+import { getProjectApplicationById, getProjectById } from '../../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
-import { setProjectApplication } from '../../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../../custom/alerts/types/types';
 import { buildPayloadMessage } from '../../../helpers/utils';
+import { useEffect, useState } from 'react';
 
 export const TableApplications = ({ projectId }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const { applications } = useSelector( state => state.projectReducer.project);
 
-    const handledSelect = id => {
-        getProjectApplicationById(projectId, id).then( response => {
+    const [applications, setApplications] = useState([]);
+
+    const fetchApplications = () => {
+        getProjectById(projectId).then( response => {
             if( response.code ) {
-              dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
-              dispatch(setProjectApplication(response));
-              const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
-              navigate(urlRedirect);
+                setApplications(response.applications);
             }
         }).catch( error => {
-            dispatch(setMessage(
-                buildPayloadMessage(
-                    'Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador', 
-                    alertType.error
-                )
-            ));
+            console.log(error);
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
         });
+    }
+
+    useEffect(() => {
+        fetchApplications();
+    }, []);
+
+    const handledSelect = id => {
+        const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
+        navigate(urlRedirect);
     }
 
     // const renderStatus = (status) => {

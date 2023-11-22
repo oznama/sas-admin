@@ -1,42 +1,63 @@
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { changeLoading } from '../../../store/loading/loadingSlice';
+import { getCatalogs, save, update } from '../../services/CatalogService';
+import { setMessage } from '../../../store/alert/alertSlice';
+import { buildPayloadMessage } from '../../helpers/utils';
+import { alertType } from '../custom/alerts/types/types';
+import { CatalogSingle } from './CatalogSingle';
+
 export const Catalogs = () => {
-  return (
-    <div className="accordion" id="accordionExample">
-        <div className="accordion-item">
-            <h2 className="accordion-header">
-            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                Catalog 1
-            </button>
+    const dispatch = useDispatch();
+
+    const [catalogs, setCatalogs] = useState([]);
+    const [currentOpen, setCurrentOpen] = useState();
+    
+    const fetchCatalogs = () => {
+    dispatch(changeLoading(true));
+        getCatalogs()
+        .then( response => {
+            if( response.code && response.code === 401 ) {
+            dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            }
+            setCatalogs(response);
+            dispatch(changeLoading(false));
+        }).catch( error => {
+            dispatch(changeLoading(false));
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
+        });
+    }
+  
+    useEffect(() => {
+        fetchCatalogs();
+    }, []);
+
+    const renderAccordion = () => catalogs.map(({
+        id,
+        value,
+        description,
+        companyId,
+        company,
+        childs
+    }) => (
+        <div key={ id } className="accordion-item" onClick={ () => setCurrentOpen(id === currentOpen ? null : id) }>
+            <h2 className="accordion-header" id={ `heading${id}` }>
+                <button className="accordion-button collapsed" type="button" 
+                    data-bs-toggle="collapse" data-bs-target={ `#collapse${id}` } aria-expanded="false" aria-controls={ `collapse${id}` }>
+                    { `${value} ${ description ? '-' : '' } ${description ?? ''}` }
+                </button>
             </h2>
-            <div id="collapseOne" className="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-            <div className="accordion-body">
-                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+            <div id={ `collapse${id}` } className="accordion-collapse collapse" aria-labelledby={ `heading${id}` } data-bs-parent="#accordionCatalogs">
+                <div className="accordion-body">
+                    { <CatalogSingle catalogId={ id } /> }
+                </div>
             </div>
-            </div>
+        </div> 
+    ));
+
+    return (
+        <div className="accordion" id="accordionCatalogs">
+            { renderAccordion() }
         </div>
-        <div className="accordion-item">
-            <h2 className="accordion-header">
-            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                Catalog 2
-            </button>
-            </h2>
-            <div id="collapseTwo" className="accordion-collapse collapse" data-bs-parent="#accordionExample">
-            <div className="accordion-body">
-                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-            </div>
-            </div>
-        </div>
-        <div className="accordion-item">
-            <h2 className="accordion-header">
-            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                Catalog 3
-            </button>
-            </h2>
-            <div id="collapseThree" className="accordion-collapse collapse" data-bs-parent="#accordionExample">
-            <div className="accordion-body">
-                <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-            </div>
-            </div>
-        </div>
-        </div>
-  )
+    )
 }

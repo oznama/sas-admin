@@ -22,6 +22,7 @@ export const CatalogPage = ({
 
 CatalogPage.propTypes = {
   title: PropTypes.string,
+  catalogId: PropTypes.number,
 }
 
 CatalogPage.defaultProps = {

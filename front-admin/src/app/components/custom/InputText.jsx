@@ -23,7 +23,8 @@ export const InputText = ({
           value={ value } 
           maxLength={ maxLength }
           disabled={ disabled }
-          onChange={ onChange }>
+          onChange={ onChange }
+          autoComplete='off'>
         </input>
       </div>
     </div>

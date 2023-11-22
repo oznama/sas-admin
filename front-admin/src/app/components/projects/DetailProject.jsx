@@ -1,73 +1,85 @@
 import { useEffect, useState } from 'react';
 import { InputText } from '../custom/InputText';
 import { Select } from '../custom/Select';
-// import { TextArea } from '../../custom/TextArea';
 import { DatePicker } from '../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
-import { save, update } from '../../services/ProjectService';
-import { getSelect } from '../../services/CompanyService';
-import { buildPayloadMessage, handleDate, handleText, numberToString } from '../../helpers/utils';
+import { getProjectById, save, update } from '../../services/ProjectService';
+import { buildPayloadMessage, handleDate, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { alertType } from '../custom/alerts/types/types';
+import { getEmployess } from '../../services/EmployeeService';
 
-export const DetailProject = () => {
+export const DetailProject = ({
+    projectId,
+}) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const project = useSelector( state => state.projectReducer.project );
-    const [pKey, setPKey] = useState(project.key);
-    const [description, setDescription] = useState(project.description);
-    const [createdBy, setCreatedBy] = useState(project.createdBy);
-    const [dateCreated, setDateCreated] = useState(handleDate(project.creationDate, true));
-    const [company, setCompany] = useState(numberToString(project.companyId, '-1'));
-    const [pm, setPm] = useState(numberToString(project.projectManagerId, '-1'));
-    const [installationDate, setInstallationDate] = useState(handleDate(project.installationDate, false));
-    const [companies, setCompanies] = useState([]);
+    const [pKey, setPKey] = useState('');
+    const [description, setDescription] = useState('');
+    const [createdBy, setCreatedBy] = useState('');
+    const [dateCreated, setDateCreated] = useState(new Date());
+    const [pm, setPm] = useState('');
+    const [installationDate, setInstallationDate] = useState();
     const [pms, setPms] = useState([]);
 
-    const isModeEdit = (project.id && project.id > 0);
+    const fetchProject = () => {
+        getProjectById(projectId).then( response => {
+            if( response.code ) {
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            } else {
+                setPKey(response.key);
+                setDescription(response.description);
+                setCreatedBy(response.createdBy);
+                setDateCreated(handleDateStr(response.creationDate));
+                setPm(numberToString(response.projectManagerId, ''));
+                setInstallationDate(handleDateStr(response.installationDate));
+            }
+        }).catch( error => {
+            console.log(error);
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
+        });
+    }
 
-    const fetchCatalogClient = () => {
-        getSelect()
+    const fetchCatalogEmployee = () => {
+        getEmployess()
             .then( response => {
-                setCompanies( response );
-                if (response.length === 1) {
-                    setCompany(numberToString(response[0].id, ''));
-                    setPms(response[0].employess);
-                } else if (company !== '-1' && pm !== '-1') {
-                    const index = Number(company) - 1;
-                    setPms( response[index].employess );
-                }
+                setPms( response );
             }).catch( error => {
                 console.log(error);
             });
     };
 
     useEffect(() => {
-        fetchCatalogClient();
+        if(projectId) {
+            fetchProject();
+        }
+        fetchCatalogEmployee();
     }, []);
 
-    const onChangePKey = ({ target }) => setPKey(handleText(target).toUpperCase());
+    const onChangePKey = ({ target }) => {
+        setPKey(handleText(target).toUpperCase())
+    };
     const onChangeDesc = ({ target }) => setDescription(target.value);
     const onChangeCreatedDate = (date) => setDateCreated(date);
     const onChangeInstallationDate = (date) => setInstallationDate(date);
-    const onChangeCompany = ({ target }) => {
-        setCompany(target.value);
-        const index = target.value - 1;
-        setPms( companies[index].employess );
-    }
     const onChangePm = ({ target }) => setPm(target.value);
     
     const onSubmit = event => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        if ( isModeEdit ) {
+        if ( projectId ) {
             updateProject(request);
         } else {
-            saveProject(request);
+            const regex = /^[A-Z]{1}-\d{2}-\d{4}-\d{2}$/;
+            if( regex.test(request.key) ) {
+                saveProject(request);
+            } else {
+                dispatch(setMessage(buildPayloadMessage('¡Clave invalida!', alertType.warning)));
+            }
         }
     }
 
@@ -92,7 +104,7 @@ export const DetailProject = () => {
     };
 
     const updateProject = request => {
-        update(project.id, request).then( response => {
+        update(projectId, request).then( response => {
             if(response.code && response.code === 401) {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else if (response.code && response.code !== 200) {
@@ -110,16 +122,12 @@ export const DetailProject = () => {
         });
     };
 
-    const renderCreatedBy = () => isModeEdit && (
+    const renderCreatedBy = () => projectId && (
         <InputText name='createdBy' label='Creado por' value={ createdBy } disabled />
     )
     
-    const renderCreationDate = () => isModeEdit && (
+    const renderCreationDate = () => projectId && (
         <DatePicker name='creationDate' label="Fecha" disabled value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
-    )
-
-    const renderSelectClient = () => permissions.isAdminSas && (
-        <Select name="companyId" label="Cliente" options={ companies } value={ company } disabled={ isModeEdit && permissions.canEditProjCli } required onChange={ onChangeCompany } />
     )
 
     return (
@@ -127,24 +135,17 @@ export const DetailProject = () => {
             <form className="needs-validation" onSubmit={ onSubmit }>
                 
                 <InputText name='key' label='Clave' placeholder='Ingresa clave' 
-                    disabled={ isModeEdit } value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
+                    disabled={ projectId } value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
                     value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
                 <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
-                {/* <div className="row text-start">
-                    <div className='col-12'>
-                    <TextArea label='Descripci&oacute;n' placeholder='Agrega alguna descripci&oacute;n al proyecto' value={ description } onChange={ onChangeDesc } />
-                    </div>
-                </div> */}
-
                 { renderCreatedBy() }
                 { renderCreationDate() }
-                { renderSelectClient() }
                 <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } />
 
                 <div className="pt-3 d-flex flex-row-reverse">
-                    <button type="submit" className="btn btn-primary">Guardar</button>
+                    <button type="submit" className="btn btn-primary" disabled={ (projectId && !permissions.canEditProj) }>Guardar</button>
                     &nbsp;
                     <button type="button" className="btn btn-danger" onClick={ () => navigate(`/home`) }>Cancelar</button>
                 </div>
@@ -152,4 +153,3 @@ export const DetailProject = () => {
         </div>
     )
 }
-

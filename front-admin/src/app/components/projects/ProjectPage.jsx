@@ -1,21 +1,22 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { cleanProjectApplication, setCurrentTab } from '../../../store/project/projectSlice';
+import { setCurrentTab } from '../../../store/project/projectSlice';
 import { Alert } from '../custom/alerts/page/Alert';
 import { TableLog } from '../custom/TableLog';
+import { numberToString } from '../../helpers/utils';
 
 export const ProjectPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
-  const {project, currentTab} = useSelector( state => state.projectReducer );
+  const {currentTab} = useSelector( state => state.projectReducer );
   
   const handleAddApplication = () => {
-    dispatch(cleanProjectApplication(project.id));
-    navigate(`/project/${ project.id }/application/add`);
+    navigate(`/project/${ id }/application/add`);
   }
 
   const renderAddButton = () => permissions.canCreateProjApp && (
@@ -45,13 +46,13 @@ export const ProjectPage = () => {
       <div className='px-5'>
         <div className='d-flex justify-content-between'>
           <h1 className="fs-4 card-title fw-bold mb-4">Proyecto Nuevo</h1>
-          { ( project.id ) ? renderTabs() : null }
+          { ( id ) ? renderTabs() : null }
         </div>
         <Alert />
-        { (currentTab === 2 && project.id ) ? renderAddButton() : null }
+        { (currentTab === 2 && id ) ? renderAddButton() : null }
         { 
-          (currentTab === 2) ? ( <TableApplications projectId = { project.id } /> ) : ( 
-            (currentTab === 3) ? (<TableLog history={ project.history } />) : (<DetailProject />) 
+          (currentTab === 2) ? ( <TableApplications projectId = { id } /> ) : ( 
+            (currentTab === 3) ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (<DetailProject projectId={ id } />) 
           )
         }
       </div>

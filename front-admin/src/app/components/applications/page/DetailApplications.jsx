@@ -5,42 +5,64 @@ import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
-import { saveApplication, updateApplication } from '../../../services/ProjectService';
+import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
 import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
 import { Alert } from '../../custom/alerts/page/Alert';
-import { addAplication } from '../../../../store/project/projectSlice';
 import { TableLog } from '../../custom/TableLog';
 
 export const DetailApplications = () => {
 
   const dispatch = useDispatch();
   const { permissions } = useSelector( state => state.auth );
-  const { projectApplication } = useSelector( state => state.projectReducer );
-  const { projectId } = useParams();
+  const { projectId, id } = useParams();
 
   const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState(1);
-  const [aplication, setAplication] = useState(numberToString(projectApplication.applicationId, ''));
-  const [amount, setAmount] = useState(numberToString(projectApplication.amount, ''));
+  const [aplication, setAplication] = useState('');
+  const [amount, setAmount] = useState('');
   // const [status, setStatus] = useState('2000900001');
-  const [leader, setLeader] = useState(numberToString(projectApplication.leaderId, ''));
-  const [developer, setDeveloper] = useState(numberToString(projectApplication.developerId, ''));
-  const [hours, setHours] = useState(numberToString(projectApplication.hours, ''));
-  const [endDate, setEndDate] = useState(handleDateStr(projectApplication.endDate));
-  const [designDate, setDesignDate] = useState(handleDateStr(projectApplication.designDate));
-  const [developmentDate, setDevelopmentDate] = useState(handleDateStr(projectApplication.developmentDate));
+  const [leader, setLeader] = useState('');
+  const [developer, setDeveloper] = useState('');
+  const [hours, setHours] = useState('');
+  const [endDate, setEndDate] = useState();
+  const [designDate, setDesignDate] = useState();
+  const [developmentDate, setDevelopmentDate] = useState();
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
 
-  const isModeEdit = ( projectApplication.id && projectApplication.id > 0 && !permissions.canEditProjApp );
+  const isModeEdit = ( id && !permissions.canEditProjApp );
+
+  const fetchApplication = () => {
+    getProjectApplicationById(projectId, id).then( response => {
+      if( response.code ) {
+        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+      } else {
+        setAplication(numberToString(response.applicationId, ''));
+        setAmount(numberToString(response.amount, ''));
+        setLeader(numberToString(response.leaderId, ''));
+        setDeveloper(numberToString(response.developerId, ''));
+        setHours(numberToString(response.hours, ''));
+        setEndDate(handleDateStr(response.endDate));
+        setDesignDate(handleDateStr(response.designDate));
+        setDevelopmentDate(handleDateStr(response.developmentDate));
+      }
+    }).catch( error => {
+        dispatch(setMessage(
+            buildPayloadMessage(
+                'Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador', 
+                alertType.error
+            )
+        ));
+    });
+  }
 
   const fetchSelects = () => {
     
-    getCatalogChilds(1000000005)
+    getCatalogChilds(1000000004)
       .then( response => {
         setCatApliations(response);
       }).catch( error => {
@@ -54,7 +76,7 @@ export const DetailApplications = () => {
     //     console.log(error);
     //   });
     
-    getEmployess()
+    getEmployess(true)
       .then( response => {
         setCatEmployees(response);
       }).catch( error => {
@@ -63,6 +85,9 @@ export const DetailApplications = () => {
   };
 
   useEffect(() => {
+    if( id ) {
+      fetchApplication();
+    }
     fetchSelects();
   }, []);
 
@@ -88,10 +113,10 @@ export const DetailApplications = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( projectApplication.id && permissions.canEditProjApp ) {
+    if ( id && permissions.canEditProjApp ) {
       update(request);
     } else if ( permissions.canCreateProjApp ) {
-      request.projectId = projectApplication.projectId;
+      request.projectId = projectId;
       save(request);
     }    
   }
@@ -102,8 +127,7 @@ export const DetailApplications = () => {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
       } else {
         dispatch(setMessage(buildPayloadMessage('¡Aplicacion agregada a proyecto correctamente!', alertType.success)));
-        dispatch(addAplication(response));
-        navigate(`/project/${projectApplication.projectId}/edit`, { replace: true });
+        navigate(`/project/${projectId}/edit`, { replace: true });
       }
     }).catch(error => {
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear aplicación, contacte al administrador', alertType.error)));
@@ -111,7 +135,7 @@ export const DetailApplications = () => {
   }
 
   const update = request => {
-    updateApplication(projectApplication.id, request).then( response => {
+    updateApplication(id, request).then( response => {
       if(response.code && response.code !== 201) {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
       } else {
@@ -194,7 +218,7 @@ export const DetailApplications = () => {
         { renderTabs() }
       </div>
       <Alert />
-      { (currentTab === 2) ? (<TableLog history={ projectApplication.history } />) : renderDetail() }
+      { (currentTab === 2) ? (<TableLog tableName='ProjectApplication' recordId={ id } />) : renderDetail() }
     </div>
   )
 }

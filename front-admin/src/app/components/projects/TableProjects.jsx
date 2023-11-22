@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { getProjectById, getProjects } from '../../services/ProjectService';
+import { getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeLoading } from '../../../store/loading/loadingSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
-import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setCurrentTab } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
 import { buildPayloadMessage } from '../../helpers/utils';
@@ -60,18 +60,8 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        getProjectById(id).then( response => {
-            if( response.code ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
-            } else {
-              dispatch(setProject(response));
-              dispatch(setCurrentTab(1));
-              navigate(`/project/${id}/edit`);
-            }
-        }).catch( error => {
-            console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
-        });
+        dispatch(setCurrentTab(1));
+        navigate(`/project/${id}/edit`);
     }
 
     // const renderStatus = (status) => {
