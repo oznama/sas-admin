@@ -70,7 +70,16 @@ public class EmployeeController {
           @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
   public ResponseEntity<List<EmployeeFindSelectDto>> select() throws CustomException {
     log.info("Getting catalog employee");
-    return ResponseEntity.ok(service.getForSelect());
+    return ResponseEntity.ok(service.getForSelect(false));
+  }
+
+  @GetMapping("/select/developers")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar desarrolladores para select", nickname = "/select")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<EmployeeFindSelectDto>> selectDevelopers() throws CustomException {
+    log.info("Getting catalog employee");
+    return ResponseEntity.ok(service.getForSelect(true));
   }
 
 }

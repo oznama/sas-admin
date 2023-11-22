@@ -7,6 +7,7 @@ import com.mexico.sas.admin.api.dto.catalog.CatalogSimpleDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Catalog;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -22,11 +23,8 @@ public interface CatalogService {
     Catalog findEntityById(Long id) throws CustomException;
     Catalog findEntityByIdAndCatalogParentId(Long id, Long catalogParentId) throws CustomException;
     CatalogDto findById(Long id) throws CustomException;
-    List<CatalogDto> findAll() throws CustomException;
+    List<CatalogPaggedDto> findAll() throws CustomException;
     CatalogDto findByIdAndCatalogParent(Long id, Long catalogParentId) throws CustomException;
     List<CatalogDto> findChildsDto(Long id) throws CustomException;
-    List<CatalogPaggedDto> findChilds(Long id) throws CustomException;
-    List<CatalogPaggedDto> findChilds(List<Long> catalogsParentId) throws CustomException;
-    CatalogDto findByIdInCatalogsParent(Long id, List<Long> catalogsParentId) throws CustomException;
     CatalogSimpleDto getCatalogSimpleDto(Long id);
 }

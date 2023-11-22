@@ -10,6 +10,7 @@ import lombok.Setter;
 public class SecurityContextPrincipal {
     private Long userId;
     private String name;
+    private Long roleId;
     private Long companyId;
 
     public SecurityContextPrincipal(Long userId) {

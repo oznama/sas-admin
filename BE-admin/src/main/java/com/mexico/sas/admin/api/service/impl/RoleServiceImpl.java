@@ -40,7 +40,7 @@ public class RoleServiceImpl extends LogMovementUtils implements RoleService {
   public void save(RoleDto roleDto) throws CustomException {
     log.debug("Saving role {} ...", roleDto);
     Role role = from_M_To_N(roleDto, Role.class);
-    role.setCreatedBy(getCurrentUserId());
+    role.setCreatedBy(getCurrentUser().getUserId());
     repository.save(role);
     if(role.getId() == null) {
       String msgError = I18nResolver.getMessage(I18nKeys.ROLE_NOT_CREATED, role.getName());

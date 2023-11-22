@@ -12,6 +12,9 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
+    Long countByCompany(Company company);
+    Long countByCompanyAndCreatedBy(Company company, Long createdBy);
+    Page<Project> findByCompany(Company company, Pageable pageable);
     Page<Project> findByCompanyAndCreatedBy(Company company, Long createdBy, Pageable pageable);
     Optional<Project> findByIdAndActiveIsTrueAndEliminateIsFalse(Long id);
     Optional<Project> findByKey(String key);

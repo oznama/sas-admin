@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
+import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.log.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.*;
@@ -67,7 +68,7 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
         if( logMovement != null ) {
             try {
                 logMovementDto.setId(logMovement.getId());
-                logMovementDto.setDate(logMovement.getCreationDate());
+                logMovementDto.setDate(dateToString(logMovement.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY_HHMMSS, true));
                 logMovementDto.setUserName(logMovement.getUserFullname());
                 try {
                     logMovementDto.setEvent(catalogService.findByIdAndCatalogParent(logMovement.getEventId(), CatalogKeys.LOG_DETAIL).getValue());

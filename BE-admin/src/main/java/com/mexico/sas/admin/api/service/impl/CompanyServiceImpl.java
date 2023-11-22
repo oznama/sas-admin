@@ -50,9 +50,9 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
             companies.forEach( company -> {
                 try {
                     if( company.getId().equals(CatalogKeys.COMPANY_SAS) ) {
-                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), bossesPositions()));
+                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, bossesPositions()));
                     } else {
-                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), CatalogKeys.EMPLOYEE_POSITION_PM));
+                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM));
                     }
                 } catch (CustomException e) {
                     log.error("Impossible add company {}", company.getId());
@@ -61,7 +61,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         } else {
             try {
                 Company company = findEntityById(getCurrentUser().getCompanyId());
-                getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), CatalogKeys.EMPLOYEE_POSITION_PM));
+                getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM));
             } catch (CustomException e) {
                 log.error("Impossible add company, {}", e.getMessage());
             }

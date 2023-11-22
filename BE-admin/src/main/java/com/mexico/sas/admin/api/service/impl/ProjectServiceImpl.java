@@ -12,6 +12,7 @@ import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
 import com.mexico.sas.admin.api.repository.ProjectRepository;
 import com.mexico.sas.admin.api.service.*;
+import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,35 +48,35 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public Page<ProjectPageableDto> findAll(Pageable pageable) {
+        Long roleId = getCurrentUser().getRoleId();
         Long companyId = getCurrentUser().getCompanyId();
         log.debug("Finding all projects with pagination for employee of company {}", companyId);
-        Page<Project> projects = companyId.equals(CatalogKeys.COMPANY_SAS) ? repository.findAll(pageable)
-                : repository.findByCompanyAndCreatedBy(new Company(companyId), getCurrentUserId(), pageable);
+        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.findAll(pageable)
+                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
+                    ? repository.findByCompany(new Company(companyId), pageable)
+                    : repository.findByCompanyAndCreatedBy(new Company(companyId), getCurrentUser().getUserId(), pageable));
+
+//        long total = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.count()
+//                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
+//                ? repository.countByCompany(new Company(companyId))
+//                : repository.countByCompanyAndCreatedBy(new Company(companyId), getCurrentUser().getUserId()));
+
         List<ProjectPageableDto> projectsPageableDto = new ArrayList<>();
 
         projects.forEach( project -> {
             try {
-                ProjectPageableDto projectPageableDto = from_M_To_N(project, ProjectPageableDto.class);
-                projectPageableDto.setCreatedBy(logMovementService
-                        .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
-                projectPageableDto.setCompany(project.getCompany().getName());
-                projectPageableDto.setProjectManager(buildFullname(project.getProjectManager()));
-                projectsPageableDto.add(projectPageableDto);
+                projectsPageableDto.add(parseProjectPagged(project));
             } catch (CustomException e) {
                 log.error(e.getMessage());
             }
         });
-        return new PageImpl<>(projectsPageableDto, pageable, repository.count());
+        return new PageImpl<>(projectsPageableDto, pageable, projects.getTotalElements());
     }
 
     @Override
     public ProjectFindDto findById(Long id) throws CustomException {
         Project project = findEntityById(id);
-        ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
-        projectFindDto.setCreatedBy(logMovementService
-                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
-        projectFindDto.setCompanyId(project.getCompany().getId());
-        projectFindDto.setProjectManagerId(project.getProjectManager().getId());
+        ProjectFindDto projectFindDto = parseFromEntity(project);
         List<ProjectApplication> projectApplications = projectApplicationRepository.findByProject(project);
         List<ProjectApplicationFindDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
@@ -86,15 +87,13 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             }
         });
         projectFindDto.setApplications(applications);
-        projectFindDto.setHistory(logMovementService.findByTableAndRecordId(Project.class.getSimpleName(), id));
         return projectFindDto;
     }
 
     @Override
     public ProjectFindDto findByKey(String key) throws CustomException {
-        Project project = repository.findByKey(key)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_BYKEY_NOT_FOUND, key)));
-        return from_M_To_N(project, ProjectFindDto.class);
+        return parseFromEntity(repository.findByKey(key)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_BYKEY_NOT_FOUND, key))));
     }
 
     @Override
@@ -105,6 +104,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public void save(ProjectDto projectDto) throws CustomException {
+        log.debug(" ::: Request to save ::: {}", projectDto);
         Project project = from_M_To_N(projectDto, Project.class);
         validationSave(projectDto, project);
         try {
@@ -113,7 +113,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             projectDto.setId(project.getId());
             log.debug("Project created with id: {}", projectDto.getId());
             save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.PROJECT_LOG_CREATED));
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
             log.error(msgError, e.getMessage());
@@ -124,32 +124,10 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     @Override
     public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
         Project project = findEntityById(projectId);
-        StringBuilder sb = new StringBuilder();
-        if( !project.getDescription().equals(projectUpdateDto.getDescription()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.description,
-                    project.getDescription(), projectUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
-            project.setDescription(projectUpdateDto.getDescription());
-        }
-        if( projectUpdateDto.getCompanyId() != null && !project.getCompany().getId().equals(projectUpdateDto.getCompanyId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.companyId,
-                    project.getCompany().getId(), projectUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
-            project.setCompany(new Company(projectUpdateDto.getCompanyId()));
-        }
-        if( !project.getProjectManager().getId().equals(projectUpdateDto.getProjectManagerId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.projectManagerId,
-                    project.getProjectManager().getId(), projectUpdateDto.getProjectManagerId())).append(GeneralKeys.JUMP_LINE);
-            project.setProjectManager(new Employee(projectUpdateDto.getProjectManagerId()));
-        }
-        if( (project.getInstallationDate() == null && projectUpdateDto.getInstallationDate() != null) ||
-                (!project.getInstallationDate().equals(projectUpdateDto.getInstallationDate())) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.installationDate,
-                    project.getInstallationDate(), projectUpdateDto.getInstallationDate())).append(GeneralKeys.JUMP_LINE);
-            project.setInstallationDate(projectUpdateDto.getInstallationDate());
-        }
-
-        if(!sb.toString().isEmpty()) {
+        String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto);
+        if(!message.isEmpty()) {
             repository.save(project);
-            save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_UPDATE, sb.toString().trim());
+            save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
     }
 
@@ -163,7 +141,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             log.debug("Entity ::: {}", projectApplication);
             projectApplicationRepository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_LOG_CREATED));
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
             projectApplicationDto.setId(projectApplication.getId());
             log.debug("Application for project created with id: {}", projectApplicationDto.getId());
         } catch (Exception e) {
@@ -177,46 +155,11 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     @Override
     public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        StringBuilder sb = new StringBuilder();
-        if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.applicationId,
-                    projectApplication.getApplicationId(), projectApplicationUpdateDto.getApplicationId())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
-        }
-        if( !projectApplication.getAmount().equals(projectApplicationUpdateDto.getAmount()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
-                    projectApplication.getAmount(), projectApplicationUpdateDto.getAmount())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
-        }
-        if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,
-                    projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setLeader(new Employee(projectApplicationUpdateDto.getLeaderId()));
-        }
-        if( !projectApplication.getDeveloper().getId().equals(projectApplicationUpdateDto.getDeveloperId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developerId,
-                    projectApplication.getDeveloper().getId(), projectApplicationUpdateDto.getDeveloperId())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setDeveloper(new Employee(projectApplicationUpdateDto.getDeveloperId()));
-        }
-        if( !projectApplication.getDesignDate().equals(projectApplicationUpdateDto.getDesignDate()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
-                    projectApplication.getDesignDate(), projectApplicationUpdateDto.getDesignDate())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setDesignDate(projectApplicationUpdateDto.getDesignDate());
-        }
-        if( !projectApplication.getDevelopmentDate().equals(projectApplicationUpdateDto.getDevelopmentDate()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developmentDate,
-                    projectApplication.getDevelopmentDate(), projectApplicationUpdateDto.getDevelopmentDate())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setDevelopmentDate(projectApplicationUpdateDto.getDevelopmentDate());
-        }
-        if( !projectApplication.getEndDate().equals(projectApplicationUpdateDto.getEndDate()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.endDate,
-                    projectApplication.getEndDate(), projectApplicationUpdateDto.getEndDate())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setEndDate(projectApplicationUpdateDto.getEndDate());
-        }
+        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto);
 
-        if(!sb.toString().isEmpty()) {
+        if(!message.isEmpty()) {
             projectApplicationRepository.save(projectApplication);
-            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, sb.toString().trim());
+            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
     }
 
@@ -246,18 +189,53 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId))));
     }
 
+    private ProjectFindDto parseFromEntity(Project project) throws CustomException {
+        ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
+        projectFindDto.setCreatedBy(logMovementService
+                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+        projectFindDto.setCompanyId(project.getCompany().getId());
+        projectFindDto.setProjectManagerId(project.getProjectManager().getId());
+        projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return projectFindDto;
+    }
+
+    private ProjectPageableDto parseProjectPagged(Project project) throws CustomException {
+        ProjectPageableDto projectPageableDto = from_M_To_N(project, ProjectPageableDto.class);
+        projectPageableDto.setCreatedBy(logMovementService
+                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+        projectPageableDto.setCompany(project.getCompany().getName());
+        projectPageableDto.setProjectManager(buildFullname(project.getProjectManager()));
+        projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return projectPageableDto;
+    }
+
     private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
         projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
-        projectApplicationDto.setHistory(logMovementService
-                .findByTableAndRecordId(ProjectApplication.class.getSimpleName(), projectApplication.getId()));
+        projectApplicationDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return projectApplicationDto;
     }
 
-    private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
+    private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
+        ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
+        projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
+        projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
+        projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
+        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
+        projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationFindDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return projectApplicationFindDto;
+    }
 
+    private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
+        project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
             findByKey(project.getKey());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, projectDto.getKey()), null);
@@ -265,27 +243,17 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             if ( e instanceof BadRequestException)
                 throw e;
         }
-
-        Long companyId = getCurrentUser().getCompanyId();
-        Company company = null;
-        if(companyId.equals(CatalogKeys.COMPANY_SAS)) {
-            companyService.findById(projectDto.getCompanyId());
-            company = new Company(projectDto.getCompanyId());
-            project.setCompany(company);
-        } else {
-            company = new Company(companyId);
-            project.setCompany(company);
-        }
-
+        Company company = new Company(getCurrentUser().getCompanyId());
+        project.setCompany(company);
         employeeService.findByCompanyAndId(company.getId() , projectDto.getProjectManagerId());
         project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
-
-        project.setStatus(CatalogKeys.ESTATUS_MACHINE_ENABLED);
-        project.setCreatedBy(getCurrentUserId());
+        project.setCreatedBy(getCurrentUser().getUserId());
     }
 
     private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
-
+        projectApplication.setDesignDate(stringToDate(projectApplicationDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        projectApplication.setDevelopmentDate(stringToDate(projectApplicationDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        projectApplication.setEndDate(stringToDate(projectApplicationDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
             findByProjectAndApplicationId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
@@ -299,15 +267,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
         projectApplication.setLeader(employeeService.findEntityById(projectApplicationDto.getLeaderId()));
         projectApplication.setDeveloper(employeeService.findEntityById(projectApplicationDto.getDeveloperId()));
-        projectApplication.setCreatedBy(getCurrentUserId());
-    }
-
-    private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
-        ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
-        projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
-        projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
-        projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        return projectApplicationFindDto;
+        projectApplication.setCreatedBy(getCurrentUser().getUserId());
     }
 }

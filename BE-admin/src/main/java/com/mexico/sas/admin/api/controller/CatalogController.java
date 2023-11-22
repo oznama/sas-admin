@@ -59,6 +59,15 @@ public class CatalogController {
             new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), updateStatusDto));
   }
 
+  @GetMapping
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar los catalogs padres", nickname = "/findAll")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = CatalogPaggedDto.class, responseContainer = "List") })
+  public ResponseEntity<List<CatalogPaggedDto>> findAll() throws CustomException {
+    log.info("Finding catalog parents");
+    return ResponseEntity.ok(service.findAll());
+  }
+
   @GetMapping("/{id}")
   @ApiIgnore
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar catalogo por id", nickname = "findById")
@@ -84,15 +93,6 @@ public class CatalogController {
   public ResponseEntity<List<CatalogDto>> findChilds(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding catalog items by id");
     return ResponseEntity.ok(service.findChildsDto(id));
-  }
-
-  @GetMapping
-  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar los catalogs principales", nickname = "/findAll")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = CatalogDto.class, responseContainer = "List") })
-  public ResponseEntity<List<CatalogDto>> findAll() throws CustomException {
-    log.info("Finding catalog parents");
-    return ResponseEntity.ok(service.findAll());
   }
 
 }

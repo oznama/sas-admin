@@ -28,7 +28,7 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
   public void save(RolePermissionDto rolePermissionDto) throws CustomException {
     log.debug("Saving role-permission relation {} ...", rolePermissionDto);
     RolePermission rolePermission = from_M_To_N(rolePermissionDto, RolePermission.class);
-    rolePermission.setCreatedBy(getCurrentUserId());
+    rolePermission.setCreatedBy(getCurrentUser().getUserId());
     repository.save(rolePermission);
     if(rolePermission.getId() == null) {
       String msgError = I18nResolver.getMessage(I18nKeys.ROLE_PERMISSION_NOT_CREATED, rolePermissionDto);

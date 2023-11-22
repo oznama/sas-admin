@@ -6,18 +6,18 @@ SELECT setval('companies_id_seq', 2);
 
 -- Empleados
 INSERT INTO employees (id, email, name, surname, company_id) VALUES (1, 'admin@sas-mexico.com', 'admin', 'admin', 1);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, position_id) VALUES (2, 'jaime.careno@sas-mexico.com', 'Jaime', CONCAT('Carre',E'\u00F1','o'), 'Mendez', 1, 2000600001);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (3, 'selene.pascali@sas-mexico.com', 'Selene', 'Pascalis', 'Garcia', 1, 2, 2000600002);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (4, 'angel.calzada@sas-mexico.com', 'Angel', 'Calzada', 1, 3, 2000600005);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (5, 'alvaro.mendoza@sas-mexico.com', 'Alvaro', 'Mendoza', 1, 3, 2000600006);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (6, 'juan.banos@sas-mexico.com', 'Juan', CONCAT('Ba',E'\u00F1','os'), 1, 3, 2000600006);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000600006);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000600006);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, position_id) VALUES (2, 'jaime.careno@sas-mexico.com', 'Jaime', CONCAT('Carre',E'\u00F1','o'), 'Mendez', 1, 2000500001);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (3, 'selene.pascali@sas-mexico.com', 'Selene', 'Pascalis', 'Garcia', 1, 2, 2000500002);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (4, 'angel.calzada@sas-mexico.com', 'Angel', 'Calzada', 1, 3, 2000500005);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (5, 'alvaro.mendoza@sas-mexico.com', 'Alvaro', 'Mendoza', 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (6, 'juan.banos@sas-mexico.com', 'Juan', CONCAT('Ba',E'\u00F1','os'), 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000500006);
 
-INSERT INTO employees (id, email, name, surname, company_id, position_id) VALUES (9, 'rogelio.zavaleta@prosa.com.mx', 'Rogelio', 'Zavaleta', 2, 2000600003);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (10, 'fernando.chavez@prosa.com.mx', 'Fernando', 'Chavez', 'Nava', 2, 9, 2000600004);
-INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, position_id) VALUES (11, 'karen.lopez@prosa.com.mx', 'Karen', 'Paulina', 'Lopez', 'Medina', 2, 2000600007);
-INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, boss_id, position_id) VALUES (12, 'miguel.poblete@prosa.com.mx', 'Miguel', 'Angel', 'Poblete', 'Marroquin', 2, 11, 2000600007);
+INSERT INTO employees (id, email, name, surname, company_id, position_id) VALUES (9, 'rogelio.zavaleta@prosa.com.mx', 'Rogelio', 'Zavaleta', 2, 2000500003);
+INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (10, 'fernando.chavez@prosa.com.mx', 'Fernando', 'Chavez', 'Nava', 2, 9, 2000500004);
+INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, position_id) VALUES (11, 'karen.lopez@prosa.com.mx', 'Karen', 'Paulina', 'Lopez', 'Medina', 2, 2000500007);
+INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, boss_id, position_id) VALUES (12, 'miguel.poblete@prosa.com.mx', 'Miguel', 'Angel', 'Poblete', 'Marroquin', 2, 11, 2000500007);
 
 SELECT setval('employees_id_seq', 12);
 
@@ -37,22 +37,20 @@ INSERT INTO permission (id, name, description) VALUES(4, 'Admin-Usr', 'Administr
 INSERT INTO permission (id, name, description) VALUES(5, 'Admin-App', 'Administracion de aplicaciones');
 INSERT INTO permission (id, name, description) VALUES(6, 'Create-proj', 'Crear proyectos');
 INSERT INTO permission (id, name, description) VALUES(7, 'Edit-proj', 'Editar proyectos');
-INSERT INTO permission (id, name, description) VALUES(8, 'Edit-proj-cli', 'Editar el cliente del proyecto');
-INSERT INTO permission (id, name, description) VALUES(9, 'Edit-proj-pm', 'Editar el pm del proyecto');
-INSERT INTO permission (id, name, description) VALUES(10, 'Dis-proj', 'Desactivar proyectos');
-INSERT INTO permission (id, name, description) VALUES(11, 'Del-proj', 'Eliminar proyectos');
-INSERT INTO permission (id, name, description) VALUES(12, 'Create-proj-app', 'Asociacion de aplicaciones a proyecto');
-INSERT INTO permission (id, name, description) VALUES(13, 'Edit-proj-app', 'Editar detalles de aplicacion en proyecto');
-INSERT INTO permission (id, name, description) VALUES(14, 'Del-proj-app', 'Eliminar asociacion de aplicacion a proyecto');
+INSERT INTO permission (id, name, description) VALUES(8, 'Edit-proj-pm', 'Editar el pm del proyecto');
+INSERT INTO permission (id, name, description) VALUES(9, 'Dis-proj', 'Desactivar proyectos');
+INSERT INTO permission (id, name, description) VALUES(10, 'Del-proj', 'Eliminar proyectos');
+INSERT INTO permission (id, name, description) VALUES(11, 'Create-proj-app', 'Asociacion de aplicaciones a proyecto');
+INSERT INTO permission (id, name, description) VALUES(12, 'Edit-proj-app', 'Editar detalles de aplicacion en proyecto');
+INSERT INTO permission (id, name, description) VALUES(13, 'Del-proj-app', 'Eliminar asociacion de aplicacion a proyecto');
 
-SELECT setval('permission_id_seq', 14);
+SELECT setval('permission_id_seq', 13);
 
 -- Rol Permiso
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 1);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 3);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 4);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 5);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 6);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 7);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 8);
@@ -61,8 +59,8 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 10);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 11);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 12);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 13);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 14);
 
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 1);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 3);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 4);
@@ -75,13 +73,13 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 10);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 11);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 12);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 13);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 14);
 
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 3);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 4);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 5);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 6);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 7);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 12);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 11);
 
 
 -- Usuarios
@@ -110,26 +108,21 @@ INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (20001000
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100002, 'Inactivo', 'Registro inactivo', 1000000001);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100003, 'Eliminado', 'Registro eliminado', 1000000001);
 
----- Catalogo de tipos de catalogo
-INSERT INTO catalog (id, value, description) VALUES (1000000002, 'Tipo Catalogo', 'Tipo de catalogo interno o externo');
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200001, 'Interno', 'Tipo de catalogo interno', 1000000002);
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200002, 'Externo', 'Tipo de catalogo externo', 1000000002);
-
 -- Estatus Proyecto
-INSERT INTO catalog (id, value, description, type) VALUES (1000000003, 'Estatus proyecto', 'Estados del proyecto', 2000200002);
-INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000300001, 'Nuevo', 'Nuevo', 2000200002, 1000000003);
+INSERT INTO catalog (id, value, description) VALUES (1000000002, 'Estatus proyecto', 'Estados del proyecto');
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200001, 'Nuevo', 'Nuevo', 1000000002);
 
 ---- Crear catalogo bitacora
-INSERT INTO catalog (id, value, description) VALUES (1000000004, 'Bitacora detalle', 'Catalogo de detalle de bitacora');
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400001, 'Insert', 'New record', 1000000004);
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400002, 'Update', 'Change data', 1000000004);
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400003, 'Delete', 'Physical delete', 1000000004);
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400004, 'Status', 'Status change', 1000000004);
-INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000400005, 'Eliminate', 'Logic delete', 1000000004);
+INSERT INTO catalog (id, value, description) VALUES (1000000003, 'Bitacora detalle', 'Catalogo de detalle de bitacora');
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300001, 'Insert', 'New record', 1000000003);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300002, 'Update', 'Change data', 1000000003);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300003, 'Delete', 'Physical delete', 1000000003);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300004, 'Status', 'Status change', 1000000003);
+INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300005, 'Eliminate', 'Logic delete', 1000000003);
 
 ---- Aplicaciones
-INSERT INTO catalog (id, value, description, type) VALUES (1000000005, 'Aplicaciones', '', 2000200002);
-INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500001, 'ACT', '', 2000200002, 1000000005);
+INSERT INTO catalog (id, value) VALUES (1000000004, 'Aplicaciones');
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000400001, 'ACT', 1000000004);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500002, 'CTM', '', 2000200002, 1000000005);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500003, 'IFO', '', 2000200002, 1000000005);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500004, 'PROALERTA', '', 2000200002, 1000000005);
@@ -150,14 +143,14 @@ INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (20
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500019, 'MDT', '', 2000200002, 1000000005);
 
 -- Puesto de trabajo
-INSERT INTO catalog (id, value, description, type) VALUES (1000000006, 'Pruesto trabajo', 'Jerarquia laboral', 2000200002);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600001, 'Director', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600002, 'Subdirector', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600003, 'Gerente', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600004, 'PM', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600005, 'Lider', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600006, 'Desarrollador', 2000200002, 1000000006);
-INSERT INTO catalog (id, value, type, catalog_parent_id) VALUES (2000600007, 'Analista', 2000200002, 1000000006);
+INSERT INTO catalog (id, value, description) VALUES (1000000005, 'Pruesto trabajo', 'Jerarquia laboral');
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500001, 'Director', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500002, 'Subdirector', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500003, 'Gerente', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500004, 'PM', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500005, 'Lider', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500006, 'Desarrollador', 1000000005);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500007, 'Analista', 1000000005);
 
 -- Proyectos
 --INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (1, 'T-62-9900-22', 'Generación de reportes por módulo en SIA para MIFEL', 1, 1, 1, 3, current_timestamp);

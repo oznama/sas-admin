@@ -1,13 +1,11 @@
 package com.mexico.sas.admin.api.dto.project;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -21,9 +19,7 @@ public class ProjectDto implements Serializable {
     private String description;
     private Long companyId;
     private Long projectManagerId;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date creationDate;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date installationDate;
+    private String creationDate;
+    private String installationDate;
 
 }

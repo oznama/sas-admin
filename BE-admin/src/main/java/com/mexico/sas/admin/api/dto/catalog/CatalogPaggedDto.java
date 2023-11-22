@@ -20,7 +20,9 @@ public class CatalogPaggedDto implements Serializable {
     private Long id;
     private String value;
     private String description;
-    private Boolean isRequired;
-    private CatalogSimpleDto status;
-    private CatalogSimpleDto type;
+    private Long status;
+    private Long companyId;
+    private String company;
+
+    private List<CatalogDto> childs;
 }

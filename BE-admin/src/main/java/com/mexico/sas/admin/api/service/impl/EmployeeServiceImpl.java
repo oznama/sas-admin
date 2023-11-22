@@ -1,5 +1,7 @@
 package com.mexico.sas.admin.api.service.impl;
 
+import com.mexico.sas.admin.api.constants.CatalogKeys;
+import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
@@ -64,17 +66,23 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect() {
-        return getForSelect(getCurrentUser().getCompanyId(), bossesAndPmPositions());
+    public List<EmployeeFindSelectDto> getForSelect(Boolean developers) {
+        return getForSelect(getCurrentUser().getCompanyId(), developers, bossesAndPmPositions());
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Long companyId, List<Long> positionIds) {
-        return getSelect(repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds));
+    public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, List<Long> positionIds) {
+        List<Employee> employees = getCurrentUser().getRoleId().equals(GeneralKeys.ROOT_USER_ID)
+            ? repository.findAll()
+            : (companyId.equals(CatalogKeys.COMPANY_SAS) && !developers
+                ? repository.findByPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(positionIds)
+                : repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds)
+            );
+        return getSelect(employees);
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Long companyId, Long positionId) {
+    public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
         return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
     }
 

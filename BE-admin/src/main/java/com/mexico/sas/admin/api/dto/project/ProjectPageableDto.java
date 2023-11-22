@@ -1,12 +1,10 @@
 package com.mexico.sas.admin.api.dto.project;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -20,10 +18,8 @@ public class ProjectPageableDto implements Serializable {
     private String description;
     private Long status;
     private String createdBy;
-    @JsonFormat(pattern="dd/MM/yyyy")
-    private Date creationDate;
+    private String creationDate;
     private String company;
     private String projectManager;
-    @JsonFormat(pattern="dd/MM/yyyy")
-    private Date installationDate;
+    private String installationDate;
 }

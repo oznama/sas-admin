@@ -8,7 +8,6 @@ import lombok.experimental.FieldNameConstants;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author Oziel Naranjo
@@ -28,9 +27,8 @@ public class CatalogUpdateDto implements Serializable {
 
     @Size(max = 255, message = "{validation.value.invalid}")
     private String description;
-    private Boolean isRequired;
 
     @Valid
-    private CatalogSimpleDto type;
+    private Long status;
 
 }

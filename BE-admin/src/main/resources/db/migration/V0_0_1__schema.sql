@@ -48,11 +48,10 @@ create table catalog (
     id  bigserial not null,
     value varchar(255),
     description varchar(255),
-    is_required boolean default false,
     status int8 default 2000100001,
-    type int8 default 2000200001,
     catalog_parent_id int8,
     created_by int8 default 1,
+    company_id int8 default 1,
     creation_date timestamp default current_timestamp,
     primary key (id)
 );
@@ -91,7 +90,7 @@ CREATE TABLE projects (
     id bigserial not null,
     p_key varchar(15) not null unique,
     description varchar(255) not null,
-    status int8 not null,
+    status int8 not null default 2000200001,
     company_id int8 not null,
     project_manager_id int8 not null,
     installation_date timestamp,
@@ -133,6 +132,8 @@ CREATE TABLE log_movement (
 );
 
 alter table catalog add constraint fk_catalog_parent foreign key (catalog_parent_id) references catalog;
+
+alter table catalog add constraint fk_catalog_company foreign key (company_id) references companies;
 
 alter table permission add constraint unique_perm_name unique (name);
 

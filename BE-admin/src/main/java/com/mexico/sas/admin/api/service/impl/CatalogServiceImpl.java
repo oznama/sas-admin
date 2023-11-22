@@ -14,6 +14,8 @@ import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Catalog;
 import com.mexico.sas.admin.api.repository.CatalogRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
+import com.mexico.sas.admin.api.service.CompanyService;
+import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
     @Autowired
     private CatalogRepository repository;
+    @Autowired
+    private CompanyService companyService;
 
     @Override
     public CatalogDto save(CatalogDto catalogDto) throws CustomException {
@@ -41,7 +45,8 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
         try{
             repository.save(catalog);
-            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_INSERT, "TODO");
+            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_INSERT,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.CATALOG_DUPLICATED, catalogDto.getDescription()), catalogDto);
         } catch (Exception e) {
@@ -61,18 +66,14 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         catalogDto.setId(id);
         log.debug("Updating catalog {} ...", catalogDto);
         Catalog catalog = validationUpdate(catalogDto);
-        try {
-            if(catalogDto.getValue() != null && !catalogDto.getValue().equalsIgnoreCase(catalog.getValue()))
-                catalog.setValue(catalogDto.getValue());
-            if(catalogDto.getDescription() != null && !catalogDto.getDescription().equalsIgnoreCase(catalog.getDescription()))
-                catalog.setDescription(catalogDto.getDescription());
-            if(catalogDto.getIsRequired() != null && !catalogDto.getIsRequired().equals(catalog.getIsRequired()))
-                catalog.setIsRequired(catalogDto.getIsRequired());
-
-            repository.save(catalog);
-            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_UPDATE, "TODO");
-        } catch (Exception e) {
-            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
+        String message = ChangeBeanUtils.checkCatalog(catalog, catalogDto);
+        if(!message.isEmpty()) {
+            try {
+                repository.save(catalog);
+                save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+            } catch (Exception e) {
+                throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
+            }
         }
         return findById(id);
     }
@@ -114,36 +115,15 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     }
 
     @Override
-    public List<CatalogDto> findAll() throws CustomException {
-        return parseCatalogDto(repository.findByCatalogParentIsNull());
+    public List<CatalogPaggedDto> findAll() throws CustomException {
+        return parsingPage(repository.findByCatalogParentIsNullAndStatusIsNotAndIdNotInOrderByIdAsc(
+                CatalogKeys.ESTATUS_MACHINE_ELIMINATED, catalogsNotIn()));
     }
 
     @Override
     public List<CatalogDto> findChildsDto(Long id) throws CustomException {
-        return parseCatalogDto(repository.findByCatalogParent(findEntityById(id)));
-    }
-
-    @Override
-    public List<CatalogPaggedDto> findChilds(Long id) throws CustomException {
-        return parsingPage(repository.findByCatalogParent(findEntityById(id)));
-    }
-
-    @Override
-    public List<CatalogPaggedDto> findChilds(List<Long> catalogsParentId) throws CustomException {
-        if(!catalogsParentId.isEmpty()) {
-            List<Catalog> parents = getCatalogsList(catalogsParentId);
-            if(!parents.isEmpty()) {
-                return parsingPage(repository.findByCatalogParentIn(parents));
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    @Override
-    public CatalogDto findByIdInCatalogsParent(Long id, List<Long> catalogsParentId) throws CustomException {
-        Catalog catalog = repository.findByIdAndCatalogParentIn(id, getCatalogsList(catalogsParentId)).orElseThrow(() ->
-                new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, id)));
-        return parseCatalogDto(catalog);
+        return parseCatalogDto(repository.findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(
+                findEntityById(id), getCurrentUser().getCompanyId(), CatalogKeys.ESTATUS_MACHINE_ELIMINATED));
     }
 
     @Override
@@ -163,11 +143,8 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     @Override
     public CatalogSimpleDto getCatalogSimpleDto(Long id) {
         CatalogSimpleDto catalogSimpleDto = null;
-        try {
-            Catalog catalog = findEntityById(id);
-            catalogSimpleDto = from_M_To_N(catalog, CatalogSimpleDto.class);
-            catalogSimpleDto.setDescription(catalog.getValue());
-            return catalogSimpleDto;
+        try {;
+            return from_M_To_N(findEntityById(id), CatalogSimpleDto.class);
         } catch (CustomException e) {
             log.warn("Impossible parsing catalog, error: {}", e.getMessage());
         }
@@ -178,25 +155,13 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         CatalogDto catalogDto = from_M_To_N(catalog, CatalogDto.class);
         if(catalog.getCatalogParent() != null && catalog.getCatalogParent().getId() != null)
             catalogDto.setCatalogParent(catalog.getCatalogParent().getId());
-        if(catalog.getStatus()!=null) {
-            catalogDto.setStatus(getCatalogSimpleDto(catalog.getStatus()));
-        }
-        if(catalog.getType()!=null) {
-            catalogDto.setType(getCatalogSimpleDto(catalog.getType()));
-        }
         return catalogDto;
     }
 
     private CatalogPaggedDto parseCatalogPaggedDto(Catalog catalog) throws CustomException {
         CatalogPaggedDto catalogDto = from_M_To_N(catalog, CatalogPaggedDto.class);
-        if(catalog.getStatus()!=null) {
-            log.debug("Setting catalog status {}...", catalog.getStatus());
-            catalogDto.setStatus(getCatalogSimpleDto(catalog.getStatus()));
-        }
-        if(catalog.getType()!=null) {
-            log.debug("Setting type status {}...", catalog.getType());
-            catalogDto.setType(getCatalogSimpleDto(catalog.getType()));
-        }
+        catalogDto.setCompany(companyService.findById(catalog.getCompanyId()).getName());
+        catalogDto.setChilds(findChildsDto(catalog.getId()));
         log.debug("Catalog {} finded!", catalogDto.getId());
         return catalogDto;
     }
@@ -238,29 +203,12 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         }
         log.debug("NEXT catalog id: {}", nextId);
         catalog.setId(nextId); // Se asigna el id + 1
-
-        findByIdAndCatalogParent(catalogDto.getStatus().getId(), CatalogKeys.ESTATUS_MACHINE);
-        catalog.setStatus(catalogDto.getStatus().getId());
-
-
-        if(catalogDto.getType() == null && catalogDto.getType().getId() == null) {
-            catalog.setType(CatalogKeys.CAT_TYPES_EXT);
-        } else {
-            findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
-            catalog.setType(catalogDto.getType().getId());
-        }
-
-        catalog.setIsRequired( catalog.getIsRequired() == null ? false : catalog.getIsRequired() );
-        catalog.setCreatedBy(getCurrentUserId());
+        catalog.setCompanyId(getCurrentUser().getCompanyId());
+        catalog.setCreatedBy(getCurrentUser().getUserId());
     }
 
     private Catalog validationUpdate(CatalogUpdateDto catalogDto) throws CustomException {
         Catalog catalog = findEntityById(catalogDto.getId());
-
-        if(catalogDto.getType() != null && catalogDto.getType().getId() != null) {
-            findByIdAndCatalogParent(catalogDto.getType().getId(), CatalogKeys.CAT_TYPES);
-            catalog.setType(catalogDto.getType().getId());
-        }
 
         return catalog;
     }

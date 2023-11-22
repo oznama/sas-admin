@@ -213,7 +213,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   private void validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion de rol
     user.setRole(roleService.findEntityById(userDto.getRole()));
-    user.setCreatedBy(getCurrentUserId());
+    user.setCreatedBy(getCurrentUser().getUserId());
   }
 
   private void validationUpdate(UserUpdateDto userDto, User user) throws CustomException {

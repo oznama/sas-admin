@@ -110,7 +110,7 @@ public class Utils {
         return dayInit >= dayEnd;
     }
 
-    public Date stringToDate(String date, String pattern) throws CustomException {
+    public static Date stringToDate(String date, String pattern) throws CustomException {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
             sdf.setLenient(false);
@@ -130,7 +130,8 @@ public class Utils {
         return Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
-    protected String dateToString(Date date, String pattern, boolean withLocale) throws CustomException {
+    public static String dateToString(Date date, String pattern, boolean withLocale) throws CustomException {
+        if(date == null) return null;
         try {
             SimpleDateFormat sdf = withLocale ? new SimpleDateFormat(pattern, AuthorizationFilter.LOCALE) :
                     new SimpleDateFormat(pattern);
@@ -255,10 +256,6 @@ public class Utils {
         }
     }
 
-    protected Long getCurrentUserId() {
-        return getCurrentUser().getUserId();
-    }
-
     protected SecurityContextPrincipal getCurrentUser() {
         log.debug("Getting CURRENT USER ID In security context ...!");
         SecurityContextPrincipal user = null;
@@ -325,6 +322,12 @@ public class Utils {
         List<Long> bosses = bossesPositions();
         bosses.add(CatalogKeys.EMPLOYEE_POSITION_PM);
         return bosses;
+    }
+
+    protected List<Long> catalogsNotIn() {
+        List<Long> catsNotIn = bossesPositions();
+        catsNotIn.add(CatalogKeys.CATALOG_APPLICATIONS);
+        return catsNotIn;
     }
 
 }

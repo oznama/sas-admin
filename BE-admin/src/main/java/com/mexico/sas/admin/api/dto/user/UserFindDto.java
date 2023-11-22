@@ -1,7 +1,6 @@
 package com.mexico.sas.admin.api.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
