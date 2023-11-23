@@ -79,17 +79,11 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     }
 
     @Override
-    public void updateStatus(UpdateStatusDto updateStatusDto) throws CustomException {
-        findById(updateStatusDto.getId());
-        Catalog catalogParent = new Catalog();
-        catalogParent.setId(CatalogKeys.ESTATUS_MACHINE);
-        repository.findByIdAndCatalogParent(updateStatusDto.getStatusId(), catalogParent)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, updateStatusDto.getStatusId())));;
-        log.debug("Updating proposal status: {}", updateStatusDto);
-        repository.updateStatus(updateStatusDto.getId(), updateStatusDto.getStatusId());
-        save(Catalog.class.getSimpleName(), updateStatusDto.getId(),
-                updateStatusDto.getStatusId().equals(CatalogKeys.ESTATUS_MACHINE_ELIMINATED) ?
-                        CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS, "TODO");
+    public void deleteLogic(Long id) {
+        log.debug("Delete logic: {}", id);
+        repository.updateStatus(id, CatalogKeys.ESTATUS_MACHINE_ELIMINATED);
+        save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
     }
 
     @Override
@@ -116,14 +110,20 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
     @Override
     public List<CatalogPaggedDto> findAll() throws CustomException {
-        return parsingPage(repository.findByCatalogParentIsNullAndStatusIsNotAndIdNotInOrderByIdAsc(
-                CatalogKeys.ESTATUS_MACHINE_ELIMINATED, catalogsNotIn()));
+        List<Catalog> catalogs = getCurrentUser().getRoleId().equals(CatalogKeys.ROLE_ROOT)
+                ? repository.findByCatalogParentIsNullAndIdNotInOrderByIdAsc(catalogsNotIn())
+                : repository.findByCatalogParentIsNullAndStatusIsNotAndIdNotInOrderByIdAsc(
+                        CatalogKeys.ESTATUS_MACHINE_ELIMINATED, catalogsNotIn());
+        return parsingPage(catalogs);
     }
 
     @Override
-    public List<CatalogDto> findChildsDto(Long id) throws CustomException {
-        return parseCatalogDto(repository.findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(
-                findEntityById(id), getCurrentUser().getCompanyId(), CatalogKeys.ESTATUS_MACHINE_ELIMINATED));
+    public List<CatalogPaggedDto> findChildsByParentId(Long id) {
+        List<Catalog> catalogs = getCurrentUser().getRoleId().equals(CatalogKeys.ROLE_ROOT)
+                ? repository.findByCatalogParentAndCompanyIdOrderByIdAsc(new Catalog(id), getCurrentUser().getCompanyId())
+                : repository.findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(
+                        new Catalog(id), getCurrentUser().getCompanyId(), CatalogKeys.ESTATUS_MACHINE_ELIMINATED);
+        return parsingPage(catalogs);
     }
 
     @Override
@@ -140,17 +140,6 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
                 new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, id)));
     }
 
-    @Override
-    public CatalogSimpleDto getCatalogSimpleDto(Long id) {
-        CatalogSimpleDto catalogSimpleDto = null;
-        try {;
-            return from_M_To_N(findEntityById(id), CatalogSimpleDto.class);
-        } catch (CustomException e) {
-            log.warn("Impossible parsing catalog, error: {}", e.getMessage());
-        }
-        return catalogSimpleDto;
-    }
-
     private CatalogDto parseCatalogDto(Catalog catalog) throws CustomException {
         CatalogDto catalogDto = from_M_To_N(catalog, CatalogDto.class);
         if(catalog.getCatalogParent() != null && catalog.getCatalogParent().getId() != null)
@@ -161,7 +150,7 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     private CatalogPaggedDto parseCatalogPaggedDto(Catalog catalog) throws CustomException {
         CatalogPaggedDto catalogDto = from_M_To_N(catalog, CatalogPaggedDto.class);
         catalogDto.setCompany(companyService.findById(catalog.getCompanyId()).getName());
-        catalogDto.setChilds(findChildsDto(catalog.getId()));
+        catalogDto.setStatusDesc(findEntityById(catalog.getStatus()).getValue());
         log.debug("Catalog {} finded!", catalogDto.getId());
         return catalogDto;
     }

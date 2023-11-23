@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Date;
 @Entity
 @Table
 @Data
+@NoArgsConstructor
 @DynamicInsert
 public class Catalog implements Serializable {
 
@@ -34,4 +36,7 @@ public class Catalog implements Serializable {
     @JoinColumn
     private Catalog catalogParent;
 
+    public Catalog(Long id) {
+        this.id = id;
+    }
 }

@@ -46,17 +46,17 @@ public class CatalogController {
     return ResponseEntity.ok().body(service.update(id, catalogDto));
   }
 
-  @PatchMapping
+  @DeleteMapping(path = "/{id}")
   @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "PATCH", value = "Servicio para actualizar status de catalogo", nickname = "updateStatus")
+  @ApiOperation(httpMethod = "PATCH", value = "Servicio para eliminar catalogo", nickname = "delete")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })
-  public ResponseEntity<ResponseDto> updateStatus(@Valid @RequestBody UpdateStatusDto updateStatusDto) throws CustomException {
-    log.info("Updating catalog's status");
-    service.updateStatus(updateStatusDto);
+  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+    log.info("Delete catalog");
+    service.deleteLogic(id);
     return ResponseEntity.ok(
-            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), updateStatusDto));
+            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
   @GetMapping
@@ -90,9 +90,9 @@ public class CatalogController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = CatalogPaggedDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<CatalogDto>> findChilds(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<List<CatalogPaggedDto>> findChilds(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding catalog items by id");
-    return ResponseEntity.ok(service.findChildsDto(id));
+    return ResponseEntity.ok(service.findChildsByParentId(id));
   }
 
 }

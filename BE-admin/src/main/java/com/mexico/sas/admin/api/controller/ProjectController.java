@@ -92,50 +92,9 @@ public class ProjectController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectPageableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<Page<ProjectPageableDto>> findAll(Pageable pageable) throws CustomException {
+  public ResponseEntity<Page<ProjectPageableDto>> findAll(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
     log.info("Finding all projects");
-    return ResponseEntity.ok(service.findAll(pageable));
-  }
-
-  @PostMapping(path = "/application", headers = "Accept=application/json")
-  @ResponseStatus(code = HttpStatus.CREATED)
-  @ApiOperation(httpMethod = "POST",
-          value = "Servicio para crear aplicacion de proyecto",
-          nickname = "/saveApplication")
-  @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationFindDto.class)
-  })
-  public ResponseEntity<ProjectApplicationFindDto> saveApplication(@Valid @RequestBody ProjectApplicationDto projectApplicationDto) throws CustomException {
-    log.info("Saving project application");
-    service.save(projectApplicationDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(service.findByApplicationId(projectApplicationDto.getId()));
-  }
-
-  @PutMapping(path = "/application/{id}", headers = "Accept=application/json")
-  @ResponseStatus(code = HttpStatus.CREATED)
-  @ApiOperation(httpMethod = "POST",
-          value = "Servicio para actualizar aplicacion de proyecto",
-          nickname = "/updateApplication")
-  @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = ProjectApplicationUpdateDto.class)
-  })
-  public ResponseEntity<ProjectApplicationUpdateDto> updateApplication(@PathVariable("id") Long id, @Valid @RequestBody ProjectApplicationUpdateDto projectApplicationDto) throws CustomException {
-    log.info("Updating project application");
-    service.update(id, projectApplicationDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(projectApplicationDto);
-  }
-
-  @GetMapping("/{projectId}/application/{id}")
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar aplicacion de proyecto por id",
-          nickname = "/findApplicationById")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationDto.class)
-  })
-  public ResponseEntity<ProjectApplicationDto> findByApplicationId(@PathVariable("projectId") Long projectId,
-                                                        @PathVariable("id") Long id) throws CustomException {
-    log.info("Finding project by id");
-    return ResponseEntity.ok(service.findByProjectAndId(projectId, id));
+    return ResponseEntity.ok(service.findAll(filter, pageable));
   }
 
 }

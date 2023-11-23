@@ -9,7 +9,6 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.*;
-import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
 import com.mexico.sas.admin.api.repository.ProjectRepository;
 import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
@@ -19,9 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -30,9 +35,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Autowired
     private ProjectRepository repository;
-
-    @Autowired
-    private ProjectApplicationRepository projectApplicationRepository;
 
     @Autowired
     private CatalogService catalogService;
@@ -47,14 +49,18 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     private LogMovementService logMovementService;
 
     @Override
-    public Page<ProjectPageableDto> findAll(Pageable pageable) {
+    public Page<ProjectPageableDto> findAll(String filter, Pageable pageable) {
         Long roleId = getCurrentUser().getRoleId();
         Long companyId = getCurrentUser().getCompanyId();
         log.debug("Finding all projects with pagination for employee of company {}", companyId);
-        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.findAll(pageable)
+        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) ?
+                findByFilter(filter, null, null, null, null, null,
+                        null, null, null, pageable)
                 : (roleId.equals(CatalogKeys.ROLE_ADMIN)
-                    ? repository.findByCompany(new Company(companyId), pageable)
-                    : repository.findByCompanyAndCreatedBy(new Company(companyId), getCurrentUser().getUserId(), pageable));
+                    ? findByFilter(filter, new Company(companyId), null, null, null,
+                null, null, null, null, pageable)
+                    : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
+                null, null, null, null, null, pageable));
 
 //        long total = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.count()
 //                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
@@ -77,16 +83,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     public ProjectFindDto findById(Long id) throws CustomException {
         Project project = findEntityById(id);
         ProjectFindDto projectFindDto = parseFromEntity(project);
-        List<ProjectApplication> projectApplications = projectApplicationRepository.findByProject(project);
         List<ProjectApplicationFindDto> applications = new ArrayList<>();
-        projectApplications.forEach( pa -> {
-            try {
-                applications.add(getProjectApplicationFindDto(pa));
-            } catch (CustomException e) {
-                log.error(e.getMessage());
-            }
-        });
-        projectFindDto.setApplications(applications);
         return projectFindDto;
     }
 
@@ -131,64 +128,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         }
     }
 
-    @Override
-    public void save(ProjectApplicationDto projectApplicationDto) throws CustomException {
-        ProjectApplication projectApplication = from_M_To_N(projectApplicationDto, ProjectApplication.class);
-        validationSave(projectApplicationDto, projectApplication);
-        try {
-            log.debug("Application {} for project id {} to save",
-                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
-            log.debug("Entity ::: {}", projectApplication);
-            projectApplicationRepository.save(projectApplication);
-            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
-            projectApplicationDto.setId(projectApplication.getId());
-            log.debug("Application for project created with id: {}", projectApplicationDto.getId());
-        } catch (Exception e) {
-            String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_CREATED,
-                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
-            log.error(msgError, e.getMessage());
-            throw new CustomException(msgError);
-        }
-    }
-
-    @Override
-    public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
-        ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto);
-
-        if(!message.isEmpty()) {
-            projectApplicationRepository.save(projectApplication);
-            save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
-        }
-    }
-
-    @Override
-    public ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException {
-        return getProjectApplicationFindDto(findEntityByApplicationId(id));
-    }
-
-    @Override
-    public ProjectApplication findEntityByApplicationId(Long id) throws CustomException {
-        log.debug("Finding project application: {}", id);
-        return projectApplicationRepository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id)));
-    }
-
-    @Override
-    public ProjectApplicationDto findByProjectAndId(Long projectId, Long id) throws CustomException {
-        log.debug("Finding project application with projectId: {} and id: {}", projectId, id);
-        return parseFromEntity(projectApplicationRepository.findByProjectAndId(new Project(projectId), id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id))));
-    }
-
-    @Override
-    public ProjectApplicationDto findByProjectAndApplicationId(Long projectId, Long applicationId) throws CustomException {
-        log.debug("Finding project application with projectId: {} and applicationId: {}", projectId, applicationId);
-        return parseFromEntity(projectApplicationRepository.findByProjectAndApplicationId(new Project(projectId), applicationId)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId))));
-    }
-
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
         projectFindDto.setCreatedBy(logMovementService
@@ -211,29 +150,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         return projectPageableDto;
     }
 
-    private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
-        ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
-        projectApplicationDto.setProjectId(projectApplication.getProject().getId());
-        projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
-        projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
-        projectApplicationDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectApplicationDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectApplicationDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        return projectApplicationDto;
-    }
-
-    private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
-        ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
-        projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
-        projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
-        projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectApplicationFindDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        return projectApplicationFindDto;
-    }
-
     private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
         project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
@@ -250,23 +166,79 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         project.setCreatedBy(getCurrentUser().getUserId());
     }
 
-    private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
-        projectApplication.setDesignDate(stringToDate(projectApplicationDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
-        projectApplication.setDevelopmentDate(stringToDate(projectApplicationDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
-        projectApplication.setEndDate(stringToDate(projectApplicationDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
-        try {
-            findByProjectAndApplicationId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
-            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
-                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
-                    projectApplicationDto.getProjectId()), null);
-        } catch (CustomException e) {
-            if(e instanceof BadRequestException)
-                throw e;
+    private Page<Project> findByFilter(String filter, Company company, Long createdBy,
+                                       Long status, Long projectManagerId, Boolean active,
+                                       Date installationDate, Date startDate, Date endDate,
+                                       Pageable pageable) {
+        return repository.findAll((Specification<Project>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, company, createdBy, status, projectManagerId, active,
+                        installationDate, startDate, endDate, criteriaBuilder, root), pageable);
+    }
+
+    private Long countByFilter(String filter, Company company, Long createdBy,
+                                       Long status, Long projectManagerId, Boolean active,
+                                       Date installationDate, Date startDate, Date endDate) {
+        return repository.count((Specification<Project>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, company, createdBy, status, projectManagerId, active,
+                        installationDate, startDate, endDate, criteriaBuilder, root));
+    }
+
+    /**
+     *
+     * @param filter
+     * @param company
+     * @param createdBy
+     * @param status
+     * @param projectManagerId
+     * @param active
+     * @param startDate
+     * @param endDate
+     * @param builder
+     * @param root
+     * @return
+     */
+    private Predicate getPredicateDinamycFilter(String filter, Company company, Long createdBy,
+                                                Long status, Long projectManagerId, Boolean active,
+                                                Date installationDate, Date startDate, Date endDate,
+                                                CriteriaBuilder builder, Root<Project> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.isFalse(root.get(Project.Fields.eliminate)));
+
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pKey = builder.like(builder.lower(root.get(Project.Fields.key)), patternFilter);
+            Predicate pDescription = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Project.Fields.description))), patternFilter);
+            predicates.add(builder.or(pKey, pDescription));
         }
 
-        projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
-        projectApplication.setLeader(employeeService.findEntityById(projectApplicationDto.getLeaderId()));
-        projectApplication.setDeveloper(employeeService.findEntityById(projectApplicationDto.getDeveloperId()));
-        projectApplication.setCreatedBy(getCurrentUser().getUserId());
+        if(company != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.company), company));
+        }
+
+        if(createdBy != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.createdBy), createdBy));
+        }
+
+        if(status != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.status), status));
+        }
+
+        if(projectManagerId != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.projectManager), projectManagerId));
+        }
+
+        if(active != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.active), active));
+        }
+
+        if(installationDate != null) {
+            predicates.add(builder.equal(root.get(Project.Fields.installationDate), installationDate));
+        }
+
+        if(startDate != null && endDate != null) {
+            predicates.add(builder.between(root.get(Project.Fields.creationDate), startDate, endDate));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }
