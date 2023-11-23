@@ -64,7 +64,7 @@ export const DetailApplications = () => {
     
     getCatalogChilds(1000000004)
       .then( response => {
-        setCatApliations(response);
+        setCatApliations(response.filter( cat => cat.status === 2000100001 ));
       }).catch( error => {
         console.log(error);
       });

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
-import { changeLoading } from '../../../store/loading/loadingSlice';
 import { get } from '../../services/LogService';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { buildPayloadMessage } from '../../helpers/utils';
@@ -15,16 +14,13 @@ export const TableLog = ({
     const [history, setHistory] = useState([]);
 
     const fetchLogs = () => {
-        dispatch(changeLoading(true));
         get(tableName, recordId)
           .then( response => {
             if( response.code && response.code === 401 ) {
               dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             }
             setHistory(response);
-            dispatch(changeLoading(false));
           }).catch( error => {
-            dispatch(changeLoading(false));
             dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
           });
       }

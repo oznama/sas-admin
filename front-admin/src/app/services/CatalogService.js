@@ -49,3 +49,13 @@ export const update = async(id, data) => {
     const jsonResponse = await response.json();
     return jsonResponse;
 };
+
+export const deleteLogic = async(id) => {
+    const request = {
+        method: "DELETE",
+        headers: getHeaders()
+    }
+    const urlInternal = `${context}/${id}`;
+    const response = await api( urlInternal, request );
+    return await response.json();
+};

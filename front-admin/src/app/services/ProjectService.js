@@ -2,11 +2,12 @@ import { api, getHeaders } from '../api/Api';
 
 const context = 'projects';
 
-export const getProjects = async(page=0, size=10, sort='id,asc') => {
+export const getProjects = async(page=0, size=10, sort='id,asc', filter='') => {
     const request = {
         headers: getHeaders()
     }
-    const urlProjects = `${context}?page=${page}&size=${size}&sort=${sort}`;
+    const filterParam = filter ? `&filter=${filter}` : ''
+    const urlProjects = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
     const response = await api( urlProjects, request );
     const projects = await response.json();
     return projects;
@@ -66,11 +67,21 @@ export const updateApplication = async(id, data) => {
     return jsonResponse;
 };
 
+export const getApplicationsByProjectId = async(projectId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlProject = `${context}/application/${projectId}`;
+    const response = await api( urlProject, request );
+    const projectApplication = await response.json();
+    return projectApplication;
+};
+
 export const getProjectApplicationById = async(projectId, id) => {
     const request = {
         headers: getHeaders()
     }
-    const urlProject = `${context}/${projectId}/application/${id}`;
+    const urlProject = `${context}/application/${projectId}/${id}`;
     const response = await api( urlProject, request );
     const projectApplication = await response.json();
     return projectApplication;

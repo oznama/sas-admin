@@ -17,7 +17,7 @@ export const Select = ({
   return (
     <div className='mb-3'>
         <label className="form-label">{ label }</label>
-        <select className="form-select" aria-label="select example" 
+        <select className="form-select"
           name={ name } disabled={ disabled } value={ value } required={ required } onChange={ onChange }>
             <option value=''>Seleccionar...</option>
             { renderItems() }

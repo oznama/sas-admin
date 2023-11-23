@@ -38,7 +38,6 @@ export const Catalogs = () => {
         description,
         companyId,
         company,
-        childs
     }) => (
         <div key={ id } className="accordion-item" onClick={ () => setCurrentOpen(id === currentOpen ? null : id) }>
             <h2 className="accordion-header" id={ `heading${id}` }>

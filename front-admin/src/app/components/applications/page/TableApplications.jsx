@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { getProjectApplicationById, getProjectById } from '../../../services/ProjectService';
+import { getApplicationsByProjectId } from '../../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
 import { useNavigate } from 'react-router-dom';
@@ -16,11 +16,11 @@ export const TableApplications = ({ projectId }) => {
     const [applications, setApplications] = useState([]);
 
     const fetchApplications = () => {
-        getProjectById(projectId).then( response => {
+        getApplicationsByProjectId(projectId).then( response => {
             if( response.code ) {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
-                setApplications(response.applications);
+                setApplications(response);
             }
         }).catch( error => {
             console.log(error);

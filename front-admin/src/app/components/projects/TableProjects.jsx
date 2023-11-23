@@ -23,10 +23,13 @@ export const TableProject = ({
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
+    const [filter, setFilter] = useState('')
+
+    const onChangeFilter = ({ target }) => setFilter(target.value);
 
     const fetchProjects = (page) => {
         dispatch(changeLoading(true));
-        getProjects(page, pageSize, sort)
+        getProjects(page, pageSize, sort, filter)
             .then( response => {
                 if( response.code && response.code === 401 ) {
                     dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
@@ -48,6 +51,30 @@ export const TableProject = ({
         setCurrentPage(page);
         fetchProjects(currentPage);
     }
+
+    const handleAddProject = () => {
+        dispatch(setCurrentTab(1));
+        navigate(`/project/add`);
+    }
+
+    const renderAddButton = () => permissions.canCreateProj && (
+        <div className="d-flex flex-row-reverse pb-2">
+            <button type="button" className="btn btn-primary" onClick={ handleAddProject }>
+                <span className="bi bi-plus"></span>
+            </button>
+        </div>
+    );
+
+    const renderSearcher = () => (
+        <div className="input-group w-50 pt-3">
+            <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
+                maxLength={ 100 } autoComplete='off'
+                value={ filter } required onChange={ onChangeFilter } />
+            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
+                <i className="bi bi-search"></i>
+            </button>
+        </div>
+    )
 
     // const addNewElement = newElement => {
     //     Manera 1 para agregar un nuevo elemento al estado
@@ -97,7 +124,11 @@ export const TableProject = ({
     ));
 
     return (
-        <>
+        <div>
+            { renderSearcher() }
+
+            { renderAddButton() }
+
             <div className='table-responsive text-nowrap'>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
@@ -126,7 +157,7 @@ export const TableProject = ({
                 pageSize={ pageSize }
                 onPageChange={ page => onPaginationClick(page) } 
             />
-        </>
+        </div>
     )
 }
 

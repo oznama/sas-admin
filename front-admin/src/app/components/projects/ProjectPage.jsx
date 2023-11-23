@@ -44,7 +44,7 @@ export const ProjectPage = () => {
   return (
     <>
       <div className='px-5'>
-        <div className='d-flex justify-content-between'>
+        <div className={`d-flex ${ (id) ? 'justify-content-between' : 'd-flex justify-content-center'}`}>
           <h1 className="fs-4 card-title fw-bold mb-4">Proyecto Nuevo</h1>
           { ( id ) ? renderTabs() : null }
         </div>
