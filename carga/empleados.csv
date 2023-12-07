@@ -1,25 +1,25 @@
-"email,name,second_name,surname,second_surname",,,,
-",Carlos,,Marquez,Fandiño",,,,
-"valerie.alvarez@prosa.com.mx,Valerie,Michele,Alvarez,Palomino",,,,
-"diana.banuelos@prosa.com.mx,Diana ,Irlanda ,Bañuelos,Leon",,,,
-"luis.hernandez@prosa.com.mx,Luis,Daniel,Hernández,García",,,,
-"elizabeth.prado@prosa.com.mx,Elizabeth,,Prado,Romero",,,,
-"ivett.tapia@prosa.com.mx,Juana,Ivett,Tapia,Reyes",,,,
-",Miguel,Angel,Gonzalez,Salazar",,,,
-"salvador.gonzalez@prosa.com.mx,Salvador,,Gonzalez,Villanueva",,,,
-"alfonso.garcia@prosa.com.mx,Alfonso,,Garcia,Camarillo",,,,
-"wendy.paulin@prosa.com.mx,Wendy,,Paulin,Martinez",,,,
-"lizbeth.quintana@prosa.com.mx,Lizbeth,,Quintana,Ortega",,,,
-"areli.alvarez@prosa.com.mx,Areli,,Alvarez,Lopez",,,,
-"laura.vargas@prosa.com.mx,Laura,Esmeralda,Vargas,Villanueva",,,,
-"javier.martinez@prosa.com.mx,Javier,,Martinez,Avila",,,,
-"jose.medina@prosa.com.mx,Jose,Alberto,De Medina,Medina",,,,
-"adriana.hernandez@prosa.com.mx,Adriana,Elizabeth,Hernández,Rodríguez",,,,
-"silvia.kawasaki@prosa.com.mx,Silvia,Yuriko,Kawasaki,Subias",,,,
-"dulce.serna@prosa.com.mx,Dulce,Perla,Serna,Chavez",,,,
-"andres.hernandez@prosa.com.mx,Andrés,Alberto,Hernández,Díaz",,,,
-"karla.ortiz@prosa.com.mx,Karla,Fernanda,Ortiz,Perez",,,,
-"felix.palma@prosa.com.mx,Felix,Gustavo,Palma,Espejel",,,,
-"liliana.tabuenca@prosa.com.mx,Liliana,,Tabuenca,Perales",,,,
-"laura.canedo@prosa.com.mx,Laura,,Cañedo,Martinez",,,,
-"israel.orozco@prosa.com.mx,Israel,,Orozco,Bermejo",,,,
+email,name,second_name,surname,second_surname
+carlos.marquez@prosa.com.mx,Carlos,,Marquez,Fandino
+valerie.alvarez@prosa.com.mx,Valerie,Michele,Alvarez,Palomino
+diana.banuelos@prosa.com.mx,Diana ,Irlanda ,Bañuelos,Leon
+luis.hernandez@prosa.com.mx,Luis,Daniel,Hernández,García
+elizabeth.prado@prosa.com.mx,Elizabeth,,Prado,Romero
+ivett.tapia@prosa.com.mx,Juana,Ivett,Tapia,Reyes
+miguel.gonzales@prosa.com.mx,Miguel,Angel,Gonzalez,Salazar
+salvador.gonzalez@prosa.com.mx,Salvador,,Gonzalez,Villanueva
+alfonso.garcia@prosa.com.mx,Alfonso,,Garcia,Camarillo
+wendy.paulin@prosa.com.mx,Wendy,,Paulin,Martinez
+lizbeth.quintana@prosa.com.mx,Lizbeth,,Quintana,Ortega
+areli.alvarez@prosa.com.mx,Areli,,Alvarez,Lopez
+laura.vargas@prosa.com.mx,Laura,Esmeralda,Vargas,Villanueva
+javier.martinez@prosa.com.mx,Javier,,Martinez,Avila
+jose.medina@prosa.com.mx,Jose,Alberto,De Medina,Medina
+adriana.hernandez@prosa.com.mx,Adriana,Elizabeth,Hernández,Rodríguez
+silvia.kawasaki@prosa.com.mx,Silvia,Yuriko,Kawasaki,Subias
+dulce.serna@prosa.com.mx,Dulce,Perla,Serna,Chavez
+andres.hernandez@prosa.com.mx,Andrés,Alberto,Hernández,Díaz
+karla.ortiz@prosa.com.mx,Karla,Fernanda,Ortiz,Perez
+felix.palma@prosa.com.mx,Felix,Gustavo,Palma,Espejel
+liliana.tabuenca@prosa.com.mx,Liliana,,Tabuenca,Perales
+laura.canedo@prosa.com.mx,Laura,,Cañedo,Martinez
+israel.orozco@prosa.com.mx,Israel,,Orozco,Bermejo
