@@ -14,6 +14,7 @@ public class ProjectApplicationFindDto implements Serializable {
     private String application;
     private String amount;
     private Integer hours;
+    private String startDate;
     private String designDate;
     private String developmentDate;
     private String endDate;

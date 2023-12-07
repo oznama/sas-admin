@@ -109,6 +109,7 @@ CREATE TABLE project_applications (
     leader_id int8 not null,
     developer_id int8 not null,
     hours int,
+    start_date timestamp,
     design_date timestamp,
     development_date timestamp,
     end_date timestamp,

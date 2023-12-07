@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ProjectApplicationRepository extends JpaRepository<ProjectApplication, Long> {
     Optional<ProjectApplication> findByProjectAndId(Project project, Long id);
-    Optional<ProjectApplication> findByProjectAndApplicationId(Project project, Long applicationId);
+    Optional<ProjectApplication> findByProjectAndApplicationIdAndActiveIsTrueAndEliminateIsFalse(Project project, Long applicationId);
     List<ProjectApplication> findByProject(Project project);
 
 }

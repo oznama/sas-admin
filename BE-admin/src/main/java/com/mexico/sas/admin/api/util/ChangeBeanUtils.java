@@ -17,15 +17,15 @@ public class ChangeBeanUtils extends Utils {
         StringBuilder sb = new StringBuilder();
 
         if(catalogUpdateDto.getValue() != null && !catalogUpdateDto.getValue().equalsIgnoreCase(catalog.getValue())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CatalogUpdateDto.Fields.value,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, CatalogUpdateDto.Fields.value,
                     catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
         } if(catalogUpdateDto.getDescription() != null && !catalogUpdateDto.getDescription().equalsIgnoreCase(catalog.getDescription())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CatalogUpdateDto.Fields.description,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.description,
                     catalog.getDescription(), catalogUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             catalog.setDescription(catalogUpdateDto.getDescription());
         } if(catalogUpdateDto.getStatus() != null && !catalogUpdateDto.getStatus().equals(catalog.getStatus())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CatalogUpdateDto.Fields.status,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.status,
                     catalog.getStatus(), catalogUpdateDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             catalog.setStatus(catalogUpdateDto.getStatus());
         }
@@ -92,6 +92,16 @@ public class ChangeBeanUtils extends Utils {
         }
         String currentDate = null;
         try {
+            currentDate = dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(projectApplicationUpdateDto.getStartDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.startDate,
+                        currentDate, projectApplicationUpdateDto.getStartDate())).append(GeneralKeys.JUMP_LINE);
+                projectApplication.setStartDate(stringToDate(projectApplicationUpdateDto.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking start date, error: {}", e.getMessage());
+        }
+        try {
             currentDate = dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(projectApplicationUpdateDto.getDesignDate()) ) {
                 sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
@@ -99,7 +109,7 @@ public class ChangeBeanUtils extends Utils {
                 projectApplication.setDesignDate(stringToDate(projectApplicationUpdateDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
         } catch (CustomException e) {
-            log.error("Error checking design dates, error: {}", e.getMessage());
+            log.error("Error checking design date, error: {}", e.getMessage());
         }
         try {
             currentDate = dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
@@ -109,7 +119,7 @@ public class ChangeBeanUtils extends Utils {
                 projectApplication.setDevelopmentDate(stringToDate(projectApplicationUpdateDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
         } catch (CustomException e) {
-            log.error("Error checking development dates, error: {}", e.getMessage());
+            log.error("Error checking development date, error: {}", e.getMessage());
         }
         try {
             currentDate = dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
@@ -119,7 +129,7 @@ public class ChangeBeanUtils extends Utils {
                 projectApplication.setEndDate(stringToDate(projectApplicationUpdateDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
         } catch (CustomException e) {
-            log.error("Error checking end dates, error: {}", e.getMessage());
+            log.error("Error checking end date, error: {}", e.getMessage());
         }
 
         return sb.toString().trim();

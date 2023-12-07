@@ -108,7 +108,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     @Override
     public ProjectApplicationDto findByProjectAndApplicationId(Long projectId, Long applicationId) throws CustomException {
         log.debug("Finding project application with projectId: {} and applicationId: {}", projectId, applicationId);
-        return parseFromEntity(repository.findByProjectAndApplicationId(new Project(projectId), applicationId)
+        return parseFromEntity(repository.findByProjectAndApplicationIdAndActiveIsTrueAndEliminateIsFalse(new Project(projectId), applicationId)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId))));
     }
 
@@ -117,6 +117,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationDto.setProjectId(projectApplication.getProject().getId());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
         projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
+        projectApplicationDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -129,6 +130,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
         projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
         projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
+        projectApplicationFindDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -136,6 +138,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
+        projectApplication.setStartDate(stringToDate(projectApplicationDto.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY));
         projectApplication.setDesignDate(stringToDate(projectApplicationDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
         projectApplication.setDevelopmentDate(stringToDate(projectApplicationDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
         projectApplication.setEndDate(stringToDate(projectApplicationDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));

@@ -133,7 +133,7 @@ INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (20003000
 
 ---- Aplicaciones
 INSERT INTO catalog (id, value) VALUES (1000000004, 'Aplicaciones');
-INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000400001, 'ACT', 1000000004);
+--INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000400001, 'ACT', 1000000004);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500002, 'CTM', '', 2000200002, 1000000005);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500003, 'IFO', '', 2000200002, 1000000005);
 --INSERT INTO catalog (id, value, description, type, catalog_parent_id) VALUES (2000500004, 'PROALERTA', '', 2000200002, 1000000005);

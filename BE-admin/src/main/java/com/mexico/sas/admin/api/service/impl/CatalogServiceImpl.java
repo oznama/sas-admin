@@ -1,10 +1,8 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
-import com.mexico.sas.admin.api.dto.*;
 import com.mexico.sas.admin.api.dto.catalog.CatalogDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogPaggedDto;
-import com.mexico.sas.admin.api.dto.catalog.CatalogSimpleDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -45,8 +43,9 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
         try{
             repository.save(catalog);
-            save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            save(Catalog.class.getSimpleName(),
+                    catalogDto.getCatalogParent() == null ? catalog.getId() : catalogDto.getCatalogParent(),
+                    CatalogKeys.LOG_DETAIL_INSERT, I18nResolver.getMessage(I18nKeys.LOG_CATALOG_CREATION, catalogDto.getValue()));
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.CATALOG_DUPLICATED, catalogDto.getDescription()), catalogDto);
         } catch (Exception e) {
@@ -70,7 +69,9 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         if(!message.isEmpty()) {
             try {
                 repository.save(catalog);
-                save(Catalog.class.getSimpleName(), catalog.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+                save(Catalog.class.getSimpleName(),
+                        catalog.getCatalogParent() == null ? catalog.getId() : catalog.getCatalogParent().getId(),
+                        CatalogKeys.LOG_DETAIL_UPDATE, message);
             } catch (Exception e) {
                 throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
             }
@@ -119,8 +120,8 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
     @Override
     public List<CatalogPaggedDto> findChildsByParentId(Long id) {
-        List<Catalog> catalogs = getCurrentUser().getRoleId().equals(CatalogKeys.ROLE_ROOT)
-                ? repository.findByCatalogParentAndCompanyIdOrderByIdAsc(new Catalog(id), getCurrentUser().getCompanyId())
+        List<Catalog> catalogs = getCurrentUser().getCompanyId().equals(CatalogKeys.COMPANY_SAS)
+                ? repository.findByCatalogParentOrderByIdAsc(new Catalog(id))
                 : repository.findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(
                         new Catalog(id), getCurrentUser().getCompanyId(), CatalogKeys.ESTATUS_MACHINE_ELIMINATED);
         return parsingPage(catalogs);

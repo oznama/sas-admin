@@ -21,6 +21,7 @@ public class ProjectApplicationDto implements Serializable {
     private Integer hours;
     private Long leaderId;
     private Long developerId;
+    private String startDate;
     private String designDate;
     private String developmentDate;
     private String endDate;
