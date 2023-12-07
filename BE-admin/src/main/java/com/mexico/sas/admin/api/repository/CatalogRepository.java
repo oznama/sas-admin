@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface CatalogRepository extends JpaRepository<Catalog, Long> {
     List<Catalog> findByCatalogParentIsNullAndIdNotInOrderByIdAsc(List<Long> ids);
     List<Catalog> findByCatalogParentIsNullAndStatusIsNotAndIdNotInOrderByIdAsc(Long status, List<Long> ids);
-    List<Catalog> findByCatalogParentAndCompanyIdOrderByIdAsc(Catalog catalogParent, Long companyId);
+    List<Catalog> findByCatalogParentOrderByIdAsc(Catalog catalogParent);
     List<Catalog> findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(Catalog catalogParent, Long companyId, Long status);
     Optional<Catalog> findById(Long id);
     Optional<Catalog> findByIdAndCatalogParent(Long id, Catalog catalogParent);

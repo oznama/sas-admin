@@ -55,7 +55,7 @@ export const TableLog = ({
                 <thead className="thead-dark">
                     <tr>
                         <th className="text-center fs-6" scope="col">Movimiento</th>
-                        <th className="text-center fs-6" scope="col">Por</th>
+                        <th className="text-center fs-6" scope="col">Usuario</th>
                         <th className="text-center fs-6" scope="col">Fecha</th>
                     </tr>
                 </thead>

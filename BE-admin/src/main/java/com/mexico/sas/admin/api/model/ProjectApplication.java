@@ -21,6 +21,7 @@ public class ProjectApplication {
     private Long applicationId;
     private BigDecimal amount;
     private Integer hours;
+    private Date startDate;
     private Date designDate;
     private Date developmentDate;
     private Date endDate;

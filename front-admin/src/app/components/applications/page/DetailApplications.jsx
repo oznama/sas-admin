@@ -166,49 +166,51 @@ export const DetailApplications = () => {
   )
 
   const renderDetail = () => (
-    <form onSubmit={ onSubmit }>
-        <div className='text-center'>
-          <div className="row text-start">
-            <div className='col-4'>
-              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
+    <div className='d-grid gap-2 col-6 mx-auto'>
+      <form onSubmit={ onSubmit }>
+          <div className='text-center'>
+            <div className="row text-start">
+              <div className='col-4'>
+                <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
+              </div>
+              <div className='col-4'>
+                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ amount } required onChange={ onChangeAmount } />
+              </div>
+              {/* <div className='col-4'>
+                <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+              </div> */}
+              <div className='col-4'>
+                <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit } required value={ hours } onChange={ onChangeHours } />
+              </div>
             </div>
-            <div className='col-4'>
-              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ amount } required onChange={ onChangeAmount } />
+            <div className="row text-start">
+              <div className='col-6'>
+              <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+              </div>
+              <div className='col-6'>
+                <Select name="developerId" label="Desarrollador" disabled={ isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
+              </div>
             </div>
-            {/* <div className='col-4'>
-              <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
-            </div> */}
-            <div className='col-4'>
-              <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit } required value={ hours } onChange={ onChangeHours } />
-            </div>
-          </div>
-          <div className="row text-start">
-            <div className='col-6'>
-            <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
-            </div>
-            <div className='col-6'>
-              <Select name="developerId" label="Desarrollador" disabled={ isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
-            </div>
-          </div>
 
-          <div className="row text-start">
-            <div className='col-4'>
-              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
-            </div>
-            <div className='col-4'>
-              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
-            </div>
-            <div className='col-4'>
-              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
+            <div className="row text-start">
+              <div className='col-4'>
+                <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
+              </div>
+              <div className='col-4'>
+                <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
+              </div>
+              <div className='col-4'>
+                <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="pt-3 d-flex flex-row-reverse">
-            { renderSaveButton() }
-            &nbsp;
-            <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
-        </div>
+          <div className="pt-3 d-flex flex-row-reverse">
+              { renderSaveButton() }
+              &nbsp;
+              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
+          </div>
       </form>
+    </div>
   )
  
   return (

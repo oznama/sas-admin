@@ -20,8 +20,8 @@ export const NavBarPage = () => {
 
   const renderTablCatalogs = () => permissions.canAdminCat && (
     <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 2) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(2) } to="catalog">
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(1) } to="catalog">
         Cat&aacute;logos
       </NavLink>
     </li>
@@ -29,18 +29,27 @@ export const NavBarPage = () => {
 
   const renderTabApplications = () => permissions.canAdminApp && (
     <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(1) } to="application">
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 2) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(2) } to="application">
         Aplicaciones
       </NavLink>
     </li>
   );
 
-  const renderTablUsers = () => permissions.canAdminUsr && (
+  const renderTabCompany = () => permissions.isAdminSas && (
+    <li className="nav-item">
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 3) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(3) } to="company">
+        Compa&ntilde;ias
+      </NavLink>
+    </li>
+  );
+
+  const renderTabEmployee = () => !permissions.isAdminSas && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(4) } to="user">
-        Usuarios
+        onClick={ () => setCurrentTab(4) } to="employee">
+        Empleados
       </NavLink>
     </li>
   );
@@ -55,7 +64,8 @@ export const NavBarPage = () => {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             { renderTablCatalogs() }
             { renderTabApplications() }
-            { renderTablUsers() }
+            { renderTabCompany() }
+            { renderTabEmployee() }
           </ul>
         </div>
 

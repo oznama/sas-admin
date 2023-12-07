@@ -13,7 +13,6 @@ export const CatalogSingle = ({
 
   const dispatch = useDispatch();
   const { permissions } = useSelector( state => state.auth );
-  console.log(permissions);
 
   const [catalogChilds, setCatalogChilds] = useState([]);
   const [id, setId] = useState(null);
@@ -190,6 +189,7 @@ export const CatalogSingle = ({
     <tr key={ id }>
       <th className="text-start" scope="row" onClick={ () => handledSelect(id) }>{ value }</th>
       <td className="text-start">{ description }</td>
+      { permissions.isAdminRoot && (<td className="text-center">{ company }</td>)}
       { permissions.isAdminRoot && (<td className="text-center">{ renderStatus(status, statusDesc) }</td>)}
       { permissions.canDelCat && (<td className="text-center">
           <button type="button" className="btn btn-danger" onClick={ () => deleteChild(id) }>
@@ -206,6 +206,7 @@ export const CatalogSingle = ({
           <tr>
             <th className="text-center fs-6" scope="col">Nombre</th>
             <th className="text-center fs-6" scope="col">Descripci&oacute;n</th>
+            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Empresa</th>)}
             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Estatus</th>)}
             { permissions.canDelCat && (<th className="text-center fs-6" scope="col">Borrar</th>)}
           </tr>
