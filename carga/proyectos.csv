@@ -1,49 +1,49 @@
 p_key|description|company_id|project_manager_id|installation_date
 T-62-9900-22|Generacion de reportes por modulo en SIA para MIFEL|1|9|2023-01-01 00:00:00.0
-C-20-1829-22|SCOTIABANK – Mapeo de valores VRM (VISA) en PROALERTA|1|28|2023-01-01 00:00:00.0
-C-20-1885-22|EMS OMICRON) Habilitar dolares para el ISO Agregador OMICRON|1|21|2023-01-01 00:00:00.0
-R-20-2008-2|SUNSETPAY ALTA ISO AGREGADOR|1|21|2023-01-01 00:00:00.0
-C-24-1942-22|Baja- ISO Agregador Pagaphone|1|21|2023-01-01 00:00:00.0
-C-24-1347-22|Mejoras a la carretera de Chedraui para discriminar las Txs con rechazo|1|31|2023-01-01 00:00:00.0
-P-55-5201-20|Punteo electronico transaccional|1|24|2023-01-01 00:00:00.0
 C-20-1809-22|BradesCard, Alta Del Servicio De Lote De Aclaraciones|1|13|2023-01-01 00:00:00.0
+H-62-9865-22|Automatizacion de respaldos para el Producto de Banca|1|14|2023-01-01 00:00:00.0
+N-77-1783-22|Camara MC/Producto CC - Implementacion de MasterCard como Camara de Compensacion Adquirente POS|1|15|2023-01-01 00:00:00.0
+N-77-1972-22|ABM reactivacion del proyecto CASHBACK INTERBANCARIO CAMARA MCC N-77-1366-21|1|10|2023-01-01 00:00:00.0
+C-24-1853-22|Automatizacion del servicio S9005 Transacciones de Cargo Automatico y envio de detalle a cliente|1|11|2023-01-01 00:00:00.0
+A-20-1784-22|FIRST DATA FISERV - ALTA ADQUIRENTE BACKEND E INTEGRACIoN DE OPERATIVAS ISO-AGREGADOR|1|16|2023-01-01 00:00:00.0
+C-24-1653-22|Fase II Facturacion automatica Sigue mi Tarjeta|1|17|2023-01-01 00:00:00.0
+C-20-1828-22|Migracion de Bines de 6 posiciones a 8 Posiciones para Bradescard .|1|18|2023-01-01 00:00:00.0
+C-20-1902-22|LIVERPOOL - HABILITACIoN DEL TOKEN Q6 y MSI PARA TARJETAS SUBURBIA|1|19|2023-01-01 00:00:00.0
+C-20-2097-22|Archivos especiales Camara de Compensacion MC para Banorte|1|20|2023-01-01 00:00:00.0
+C-20-1885-22|EMS OMICRON) Habilitar dolares para el ISO Agregador OMICRON|1|21|2023-01-01 00:00:00.0
+C-20-1970-22|ALTA DE Bin Visa 45178000 para caja popular APASEO DEL ALTO CON FAST FUNDS|1|12|2023-01-01 00:00:00.0
+N/A|Alta de bines tokenizados para Banorte|1|22|2023-01-01 00:00:00.0
+C-20-1617-22|Cambio de razon social Tecnologias Rappi por tarjetas del futuro|1|23|2023-01-01 00:00:00.0
+R-20-2008-2|SUNSETPAY ALTA ISO AGREGADOR|1|21|2023-01-01 00:00:00.0
+P-55-5201-20|Punteo electronico transaccional|1|24|2023-01-01 00:00:00.0
+C-20-1981-22|Migracion de BINES a 8 Posiciones para BANORTE|1|25|2023-01-01 00:00:00.0
 C-20-2068-22|MIFEL- Incorporacion al esquema de Corresponsal es con Oxxo|1|13|2023-01-01 00:00:00.0
-C-20-2081-22|Banregio, Migracion de Transacciones de Corresponsales de Banregio a Nuevo Autorizador|1|13|2023-01-01 00:00:00.0
-N-77-1783-22|Camara MC/Producto CC – Implementacion de MasterCard como Camara de Compensacion Adquirente POS|1|15|2023-01-01 00:00:00.0
+C-20-2007-22|Envio de archivos a Minsait y habilitacion de esquema Hotsite|1|23|2023-01-01 00:00:00.0
+R-20-2090-22|Migracion de Bines de 6 a 8 posiciones|1|26|2023-01-01 00:00:00.0
+C-20-2049-22|Alta de Bin Credito MC en MSI para Oplay Digital Services|1|12|2023-01-01 00:00:00.0
+C-24-1532-22|Mejora Batch Rechazos en la carretera Oxxo|1|27|2023-01-01 00:00:00.0
+C-20-1829-22|SCOTIABANK - Mapeo de valores VRM (VISA) en PROALERTA|1|28|2023-01-01 00:00:00.0
+C-24-1644-22|Extraccion de reportes del SAC|1|29|2023-01-01 00:00:00.0
+C-20-2046-22|Actualizacion de SRE para Bin Visa Adquirente de Pagatodo|1|12|2023-01-01 00:00:00.0
 C-20-2074-22|Banregio: Generacion de nuevos archivos de compensacion|1|30|2023-01-01 00:00:00.0
 A-20-2094-22|Afirme, Alta de Entidad hija para Afirme con el bin 41309841 Debito Visa Internacional con procesador Propio|1|30|2023-01-01 00:00:00.0
 A-20-1114-23|AFIRME - Alta de Bin Marca Privada en Intercambio y Alta en servicio de Corresponsalias OXXO|1|30|2023-01-01 00:00:00.0
-A-20-1023-23|Alta de Bin Debito en los sistemas Prosa y Proalerta|1|30|2023-01-01 00:00:00.0
-A-20-1304-23|Migracion de Bines a 8 posiciones para Intercam con autorizador payware|1|30|2023-01-01 00:00:00.0
-C-20-1139-23|Afirme, Alta y descarga de controversias en SIA|1|30|2023-01-01 00:00:00.0
-C-24-1653-22|Fase II Facturacion automatica Sigue mi Tarjeta|1|17|2023-01-01 00:00:00.0
-C-20-1156-22|Generacion de nuevo reporte especial para el proceso de aclaraciones del banco|1|33|2023-01-01 00:00:00.0
-N-77-1972-22|ABM reactivacion del proyecto CASHBACK INTERBANCARIO CAMARA MCC N-77-1366-21|1|10|2023-01-01 00:00:00.0
-C-24-1102-23|Automatizacion de Remesas MSI (ALTA/BAJA/CAMBIO DE PROMOCIONES)|1|10|2023-01-01 00:00:00.0
-N-77-1157-23|Producto CC/Relaciones Gremiales – Actualizacion modulo VISA en el SIA- Emisores VISA, eliminacion de Segundo Contracargo|1|10|2023-01-01 00:00:00.0
-C-20-1623-22|RECICLAJE DE LICENCIAS DCVV - SCOTIABANK|1|36|2023-01-01 00:00:00.0
-C-20-1828-22|Migracion de Bines de 6 posiciones a 8 Posiciones para Bradescard .|1|18|2023-01-01 00:00:00.0
-R-20-2090-22|Migracion de Bines de 6 a 8 posiciones|1|26|2023-01-01 00:00:00.0
-C-24-1532-22|Mejora Batch Rechazos en la carretera Oxxo|1|27|2023-01-01 00:00:00.0
-C-24-1853-22|Automatizacion del servicio S9005 Transacciones de Cargo Automatico y envio de detalle a cliente|1|11|2023-01-01 00:00:00.0
-K-66-1437-23|INCREMENTO DE COMISIoN 2023 EMISORES OXXO|1|32|2023-01-01 00:00:00.0
-A-20-0032-21|Alta de Cardpay como Adquirente no bancario|1|35|2023-01-01 00:00:00.0
-C-20-1981-22|Migracion de BINES a 8 Posiciones para BANORTE|1|25|2023-01-01 00:00:00.0
-C-20-1130-23|INTERCAM – Entrega de archivos PLTRPT de Proalerta a Intercam|1|34|2023-01-01 00:00:00.0
-C-20-1617-22|Cambio de razon social Tecnologias Rappi por tarjetas del futuro|1|23|2023-01-01 00:00:00.0
-C-20-2007-22|Envio de archivos a Minsait y habilitacion de esquema Hotsite|1|23|2023-01-01 00:00:00.0
-R-20-1115-23|Alta de Nueva Entidad Emisora con Bin Credito MC con Autorizador|1|23|2023-01-01 00:00:00.0
-A-20-1784-22|FIRST DATA FISERV - ALTA ADQUIRENTE BACKEND E INTEGRACIoN DE OPERATIVAS ISO-AGREGADOR|1|16|2023-01-01 00:00:00.0
-C-20-1342-23|SMARTPAYMENTS - CERTIFICACIoN OPERATIVAS USD|1|16|2023-01-01 00:00:00.0
-C-20-1902-22|LIVERPOOL - HABILITACIoN DEL TOKEN Q6 y MSI PARA TARJETAS SUBURBIA|1|19|2023-01-01 00:00:00.0
-C-20-1970-22|ALTA DE Bin Visa 45178000 para caja popular APASEO DEL ALTO CON FAST FUNDS|1|12|2023-01-01 00:00:00.0
-C-20-2049-22|Alta de Bin Credito MC en MSI para Oplay Digital Services|1|12|2023-01-01 00:00:00.0
-C-20-2046-22|Actualizacion de SRE para Bin Visa Adquirente de Pagatodo|1|12|2023-01-01 00:00:00.0
+C-20-2081-22|Banregio, Migracion de Transacciones de Corresponsales de Banregio a Nuevo Autorizador|1|13|2023-01-01 00:00:00.0
 R-20-1187-23|Alta de Bin 506488 Debito CARNET, con autorizador propio|1|12|2023-01-01 00:00:00.0
+R-20-1115-23|Alta de Nueva Entidad Emisora con Bin Credito MC con Autorizador|1|23|2023-01-01 00:00:00.0
+C-24-1942-22|Baja- ISO Agregador Pagaphone|1|21|2023-01-01 00:00:00.0
 C-20-2082-22|Multiva, baja de Bienes 6 posiciones|1|12|2023-01-01 00:00:00.0
 A-20-1901-22|ACTINVER - ALTA DE 2 BINES A 8 POSICIONES CON FAST FUNDS|1|12|2023-01-01 00:00:00.0
+C-24-1102-23|Automatizacion de Remesas MSI (ALTA/BAJA/CAMBIO DE PROMOCIONES)|1|10|2023-01-01 00:00:00.0
+N-77-1157-23|Producto CC/Relaciones Gremiales - Actualizacion modulo VISA en el SIA- Emisores VISA, eliminacion de Segundo Contracargo|1|10|2023-01-01 00:00:00.0
+C-24-1347-22|Mejoras a la carretera de Chedraui para discriminar las Txs con rechazo|1|31|2023-01-01 00:00:00.0
 R-20-1209-23|Alta de Emisor SVPAYMENT y Bin Credito VISA, con autorizador propio|1|12|2023-01-01 00:00:00.0
-C-20-2097-22|Archivos especiales Camara de Compensacion MC para Banorte|1|20|2023-01-01 00:00:00.0
-C-24-1644-22|Extraccion de reportes del SAC|1|29|2023-01-01 00:00:00.0
-H-62-9865-22|Automatizacion de respaldos para el Producto de Banca|1|14|2023-01-01 00:00:00.0
-N/A|Alta de bines tokenizados para Banorte|1|22|2023-01-01 00:00:00.0
+K-66-1437-23|INCREMENTO DE COMISIÃ“N 2023 EMISORES OXXO|1|32|2023-01-01 00:00:00.0
+C-20-1156-22|Generacion de nuevo reporte especial para el proceso de aclaraciones del banco|1|33|2023-01-01 00:00:00.0
+C-20-1130-23|INTERCAM - Entrega de archivos PLTRPT de Proalerta a Intercam|1|34|2023-01-01 00:00:00.0
+A-20-0032-21|Alta de Cardpay como Adquirente no bancario|1|35|2023-01-01 00:00:00.0
+A-20-1023-23|Alta de Bin Debito en los sistemas Prosa y Proalerta|1|30|2023-01-01 00:00:00.0
+C-20-1623-22|RECICLAJE DE LICENCIAS DCVV - SCOTIABANK|1|36|2023-01-01 00:00:00.0
+A-20-1304-23|Migracion de Bines a 8 posiciones para Intercam con autorizador payware|1|30|2023-01-01 00:00:00.0
+C-20-1342-23|SMARTPAYMENTS - CERTIFICACIoN OPERATIVAS USD|1|16|2023-01-01 00:00:00.0
+C-20-1139-23|Afirme, Alta y descarga de controversias en SIA|1|30|2023-01-01 00:00:00.0
