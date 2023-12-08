@@ -117,7 +117,7 @@ export const TableProject = ({
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             { permissions.isAdminSas && (<td className="text-start">{ createdBy }</td>) }
             <td className="text-center">{ creationDate }</td>
-            { permissions.isAdminSas && (<th className="text-start">{ company }</th>) }
+            { permissions.isAdminRoot && (<th className="text-start">{ company }</th>) }
             <td className="text-start">{ projectManager }</td>
             <td className="text-center">{ installationDate }</td>
         </tr>
@@ -140,7 +140,7 @@ export const TableProject = ({
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
                             { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Creado por</th>) }
                             <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
-                            { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Cliente</th>) }
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Cliente</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
                         </tr>
