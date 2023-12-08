@@ -53,14 +53,11 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         Long roleId = getCurrentUser().getRoleId();
         Long companyId = getCurrentUser().getCompanyId();
         log.debug("Finding all projects with pagination for employee of company {}", companyId);
-        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) ?
+        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_ADMIN) ?
                 findByFilter(filter, null, null, null, null, null,
                         null, null, null, pageable)
-                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
-                    ? findByFilter(filter, new Company(companyId), null, null, null,
-                null, null, null, null, pageable)
-                    : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
-                null, null, null, null, null, pageable));
+                : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
+                null, null, null, null, null, pageable);
 
 //        long total = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.count()
 //                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
@@ -134,6 +131,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                 .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
         projectFindDto.setCompanyId(project.getCompany().getId());
         projectFindDto.setProjectManagerId(project.getProjectManager().getId());
+        projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return projectFindDto;
@@ -145,6 +143,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                 .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
         projectPageableDto.setCompany(project.getCompany().getName());
         projectPageableDto.setProjectManager(buildFullname(project.getProjectManager()));
+        projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return projectPageableDto;

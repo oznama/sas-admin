@@ -14,12 +14,7 @@ INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_i
 INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000500006);
 INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000500006);
 
-INSERT INTO employees (id, email, name, surname, company_id, position_id) VALUES (9, 'rogelio.zavaleta@prosa.com.mx', 'Rogelio', 'Zavaleta', 2, 2000500003);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (10, 'fernando.chavez@prosa.com.mx', 'Fernando', 'Chavez', 'Nava', 2, 9, 2000500004);
-INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, position_id) VALUES (11, 'karen.lopez@prosa.com.mx', 'Karen', 'Paulina', 'Lopez', 'Medina', 2, 2000500007);
-INSERT INTO employees (id, email, name, second_name, surname, second_surname, company_id, boss_id, position_id) VALUES (12, 'miguel.poblete@prosa.com.mx', 'Miguel', 'Angel', 'Poblete', 'Marroquin', 2, 11, 2000500007);
-
-SELECT setval('employees_id_seq', 12);
+SELECT setval('employees_id_seq', 8);
 
 -- Roles
 INSERT INTO sso_role (id, name, description) VALUES (1, 'ROOT', 'Usuario root');
@@ -99,10 +94,7 @@ INSERT INTO users (id, password, employee_id) VALUES (2, 'Ea6SCcSRF9rJUxhtMk3bXg
 INSERT INTO users (id, password, employee_id) VALUES (3, 'Ea6SCcSRF9rJUxhtMk3bXg==', 3);
 INSERT INTO users (id, password, employee_id) VALUES (4, 'Ea6SCcSRF9rJUxhtMk3bXg==', 8);
 
-INSERT INTO users (id, password, employee_id) VALUES (5, 'Ea6SCcSRF9rJUxhtMk3bXg==', 9);
-INSERT INTO users (id, password, employee_id) VALUES (6, 'Ea6SCcSRF9rJUxhtMk3bXg==', 10);
-
-SELECT setval('users_id_seq', 6);
+SELECT setval('users_id_seq', 4);
 
 UPDATE users SET role_id = 1 WHERE id = 1;
 UPDATE users SET role_id = 2 WHERE id = 2;
