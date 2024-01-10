@@ -10,6 +10,7 @@ export const InputText = ({
     maxLength,
     onChange,
     disabled,
+    error,
 }) => {
   return (
     <div className='mb-3'>
@@ -27,6 +28,11 @@ export const InputText = ({
           autoComplete='off'>
         </input>
       </div>
+      {
+          error && (
+            <p className='text-danger text-end'>{ error }</p>
+          )
+        }
     </div>
   )
 }
@@ -42,11 +48,12 @@ InputText.propTypes = {
     max: PropTypes.number,
     disabled: PropTypes.bool,
     onChange: PropTypes.func,
-
+    error: PropTypes.string,
 }
 
 InputText.defaultProps = {
     maxLength: 10,
     type: 'text,',
     require: false,
+    error: null,
 }
