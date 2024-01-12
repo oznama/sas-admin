@@ -23,7 +23,7 @@ public class Role implements Serializable {
   private String name;
   private String description;
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(columnDefinition = "boolean default current_timestamp")
+  @Column(columnDefinition = "timestamp default current_timestamp")
   private Date creationDate;
   private Long createdBy;
 

@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -21,5 +22,8 @@ public class ProjectDto implements Serializable {
     private Long projectManagerId;
     private String creationDate;
     private String installationDate;
+    private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
 
 }

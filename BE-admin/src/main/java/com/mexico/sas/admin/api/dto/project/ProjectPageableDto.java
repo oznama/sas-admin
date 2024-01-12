@@ -22,4 +22,7 @@ public class ProjectPageableDto implements Serializable {
     private String company;
     private String projectManager;
     private String installationDate;
+    private String amount;
+    private String tax;
+    private String total;
 }

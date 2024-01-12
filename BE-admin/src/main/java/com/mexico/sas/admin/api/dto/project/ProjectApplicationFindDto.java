@@ -13,6 +13,8 @@ public class ProjectApplicationFindDto implements Serializable {
     private Long id;
     private String application;
     private String amount;
+    private String tax;
+    private String total;
     private Integer hours;
     private String startDate;
     private String designDate;

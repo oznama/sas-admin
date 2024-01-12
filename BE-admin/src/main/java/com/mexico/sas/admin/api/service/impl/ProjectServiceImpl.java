@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -100,6 +101,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     public void save(ProjectDto projectDto) throws CustomException {
         log.debug(" ::: Request to save ::: {}", projectDto);
         Project project = from_M_To_N(projectDto, Project.class);
+        project.setAmount(BigDecimal.ZERO);
+        project.setTax(BigDecimal.ZERO);
+        project.setTotal(BigDecimal.ZERO);
         validationSave(projectDto, project);
         try {
             log.debug("Project to save, key: {}", project.getKey());
@@ -117,12 +121,18 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
+        log.debug("Update project {} with {}", projectId, projectUpdateDto);
         Project project = findEntityById(projectId);
         String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto);
         if(!message.isEmpty()) {
             repository.save(project);
             save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
+    }
+
+    @Override
+    public void updateAmounts(Long projectId, BigDecimal amount, BigDecimal tax, BigDecimal total) {
+        repository.updateAmount(projectId, amount, tax, total);
     }
 
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
@@ -134,6 +144,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectFindDto.setAmount(formatCurrency(project.getAmount().doubleValue()));
+        projectFindDto.setTax(formatCurrency(project.getTax().doubleValue()));
+        projectFindDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
         return projectFindDto;
     }
 
@@ -146,6 +159,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectPageableDto.setAmount(formatCurrency(project.getAmount().doubleValue()));
+        projectPageableDto.setTax(formatCurrency(project.getTax().doubleValue()));
+        projectPageableDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
         return projectPageableDto;
     }
 

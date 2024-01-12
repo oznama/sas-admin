@@ -6,6 +6,7 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -26,13 +27,16 @@ public class Project {
     private String description;
     private Long status;
     private Date installationDate;
+    private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
 
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(columnDefinition = "boolean default current_timestamp")
+    @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;
     private Long createdBy;
 

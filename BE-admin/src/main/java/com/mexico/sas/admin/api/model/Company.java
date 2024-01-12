@@ -27,7 +27,7 @@ public class Company {
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(columnDefinition = "boolean default current_timestamp")
+    @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;
     private Long createdBy;
 

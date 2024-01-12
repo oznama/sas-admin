@@ -51,6 +51,15 @@ public class ChangeBeanUtils extends Utils {
                     project.getProjectManager().getId(), projectUpdateDto.getProjectManagerId())).append(GeneralKeys.JUMP_LINE);
             project.setProjectManager(new Employee(projectUpdateDto.getProjectManagerId()));
         }
+        double currentAmount = doubleScale(project.getAmount().doubleValue());
+        double newAmount = doubleScale(projectUpdateDto.getAmount().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.amount,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+            project.setAmount(projectUpdateDto.getAmount());
+            project.setTax(projectUpdateDto.getTax());
+            project.setTotal(projectUpdateDto.getTotal());
+        }
         try {
             String currentDate = dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if ((project.getInstallationDate() == null && projectUpdateDto.getInstallationDate() != null) || (!currentDate.equals(projectUpdateDto.getInstallationDate()))) {
@@ -79,6 +88,8 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
                     currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
             projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
+            projectApplication.setTax(projectApplicationUpdateDto.getTax());
+            projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
         }
         if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,

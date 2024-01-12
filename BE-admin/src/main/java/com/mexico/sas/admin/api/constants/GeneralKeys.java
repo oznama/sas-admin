@@ -35,4 +35,6 @@ public interface GeneralKeys {
     String JUMP_LINE = "\n";
 
     String PSW_TEMPORAL = "Ea6SCcSRF9rJUxhtMk3bXg=="; // 12345678 with current enc
+
+    String FOOTER_TOTAL = "total";
 }

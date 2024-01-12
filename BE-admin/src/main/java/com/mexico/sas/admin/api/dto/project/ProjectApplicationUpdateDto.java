@@ -19,6 +19,8 @@ public class ProjectApplicationUpdateDto implements Serializable {
     private Long id;
     private Long applicationId;
     private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
     private Integer hours;
     private Long leaderId;
     private Long developerId;

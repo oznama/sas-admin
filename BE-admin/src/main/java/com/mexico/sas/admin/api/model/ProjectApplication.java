@@ -20,6 +20,8 @@ public class ProjectApplication {
     @Column(nullable = false)
     private Long applicationId;
     private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
     private Integer hours;
     private Date startDate;
     private Date designDate;
@@ -30,7 +32,7 @@ public class ProjectApplication {
     @Column(columnDefinition = "boolean default false")
     private Boolean eliminate;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(columnDefinition = "boolean default current_timestamp")
+    @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;
     private Long createdBy;
 

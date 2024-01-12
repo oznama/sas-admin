@@ -24,7 +24,7 @@ public class LogMovement implements Serializable {
     private String tableName;
     private Long recordId;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(columnDefinition = "boolean default current_timestamp")
+    @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;
     private Long createdBy;
     private String userFullname;
