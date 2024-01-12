@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
@@ -13,7 +14,9 @@ import { alertType } from '../../custom/alerts/types/types';
 import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
 
-export const DetailApplications = () => {
+export const DetailApplications = ({
+  edit
+}) => {
 
   const dispatch = useDispatch();
   const { permissions } = useSelector( state => state.auth );
@@ -217,10 +220,18 @@ export const DetailApplications = () => {
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
         <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
-        { renderTabs() }
+        { edit && renderTabs() }
       </div>
       <Alert />
       { (currentTab === 2) ? (<TableLog tableName='ProjectApplication' recordId={ id } />) : renderDetail() }
     </div>
   )
+}
+
+DetailApplications.propTypes = {
+  edit: PropTypes.boolean
+}
+
+DetailApplications.defaultProps = {
+  edit: false
 }

@@ -29,9 +29,9 @@ export const ProjectPage = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
-      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
+      {/* <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
-      </li>
+      </li> */}
       <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
       </li>

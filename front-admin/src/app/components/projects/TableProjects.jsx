@@ -87,7 +87,7 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        dispatch(setCurrentTab(1));
+        dispatch(setCurrentTab(2));
         navigate(`/project/${id}/edit`);
     }
 
