@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
 import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
-import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength } from '../../../helpers/utils';
+import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength, taxRate } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
@@ -26,12 +26,15 @@ export const DetailApplications = ({
   const [currentTab, setCurrentTab] = useState(1);
   const [aplication, setAplication] = useState('');
   const [amount, setAmount] = useState('');
+  const [tax, setTax] = useState('');
+  const [total, setTotal] = useState('');
   // const [status, setStatus] = useState('2000900001');
   const [leader, setLeader] = useState('');
   const [developer, setDeveloper] = useState('');
   const [hours, setHours] = useState('');
   const [endDate, setEndDate] = useState();
   const [designDate, setDesignDate] = useState();
+  const [startDate, setStartDate] = useState()
   const [developmentDate, setDevelopmentDate] = useState();
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
@@ -46,9 +49,12 @@ export const DetailApplications = ({
       } else {
         setAplication(numberToString(response.applicationId, ''));
         setAmount(numberToString(response.amount, ''));
+        setTax(numberToString(response.tax, ''))
+        setTotal(numberToString(response.total, ''))
         setLeader(numberToString(response.leaderId, ''));
         setDeveloper(numberToString(response.developerId, ''));
         setHours(numberToString(response.hours, ''));
+        setStartDate(handleDateStr(response.startDate));
         setEndDate(handleDateStr(response.endDate));
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
@@ -96,8 +102,13 @@ export const DetailApplications = ({
 
   const onChangeAplication = ({ target }) => setAplication(target.value);
   const onChangeAmount = ({ target }) => {
-    if( Number(target.value) <= mountMax ) {
-      setAmount(target.value);
+    const amount = Number(target.value);
+    if( amount <= mountMax ) {
+      const tax = amount * taxRate;
+      const total = amount + tax;
+      setAmount(amount);
+      setTax(tax.toFixed(2));
+      setTotal(total.toFixed(2));
     }
   }
   const onChangeStatus = ({target }) => setStatus(target.value);
@@ -108,9 +119,10 @@ export const DetailApplications = ({
       setHours(target.value);
     }
   }
-  const onChangeEndDate = (date) => setEndDate(date);
-  const onChangeDesignDate = (date) => setDesignDate(date);
-  const onChangeDevelopmentDate = (date) => setDevelopmentDate(date);
+  const onChangeEndDate = date => setEndDate(date);
+  const onChangeDesignDate = date => setDesignDate(date);
+  const onChangeDevelopmentDate = date => setDevelopmentDate(date);
+  const onChangeStartDate = date => setStartDate(date)
 
   const onSubmit = event => {
     event.preventDefault();
@@ -173,22 +185,32 @@ export const DetailApplications = ({
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
             <div className="row text-start">
-              <div className='col-4'>
+              <div className='col-6'>
                 <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
               </div>
-              <div className='col-4'>
-                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ amount } required onChange={ onChangeAmount } />
+            </div>
+            <div className="row text-start">
+              <div className='col-6'>
+                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ `${amount}` } required onChange={ onChangeAmount } />
               </div>
+              <div className='col-3'>
+                <InputText name="tax" label='Iva' type='text' disabled={ isModeEdit } readOnly value={ `${tax}` } />
+              </div>
+              <div className='col-3'>
+                <InputText name="total" label='Total' type='text' disabled={ isModeEdit } readOnly value={ `${total}` } />
+              </div>
+            </div>
+            <div className="row text-start">
               {/* <div className='col-4'>
                 <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
               </div> */}
-              <div className='col-4'>
+              <div className='col-6'>
                 <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit } required value={ hours } onChange={ onChangeHours } />
               </div>
             </div>
             <div className="row text-start">
               <div className='col-6'>
-              <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+                <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
               </div>
               <div className='col-6'>
                 <Select name="developerId" label="Desarrollador" disabled={ isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
@@ -196,13 +218,18 @@ export const DetailApplications = ({
             </div>
 
             <div className="row text-start">
-              <div className='col-4'>
+              <div className='col-6'>
+                <DatePicker name="startDate" label="Inicio" disabled={ isModeEdit } value={ startDate } required onChange={ (date) => onChangeStartDate(date) } />
+              </div>
+              <div className='col-6'>
                 <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
               </div>
-              <div className='col-4'>
+            </div>
+            <div className="row text-start">
+              <div className='col-6'>
                 <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
               </div>
-              <div className='col-4'>
+              <div className='col-6'>
                 <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
               </div>
             </div>

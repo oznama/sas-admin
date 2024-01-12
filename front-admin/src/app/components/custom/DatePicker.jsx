@@ -22,7 +22,7 @@ export const DatePicker = ({
     <>
         <label className="form-label">{ label }</label>
         <br/>
-        <DatePickerReact className="form-control" name={ name } disabled={ disabled } required={ required }
+        <DatePickerReact className="form-control" style={ { display: 'block' } } name={ name } disabled={ disabled } required={ required }
           selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' autoComplete='off' />
     </>
   )

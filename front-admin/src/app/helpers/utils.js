@@ -1,6 +1,7 @@
     
 export const mountMax = 999999;
 export const numberMaxLength = 3;
+export const taxRate = 0.16;
 
 export const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
 

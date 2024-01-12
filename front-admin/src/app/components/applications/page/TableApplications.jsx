@@ -14,13 +14,20 @@ export const TableApplications = ({ projectId }) => {
     const { permissions } = useSelector( state => state.auth );
 
     const [applications, setApplications] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [totalTax, setTotalTax] = useState(0);
+    const [totalT, setTotalT] = useState(0);
 
     const fetchApplications = () => {
         getApplicationsByProjectId(projectId).then( response => {
             if( response.code ) {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
-                setApplications(response);
+                setApplications(response.filter( r => r.application !== 'total' ));
+                const { amount, tax, total } = response.find( r => r.application === 'total' );
+                setTotalAmount( amount );
+                setTotalTax( tax ) ;
+                setTotalT( total );
             }
         }).catch( error => {
             console.log(error);
@@ -48,6 +55,8 @@ export const TableApplications = ({ projectId }) => {
         id,
         application,
         amount,
+        tax,
+        total,
         // status,
         leader,
         developer,
@@ -55,6 +64,7 @@ export const TableApplications = ({ projectId }) => {
         developmentDate,
         designDate,
         endDate,
+        startDate,
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
             {/* <td className="text-center">
@@ -63,14 +73,17 @@ export const TableApplications = ({ projectId }) => {
                 </button>
             </td> */}
             <th className="text-start" scope="row">{ application }</th>
-            <td className="text-end text-primary">{ amount }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             <td className="text-start">{ leader }</td>
             <td className="text-start">{ developer }</td>
             <td className="text-center">{ hours }</td>
+            <td className="text-center">{ startDate }</td>
             <td className="text-center">{ designDate }</td>
             <td className="text-center">{ developmentDate }</td>
             <td className="text-center">{ endDate }</td>
+            <td className="text-end text-primary">{ amount }</td>
+            <td className="text-end text-primary">{ tax }</td>
+            <td className="text-end text-primary">{ total }</td>
             {
                 permissions.canDelProjApp && (
                     <td className="text-center">
@@ -91,20 +104,39 @@ export const TableApplications = ({ projectId }) => {
                         <tr>
                             {/* <th className="text-center fs-6" scope="col">Editar</th> */}
                             <th className="text-center fs-6" scope="col">Aplicaci&oacute;n</th>
-                            <th className="text-center fs-6" scope="col">Monto</th>
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
                             <th className="text-center fs-6" scope="col">L&iacute;der SAS</th>
                             <th className="text-center fs-6" scope="col">Desarrollador SAS</th>
                             <th className="text-center fs-6" scope="col">Horas</th>
+                            <th className="text-center fs-6" scope="col">Fecha de inicio</th>
                             <th className="text-center fs-6" scope="col">Analisis y Dise&ntilde;o</th>
                             <th className="text-center fs-6" scope="col">Construcci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Cierre</th>
+                            <th className="text-center fs-6" scope="col">Monto</th>
+                            <th className="text-center fs-6" scope="col">Iva</th>
+                            <th className="text-center fs-6" scope="col">Total</th>
                             { permissions.canDelProjApp && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                         </tr>
                     </thead>
                     <tbody>
                         { renderRows() }
                     </tbody>
+                    <tfoot className="thead-dark">
+                        <tr>
+                            <th className="text-center fs-6" scope="col">TOTALES</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th className="text-end fs-6" scope="col">{ totalAmount }</th>
+                            <th className="text-end fs-6" scope="col">{ totalTax }</th>
+                            <th className="text-end fs-6" scope="col">{ totalT }</th>
+                            { permissions.canDelProjApp && (<th></th>) }
+                        </tr>
+                    </tfoot>
                 </table>
 
             </div>

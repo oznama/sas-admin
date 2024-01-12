@@ -11,6 +11,7 @@ export const InputText = ({
     onChange,
     disabled,
     error,
+    readOnly
 }) => {
   return (
     <div className='mb-3'>
@@ -25,6 +26,7 @@ export const InputText = ({
           maxLength={ maxLength }
           disabled={ disabled }
           onChange={ onChange }
+          readOnly={ readOnly }
           autoComplete='off'>
         </input>
       </div>
@@ -49,6 +51,7 @@ InputText.propTypes = {
     disabled: PropTypes.bool,
     onChange: PropTypes.func,
     error: PropTypes.string,
+    readOnly: PropTypes.bool
 }
 
 InputText.defaultProps = {
@@ -56,4 +59,6 @@ InputText.defaultProps = {
     type: 'text,',
     require: false,
     error: null,
+    readOnly: false,
+    onChange: () => {}
 }

@@ -108,7 +108,10 @@ export const TableProject = ({
         installationDate,
         company,
         projectManager,
-        status
+        status,
+        amount,
+        tax,
+        total
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
             <th className="text-start" scope="row">{ key }</th>
@@ -120,6 +123,9 @@ export const TableProject = ({
             { permissions.isAdminRoot && (<th className="text-start">{ company }</th>) }
             <td className="text-start">{ projectManager }</td>
             <td className="text-center">{ installationDate }</td>
+            <td className="text-end text-primary">{ amount }</td>
+            <td className="text-end text-primary">{ tax }</td>
+            <td className="text-end text-primary">{ total }</td>
         </tr>
     ));
 
@@ -143,6 +149,9 @@ export const TableProject = ({
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Cliente</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
+                            <th className="text-center fs-6" scope="col">Monto</th>
+                            <th className="text-center fs-6" scope="col">Iva</th>
+                            <th className="text-center fs-6" scope="col">Total</th>
                         </tr>
                     </thead>
                     <tbody>
