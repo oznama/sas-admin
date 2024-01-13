@@ -65,4 +65,8 @@ public interface I18nKeys {
     String LOG_GENERAL_DELETE = "log.general.delete";
     String LOG_CATALOG_CREATION = "log.catalog.creation";
     String LOG_CATALOG_UPDATE = "log.catalog.update";
+    String ORDER_NUMBER_NOT_FOUND = "order.number.not.found";
+    String ORDER_NUMBER_DUPLICATED = "order.number.duplicated";
+    String ORDER_NOT_CREATED = "order.not.created";
+    String ORDER_NOT_FOUND = "order.not.found";
 }

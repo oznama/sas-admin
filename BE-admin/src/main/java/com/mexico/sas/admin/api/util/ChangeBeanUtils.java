@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
+import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.project.ProjectApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.project.ProjectUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -163,6 +164,36 @@ public class ChangeBeanUtils extends Utils {
             }
         }
 
+        return sb.toString().trim();
+    }
+
+    public static String checkOrder(Order order, OrderDto orderDto) {
+        StringBuilder sb = new StringBuilder();
+        String currentDate = null;
+        if( !order.getStatus().equals(orderDto.getStatus()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.status,
+                    order.getStatus(), orderDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            order.setStatus(orderDto.getStatus());
+        }
+        double currentAmount = doubleScale(order.getAmount().doubleValue());
+        double newAmount = doubleScale(orderDto.getAmount().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.amount,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+            order.setAmount(orderDto.getAmount());
+            order.setTax(orderDto.getTax());
+            order.setTotal(orderDto.getTotal());
+        }
+        try {
+            currentDate = dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( currentDate == null || !currentDate.equals(orderDto.getOrderDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.orderDate,
+                        currentDate, orderDto.getOrderDate())).append(GeneralKeys.JUMP_LINE);
+                order.setOrderDate(stringToDate(orderDto.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking start date, error: {}", e.getMessage());
+        }
         return sb.toString().trim();
     }
 }
