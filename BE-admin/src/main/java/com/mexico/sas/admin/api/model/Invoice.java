@@ -9,18 +9,20 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "invoices")
 @Data
 @NoArgsConstructor
 @DynamicInsert
-public class Order {
+public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    private String orderNum;
-    private Date orderDate;
+    private String invoiceNum;
+    private Date issuedDate;
+    private Date paymentDate;
+    private Integer percentage;
     private Long status;
     private BigDecimal amount;
     private BigDecimal tax;
@@ -36,9 +38,9 @@ public class Order {
 
     @ManyToOne
     @JoinColumn
-    private ProjectApplication projectApplication;
+    private Order order;
 
-    public Order(Long id) {
+    public Invoice(Long id) {
         this.id = id;
     }
 }

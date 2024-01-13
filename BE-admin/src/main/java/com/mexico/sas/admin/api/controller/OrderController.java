@@ -40,7 +40,7 @@ public class OrderController {
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.CREATED)
-  @ApiOperation(httpMethod = "POST",
+  @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar ordenes de pago",
           nickname = "/updateOrder")
   @ApiResponses(value = {
@@ -60,7 +60,7 @@ public class OrderController {
           @ApiResponse(code = 200, message = "Success", response = OrderFindDto.class, responseContainer = "List")
   })
   public ResponseEntity<List<OrderFindDto>> findByProjectApplicationId(@PathVariable("projectApplicationId") Long projectApplicationId) throws CustomException {
-    log.info("Finding project by id");
+    log.info("Finding orders by project application");
     return ResponseEntity.ok(service.findByProjectApplicationId(projectApplicationId));
   }
 

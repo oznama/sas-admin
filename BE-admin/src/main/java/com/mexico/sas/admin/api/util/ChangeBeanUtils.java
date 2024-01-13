@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
+import com.mexico.sas.admin.api.dto.invoice.InvoiceDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.project.ProjectApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.project.ProjectUpdateDto;
@@ -192,7 +193,47 @@ public class ChangeBeanUtils extends Utils {
                 order.setOrderDate(stringToDate(orderDto.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
         } catch (CustomException e) {
-            log.error("Error checking start date, error: {}", e.getMessage());
+            log.error("Error checking order date, error: {}", e.getMessage());
+        }
+        return sb.toString().trim();
+    }
+
+    public static String checkInvoice(Invoice invoice, InvoiceDto invoiceDto) {
+        StringBuilder sb = new StringBuilder();
+        String currentDate = null;
+        if( !invoice.getStatus().equals(invoiceDto.getStatus()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.status,
+                    invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            invoice.setStatus(invoiceDto.getStatus());
+        }
+        double currentAmount = doubleScale(invoice.getAmount().doubleValue());
+        double newAmount = doubleScale(invoiceDto.getAmount().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.amount,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+            invoice.setAmount(invoiceDto.getAmount());
+            invoice.setTax(invoiceDto.getTax());
+            invoice.setTotal(invoiceDto.getTotal());
+        }
+        try {
+            currentDate = dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( currentDate == null || !currentDate.equals(invoiceDto.getIssuedDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.issuedDate,
+                        currentDate, invoiceDto.getIssuedDate())).append(GeneralKeys.JUMP_LINE);
+                invoice.setIssuedDate(stringToDate(invoiceDto.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking issued date, error: {}", e.getMessage());
+        }
+        try {
+            currentDate = dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( currentDate == null || !currentDate.equals(invoiceDto.getPaymentDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.paymentDate,
+                        currentDate, invoiceDto.getPaymentDate())).append(GeneralKeys.JUMP_LINE);
+                invoice.setPaymentDate(stringToDate(invoiceDto.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking payment date, error: {}", e.getMessage());
         }
         return sb.toString().trim();
     }

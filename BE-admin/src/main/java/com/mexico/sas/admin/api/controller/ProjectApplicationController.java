@@ -39,7 +39,7 @@ public class ProjectApplicationController {
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.CREATED)
-  @ApiOperation(httpMethod = "POST",
+  @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar aplicacion de proyecto",
           nickname = "/updateApplication")
   @ApiResponses(value = {

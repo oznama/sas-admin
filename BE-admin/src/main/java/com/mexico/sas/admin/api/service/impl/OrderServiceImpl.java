@@ -77,19 +77,6 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.ORDER_NUMBER_NOT_FOUND, orderNum))));
     }
 
-    private OrderDto parseFromEntity(Order order) throws CustomException {
-        OrderDto orderDto = from_M_To_N(order, OrderDto.class);
-        orderDto.setProjectApplicationId(order.getProjectApplication().getId());
-        orderDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        return orderDto;
-    }
-
-    private OrderFindDto getOrderFindDto(Order order) throws CustomException {
-        OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
-        orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        return orderFindDto;
-    }
-
     @Override
     public List<OrderFindDto> findByProjectApplicationId(Long projectApplicationId) throws CustomException {
         List<Order> orders = repository.findByProjectApplication(new ProjectApplication(projectApplicationId));
@@ -102,6 +89,19 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             }
         });
         return ordersFindDto;
+    }
+
+    private OrderDto parseFromEntity(Order order) throws CustomException {
+        OrderDto orderDto = from_M_To_N(order, OrderDto.class);
+        orderDto.setProjectApplicationId(order.getProjectApplication().getId());
+        orderDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return orderDto;
+    }
+
+    private OrderFindDto getOrderFindDto(Order order) throws CustomException {
+        OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
+        orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return orderFindDto;
     }
 
     private void validateSave(OrderDto orderDto, Order order) throws CustomException {

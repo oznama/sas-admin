@@ -69,4 +69,8 @@ public interface I18nKeys {
     String ORDER_NUMBER_DUPLICATED = "order.number.duplicated";
     String ORDER_NOT_CREATED = "order.not.created";
     String ORDER_NOT_FOUND = "order.not.found";
+    String INVOICE_NUMBER_NOT_FOUND = "invoice.number.not.found";
+    String INVOICE_NUMBER_DUPLICATED = "invoice.number.duplicated";
+    String INVOICE_NOT_CREATED = "invoice.not.created";
+    String INVOICE_NOT_FOUND = "invoice.not.found";
 }

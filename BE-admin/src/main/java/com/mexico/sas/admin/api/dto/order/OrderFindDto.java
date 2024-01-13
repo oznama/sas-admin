@@ -9,6 +9,8 @@ import java.io.Serializable;
 @Setter
 public class OrderFindDto implements Serializable {
 
+    private static final long serialVersionUID = 7487435623797834423L;
+
     private Long id;
     private String orderNum;
     private String orderDate;
