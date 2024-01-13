@@ -27,7 +27,8 @@ public interface CatalogKeys {
 
     // Roles
     Long ROLE_ROOT = 1L;
-    Long ROLE_ADMIN = 2L;
+    Long ROLE_JAIME = 2L;
+    Long ROLE_SELENE = 3L;
 
     // Company SAS
     Long COMPANY_SAS = 1L;

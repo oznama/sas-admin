@@ -118,11 +118,47 @@ CREATE TABLE project_applications (
     design_date timestamp,
     development_date timestamp,
     end_date timestamp,
+    requisition varchar(15) unique,
+    requisition_date timestamp,
     active boolean default true,
     eliminate boolean default false,
     created_by int8 default 1,
     creation_date timestamp default current_timestamp,
     primary key (id)
+);
+
+CREATE TABLE orders (
+    id bigserial not null,
+    project_application_id int8 not null,
+    order_num varchar(15) not null,
+    order_date timestamp,
+    status int8,
+    amount decimal(15,2) not null,
+    tax decimal(15,2) not null,
+    total decimal(15,2) not null,
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(id)
+);
+
+CREATE TABLE invoices (
+    id bigserial not null,
+    order_id int8 not null,
+    invoice_num varchar(15) not null,
+    issued_date timestamp not null,
+    payment_date timestamp,
+    percentage int8 not null,
+    status int8,
+    amount decimal(15,2) not null,
+    tax decimal(15,2) not null,
+    total decimal(15,2) not null,
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(id)
 );
 
 CREATE TABLE log_movement (
@@ -166,3 +202,7 @@ alter table project_applications add constraint fk_proj_app_project foreign key 
 alter table project_applications add constraint fk_proj_app_leader foreign key (leader_id) references employees;
 
 alter table project_applications add constraint fk_proj_app_developer foreign key (developer_id) references employees;
+
+alter table orders add constraint fk_order_application foreign key (project_application_id) references project_applications;
+
+alter table invoices add constraint fk_invpice_order foreign key (order_id) references orders;

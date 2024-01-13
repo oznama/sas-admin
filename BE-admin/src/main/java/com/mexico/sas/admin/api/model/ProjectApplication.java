@@ -27,6 +27,8 @@ public class ProjectApplication {
     private Date designDate;
     private Date developmentDate;
     private Date endDate;
+    private String requisition;
+    private Date requisitionDate;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")

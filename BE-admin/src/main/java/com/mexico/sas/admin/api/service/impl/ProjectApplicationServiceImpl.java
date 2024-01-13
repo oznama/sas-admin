@@ -133,6 +133,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationDto.setRequisitionDate(dateToString(projectApplication.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return projectApplicationDto;
     }
 
@@ -148,6 +149,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationFindDto.setRequisitionDate(dateToString(projectApplication.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return projectApplicationFindDto;
     }
 

@@ -26,5 +26,7 @@ public class ProjectApplicationFindDto implements Serializable {
     private String creationDate;
     private String leader;
     private String developer;
+    private String requisition;
+    private String requisitionDate;
 
 }

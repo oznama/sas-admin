@@ -18,8 +18,8 @@ SELECT setval('employees_id_seq', 8);
 
 -- Roles
 INSERT INTO sso_role (id, name, description) VALUES (1, 'ROOT', 'Usuario root');
-INSERT INTO sso_role (id, name, description) VALUES (2, 'BOSS', 'Usuario Jefe');
-INSERT INTO sso_role (id, name, description) VALUES (3, 'ADMIN', 'Usuario Administrador');
+INSERT INTO sso_role (id, name, description) VALUES (2, 'BOSS', 'Usuario Jaime');
+INSERT INTO sso_role (id, name, description) VALUES (3, 'ADMIN', 'Usuario Selene');
 INSERT INTO sso_role (id, name, description) VALUES (4, 'USER', 'Usuario general');
 
 SELECT setval('sso_role_id_seq', 3);
@@ -41,6 +41,7 @@ INSERT INTO permission (id, name, description) VALUES(13, 'Del-proj', 'Eliminar 
 INSERT INTO permission (id, name, description) VALUES(14, 'Create-proj-app', 'Asociacion de aplicaciones a proyecto');
 INSERT INTO permission (id, name, description) VALUES(15, 'Edit-proj-app', 'Editar detalles de aplicacion en proyecto');
 INSERT INTO permission (id, name, description) VALUES(16, 'Del-proj-app', 'Eliminar asociacion de aplicacion a proyecto');
+INSERT INTO permission (id, name, description) VALUES(17, 'Edit-requi', 'Agregar datos de requisicion');
 
 SELECT setval('permission_id_seq', 15);
 
@@ -83,9 +84,8 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 6);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 7);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 8);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 9);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 11);
-INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 14);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 17);
 
 
 -- Usuarios

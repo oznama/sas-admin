@@ -54,7 +54,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         Long roleId = getCurrentUser().getRoleId();
         Long companyId = getCurrentUser().getCompanyId();
         log.debug("Finding all projects with pagination for employee of company {}", companyId);
-        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_ADMIN) ?
+        Page<Project> projects = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
                 findByFilter(filter, null, null, null, null, null,
                         null, null, null, pageable)
                 : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
