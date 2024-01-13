@@ -36,6 +36,8 @@ export const DetailApplications = ({
   const [designDate, setDesignDate] = useState();
   const [startDate, setStartDate] = useState()
   const [developmentDate, setDevelopmentDate] = useState();
+  const [requisition, setRequisition] = useState('');
+  const [requisitionDate, setRequisitionDate] = useState();
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
@@ -58,6 +60,8 @@ export const DetailApplications = ({
         setEndDate(handleDateStr(response.endDate));
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
+        setRequisition(response.requisition);
+        setRequisitionDate(handleDateStr(response.requisitionDate));
       }
     }).catch( error => {
         dispatch(setMessage(
@@ -123,12 +127,14 @@ export const DetailApplications = ({
   const onChangeDesignDate = date => setDesignDate(date);
   const onChangeDevelopmentDate = date => setDevelopmentDate(date);
   const onChangeStartDate = date => setStartDate(date)
+  const onChangeRequisition = ({ target }) => setRequisition(target.value);
+  const onChangeRequisitionDate = date => setRequisitionDate(date)
 
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( id && permissions.canEditProjApp ) {
+    if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
       update(request);
     } else if ( permissions.canCreateProjApp ) {
       request.projectId = projectId;
@@ -162,10 +168,11 @@ export const DetailApplications = ({
   }
 
   const renderSaveButton = () => {
+    const saveButton = (<button type="submit" className="btn btn-primary">Guardar</button>);
     if(isModeEdit) {
-      return null;
+      return permissions.canEditRequi ? saveButton : null;
     } else {
-      return (<button type="submit" className="btn btn-primary">Guardar</button>) ;
+      return saveButton ;
     }
   };
 
@@ -174,11 +181,20 @@ export const DetailApplications = ({
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
+      {
+        permissions.canEditRequi && (
+          <li className="nav-item" onClick={ () => setCurrentTab(3) }>
+            <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Ordenes</a>
+          </li>
+        )
+      }
       <li className="nav-item" onClick={ () => setCurrentTab(2) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
       </li>
     </ul>
   )
+
+  console.log(permissions)
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
@@ -233,6 +249,19 @@ export const DetailApplications = ({
                 <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
               </div>
             </div>
+            {
+              permissions.canEditRequi && (
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <InputText name='requisition' label='No. de Requisici&oacute;n' placeholder='Ingresa no. de requisici&oacute;n' 
+                        value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
+                  </div>
+                  <div className='col-6'>
+                    <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
+                  </div>
+                </div>
+              )
+            }
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
               { renderSaveButton() }
@@ -250,7 +279,16 @@ export const DetailApplications = ({
         { edit && renderTabs() }
       </div>
       <Alert />
-      { (currentTab === 2) ? (<TableLog tableName='ProjectApplication' recordId={ id } />) : renderDetail() }
+      {
+        (currentTab === 1) ? 
+          renderDetail() 
+          : 
+          ( currentTab === 3 ? 
+            (<><h1>Ordenes</h1></>)
+            :
+            <TableLog tableName='ProjectApplication' recordId={ id } />
+          )
+      }
     </div>
   )
 }

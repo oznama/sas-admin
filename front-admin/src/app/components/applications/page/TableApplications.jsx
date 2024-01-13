@@ -65,6 +65,8 @@ export const TableApplications = ({ projectId }) => {
         designDate,
         endDate,
         startDate,
+        requisition,
+        requisitionDate,
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
             {/* <td className="text-center">
@@ -84,6 +86,8 @@ export const TableApplications = ({ projectId }) => {
             <td className="text-end text-primary">{ amount }</td>
             <td className="text-end text-primary">{ tax }</td>
             <td className="text-end text-primary">{ total }</td>
+            <td className="text-center">{ requisition }</td>
+            <td className="text-center">{ requisitionDate }</td>
             {
                 permissions.canDelProjApp && (
                     <td className="text-center">
@@ -115,6 +119,8 @@ export const TableApplications = ({ projectId }) => {
                             <th className="text-center fs-6" scope="col">Monto</th>
                             <th className="text-center fs-6" scope="col">Iva</th>
                             <th className="text-center fs-6" scope="col">Total</th>
+                            <th className="text-center fs-6" scope="col">No de Requisici&oacute;n</th>
+                            <th className="text-center fs-6" scope="col">Fecha No. De Requisici&oacute;n</th>
                             { permissions.canDelProjApp && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                         </tr>
                     </thead>
@@ -134,6 +140,8 @@ export const TableApplications = ({ projectId }) => {
                             <th className="text-end fs-6" scope="col">{ totalAmount }</th>
                             <th className="text-end fs-6" scope="col">{ totalTax }</th>
                             <th className="text-end fs-6" scope="col">{ totalT }</th>
+                            <th></th>
+                            <th></th>
                             { permissions.canDelProjApp && (<th></th>) }
                         </tr>
                     </tfoot>
