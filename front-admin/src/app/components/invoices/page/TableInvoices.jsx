@@ -26,7 +26,7 @@ export const TableInvoices = ({
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
                 setInvoices(response.filter( r => r.invoiceNum !== 'total' ));
-                const { amount, tax, total } = response.find( r => r.application === 'total' );
+                const { amount, tax, total } = response.find( r => r.invoiceNum === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
                 setTotalT( total );

@@ -25,7 +25,7 @@ export const TableOrders = ({
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
                 setOrders(response.filter( r => r.orderNum !== 'total' ));
-                const { amount, tax, total } = response.find( r => r.application === 'total' );
+                const { amount, tax, total } = response.find( r => r.orderNum === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
                 setTotalT( total );
@@ -67,7 +67,7 @@ export const TableOrders = ({
                     <span><i className="bi bi-pencil"></i></span>
                 </button>
             </td> */}
-            <th className="text-start" scope="row">{ orderNum }</th>
+            <th className="text-center" scope="row">{ orderNum }</th>
             <td className="text-center">{ orderDate }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             <td className="text-end text-primary">{ amount }</td>

@@ -93,7 +93,7 @@ export const DetailOrder = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( amount !== application.amount ) {
+    if ( amount !== numberToString(application.amount) ) {
       dispatch(setMessage(buildPayloadMessage(`El monto '${amount}' no coincide con el de la aplicación '${application.amount}'`, alertType.warning)));
       return;
     }

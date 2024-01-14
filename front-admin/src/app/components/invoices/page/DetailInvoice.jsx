@@ -102,7 +102,7 @@ export const DetailInvoice = () => {
     if ( id && permissions.canEditRequi ) {
       updateInvoice(request);
     } else if ( permissions.canEditRequi ) {
-      request.projectApplicationId = projectApplicationId;
+      request.orderId = orderId;
       saveInvoice(request);
     }    
   }
@@ -157,7 +157,7 @@ export const DetailInvoice = () => {
           <div className='text-center'>
             <div className="row text-start">
               <div className='col-6'>
-                <InputText name='orderNum' label='No. de orden' placeholder='Ingresa no. de orden' 
+                <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' 
                     value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
               </div>
               <div className='col-6'>
@@ -201,7 +201,7 @@ export const DetailInvoice = () => {
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-        <h1 className="fs-4 card-title fw-bold mb-4">Orden</h1>
+        <h1 className="fs-4 card-title fw-bold mb-4">Factura</h1>
         { id && renderTabs() }
       </div>
       <Alert />
