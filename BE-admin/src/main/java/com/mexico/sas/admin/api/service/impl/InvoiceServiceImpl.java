@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +89,11 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
                 log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
             }
         });
+        try {
+            invoiceFindDtos.add(getTotal(invoices));
+        } catch (CustomException e) {
+            log.error("Impossible add invoice total, error: {}", e.getMessage());
+        }
         return invoiceFindDtos;
     }
 
@@ -103,6 +109,18 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         InvoiceFindDto invoiceFindDto = from_M_To_N(invoice, InvoiceFindDto.class);
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return invoiceFindDto;
+    }
+
+    private InvoiceFindDto getTotal(List<Invoice> invoices) throws CustomException {
+        BigDecimal totalAmount = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
+        invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
+        invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
+        invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
+        invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
         return invoiceFindDto;
     }
 

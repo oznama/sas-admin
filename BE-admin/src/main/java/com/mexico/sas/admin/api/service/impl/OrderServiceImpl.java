@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +89,11 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                 log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
             }
         });
+        try {
+            ordersFindDto.add(getTotal(orders));
+        } catch (CustomException e) {
+            log.error("Impossible add order total, error: {}", e.getMessage());
+        }
         return ordersFindDto;
     }
 
@@ -101,6 +107,18 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private OrderFindDto getOrderFindDto(Order order) throws CustomException {
         OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
         orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return orderFindDto;
+    }
+
+    private OrderFindDto getTotal(List<Order> orders) throws CustomException {
+        BigDecimal totalAmount = orders.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = orders.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = orders.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        OrderFindDto orderFindDto = new OrderFindDto();
+        orderFindDto.setOrderNum(GeneralKeys.FOOTER_TOTAL);
+        orderFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
+        orderFindDto.setTax(formatCurrency(totalTax.doubleValue()));
+        orderFindDto.setTotal(formatCurrency(totalT.doubleValue()));
         return orderFindDto;
     }
 

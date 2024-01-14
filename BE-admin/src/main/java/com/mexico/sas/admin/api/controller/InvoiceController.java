@@ -52,14 +52,14 @@ public class InvoiceController {
     return ResponseEntity.status(HttpStatus.CREATED).body(invoiceDto);
   }
 
-  @GetMapping("/{orderId}")
+  @GetMapping("/byOrder/{orderId}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar facturas de orden",
-          nickname = "/findByProjectApplicationId")
+          nickname = "/findByOrderId")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = InvoiceFindDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<InvoiceFindDto>> findByProjectApplicationId(@PathVariable("orderId") Long orderId) throws CustomException {
+  public ResponseEntity<List<InvoiceFindDto>> findByOrderId(@PathVariable("orderId") Long orderId) throws CustomException {
     log.info("Finding invoices by order");
     return ResponseEntity.ok(service.findByOrderId(orderId));
   }

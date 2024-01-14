@@ -52,7 +52,7 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.CREATED).body(orderDto);
   }
 
-  @GetMapping("/{projectApplicationId}")
+  @GetMapping("/byApplication/{projectApplicationId}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar ordenes de aplicacion",
           nickname = "/findByProjectApplicationId")
