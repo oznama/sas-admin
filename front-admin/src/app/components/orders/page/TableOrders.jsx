@@ -1,29 +1,30 @@
-import PropTypes from 'prop-types';
-import { getApplicationsByProjectId } from '../../../services/ProjectService';
-import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../../store/alert/alertSlice';
-import { useNavigate } from 'react-router-dom';
-import { alertType } from '../../custom/alerts/types/types';
-import { buildPayloadMessage } from '../../../helpers/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getOrdersByProjectApplicationId } from "../../../services/OrderService";
+import { setMessage } from "../../../../store/alert/alertSlice";
+import { buildPayloadMessage } from "../../../helpers/utils";
+import { alertType } from "../../custom/alerts/types/types";
 
-export const TableApplications = ({ projectId }) => {
-
+export const TableOrders = ({
+    projectId,
+    projectApplicationId
+}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
 
-    const [applications, setApplications] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const [totalTax, setTotalTax] = useState(0);
     const [totalT, setTotalT] = useState(0);
 
-    const fetchApplications = () => {
-        getApplicationsByProjectId(projectId).then( response => {
-            if( response.code ) {
+    const fetchOrders = () => {
+        getOrdersByProjectApplicationId(projectApplicationId).then( response => {
+            if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             } else {
-                setApplications(response.filter( r => r.application !== 'total' ));
+                setOrders(response.filter( r => r.orderNum !== 'total' ));
                 const { amount, tax, total } = response.find( r => r.application === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
@@ -31,16 +32,16 @@ export const TableApplications = ({ projectId }) => {
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar las aplicaciones, contacte al administrador', alertType.error)));
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar las ordenes, contacte al administrador', alertType.error)));
         });
     }
 
     useEffect(() => {
-        fetchApplications();
+        fetchOrders();
     }, []);
 
     const handledSelect = id => {
-        const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
+        const urlRedirect = `/project/${ projectId }/application/${ projectApplicationId }/order/${ id }/edit`;
         navigate(urlRedirect);
     }
 
@@ -51,22 +52,14 @@ export const TableApplications = ({ projectId }) => {
     //     return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     // }
 
-    const renderRows = () => applications && applications.map(({
+    const renderRows = () => orders && orders.map(({
         id,
-        application,
+        orderNum,
+        orderDate,
         amount,
         tax,
-        total,
+        total
         // status,
-        leader,
-        developer,
-        hours,
-        developmentDate,
-        designDate,
-        endDate,
-        startDate,
-        requisition,
-        requisitionDate,
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
             {/* <td className="text-center">
@@ -74,22 +67,14 @@ export const TableApplications = ({ projectId }) => {
                     <span><i className="bi bi-pencil"></i></span>
                 </button>
             </td> */}
-            <th className="text-start" scope="row">{ application }</th>
+            <th className="text-start" scope="row">{ orderNum }</th>
+            <td className="text-center">{ orderDate }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
-            <td className="text-start">{ leader }</td>
-            <td className="text-start">{ developer }</td>
-            <td className="text-center">{ hours }</td>
-            <td className="text-center">{ startDate }</td>
-            <td className="text-center">{ designDate }</td>
-            <td className="text-center">{ developmentDate }</td>
-            <td className="text-center">{ endDate }</td>
             <td className="text-end text-primary">{ amount }</td>
             <td className="text-end text-primary">{ tax }</td>
             <td className="text-end text-primary">{ total }</td>
-            <td className="text-center">{ requisition }</td>
-            <td className="text-center">{ requisitionDate }</td>
             {
-                permissions.canDelProjApp && (
+                permissions.canDelOrders && (
                     <td className="text-center">
                         <button type="button" className="btn btn-danger">
                             <span><i className="bi bi-trash"></i></span>
@@ -106,21 +91,13 @@ export const TableApplications = ({ projectId }) => {
                 <thead className="thead-dark">
                     <tr>
                         {/* <th className="text-center fs-6" scope="col">Editar</th> */}
-                        <th className="text-center fs-6" scope="col">Aplicaci&oacute;n</th>
+                        <th className="text-center fs-6" scope="col">No. orden</th>
+                        <th className="text-center fs-6" scope="col">Fecha No. De Orden</th>
                         {/* <th className="text-center fs-6" scope="col">Status</th> */}
-                        <th className="text-center fs-6" scope="col">L&iacute;der SAS</th>
-                        <th className="text-center fs-6" scope="col">Desarrollador SAS</th>
-                        <th className="text-center fs-6" scope="col">Horas</th>
-                        <th className="text-center fs-6" scope="col">Fecha de inicio</th>
-                        <th className="text-center fs-6" scope="col">Analisis y Dise&ntilde;o</th>
-                        <th className="text-center fs-6" scope="col">Construcci&oacute;n</th>
-                        <th className="text-center fs-6" scope="col">Cierre</th>
                         <th className="text-center fs-6" scope="col">Monto</th>
                         <th className="text-center fs-6" scope="col">Iva</th>
                         <th className="text-center fs-6" scope="col">Total</th>
-                        <th className="text-center fs-6" scope="col">No de Requisici&oacute;n</th>
-                        <th className="text-center fs-6" scope="col">Fecha No. De Requisici&oacute;n</th>
-                        { permissions.canDelProjApp && (<th className="text-center fs-6" scope="col">Borrar</th>) }
+                        { permissions.canDelOrders && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                     </tr>
                 </thead>
                 <tbody>
@@ -130,26 +107,13 @@ export const TableApplications = ({ projectId }) => {
                     <tr>
                         <th className="text-center fs-6" scope="col">TOTALES</th>
                         <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
                         <th className="text-end fs-6" scope="col">{ totalAmount }</th>
                         <th className="text-end fs-6" scope="col">{ totalTax }</th>
                         <th className="text-end fs-6" scope="col">{ totalT }</th>
-                        <th></th>
-                        <th></th>
-                        { permissions.canDelProjApp && (<th></th>) }
+                        { permissions.canDelOrders && (<th></th>) }
                     </tr>
                 </tfoot>
             </table>
-
         </div>
     )
-}
-
-TableApplications.propTypes = {
-    pageSize: PropTypes.number,
 }

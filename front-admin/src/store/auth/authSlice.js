@@ -23,6 +23,8 @@ export const authSlice = createSlice({
             canEditProjApp: false,
             canDelProjApp: false,
             canEditRequi: false,
+            canDelOrders: false,
+            canDelInvoices: false,
         }
     },
     reducers: {
@@ -45,7 +47,9 @@ export const authSlice = createSlice({
                 canCreateProjApp: findPermmission( permissions, 'Create-proj-app' ),
                 canEditProjApp: findPermmission( permissions, 'Edit-proj-app' ),
                 canDelProjApp: findPermmission( permissions, 'Del-proj-app' ),
-                canEditRequi: findPermmission( permissions, 'Edit-requi' )
+                canEditRequi: findPermmission( permissions, 'Edit-requi' ),
+                canDelOrders: findPermmission( permissions, 'Del-ord' ),
+                canDelInvoices: findPermmission( permissions, 'Del-inv' )
             };
         },
         logout: (state) => {

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
@@ -13,10 +12,9 @@ import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
 import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
+import { TableOrders } from '../../orders/page/TableOrders';
 
-export const DetailApplications = ({
-  edit
-}) => {
+export const DetailApplications = () => {
 
   const dispatch = useDispatch();
   const { permissions } = useSelector( state => state.auth );
@@ -38,6 +36,7 @@ export const DetailApplications = ({
   const [developmentDate, setDevelopmentDate] = useState();
   const [requisition, setRequisition] = useState('');
   const [requisitionDate, setRequisitionDate] = useState();
+  const [hasRequisition, setHasRequisition] = useState(false)
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
@@ -60,13 +59,16 @@ export const DetailApplications = ({
         setEndDate(handleDateStr(response.endDate));
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
-        setRequisition(response.requisition);
+        setRequisition(response.requisition ? response.requisition : '');
         setRequisitionDate(handleDateStr(response.requisitionDate));
+        if( response.requisition ) {
+          setHasRequisition(true);
+        }
       }
     }).catch( error => {
         dispatch(setMessage(
             buildPayloadMessage(
-                'Ha ocurrido un error al cargar las aplicaciones, contacte al adminitrador', 
+                'Ha ocurrido un error al cargar la aplicacion, contacte al adminitrador', 
                 alertType.error
             )
         ));
@@ -161,6 +163,9 @@ export const DetailApplications = ({
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
       } else {
         dispatch(setMessage(buildPayloadMessage('¡Aplicacion actualizada correctamente!', alertType.success)));
+        if( request.requisition ) {
+          setHasRequisition(true);
+        }
       }
     }).catch(error => {
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar aplicación, contacte al administrador', alertType.error)));
@@ -176,13 +181,25 @@ export const DetailApplications = ({
     }
   };
 
+  const handleAddOrder = () => {
+    navigate(`/project/${ projectId }/application/${ id }/order/add`);
+  }
+
+  const renderAddOrderButton = () => (
+    <div className="d-flex flex-row-reverse p-2">
+        <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
+            <span className="bi bi-plus"></span>
+        </button>
+    </div>
+);
+
   const renderTabs = () => (
     <ul className="nav nav-tabs">
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
       {
-        permissions.canEditRequi && (
+        permissions.canEditRequi && hasRequisition && (
           <li className="nav-item" onClick={ () => setCurrentTab(3) }>
             <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Ordenes</a>
           </li>
@@ -193,8 +210,6 @@ export const DetailApplications = ({
       </li>
     </ul>
   )
-
-  console.log(permissions)
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
@@ -276,27 +291,16 @@ export const DetailApplications = ({
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
         <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
-        { edit && renderTabs() }
+        { id && renderTabs() }
       </div>
       <Alert />
+      { (currentTab === 3 && id ) ? renderAddOrderButton() : null }
       {
-        (currentTab === 1) ? 
-          renderDetail() 
-          : 
-          ( currentTab === 3 ? 
-            (<><h1>Ordenes</h1></>)
-            :
-            <TableLog tableName='ProjectApplication' recordId={ id } />
-          )
+        currentTab === 1 ? renderDetail() : ( currentTab === 3 
+          ? <TableOrders projectId={ projectId } projectApplicationId={ id } /> 
+          : <TableLog tableName='ProjectApplication' recordId={ id } />
+        )
       }
     </div>
   )
-}
-
-DetailApplications.propTypes = {
-  edit: PropTypes.boolean
-}
-
-DetailApplications.defaultProps = {
-  edit: false
 }
