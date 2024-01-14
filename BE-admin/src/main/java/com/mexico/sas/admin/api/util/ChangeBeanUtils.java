@@ -171,7 +171,8 @@ public class ChangeBeanUtils extends Utils {
     public static String checkOrder(Order order, OrderDto orderDto) {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( !order.getStatus().equals(orderDto.getStatus()) ) {
+        if( (order.getStatus() == null && orderDto.getStatus() != null)
+                || ( order.getStatus() != null && orderDto.getStatus() != null && !order.getStatus().equals(orderDto.getStatus())) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.status,
                     order.getStatus(), orderDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             order.setStatus(orderDto.getStatus());
@@ -201,7 +202,8 @@ public class ChangeBeanUtils extends Utils {
     public static String checkInvoice(Invoice invoice, InvoiceDto invoiceDto) {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( !invoice.getStatus().equals(invoiceDto.getStatus()) ) {
+        if( (invoice.getStatus() == null && invoiceDto.getStatus() != null)
+                || ( invoice.getStatus() != null && invoiceDto.getStatus() != null && !invoice.getStatus().equals(invoiceDto.getStatus()) ) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.status,
                     invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             invoice.setStatus(invoiceDto.getStatus());

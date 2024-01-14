@@ -62,8 +62,8 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public OrderFindDto findById(Long id) throws CustomException {
-        return getOrderFindDto(findEntityById(id));
+    public OrderDto findById(Long id) throws CustomException {
+        return parseFromEntity(findEntityById(id));
     }
 
     @Override
@@ -107,6 +107,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private OrderFindDto getOrderFindDto(Order order) throws CustomException {
         OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
         orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        orderFindDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
+        orderFindDto.setTax(formatCurrency(order.getTax().doubleValue()));
+        orderFindDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
         return orderFindDto;
     }
 
@@ -131,6 +134,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             if(e instanceof BadRequestException)
                 throw e;
         }
+        order.setProjectApplication(new ProjectApplication(orderDto.getProjectApplicationId()));
         order.setCreatedBy(getCurrentUser().getUserId());
     }
 }

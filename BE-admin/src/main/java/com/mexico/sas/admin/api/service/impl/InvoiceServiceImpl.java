@@ -62,8 +62,8 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     @Override
-    public InvoiceFindDto findById(Long id) throws CustomException {
-        return getInvoiceFindDto(findEntityById(id));
+    public InvoiceDto findById(Long id) throws CustomException {
+        return parseFromEntity(findEntityById(id));
     }
 
     @Override
@@ -109,6 +109,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         InvoiceFindDto invoiceFindDto = from_M_To_N(invoice, InvoiceFindDto.class);
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        invoiceFindDto.setAmount(formatCurrency(invoice.getAmount().doubleValue()));
+        invoiceFindDto.setTax(formatCurrency(invoice.getTax().doubleValue()));
+        invoiceFindDto.setTotal(formatCurrency(invoice.getTotal().doubleValue()));
         return invoiceFindDto;
     }
 
@@ -134,6 +137,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             if(e instanceof BadRequestException)
                 throw e;
         }
+        invoice.setOrder(new Order(invoiceDto.getOrderId()));
         invoice.setCreatedBy(getCurrentUser().getUserId());
     }
 }

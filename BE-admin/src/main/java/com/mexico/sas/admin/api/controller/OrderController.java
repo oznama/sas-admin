@@ -30,9 +30,9 @@ public class OrderController {
           value = "Servicio para crear ordenes de pago",
           nickname = "/saveOrder")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = OrderFindDto.class)
+          @ApiResponse(code = 201, message = "Success", response = OrderDto.class)
   })
-  public ResponseEntity<OrderFindDto> saveOrder(@Valid @RequestBody OrderDto orderDto) throws CustomException {
+  public ResponseEntity<OrderDto> saveOrder(@Valid @RequestBody OrderDto orderDto) throws CustomException {
     log.info("Saving order");
     service.save(orderDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(service.findById(orderDto.getId()));
@@ -69,9 +69,9 @@ public class OrderController {
           value = "Servicio para recuperar orden de pago",
           nickname = "/findById")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = OrderFindDto.class)
+          @ApiResponse(code = 200, message = "Success", response = OrderDto.class)
   })
-  public ResponseEntity<OrderFindDto> findById(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<OrderDto> findById(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
     return ResponseEntity.ok(service.findById(id));
   }

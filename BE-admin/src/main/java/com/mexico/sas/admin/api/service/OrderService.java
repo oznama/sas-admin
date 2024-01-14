@@ -11,7 +11,7 @@ public interface OrderService {
 
     void save(OrderDto orderDto) throws CustomException;
     void update(Long orderId, OrderDto orderDto) throws CustomException;
-    OrderFindDto findById(Long id) throws CustomException;
+    OrderDto findById(Long id) throws CustomException;
     Order findEntityById(Long id) throws CustomException;
     OrderDto findByOrderNum(String orderNum) throws CustomException;
     List<OrderFindDto> findByProjectApplicationId(Long projectApplicationId) throws CustomException;

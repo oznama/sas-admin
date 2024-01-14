@@ -30,9 +30,9 @@ public class InvoiceController {
           value = "Servicio para crear factura",
           nickname = "/saveInvoice")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = InvoiceFindDto.class)
+          @ApiResponse(code = 201, message = "Success", response = InvoiceDto.class)
   })
-  public ResponseEntity<InvoiceFindDto> saveInvoice(@Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
+  public ResponseEntity<InvoiceDto> saveInvoice(@Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
     log.info("Saving invoice");
     service.save(invoiceDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(service.findById(invoiceDto.getId()));
@@ -69,9 +69,9 @@ public class InvoiceController {
           value = "Servicio para recuperar factura",
           nickname = "/findById")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = InvoiceFindDto.class)
+          @ApiResponse(code = 200, message = "Success", response = InvoiceDto.class)
   })
-  public ResponseEntity<InvoiceFindDto> findById(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<InvoiceDto> findById(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
     return ResponseEntity.ok(service.findById(id));
   }

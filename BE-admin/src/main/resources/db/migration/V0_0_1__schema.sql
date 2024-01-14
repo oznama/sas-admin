@@ -149,7 +149,7 @@ CREATE TABLE invoices (
     invoice_num varchar(15) not null,
     issued_date timestamp not null,
     payment_date timestamp,
-    percentage int8 not null,
+    percentage int4 not null,
     status int8,
     amount decimal(15,2) not null,
     tax decimal(15,2) not null,
