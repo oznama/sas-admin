@@ -2,7 +2,7 @@ import { api, getHeaders } from '../api/Api';
 
 const context = 'companies';
 
-export const getSelect = async() => {
+export const getCompanySelect = async() => {
     const request = {
         headers: getHeaders()
     }
