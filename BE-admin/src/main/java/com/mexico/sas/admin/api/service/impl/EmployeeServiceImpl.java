@@ -34,11 +34,23 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
 
     @Override
     public EmployeeDto save(EmployeeDto employeeDto) throws CustomException {
-        return null;
+        Employee employee = from_M_To_N(employeeDto, Employee.class);
+        repository.save(employee);
+        employeeDto.setId(employee.getId());
+        return employeeDto;
     }
 
     @Override
     public EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException {
+        Employee employee = findEntityById(id);
+        employee.setEmail(employeeDto.getEmail());
+        employee.setName(employeeDto.getName());
+        employee.setSecondName(employeeDto.getSecondName());
+        employee.setSurname(employeeDto.getSurname());
+        employee.setSecondSurname(employeeDto.getSecondSurname());
+        employee.setCompanyId(employeeDto.getCompanyId());
+        employee.setPositionId(employeeDto.getPositionId());
+        repository.save(employee);
         return employeeDto;
     }
 

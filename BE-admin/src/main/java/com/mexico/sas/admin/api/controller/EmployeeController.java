@@ -62,7 +62,7 @@ public class EmployeeController {
 
   @GetMapping("/{id}")
   @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "PUT", value = "Servicio para recuperar empleado por id", nickname = "update")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleado por id", nickname = "update")
   public ResponseEntity<EmployeeFindDto> findById(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding catalog by id");
     return ResponseEntity.ok(service.findById(id));
