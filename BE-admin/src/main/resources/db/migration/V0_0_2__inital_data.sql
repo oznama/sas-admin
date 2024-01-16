@@ -41,7 +41,11 @@ INSERT INTO permission (id, name, description) VALUES(13, 'Del-proj', 'Eliminar 
 INSERT INTO permission (id, name, description) VALUES(14, 'Create-proj-app', 'Asociacion de aplicaciones a proyecto');
 INSERT INTO permission (id, name, description) VALUES(15, 'Edit-proj-app', 'Editar detalles de aplicacion en proyecto');
 INSERT INTO permission (id, name, description) VALUES(16, 'Del-proj-app', 'Eliminar asociacion de aplicacion a proyecto');
-INSERT INTO permission (id, name, description) VALUES(17, 'Edit-requi', 'Agregar datos de requisicion');
+INSERT INTO permission (id, name, description) VALUES(17, 'Get-Ord', 'Ver Ordenes');
+INSERT INTO permission (id, name, description) VALUES(18, 'Create-Ord', 'Crear Ordenes');
+INSERT INTO permission (id, name, description) VALUES(19, 'Edit-Ord', 'Editar Ordenes');
+INSERT INTO permission (id, name, description) VALUES(20, 'Del-Ord', 'Eliminar Ordenes');
+
 
 SELECT setval('permission_id_seq', 15);
 
@@ -62,6 +66,10 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 13);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 14);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 15);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 16);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 17);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 18);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 19);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 20);
 
 
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 2);
@@ -79,6 +87,7 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 13);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 14);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 15);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 16);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 17);
 
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 6);
@@ -86,6 +95,9 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 7);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 8);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 11);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 17);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 18);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 19);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 20);
 
 
 -- Usuarios
@@ -154,6 +166,24 @@ INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500004, 'PM', 100
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500005, 'Lider', 1000000005);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500006, 'Desarrollador', 1000000005);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000500007, 'Analista', 1000000005);
+
+-- Estatus ordenes
+INSERT INTO catalog (id, value, description) VALUES (1000000006, 'Estatus de ordenes', 'Estatus de ordenes');
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600001, 'Proceso', 1000000006);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600002, 'Pagada', 1000000006);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600003, 'Cancelada', 1000000006);
+
+-- Estatus requisiciones
+INSERT INTO catalog (id, value, description) VALUES (1000000007, 'Estatus de requisiciones', 'Estatus de requisiciones');
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700001, 'Proceso', 1000000007);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700002, 'Pagada', 1000000007);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700003, 'Cancelada', 1000000007);
+
+-- Estatus facturas
+INSERT INTO catalog (id, value, description) VALUES (1000000008, 'Estatus de facturas', 'Estatus de facturas');
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800001, 'Proceso', 1000000008);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800002, 'Pagada', 1000000008);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800003, 'Cancelada', 1000000008);
 
 -- Proyectos
 --INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (1, 'T-62-9900-22', 'Generación de reportes por módulo en SIA para MIFEL', 1, 1, 1, 3, current_timestamp);

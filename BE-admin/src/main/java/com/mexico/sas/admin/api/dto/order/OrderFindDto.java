@@ -20,5 +20,8 @@ public class OrderFindDto implements Serializable {
     private String total;
     private Boolean active;
     private Boolean eliminate;
+    private String requisition;
+    private String requisitionDate;
+    private Long requisitionStatus;
 
 }

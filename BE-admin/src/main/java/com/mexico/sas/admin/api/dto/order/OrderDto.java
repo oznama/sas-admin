@@ -17,11 +17,14 @@ public class OrderDto implements Serializable {
     private static final long serialVersionUID = -7955591922799938614L;
 
     private Long id;
-    private Long projectApplicationId;
+    private Long projectId;
     private String orderNum;
     private String orderDate;
     private Long status;
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;
+    private String requisition;
+    private String requisitionDate;
+    private Long requisitionStatus;
 }

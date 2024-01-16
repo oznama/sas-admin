@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.repository;
 
 import com.mexico.sas.admin.api.model.Order;
-import com.mexico.sas.admin.api.model.ProjectApplication;
+import com.mexico.sas.admin.api.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Optional<Order> findByOrderNum(String orderNum);
-    List<Order> findByProjectApplication(ProjectApplication projectApplication);
+    List<Order> findByProject(Project project);
 
 }

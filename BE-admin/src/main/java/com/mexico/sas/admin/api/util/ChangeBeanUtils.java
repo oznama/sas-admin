@@ -79,90 +79,69 @@ public class ChangeBeanUtils extends Utils {
     public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto) {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( projectApplicationUpdateDto.getRequisition() != null ) {
-            if( projectApplication.getRequisition() == null || (projectApplication.getRequisition() != null
-                            && !projectApplication.getRequisition().equals(projectApplicationUpdateDto.getRequisition()))
-            ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.requisition,
-                        projectApplication.getRequisition(), projectApplicationUpdateDto.getRequisition())).append(GeneralKeys.JUMP_LINE);
-                projectApplication.setRequisition(projectApplicationUpdateDto.getRequisition());
+        if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.applicationId,
+                    projectApplication.getApplicationId(), projectApplicationUpdateDto.getApplicationId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
+        }
+        double currentAmount = doubleScale(projectApplication.getAmount().doubleValue());
+        double newAmount = doubleScale(projectApplicationUpdateDto.getAmount().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
+            projectApplication.setTax(projectApplicationUpdateDto.getTax());
+            projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+        }
+        if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,
+                    projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setLeader(new Employee(projectApplicationUpdateDto.getLeaderId()));
+        }
+        if( !projectApplication.getDeveloper().getId().equals(projectApplicationUpdateDto.getDeveloperId()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developerId,
+                    projectApplication.getDeveloper().getId(), projectApplicationUpdateDto.getDeveloperId())).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setDeveloper(new Employee(projectApplicationUpdateDto.getDeveloperId()));
+        }
+        try {
+            currentDate = dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(projectApplicationUpdateDto.getStartDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.startDate,
+                        currentDate, projectApplicationUpdateDto.getStartDate())).append(GeneralKeys.JUMP_LINE);
+                projectApplication.setStartDate(stringToDate(projectApplicationUpdateDto.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
-            try {
-                currentDate = dateToString(projectApplication.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
-                if( currentDate == null || (currentDate != null && projectApplicationUpdateDto.getRequisitionDate() != null
-                        && !currentDate.equals(projectApplicationUpdateDto.getRequisitionDate())) ) {
-                    sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.requisitionDate,
-                            currentDate, projectApplicationUpdateDto.getRequisitionDate())).append(GeneralKeys.JUMP_LINE);
-                    projectApplication.setRequisitionDate(stringToDate(projectApplicationUpdateDto.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY));
-                }
-            } catch (CustomException e) {
-                log.error("Error checking end date, error: {}", e.getMessage());
+        } catch (CustomException e) {
+            log.error("Error checking start date, error: {}", e.getMessage());
+        }
+        try {
+            currentDate = dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(projectApplicationUpdateDto.getDesignDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
+                        currentDate, projectApplicationUpdateDto.getDesignDate())).append(GeneralKeys.JUMP_LINE);
+                projectApplication.setDesignDate(stringToDate(projectApplicationUpdateDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
-        } else {
-            if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.applicationId,
-                        projectApplication.getApplicationId(), projectApplicationUpdateDto.getApplicationId())).append(GeneralKeys.JUMP_LINE);
-                projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
+        } catch (CustomException e) {
+            log.error("Error checking design date, error: {}", e.getMessage());
+        }
+        try {
+            currentDate = dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(projectApplicationUpdateDto.getDevelopmentDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developmentDate,
+                        currentDate, projectApplicationUpdateDto.getDevelopmentDate())).append(GeneralKeys.JUMP_LINE);
+                projectApplication.setDevelopmentDate(stringToDate(projectApplicationUpdateDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
-            double currentAmount = doubleScale(projectApplication.getAmount().doubleValue());
-            double newAmount = doubleScale(projectApplicationUpdateDto.getAmount().doubleValue());
-            if( currentAmount != newAmount ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
-                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-                projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
-                projectApplication.setTax(projectApplicationUpdateDto.getTax());
-                projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+        } catch (CustomException e) {
+            log.error("Error checking development date, error: {}", e.getMessage());
+        }
+        try {
+            currentDate = dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(projectApplicationUpdateDto.getEndDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.endDate,
+                        currentDate, projectApplicationUpdateDto.getEndDate())).append(GeneralKeys.JUMP_LINE);
+                projectApplication.setEndDate(stringToDate(projectApplicationUpdateDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
-            if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,
-                        projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId())).append(GeneralKeys.JUMP_LINE);
-                projectApplication.setLeader(new Employee(projectApplicationUpdateDto.getLeaderId()));
-            }
-            if( !projectApplication.getDeveloper().getId().equals(projectApplicationUpdateDto.getDeveloperId()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developerId,
-                        projectApplication.getDeveloper().getId(), projectApplicationUpdateDto.getDeveloperId())).append(GeneralKeys.JUMP_LINE);
-                projectApplication.setDeveloper(new Employee(projectApplicationUpdateDto.getDeveloperId()));
-            }
-            try {
-                currentDate = dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
-                if( !currentDate.equals(projectApplicationUpdateDto.getStartDate()) ) {
-                    sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.startDate,
-                            currentDate, projectApplicationUpdateDto.getStartDate())).append(GeneralKeys.JUMP_LINE);
-                    projectApplication.setStartDate(stringToDate(projectApplicationUpdateDto.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY));
-                }
-            } catch (CustomException e) {
-                log.error("Error checking start date, error: {}", e.getMessage());
-            }
-            try {
-                currentDate = dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
-                if( !currentDate.equals(projectApplicationUpdateDto.getDesignDate()) ) {
-                    sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
-                            currentDate, projectApplicationUpdateDto.getDesignDate())).append(GeneralKeys.JUMP_LINE);
-                    projectApplication.setDesignDate(stringToDate(projectApplicationUpdateDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
-                }
-            } catch (CustomException e) {
-                log.error("Error checking design date, error: {}", e.getMessage());
-            }
-            try {
-                currentDate = dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
-                if( !currentDate.equals(projectApplicationUpdateDto.getDevelopmentDate()) ) {
-                    sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developmentDate,
-                            currentDate, projectApplicationUpdateDto.getDevelopmentDate())).append(GeneralKeys.JUMP_LINE);
-                    projectApplication.setDevelopmentDate(stringToDate(projectApplicationUpdateDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
-                }
-            } catch (CustomException e) {
-                log.error("Error checking development date, error: {}", e.getMessage());
-            }
-            try {
-                currentDate = dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
-                if( !currentDate.equals(projectApplicationUpdateDto.getEndDate()) ) {
-                    sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.endDate,
-                            currentDate, projectApplicationUpdateDto.getEndDate())).append(GeneralKeys.JUMP_LINE);
-                    projectApplication.setEndDate(stringToDate(projectApplicationUpdateDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
-                }
-            } catch (CustomException e) {
-                log.error("Error checking end date, error: {}", e.getMessage());
-            }
+        } catch (CustomException e) {
+            log.error("Error checking end date, error: {}", e.getMessage());
         }
 
         return sb.toString().trim();
@@ -196,6 +175,29 @@ public class ChangeBeanUtils extends Utils {
         } catch (CustomException e) {
             log.error("Error checking order date, error: {}", e.getMessage());
         }
+
+        if( !order.getRequisition().equals(orderDto.getRequisition())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisition,
+                    order.getRequisition(), orderDto.getRequisition())).append(GeneralKeys.JUMP_LINE);
+            order.setRequisition(orderDto.getRequisition());
+        }
+        try {
+            currentDate = dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if( !currentDate.equals(orderDto.getRequisitionDate())) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisitionDate,
+                        currentDate, orderDto.getRequisitionDate())).append(GeneralKeys.JUMP_LINE);
+                order.setRequisitionDate(stringToDate(orderDto.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking end date, error: {}", e.getMessage());
+        }
+        if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
+                || ( order.getRequisitionStatus() != null && orderDto.getRequisitionStatus() != null && !order.getRequisitionStatus().equals(orderDto.getRequisitionStatus())) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisitionStatus,
+                    order.getRequisitionStatus(), orderDto.getRequisitionStatus())).append(GeneralKeys.JUMP_LINE);
+            order.setRequisitionStatus(orderDto.getRequisitionStatus());
+        }
+
         return sb.toString().trim();
     }
 

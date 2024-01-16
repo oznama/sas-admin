@@ -25,6 +25,9 @@ public class Order {
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;
+    private String requisition;
+    private Date requisitionDate;
+    private Long requisitionStatus;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
@@ -36,7 +39,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn
-    private ProjectApplication projectApplication;
+    private Project project;
 
     public Order(Long id) {
         this.id = id;

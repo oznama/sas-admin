@@ -118,8 +118,6 @@ CREATE TABLE project_applications (
     design_date timestamp,
     development_date timestamp,
     end_date timestamp,
-    requisition varchar(15) unique,
-    requisition_date timestamp,
     active boolean default true,
     eliminate boolean default false,
     created_by int8 default 1,
@@ -129,13 +127,16 @@ CREATE TABLE project_applications (
 
 CREATE TABLE orders (
     id bigserial not null,
-    project_application_id int8 not null,
+    project_id int8 not null,
     order_num varchar(15) not null,
     order_date timestamp,
     status int8,
     amount decimal(15,2) not null,
     tax decimal(15,2) not null,
     total decimal(15,2) not null,
+    requisition varchar(15) unique,
+    requisition_date timestamp,
+    requisition_status int8,
     active boolean default true,
     eliminate boolean default false,
     created_by int8 default 1,
@@ -203,6 +204,6 @@ alter table project_applications add constraint fk_proj_app_leader foreign key (
 
 alter table project_applications add constraint fk_proj_app_developer foreign key (developer_id) references employees;
 
-alter table orders add constraint fk_order_application foreign key (project_application_id) references project_applications;
+alter table orders add constraint fk_order_project foreign key (project_id) references project_applications;
 
 alter table invoices add constraint fk_invpice_order foreign key (order_id) references orders;

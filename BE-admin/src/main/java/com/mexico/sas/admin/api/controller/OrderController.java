@@ -61,7 +61,7 @@ public class OrderController {
   })
   public ResponseEntity<List<OrderFindDto>> findByProjectApplicationId(@PathVariable("projectApplicationId") Long projectApplicationId) throws CustomException {
     log.info("Finding orders by project application");
-    return ResponseEntity.ok(service.findByProjectApplicationId(projectApplicationId));
+    return ResponseEntity.ok(service.findByProjectId(projectApplicationId));
   }
 
   @GetMapping("/{id}")

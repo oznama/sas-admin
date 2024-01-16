@@ -14,6 +14,6 @@ public interface OrderService {
     OrderDto findById(Long id) throws CustomException;
     Order findEntityById(Long id) throws CustomException;
     OrderDto findByOrderNum(String orderNum) throws CustomException;
-    List<OrderFindDto> findByProjectApplicationId(Long projectApplicationId) throws CustomException;
+    List<OrderFindDto> findByProjectId(Long projectId) throws CustomException;
 
 }

@@ -10,6 +10,7 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Order;
+import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.ProjectApplication;
 import com.mexico.sas.admin.api.repository.OrderRepository;
 import com.mexico.sas.admin.api.service.OrderService;
@@ -35,8 +36,8 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         Order order = from_M_To_N(orderDto, Order.class);
         validateSave(orderDto, order);
         try {
-            log.debug("Order {} for project application id {} to save",
-                    orderDto.getOrderNum(), orderDto.getProjectApplicationId());
+            log.debug("Order {} for project id {} to save",
+                    orderDto.getOrderNum(), orderDto.getProjectId());
             repository.save(order);
             save(Order.class.getSimpleName(), order.getId(), CatalogKeys.LOG_DETAIL_INSERT,
                     I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
@@ -79,8 +80,8 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public List<OrderFindDto> findByProjectApplicationId(Long projectApplicationId) throws CustomException {
-        List<Order> orders = repository.findByProjectApplication(new ProjectApplication(projectApplicationId));
+    public List<OrderFindDto> findByProjectId(Long projectId) throws CustomException {
+        List<Order> orders = repository.findByProject(new Project(projectId));
         List<OrderFindDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
@@ -99,14 +100,16 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     private OrderDto parseFromEntity(Order order) throws CustomException {
         OrderDto orderDto = from_M_To_N(order, OrderDto.class);
-        orderDto.setProjectApplicationId(order.getProjectApplication().getId());
+        orderDto.setProjectId(order.getProject().getId());
         orderDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        orderDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return orderDto;
     }
 
     private OrderFindDto getOrderFindDto(Order order) throws CustomException {
         OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
         orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        orderFindDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderFindDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
         orderFindDto.setTax(formatCurrency(order.getTax().doubleValue()));
         orderFindDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
@@ -134,7 +137,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             if(e instanceof BadRequestException)
                 throw e;
         }
-        order.setProjectApplication(new ProjectApplication(orderDto.getProjectApplicationId()));
+        order.setProject(new Project(orderDto.getProjectId()));
         order.setCreatedBy(getCurrentUser().getUserId());
     }
 }
