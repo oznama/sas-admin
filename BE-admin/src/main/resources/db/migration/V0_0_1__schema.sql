@@ -204,6 +204,6 @@ alter table project_applications add constraint fk_proj_app_leader foreign key (
 
 alter table project_applications add constraint fk_proj_app_developer foreign key (developer_id) references employees;
 
-alter table orders add constraint fk_order_project foreign key (project_id) references project_applications;
+alter table orders add constraint fk_order_project foreign key (project_id) references projects;
 
-alter table invoices add constraint fk_invpice_order foreign key (order_id) references orders;
+alter table invoices add constraint fk_invoice_order foreign key (order_id) references orders;
