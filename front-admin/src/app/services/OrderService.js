@@ -24,11 +24,11 @@ export const update = async(id, data) => {
     return jsonResponse;
 };
 
-export const getOrdersByProjectApplicationId = async(projectApplicationId) => {
+export const getOrdersByProjectId = async(projectId) => {
     const request = {
         headers: getHeaders()
     }
-    const response = await api( `${context}/byApplication/${projectApplicationId}`, request );
+    const response = await api( `${context}/byProject/${projectId}`, request );
     const jsonResponse = await response.json();
     return jsonResponse;
 };

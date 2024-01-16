@@ -6,6 +6,7 @@ import { setCurrentTab } from '../../../store/project/projectSlice';
 import { Alert } from '../custom/alerts/page/Alert';
 import { TableLog } from '../custom/TableLog';
 import { numberToString } from '../../helpers/utils';
+import { TableOrders } from '../orders/page/TableOrders';
 
 export const ProjectPage = () => {
 
@@ -27,6 +28,18 @@ export const ProjectPage = () => {
       </div>
   );
 
+  const handleAddOrder = () => {
+    navigate(`/project/${ id }/order/add`);
+  }
+
+  const renderAddOrderButton = () => permissions.canCreateOrd && (
+    <div className="d-flex flex-row-reverse p-2">
+        <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
+            <span className="bi bi-plus"></span>
+        </button>
+    </div>
+  );
+
   const renderTabs = () => (
     <ul className="nav nav-tabs">
       {/* <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
@@ -35,6 +48,13 @@ export const ProjectPage = () => {
       <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
       </li>
+      {
+        permissions.canAdminOrd && (
+          <li className="nav-item" onClick={ () => dispatch(setCurrentTab(4)) }>
+            <a className={ `nav-link ${ (currentTab === 4) ? 'active' : '' }` }>Ordenes</a>
+          </li>
+        )
+      }
       <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
         <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
       </li>
@@ -49,10 +69,15 @@ export const ProjectPage = () => {
           { ( id ) ? renderTabs() : null }
         </div>
         <Alert />
-        { (currentTab === 2 && id ) ? renderAddButton() : null }
+        { (currentTab === 2 && id ) ? renderAddButton() : (
+          (currentTab === 4 && id ) ? renderAddOrderButton() : null
+          )
+        }
         { 
-          (currentTab === 2) ? ( <TableApplications projectId = { id } /> ) : ( 
-            (currentTab === 3) ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (<DetailProject projectId={ id } />) 
+          currentTab === 2 ? ( <TableApplications projectId = { id } /> ) : ( 
+            currentTab === 3 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (
+            currentTab === 4 ? (<TableOrders projectId={ id } />) : (<DetailProject projectId={ id } />)
+            ) 
           )
         }
       </div>

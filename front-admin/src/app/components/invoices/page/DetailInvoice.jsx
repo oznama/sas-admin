@@ -12,6 +12,7 @@ import { TableLog } from '../../custom/TableLog';
 import { TableOrders } from '../../orders/page/TableOrders';
 import { getOrderById } from '../../../services/OrderService';
 import { getInvoiceById, save, update } from '../../../services/InvoiceService';
+import { getCatalogChilds } from '../../../services/CatalogService';
 
 export const DetailInvoice = () => {
 
@@ -29,7 +30,16 @@ export const DetailInvoice = () => {
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
   const [order, setOrder] = useState({});
-  // const [status, setStatus] = useState('2000900001');
+  const [status, setStatus] = useState('');
+  const [catStatus, setCatStatus] = useState([])
+
+  const fetchSelects = () => {
+    getCatalogChilds(1000000008).then( response => {
+      setCatStatus(response.filter( cat => cat.status === 2000100001 ));
+    }).catch( error => {
+      console.log(error);
+    });
+  };
 
   const fetchOrder = () => {
     getOrderById(orderId).then( response => {
@@ -60,6 +70,7 @@ export const DetailInvoice = () => {
         setIssuedDate(handleDateStr(response.issuedDate));
         setPaymentDate(handleDateStr(response.paymentDate));
         setPercentage(response.percentage ? response.percentage : 0);
+        setStatus(numberToString(response.status, ''));
       }
     }).catch( error => {
         dispatch(setMessage(
@@ -72,6 +83,7 @@ export const DetailInvoice = () => {
   }
 
   useEffect(() => {
+    fetchSelects();
     fetchOrder();
     if( id ) {
       fetchInvoice();
@@ -99,9 +111,9 @@ export const DetailInvoice = () => {
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
     // TODO Validacion para monto vs porcentaje y orden de pago
-    if ( id && permissions.canEditRequi ) {
+    if ( id && permissions.canEditOrd ) {
       updateInvoice(request);
-    } else if ( permissions.canEditRequi ) {
+    } else if ( permissions.canCreateOrd ) {
       request.orderId = orderId;
       saveInvoice(request);
     }    
@@ -113,7 +125,7 @@ export const DetailInvoice = () => {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
       } else {
         dispatch(setMessage(buildPayloadMessage('Factura agregada correctamente!', alertType.success)));
-        navigate(`/project/${projectId}/application/${projectApplicationId}/order/${orderId}/edit`, { replace: true });
+        navigate(`/project/${projectId}/order/${orderId}/edit`, { replace: true });
       }
     }).catch(error => {
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear la factura, contacte al administrador', alertType.error)));
@@ -137,7 +149,7 @@ export const DetailInvoice = () => {
 
   const renderSaveButton = () => {
     const saveButton = (<button type="submit" className="btn btn-primary">Guardar</button>);
-    return permissions.canEditRequi ? saveButton : null;
+    return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
   };
 
   const renderTabs = () => (
@@ -156,12 +168,15 @@ export const DetailInvoice = () => {
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
             <div className="row text-start">
-              <div className='col-6'>
+              <div className='col-4'>
                 <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' 
                     value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
               </div>
-              <div className='col-6'>
-              <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+              <div className='col-4'>
+                <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+              </div>
+              <div className='col-4'>
+                <Select name = "status" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
               </div>
             </div>
             <div className="row text-start">
@@ -183,16 +198,11 @@ export const DetailInvoice = () => {
                 <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
               </div>
             </div>
-            <div className="row text-start">
-              {/* <div className='col-4'>
-                <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
-              </div> */}
-            </div>
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
               { renderSaveButton() }
               &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/application/${ projectApplicationId }/order/${orderId}/edit`) }>Cancelar</button>
+              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
           </div>
       </form>
     </div>

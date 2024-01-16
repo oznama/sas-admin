@@ -34,9 +34,7 @@ export const DetailApplications = () => {
   const [designDate, setDesignDate] = useState();
   const [startDate, setStartDate] = useState()
   const [developmentDate, setDevelopmentDate] = useState();
-  const [requisition, setRequisition] = useState('');
-  const [requisitionDate, setRequisitionDate] = useState();
-  const [hasRequisition, setHasRequisition] = useState(false)
+
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
@@ -59,11 +57,6 @@ export const DetailApplications = () => {
         setEndDate(handleDateStr(response.endDate));
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
-        setRequisition(response.requisition ? response.requisition : '');
-        setRequisitionDate(handleDateStr(response.requisitionDate));
-        if( response.requisition ) {
-          setHasRequisition(true);
-        }
       }
     }).catch( error => {
         dispatch(setMessage(
@@ -129,8 +122,6 @@ export const DetailApplications = () => {
   const onChangeDesignDate = date => setDesignDate(date);
   const onChangeDevelopmentDate = date => setDevelopmentDate(date);
   const onChangeStartDate = date => setStartDate(date)
-  const onChangeRequisition = ({ target }) => setRequisition(target.value);
-  const onChangeRequisitionDate = date => setRequisitionDate(date)
 
   const onSubmit = event => {
     event.preventDefault();
@@ -163,9 +154,6 @@ export const DetailApplications = () => {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
       } else {
         dispatch(setMessage(buildPayloadMessage('¡Aplicacion actualizada correctamente!', alertType.success)));
-        if( request.requisition ) {
-          setHasRequisition(true);
-        }
       }
     }).catch(error => {
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar aplicación, contacte al administrador', alertType.error)));
@@ -181,30 +169,11 @@ export const DetailApplications = () => {
     }
   };
 
-  const handleAddOrder = () => {
-    navigate(`/project/${ projectId }/application/${ id }/order/add`);
-  }
-
-  const renderAddOrderButton = () => (
-    <div className="d-flex flex-row-reverse p-2">
-        <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
-            <span className="bi bi-plus"></span>
-        </button>
-    </div>
-);
-
   const renderTabs = () => (
     <ul className="nav nav-tabs">
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
-      {
-        permissions.canEditRequi && hasRequisition && (
-          <li className="nav-item" onClick={ () => setCurrentTab(3) }>
-            <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Ordenes</a>
-          </li>
-        )
-      }
       <li className="nav-item" onClick={ () => setCurrentTab(2) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
       </li>
@@ -264,19 +233,6 @@ export const DetailApplications = () => {
                 <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
               </div>
             </div>
-            {
-              permissions.canEditRequi && (
-                <div className="row text-start">
-                  <div className='col-6'>
-                    <InputText name='requisition' label='No. de Requisici&oacute;n' placeholder='Ingresa no. de requisici&oacute;n' 
-                        value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
-                  </div>
-                  <div className='col-6'>
-                    <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
-                  </div>
-                </div>
-              )
-            }
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
               { renderSaveButton() }
@@ -294,13 +250,7 @@ export const DetailApplications = () => {
         { id && renderTabs() }
       </div>
       <Alert />
-      { (currentTab === 3 && id ) ? renderAddOrderButton() : null }
-      {
-        currentTab === 1 ? renderDetail() : ( currentTab === 3 
-          ? <TableOrders projectId={ projectId } projectApplicationId={ id } /> 
-          : <TableLog tableName='ProjectApplication' recordId={ id } />
-        )
-      }
+      { currentTab === 1 ? renderDetail() : ( <TableLog tableName='ProjectApplication' recordId={ id } />) }
     </div>
   )
 }
