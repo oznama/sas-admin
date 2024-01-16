@@ -17,6 +17,9 @@ import com.mexico.sas.admin.api.service.EmployeeService;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,6 +61,20 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
+    public Page<EmployeeFindDto> findAll(Pageable pageable) {
+        Page<Employee> employees = repository.findAll(pageable);
+        List<EmployeeFindDto> employeeFindDtos = new ArrayList<>();
+        employees.forEach( employee -> {
+            try {
+                employeeFindDtos.add(parseEmployeeFindDto(employee));
+            } catch (CustomException e) {
+                log.error(e.getMessage());
+            }
+        } );
+        return new PageImpl<>(employeeFindDtos, pageable, employees.getTotalElements());
+    }
+
+    @Override
     public EmployeeFindDto findByCompanyAndId(Long companyId, Long id) throws CustomException {
         log.debug("Finding by company {} and id {}", companyId, id);
         Employee employee = repository.findByCompanyIdAndIdAndActiveIsTrueAndEliminateIsFalse(companyId, id)
@@ -81,6 +98,11 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     @Override
     public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
         return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
+    }
+
+    private EmployeeFindDto parseEmployeeFindDto(Employee employee) throws CustomException {
+        EmployeeFindDto employeeFindDto = from_M_To_N(employee, EmployeeFindDto.class);
+        return employeeFindDto;
     }
 
     private List<EmployeeFindSelectDto> getSelect(List<Employee> employees) {

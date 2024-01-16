@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.company.CompanyFindSelectDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.service.CompanyService;
@@ -10,6 +11,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,6 +66,15 @@ public class EmployeeController {
 //    log.info("Finding catalog by id");
 //    return ResponseEntity.ok(service.findById(id));
 //  }
+
+  @GetMapping()
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar todos los empleados", nickname = "/findAll")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = EmployeeFindDto.class, responseContainer = "List") })
+  public ResponseEntity<Page<EmployeeFindDto>> findAll(Pageable pageable) throws CustomException {
+    log.info("Getting all employees");
+    return ResponseEntity.ok(service.findAll(pageable));
+  }
 
   @GetMapping("/select")
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleados para select", nickname = "/select")
