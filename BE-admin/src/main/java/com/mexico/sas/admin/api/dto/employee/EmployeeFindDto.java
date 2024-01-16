@@ -17,6 +17,7 @@ public class EmployeeFindDto implements Serializable {
     private String secondName;
     private String surname;
     private String secondSurname;
+    private String phone;
     private Boolean active;
     private Boolean eliminate;
     private Date creationDate;
