@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.company.CompanyFindSelectDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -13,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -28,23 +29,23 @@ public class EmployeeController {
   @Autowired
   private EmployeeService service;
 
-//  @PostMapping(headers = "Accept=application/json")
-//  @ResponseStatus(code = HttpStatus.CREATED)
-//  @ApiOperation(httpMethod = "POST", value = "Servicio para crear cliente", nickname = "save")
-//  public ResponseEntity<CatalogDto> save(@Valid @RequestBody ClientDto clientDto) throws CustomException {
-//    log.info("Saving client");
-//    service.save(clientDto);
-//    return ResponseEntity.status(HttpStatus.CREATED).body(clientDto);
-//  }
+  @PostMapping(headers = "Accept=application/json")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @ApiOperation(httpMethod = "POST", value = "Servicio para crear empleado", nickname = "save")
+  public ResponseEntity<EmployeeDto> save(@Valid @RequestBody EmployeeDto employeeDto) throws CustomException {
+    log.info("Saving employee");
+    service.save(employeeDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(employeeDto);
+  }
 
-//  @PutMapping(path = "/{id}", headers = "Accept=application/json")
-//  @ResponseStatus(code = HttpStatus.OK)
-//  @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar catalogo", nickname = "update")
-//  public ResponseEntity<CatalogDto> update(
-//          @PathVariable("id") Long id, @Valid @RequestBody CatalogUpdateDto catalogDto) throws CustomException {
-//    log.info("Updating catalog");
-//    return ResponseEntity.ok().body(service.update(id, catalogDto));
-//  }
+  @PutMapping(path = "/{id}", headers = "Accept=application/json")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar catalogo", nickname = "update")
+  public ResponseEntity<EmployeeDto> update(
+          @PathVariable("id") Long id, @Valid @RequestBody EmployeeDto catalogDto) throws CustomException {
+    log.info("Updating catalog");
+    return ResponseEntity.ok().body(service.update(id, catalogDto));
+  }
 
 //  @PatchMapping
 //  @ResponseStatus(code = HttpStatus.OK)
@@ -59,13 +60,13 @@ public class EmployeeController {
 //            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), updateStatusDto));
 //  }
 
-//  @GetMapping("/{id}")
-//  @ApiIgnore
-//  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar catalogo por id", nickname = "findById")
-//  public ResponseEntity<CatalogDto> findById(@PathVariable("id") Long id) throws CustomException {
-//    log.info("Finding catalog by id");
-//    return ResponseEntity.ok(service.findById(id));
-//  }
+  @GetMapping("/{id}")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "PUT", value = "Servicio para recuperar empleado por id", nickname = "update")
+  public ResponseEntity<EmployeeFindDto> findById(@PathVariable("id") Long id) throws CustomException {
+    log.info("Finding catalog by id");
+    return ResponseEntity.ok(service.findById(id));
+  }
 
   @GetMapping()
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar todos los empleados", nickname = "/findAll")

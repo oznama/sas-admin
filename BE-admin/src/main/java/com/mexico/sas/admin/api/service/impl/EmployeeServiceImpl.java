@@ -33,13 +33,13 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     private EmployeeRepository repository;
 
     @Override
-    public EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException {
+    public EmployeeDto save(EmployeeDto employeeDto) throws CustomException {
         return null;
     }
 
     @Override
-    public void update(EmployeeDto employeeDto) throws CustomException {
-
+    public EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException {
+        return employeeDto;
     }
 
     @Override

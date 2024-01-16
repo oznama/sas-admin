@@ -13,8 +13,8 @@ import java.util.List;
 
 public interface EmployeeService {
 
-    EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException;
-    void update(EmployeeDto employeeDto) throws CustomException;
+    EmployeeDto save(EmployeeDto employeeDto) throws CustomException;
+    EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException;
     Employee findEntityById(Long id) throws CustomException;
     EmployeeFindDto findById(Long id) throws CustomException;
     Employee findEntityByEmail(String email) throws CustomException;
