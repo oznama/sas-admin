@@ -52,16 +52,16 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.CREATED).body(orderDto);
   }
 
-  @GetMapping("/byApplication/{projectApplicationId}")
+  @GetMapping("/byProject/{projectId}")
   @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar ordenes de aplicacion",
-          nickname = "/findByProjectApplicationId")
+          value = "Servicio para recuperar ordenes de proyecto",
+          nickname = "/byProject")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = OrderFindDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<OrderFindDto>> findByProjectApplicationId(@PathVariable("projectApplicationId") Long projectApplicationId) throws CustomException {
-    log.info("Finding orders by project application");
-    return ResponseEntity.ok(service.findByProjectId(projectApplicationId));
+  public ResponseEntity<List<OrderFindDto>> findByProjectId(@PathVariable("projectId") Long projectId) throws CustomException {
+    log.info("Finding orders by project");
+    return ResponseEntity.ok(service.findByProjectId(projectId));
   }
 
   @GetMapping("/{id}")

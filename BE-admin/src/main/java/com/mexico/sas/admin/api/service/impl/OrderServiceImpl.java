@@ -130,6 +130,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     private void validateSave(OrderDto orderDto, Order order) throws CustomException {
         order.setOrderDate(stringToDate(orderDto.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        order.setRequisitionDate(stringToDate(orderDto.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
             findByOrderNum(orderDto.getOrderNum());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.ORDER_NUMBER_DUPLICATED, orderDto.getOrderNum()), null);
