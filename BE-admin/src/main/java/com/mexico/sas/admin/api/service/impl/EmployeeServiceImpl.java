@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -74,7 +75,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
 
     @Override
     public Page<EmployeeFindDto> findAll(Pageable pageable) {
-        Page<Employee> employees = repository.findAll(pageable);
+        Page<Employee> employees = repository.findByIdNotIn(employessNotIn(), pageable);
         List<EmployeeFindDto> employeeFindDtos = new ArrayList<>();
         employees.forEach( employee -> {
             try {
@@ -110,6 +111,11 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     @Override
     public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
         return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
+    }
+
+    @Override
+    public List<EmployeeFindSelectDto> getForSelect(Long companyId) {
+        return getSelect(repository.findByCompanyIdAndIdNotIn(companyId, employessNotIn()));
     }
 
     private EmployeeFindDto parseEmployeeFindDto(Employee employee) throws CustomException {

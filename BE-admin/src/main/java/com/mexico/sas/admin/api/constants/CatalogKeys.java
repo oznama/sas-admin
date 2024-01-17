@@ -39,5 +39,8 @@ public interface CatalogKeys {
     Long EMPLOYEE_POSITION_GR = 2000500003L;
     Long EMPLOYEE_POSITION_PM = 2000500004L;
 
+    // Invoice status
+    Long INVOICE_STATUS_PAID = 2000800002L;
+
 
 }

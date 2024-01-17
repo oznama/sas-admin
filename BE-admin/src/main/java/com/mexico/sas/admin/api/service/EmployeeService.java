@@ -25,4 +25,5 @@ public interface EmployeeService {
     List<EmployeeFindSelectDto> getForSelect(Boolean developers);
     List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developer, List<Long> positionIds);
     List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developer, Long positionId);
+    List<EmployeeFindSelectDto> getForSelect(Long companyId);
 }

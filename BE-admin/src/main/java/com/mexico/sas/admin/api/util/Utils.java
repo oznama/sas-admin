@@ -311,23 +311,22 @@ public class Utils {
     }
 
     protected List<Long> bossesPositions() {
-        List<Long> bosses = new ArrayList<>();
-        bosses.add(CatalogKeys.EMPLOYEE_POSITION_DR);
-        bosses.add(CatalogKeys.EMPLOYEE_POSITION_SD);
-        bosses.add(CatalogKeys.EMPLOYEE_POSITION_GR);
-        return bosses;
+        return Arrays.asList(
+                CatalogKeys.EMPLOYEE_POSITION_DR,
+                CatalogKeys.EMPLOYEE_POSITION_SD,
+                CatalogKeys.EMPLOYEE_POSITION_GR);
     }
 
     protected List<Long> bossesAndPmPositions() {
-        List<Long> bosses = bossesPositions();
-        bosses.add(CatalogKeys.EMPLOYEE_POSITION_PM);
-        return bosses;
+        return Arrays.asList(CatalogKeys.EMPLOYEE_POSITION_PM);
     }
 
     protected List<Long> catalogsNotIn() {
-        List<Long> catsNotIn = bossesPositions();
-        catsNotIn.add(CatalogKeys.CATALOG_APPLICATIONS);
-        return catsNotIn;
+        return Arrays.asList(CatalogKeys.CATALOG_APPLICATIONS);
+    }
+
+    protected List<Long> employessNotIn() {
+        return Arrays.asList(1L);
     }
 
 }

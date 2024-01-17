@@ -41,4 +41,5 @@ public class EmployeeDto implements Serializable {
 
     private Long companyId;
     private Long positionId;
+    private Long bossId;
 }

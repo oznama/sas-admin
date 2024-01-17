@@ -95,4 +95,13 @@ public class EmployeeController {
     return ResponseEntity.ok(service.getForSelect(true));
   }
 
+  @GetMapping("/select/{companyId}")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleados por compania para select", nickname = "/selectByCompanyId")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<EmployeeFindSelectDto>> selectByCompanyId(@PathVariable("companyId") Long companyId) throws CustomException {
+    log.info("Getting catalog employee");
+    return ResponseEntity.ok(service.getForSelect(companyId));
+  }
+
 }

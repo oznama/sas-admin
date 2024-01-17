@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -90,6 +91,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             }
         });
         try {
+            invoiceFindDtos.add((getPaid(invoices.stream()
+                    .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
+                    .collect(Collectors.toList()))));
             invoiceFindDtos.add(getTotal(invoices));
         } catch (CustomException e) {
             log.error("Impossible add invoice total, error: {}", e.getMessage());
@@ -115,15 +119,29 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         return invoiceFindDto;
     }
 
+    private InvoiceFindDto getPaid(List<Invoice> invoices) throws CustomException {
+        BigDecimal totalAmount = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
+        invoiceFindDto.setInvoiceNum(GeneralKeys.ROW_TOTAL);
+        invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
+        invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
+        invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        return invoiceFindDto;
+    }
+
     private InvoiceFindDto getTotal(List<Invoice> invoices) throws CustomException {
         BigDecimal totalAmount = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalP = invoices.stream().map( pa -> pa.getPercentage() ).reduce(0, (sum, p) -> sum + p);
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
         invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
         invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
         invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        invoiceFindDto.setPercentage(totalP);
         return invoiceFindDto;
     }
 

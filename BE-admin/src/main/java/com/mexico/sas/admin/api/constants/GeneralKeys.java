@@ -37,4 +37,5 @@ public interface GeneralKeys {
     String PSW_TEMPORAL = "Ea6SCcSRF9rJUxhtMk3bXg=="; // 12345678 with current enc
 
     String FOOTER_TOTAL = "total";
+    String ROW_TOTAL = "paid";
 }
