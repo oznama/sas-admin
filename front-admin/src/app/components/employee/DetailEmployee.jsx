@@ -5,7 +5,7 @@ import { getCatalogChilds } from "../../services/CatalogService";
 import { getCompanySelect } from "../../services/CompanyService";
 import { InputText } from "../custom/InputText";
 import { Select } from "../custom/Select";
-import { getEmployeeById, save, update } from "../../services/EmployeeService";
+import { getEmployeeById, getEmployess, save, update } from "../../services/EmployeeService";
 import { setMessage } from "../../../store/alert/alertSlice";
 import { buildPayloadMessage, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
@@ -32,7 +32,10 @@ export const DetailEmployee = () => {
   const [position, setPosition] = useState('');
   const onChangePosition = ({ target }) => setPosition(target.value);
   const [companies, setCompanies] = useState([]);
+  const [catEmployees, setCatEmployees] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [leader, setLeader] = useState('');
+  const onChangeLeader = ({ target }) => setLeader(target.value);
 
   const onSubmit = event => {
     event.preventDefault()
@@ -121,6 +124,13 @@ const updateEmployee = request => {
       }).catch( error => {
         console.log(error);
       });
+
+    getEmployess(true)
+      .then( response => {
+        setCatEmployees(response);
+      }).catch( error => {
+        console.log(error);
+      });
   };
 
 console.log(id);
@@ -151,6 +161,7 @@ console.log(id);
                   value={ phone } onChange={ onChangePhone } maxLength={ 13 } />
               
               <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
+              <Select name="leaderId" label="L&iacute;der" options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
               <Select name="positionId" label="Puesto" options={ positions } value={ position } required onChange={ onChangePosition } />
 
               <div className="pt-3 d-flex flex-row-reverse">
