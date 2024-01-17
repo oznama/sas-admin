@@ -5,7 +5,7 @@ import { getCatalogChilds } from "../../services/CatalogService";
 import { getCompanySelect } from "../../services/CompanyService";
 import { InputText } from "../custom/InputText";
 import { Select } from "../custom/Select";
-import { getEmployeeById, getEmployess, save, update } from "../../services/EmployeeService";
+import { getEmployeeById, getEmployess, getEmployessByCompanyId, save, update } from "../../services/EmployeeService";
 import { setMessage } from "../../../store/alert/alertSlice";
 import { buildPayloadMessage, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
@@ -28,7 +28,10 @@ export const DetailEmployee = () => {
   const [phone, setPhone] = useState('');
   const onChangePhone = ({ target }) => setPhone(target.value);
   const [company, setCompany] = useState('');
-  const onChangeCompany = ({ target }) => setCompany(target.value);
+  const onChangeCompany = ({ target }) => {
+    fetchLeaders(target.value);
+    setCompany(target.value);
+  }
   const [position, setPosition] = useState('');
   const onChangePosition = ({ target }) => setPosition(target.value);
   const [companies, setCompanies] = useState([]);
@@ -58,9 +61,12 @@ export const DetailEmployee = () => {
             setSurname(response.surname);
             setSecondSurname(response.secondSurname);
             setPhone(response.phone);
-            console.log("Response Company ", response.companyId, numberToString(response.companyId, ''))
+            if( response.companyId ) {
+              fetchLeaders(response.companyId);
+            }
             setCompany(numberToString(response.companyId, ''));
             setPosition(numberToString(response.positionId, ''));
+            setLeader(numberToString(response.bossId, ''));
         }
     }).catch( error => {
         console.log(error);
@@ -86,9 +92,9 @@ export const DetailEmployee = () => {
     }).catch(error => {
         dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el empleado, contacte al administrador', alertType.error)));
     });
-};
-
-const updateEmployee = request => {
+  };
+  
+  const updateEmployee = request => {
     update(id, request).then( response => {
       console.log(response);
         if(response.code && response.code === 401) {
@@ -106,34 +112,29 @@ const updateEmployee = request => {
     }).catch(error => {
         dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el empleado, contacte al administrador', alertType.error)));
     });
-};
-
+  };
   
   const fetchSelects = () => {
+    getCatalogChilds(1000000005).then( response => {
+      setPositions(response.filter( cat => cat.status === 2000100001 ));
+    }).catch( error => {
+      console.log(error);
+    });
     
-    getCatalogChilds(1000000005)
-      .then( response => {
-        setPositions(response.filter( cat => cat.status === 2000100001 ));
-      }).catch( error => {
-        console.log(error);
-      });
-    
-    getCompanySelect()
-      .then( response => {
-        setCompanies(response);
-      }).catch( error => {
-        console.log(error);
-      });
-
-    getEmployess(true)
-      .then( response => {
-        setCatEmployees(response);
-      }).catch( error => {
-        console.log(error);
-      });
+    getCompanySelect().then( response => {
+      setCompanies(response);
+    }).catch( error => {
+      console.log(error);
+    });
   };
 
-console.log(id);
+  const fetchLeaders = companyId => {
+    getEmployessByCompanyId(companyId).then( response => {
+      setCatEmployees(response);
+    }).catch( error => {
+      console.log(error);
+    });
+  }
 
   useEffect(() => {
     fetchSelects()
@@ -146,23 +147,43 @@ console.log(id);
   return (
       <div className='d-grid gap-2 col-6 mx-auto'>
           <form className="needs-validation" onSubmit={ onSubmit }>
-              
-              <InputText name='email' label='Correo' placeholder='Ingresa correo' 
-                  value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
-              <InputText name='name' label='Nombre' placeholder='Ingresa Nombre' 
-                  value={ name } required onChange={ onChangeName } maxLength={ 50 } />
-              <InputText name='secondName' label='Segundo Nombre' placeholder='Ingresa segundo nombre' 
-                  value={ secondName } onChange={ onChangeSecondName } maxLength={ 50 } />
-              <InputText name='surname' label='Apellido' placeholder='Ingresa primer apellido' 
-                  value={ surname } required onChange={ onChangeSurname } maxLength={ 50 } />
-              <InputText name='secondSurname' label='Segundo Apellido' placeholder='Ingresa segundo apellido' 
-                  value={ secondSurname } onChange={ onChangeSecondSurname } maxLength={ 50 } />
-              <InputText name='phone' label='Telefono' placeholder='Ingresa telefono' 
-                  value={ phone } onChange={ onChangePhone } maxLength={ 13 } />
-              
-              <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
-              <Select name="leaderId" label="L&iacute;der" options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
-              <Select name="positionId" label="Puesto" options={ positions } value={ position } required onChange={ onChangePosition } />
+            <div className="row text-start">
+              <div className='col-6'>
+                <InputText name='email' label='Correo' placeholder='Ingresa correo' value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
+              </div>
+            </div>
+            <div className="row text-start">
+              <div className='col-6'>
+                <InputText name='name' label='Nombre' placeholder='Escribe el nombre' value={ name } required onChange={ onChangeName } maxLength={ 50 } />
+              </div>
+              <div className='col-6'>
+                <InputText name='secondName' label='Segundo Nombre' placeholder='Escribe segundo nombre' value={ secondName } onChange={ onChangeSecondName } maxLength={ 50 } />
+              </div>
+            </div>
+            <div className="row text-start">
+              <div className='col-6'>
+                <InputText name='surname' label='Apellido paterno' placeholder='Escribe apellido paterno' value={ surname } required onChange={ onChangeSurname } maxLength={ 50 } />
+              </div>
+              <div className='col-6'>
+                <InputText name='secondSurname' label='Segundo Apellido' placeholder='Escribe apellido materno' value={ secondSurname } onChange={ onChangeSecondSurname } maxLength={ 50 } />
+              </div>
+            </div>
+            <div className="row text-start">
+              <div className='col-6'>
+                <InputText name='phone' label='Telefono' placeholder='Escribe telefono' value={ phone } onChange={ onChangePhone } maxLength={ 13 } />
+              </div>
+            </div>
+            <div className="row text-start">
+              <div className='col-4'>
+                <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
+              </div>
+              <div className='col-4'>
+                <Select name="bossId" label="L&iacute;der" options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+              </div>
+              <div className='col-4'>
+                <Select name="positionId" label="Puesto" options={ positions } value={ position } required onChange={ onChangePosition } />
+              </div>
+            </div>
 
               <div className="pt-3 d-flex flex-row-reverse">
                   <button type="submit" className="btn btn-primary" >Guardar</button>

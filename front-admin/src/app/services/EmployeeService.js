@@ -11,6 +11,15 @@ export const getEmployess = async(withDevelopers) => {
     return await response.json();
 };
 
+export const getEmployessByCompanyId = async(companyId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const url = `${context}/select/${ companyId }`;
+    const response = await api( url, request );
+    return await response.json();
+};
+
 export const getEmployees = async(page=0, size=10, sort='id,asc', filter='') => {
     const request = {
         headers: getHeaders()

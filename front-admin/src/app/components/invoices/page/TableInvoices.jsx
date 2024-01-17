@@ -5,6 +5,7 @@ import { setMessage } from "../../../../store/alert/alertSlice";
 import { buildPayloadMessage } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 import { getInvoicesByOrderId } from "../../../services/InvoiceService";
+import { setPaid } from "../../../../store/project/projectSlice";
 
 export const TableInvoices = ({
     projectId,
@@ -18,17 +19,21 @@ export const TableInvoices = ({
     const [totalAmount, setTotalAmount] = useState(0);
     const [totalTax, setTotalTax] = useState(0);
     const [totalT, setTotalT] = useState(0);
+    const [totapP, setTotapP] = useState(0);
 
     const fetchInvoices = () => {
         getInvoicesByOrderId(orderId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
-            } else {
-                setInvoices(response.filter( r => r.invoiceNum !== 'total' ));
-                const { amount, tax, total } = response.find( r => r.invoiceNum === 'total' );
+            } else {                
+                const paid = response.find( r => r.invoiceNum === 'paid' );
+                dispatch(setPaid(paid));
+                setInvoices(response.filter( r => r.invoiceNum !== 'total' && r.invoiceNum !== 'paid' ));
+                const { amount, tax, total, percentage } = response.find( r => r.invoiceNum === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
                 setTotalT( total );
+                setTotapP( percentage );
             }
         }).catch( error => {
             console.log(error);
@@ -41,8 +46,10 @@ export const TableInvoices = ({
     }, []);
 
     const handledSelect = id => {
-        const urlRedirect = `/project/${ projectId }/order/${ orderId }/invoice/${ id }/edit`;
-        navigate(urlRedirect);
+        if ( permissions.canCreateOrd ) {
+            const urlRedirect = `/project/${ projectId }/order/${ orderId }/invoice/${ id }/edit`;
+            navigate(urlRedirect);
+        }
     }
 
     const renderStatus = (status) => {
@@ -113,7 +120,7 @@ export const TableInvoices = ({
                         <th className="text-center fs-6" scope="col">TOTALES</th>
                         <th></th>
                         <th></th>
-                        <th></th>
+                        <th className="text-center fs-6" scope="col">{ totapP }</th>
                         <th></th>
                         <th className="text-end fs-6" scope="col">{ totalAmount }</th>
                         <th className="text-end fs-6" scope="col">{ totalTax }</th>
@@ -122,6 +129,13 @@ export const TableInvoices = ({
                     </tr>
                 </tfoot>
             </table>
+            {
+                !permissions.canCreateOrd && (
+                    <div>
+                        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+                    </div>
+                 )
+            }
         </div>
     )
 }

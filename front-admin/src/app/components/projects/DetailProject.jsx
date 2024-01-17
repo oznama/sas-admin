@@ -10,38 +10,20 @@ import { setMessage } from '../../../store/alert/alertSlice';
 import { alertType } from '../custom/alerts/types/types';
 import { getEmployess } from '../../services/EmployeeService';
 
-export const DetailProject = ({
-    projectId,
-}) => {
+export const DetailProject = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const [pKey, setPKey] = useState('');
-    const [description, setDescription] = useState('');
-    const [createdBy, setCreatedBy] = useState('');
-    const [dateCreated, setDateCreated] = useState(new Date());
-    const [pm, setPm] = useState('');
-    const [installationDate, setInstallationDate] = useState();
+    const { project } = useSelector( state => state.projectReducer );
+    const [projectId, setProjectId] = useState(project.id);
+    const [pKey, setPKey] = useState(project.key);
+    const [description, setDescription] = useState(project.description);
+    const [createdBy, setCreatedBy] = useState(project.createdBy);
+    const [dateCreated, setDateCreated] = useState(project.creationDate);
+    const [pm, setPm] = useState(numberToString(project.projectManagerId, ''));
+    const [installationDate, setInstallationDate] = useState(handleDateStr(project.installationDate));
     const [pms, setPms] = useState([]);
-
-    const fetchProject = () => {
-        getProjectById(projectId).then( response => {
-            if( response.code ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
-            } else {
-                setPKey(response.key);
-                setDescription(response.description);
-                setCreatedBy(response.createdBy);
-                setDateCreated(handleDateStr(response.creationDate));
-                setPm(numberToString(response.projectManagerId, ''));
-                setInstallationDate(handleDateStr(response.installationDate));
-            }
-        }).catch( error => {
-            console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
-        });
-    }
 
     const fetchCatalogEmployee = () => {
         getEmployess()
@@ -53,9 +35,6 @@ export const DetailProject = ({
     };
 
     useEffect(() => {
-        if(projectId) {
-            fetchProject();
-        }
         fetchCatalogEmployee();
     }, []);
 

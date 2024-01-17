@@ -17,6 +17,7 @@ import { TableOrders } from '../../orders/page/TableOrders';
 export const DetailApplications = () => {
 
   const dispatch = useDispatch();
+  const { project } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
   const { projectId, id } = useParams();
 
@@ -246,7 +247,7 @@ export const DetailApplications = () => {
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-        <h1 className="fs-4 card-title fw-bold mb-4">Aplicacion</h1>
+        <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` } &gt; Aplicacion</h3>
         { id && renderTabs() }
       </div>
       <Alert />

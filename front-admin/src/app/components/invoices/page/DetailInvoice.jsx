@@ -9,16 +9,15 @@ import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
 import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
-import { TableOrders } from '../../orders/page/TableOrders';
-import { getOrderById } from '../../../services/OrderService';
 import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
 
 export const DetailInvoice = () => {
 
   const dispatch = useDispatch();
+  const { project, order, paid } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
-  const { projectId, projectApplicationId, orderId, id } = useParams();
+  const { projectId, orderId, id } = useParams();
 
   const navigate = useNavigate();
   const [invoiceNum, setInvoiceNum] = useState('');
@@ -29,7 +28,6 @@ export const DetailInvoice = () => {
   const [amount, setAmount] = useState('');
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
-  const [order, setOrder] = useState({});
   const [status, setStatus] = useState('');
   const [catStatus, setCatStatus] = useState([])
 
@@ -40,23 +38,6 @@ export const DetailInvoice = () => {
       console.log(error);
     });
   };
-
-  const fetchOrder = () => {
-    getOrderById(orderId).then( response => {
-      if( response.code ) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
-      } else {
-        setOrder(response);
-      }
-    }).catch( error => {
-        dispatch(setMessage(
-            buildPayloadMessage(
-                'Ha ocurrido un error al cargar los montos de la orden, contacte al adminitrador', 
-                alertType.error
-            )
-        ));
-    });
-  }
 
   const fetchInvoice = () => {
     getInvoiceById(id).then( response => {
@@ -84,27 +65,34 @@ export const DetailInvoice = () => {
 
   useEffect(() => {
     fetchSelects();
-    fetchOrder();
     if( id ) {
       fetchInvoice();
     }
   }, []);
 
+  const calculateAmounts = amount => {
+    if( amount <= mountMax ) {
+        const tax = amount * taxRate;
+        const total = amount + tax;
+        setAmount(amount);
+        setTax(tax.toFixed(2));
+        setTotal(total.toFixed(2));
+      }
+  }
+
   const onChangeAmount = ({ target }) => {
     const amount = Number(target.value);
-    if( amount <= mountMax ) {
-      const tax = amount * taxRate;
-      const total = amount + tax;
-      setAmount(amount);
-      setTax(tax.toFixed(2));
-      setTotal(total.toFixed(2));
-    }
+    calculateAmounts(amount);
   }
   const onChangeStatus = ({target }) => setStatus(target.value);
   const onChangeNumOrder = ({ target }) => setInvoiceNum(target.value);
   const onChangeIssuedDate = date => setIssuedDate(date)
   const onChangePaymentDate = date => setPaymentDate(date);
-  const onChangePercentage = ({target}) => setPercentage(target.value);
+  const onChangePercentage = ({target}) => {
+    setPercentage(target.value)
+    const porcDec = Number(target.value) / 100;
+    calculateAmounts(order.amount * porcDec);
+  };
 
   const onSubmit = event => {
     event.preventDefault();
@@ -165,62 +153,58 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-      <form onSubmit={ onSubmit }>
-          <div className='text-center'>
-            <div className="row text-start">
-              <div className='col-4'>
-                <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' 
-                    value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
-              </div>
-              <div className='col-4'>
-                <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
-              </div>
-              <div className='col-4'>
-                <Select name = "status" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
-              </div>
+        <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
+        <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p>
+        <form onSubmit={ onSubmit }>
+            <div className='text-center'>
+                <div className="row text-start">
+                    <div className='col-4'>
+                        <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
+                    </div>
+                    <div className='col-4'>
+                        <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+                    </div>
+                    <div className='col-4'>
+                        <Select name = "status" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+                    </div>
+                </div>
+                <div className="row text-start">
+                    <div className='col-6'>
+                        <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } />
+                    </div>
+                    <div className='col-6'>
+                        <DatePicker name="paymentDate" label="Fecha De Pago" value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
+                    </div>
+                </div>
+                <div className="row text-start">
+                    <div className='col-6'>
+                        <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
+                    </div>
+                    <div className='col-3'>
+                        <InputText name="tax" label='Iva' type='text' readOnly value={ `${tax}` } />
+                    </div>
+                    <div className='col-3'>
+                        <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
+                    </div>
+                </div>
             </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } />
-              </div>
-              <div className='col-6'>
-                <DatePicker name="paymentDate" label="Fecha De Pago" value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
-              </div>
+            <div className="pt-3 d-flex flex-row-reverse">
+                { renderSaveButton() }
+                &nbsp;
+                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
             </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
-              </div>
-              <div className='col-3'>
-                <InputText name="tax" label='Iva' type='text' readOnly value={ `${tax}` } />
-              </div>
-              <div className='col-3'>
-                <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
-              </div>
-            </div>
-          </div>
-          <div className="pt-3 d-flex flex-row-reverse">
-              { renderSaveButton() }
-              &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
-          </div>
-      </form>
+        </form>
     </div>
   )
  
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-        <h1 className="fs-4 card-title fw-bold mb-4">Factura</h1>
+      <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h3>
         { id && renderTabs() }
       </div>
       <Alert />
-      {
-        currentTab === 1 ? renderDetail() : ( currentTab === 3 
-          ? <TableOrders projectApplicationId={ id } /> 
-          : <TableLog tableName='Invoice' recordId={ id } />
-        )
-      }
+      { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>
   )
 }

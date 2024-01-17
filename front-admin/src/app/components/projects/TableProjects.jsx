@@ -66,7 +66,7 @@ export const TableProject = ({
     );
 
     const renderSearcher = () => (
-        <div className="input-group w-50 pt-3">
+        <div className="input-group w-50 py-3">
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
