@@ -216,7 +216,19 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.amount,
                     currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
             invoice.setAmount(invoiceDto.getAmount());
+        }
+        currentAmount = doubleScale(invoice.getTax().doubleValue());
+        newAmount = doubleScale(invoiceDto.getTax().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.tax,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
             invoice.setTax(invoiceDto.getTax());
+        }
+        currentAmount = doubleScale(invoice.getTotal().doubleValue());
+        newAmount = doubleScale(invoiceDto.getTotal().doubleValue());
+        if( currentAmount != newAmount ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.total,
+                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
             invoice.setTotal(invoiceDto.getTotal());
         }
         try {

@@ -54,7 +54,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     public void update(Long invoiceId, InvoiceDto invoiceDto) throws CustomException {
         Invoice invoice = findEntityById(invoiceId);
         String message = ChangeBeanUtils.checkInvoice(invoice, invoiceDto);
-
+        log.debug("Updating invoice {} with {}, changes: {}", invoice, invoiceDto, message);
         if(!message.isEmpty()) {
             repository.save(invoice);
             save(Invoice.class.getSimpleName(), invoice.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -136,12 +136,19 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         Integer totalP = invoices.stream().map( pa -> pa.getPercentage() ).reduce(0, (sum, p) -> sum + p);
+//        Long pending = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_PENDING) ).count();
+//        Long paid = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) ).count();
+//        Long canceled = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ).count();
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
         invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
         invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
         invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
         invoiceFindDto.setPercentage(totalP);
+//        invoiceFindDto.setStatus(canceled > 0 ? CatalogKeys.INVOICE_STATUS_CANCELED : (
+//                pending > 0 ? CatalogKeys.INVOICE_STATUS_PENDING :
+//                        (paid == invoices.size() ? CatalogKeys.INVOICE_STATUS_PAID : null)
+//                ));
         return invoiceFindDto;
     }
 

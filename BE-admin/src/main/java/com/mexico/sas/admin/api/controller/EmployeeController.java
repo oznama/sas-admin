@@ -1,11 +1,10 @@
 package com.mexico.sas.admin.api.controller;
 
-import com.mexico.sas.admin.api.dto.company.CompanyFindSelectDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
 import com.mexico.sas.admin.api.exception.CustomException;
-import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -71,10 +70,12 @@ public class EmployeeController {
   @GetMapping()
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar todos los empleados", nickname = "/findAll")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = EmployeeFindDto.class, responseContainer = "List") })
-  public ResponseEntity<Page<EmployeeFindDto>> findAll(Pageable pageable) throws CustomException {
+          @ApiResponse(code = 200, message = "Success", response = EmployeePaggeableDto.class, responseContainer = "List") })
+  public ResponseEntity<Page<EmployeePaggeableDto>> findAll(@RequestParam(required = false) String filter,
+                                                       @RequestParam(required = false) Long companyId,
+                                                       Pageable pageable) throws CustomException {
     log.info("Getting all employees");
-    return ResponseEntity.ok(service.findAll(pageable));
+    return ResponseEntity.ok(service.findAll(filter, companyId, pageable));
   }
 
   @GetMapping("/select")

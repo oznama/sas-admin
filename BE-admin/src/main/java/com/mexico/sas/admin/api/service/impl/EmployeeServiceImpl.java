@@ -5,6 +5,7 @@ import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.LoginException;
@@ -13,6 +14,8 @@ import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.EmployeeRepository;
+import com.mexico.sas.admin.api.service.CatalogService;
+import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -32,6 +39,12 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
 
     @Autowired
     private EmployeeRepository repository;
+
+    @Autowired
+    private CompanyService companyService;
+
+    @Autowired
+    private CatalogService catalogService;
 
     @Override
     public EmployeeDto save(EmployeeDto employeeDto) throws CustomException {
@@ -74,12 +87,12 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public Page<EmployeeFindDto> findAll(Pageable pageable) {
-        Page<Employee> employees = repository.findByIdNotIn(employessNotIn(), pageable);
-        List<EmployeeFindDto> employeeFindDtos = new ArrayList<>();
+    public Page<EmployeePaggeableDto> findAll(String filter, Long companyId, Pageable pageable) {
+        Page<Employee> employees = findByFilter(filter, companyId, null, null, pageable);
+        List<EmployeePaggeableDto> employeeFindDtos = new ArrayList<>();
         employees.forEach( employee -> {
             try {
-                employeeFindDtos.add(parseEmployeeFindDto(employee));
+                employeeFindDtos.add(parseEmployeePaggeableDto(employee));
             } catch (CustomException e) {
                 log.error(e.getMessage());
             }
@@ -123,6 +136,21 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         return employeeFindDto;
     }
 
+    private EmployeePaggeableDto parseEmployeePaggeableDto(Employee employee) throws CustomException {
+        EmployeePaggeableDto employeeFindDto = from_M_To_N(employee, EmployeePaggeableDto.class);
+        employeeFindDto.setFullName(buildFullname(employee));
+        employeeFindDto.setCompany(companyService.findEntityById(employee.getCompanyId()).getName());
+        if( employee.getBossId() != null ) {
+            employeeFindDto.setBoss(buildFullname(findEntityById(employee.getBossId())));
+        }
+        if( employee.getPositionId() != null ) {
+            employeeFindDto.setPosition(catalogService.findEntityById(employee.getPositionId()).getValue());
+        }
+        employeeFindDto.setCreatedBy(buildFullname(findEntityById(employee.getCreatedBy())));
+        employeeFindDto.setCreationDate(dateToString(employee.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return employeeFindDto;
+    }
+
     private List<EmployeeFindSelectDto> getSelect(List<Employee> employees) {
         List<EmployeeFindSelectDto> employeesFindSelectDto = new ArrayList<>();
         employees.forEach( employee -> {
@@ -147,5 +175,46 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
             if(e instanceof BadRequestException)
                 throw e;
         }
+    }
+
+    private Page<Employee> findByFilter(String filter, Long companyId, Long createdBy, Boolean active,
+                                       Pageable pageable) {
+        return repository.findAll((Specification<Employee>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, companyId, createdBy, active, criteriaBuilder, root), pageable);
+    }
+
+    private Long countByFilter(String filter, Long companyId, Long createdBy, Boolean active) {
+        return repository.count((Specification<Employee>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, companyId, createdBy, active, criteriaBuilder, root));
+    }
+
+    private Predicate getPredicateDinamycFilter(String filter, Long companyId, Long createdBy, Boolean active,
+                                                CriteriaBuilder builder, Root<Employee> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.isFalse(root.get(Employee.Fields.eliminate)));
+        predicates.add(root.get(Employee.Fields.id).in(employessNotIn()).not());
+
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pName = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Employee.Fields.name))), patternFilter);
+            Predicate pSecondName = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Employee.Fields.secondName))), patternFilter);
+            Predicate pSurname = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Employee.Fields.surname))), patternFilter);
+            Predicate pSecondSurname = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Employee.Fields.secondSurname))), patternFilter);
+            predicates.add(builder.or(pName, pSecondName, pSurname, pSecondSurname));
+        }
+
+        if(companyId != null) {
+            predicates.add(builder.equal(root.get(Employee.Fields.companyId), companyId));
+        }
+
+        if(createdBy != null) {
+            predicates.add(builder.equal(root.get(Employee.Fields.createdBy), createdBy));
+        }
+
+        if(active != null) {
+            predicates.add(builder.equal(root.get(Employee.Fields.active), active));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }

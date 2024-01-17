@@ -3,7 +3,7 @@ package com.mexico.sas.admin.api.service;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
-import com.mexico.sas.admin.api.dto.user.UserDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Employee;
 import org.springframework.data.domain.Page;
@@ -18,7 +18,7 @@ public interface EmployeeService {
     Employee findEntityById(Long id) throws CustomException;
     EmployeeFindDto findById(Long id) throws CustomException;
     Employee findEntityByEmail(String email) throws CustomException;
-    Page<EmployeeFindDto> findAll(Pageable pageable);
+    Page<EmployeePaggeableDto> findAll(String filter, Long companyId, Pageable pageable);
 
     EmployeeFindDto findByCompanyAndId(Long companyId, Long id) throws CustomException;
 

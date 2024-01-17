@@ -40,7 +40,9 @@ public interface CatalogKeys {
     Long EMPLOYEE_POSITION_PM = 2000500004L;
 
     // Invoice status
+    Long INVOICE_STATUS_PENDING = 2000800001L;
     Long INVOICE_STATUS_PAID = 2000800002L;
+    Long INVOICE_STATUS_CANCELED = 2000800003L;
 
 
 }
