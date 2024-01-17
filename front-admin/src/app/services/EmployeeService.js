@@ -20,12 +20,13 @@ export const getEmployessByCompanyId = async(companyId) => {
     return await response.json();
 };
 
-export const getEmployees = async(page=0, size=10, sort='id,asc', filter='') => {
+export const getEmployees = async(page=0, size=10, sort='id,asc', filter='', companyId='') => {
     const request = {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlEmployees = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const companyParam = companyId ? `&companyId=${companyId}` : ''
+    const urlEmployees = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }${ companyParam }`;
     const response = await api( urlEmployees, request );
     const employees = await response.json();
     return employees;

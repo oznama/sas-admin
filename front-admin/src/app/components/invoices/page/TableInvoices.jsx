@@ -20,6 +20,7 @@ export const TableInvoices = ({
     const [totalTax, setTotalTax] = useState(0);
     const [totalT, setTotalT] = useState(0);
     const [totapP, setTotapP] = useState(0);
+    const [totalStatus, setTotalStatus] = useState();
 
     const fetchInvoices = () => {
         getInvoicesByOrderId(orderId).then( response => {
@@ -29,11 +30,12 @@ export const TableInvoices = ({
                 const paid = response.find( r => r.invoiceNum === 'paid' );
                 dispatch(setPaid(paid));
                 setInvoices(response.filter( r => r.invoiceNum !== 'total' && r.invoiceNum !== 'paid' ));
-                const { amount, tax, total, percentage } = response.find( r => r.invoiceNum === 'total' );
+                const { amount, tax, total, percentage, status } = response.find( r => r.invoiceNum === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
                 setTotalT( total );
                 setTotapP( percentage );
+                // setTotalStatus( status )
             }
         }).catch( error => {
             console.log(error);
@@ -53,8 +55,8 @@ export const TableInvoices = ({
     }
 
     const renderStatus = (status) => {
-        const backColor = status === 2000800003 ? 'bg-danger' : ( status === 2000800002 ? 'bg-success' : 'bg-warning' );
-        const statusDesc = status === 2000800003 ? 'Cancelada' : ( status === 2000800002 ? 'Pagada' : 'Proceso' );
+        const backColor = status === 2000800003 ? 'bg-danger' : ( status === 2000800002 ? 'bg-success' : ( status === 2000800001 ? 'bg-warning' : '') );
+        const statusDesc = status === 2000800003 ? 'Cancelada' : ( status === 2000800002 ? 'Pagada' : ( status === 2000800001 ? 'Proceso' : '') );
         return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
@@ -79,14 +81,14 @@ export const TableInvoices = ({
             <td className="text-center">{ issuedDate }</td>
             <td className="text-center">{ paymentDate }</td>
             <td className="text-center">{ percentage }</td>
-            <td className="text-center">{ renderStatus(status, '') }</td>
+            <td className="text-center">{ renderStatus(status) }</td>
             <td className="text-end text-primary">{ amount }</td>
             <td className="text-end text-primary">{ tax }</td>
             <td className="text-end text-primary">{ total }</td>
             {
-                permissions.canDelInvoices && (
+                permissions.canDelOrd && (
                     <td className="text-center">
-                        <button type="button" className="btn btn-danger">
+                        <button type="button" className="btn btn-danger btn-sm">
                             <span><i className="bi bi-trash"></i></span>
                         </button>
                     </td>
@@ -109,7 +111,7 @@ export const TableInvoices = ({
                         <th className="text-center fs-6" scope="col">Monto</th>
                         <th className="text-center fs-6" scope="col">Iva</th>
                         <th className="text-center fs-6" scope="col">Total</th>
-                        { permissions.canDelInvoices && (<th className="text-center fs-6" scope="col">Borrar</th>) }
+                        { permissions.canDelOrd && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                     </tr>
                 </thead>
                 <tbody>
@@ -121,11 +123,11 @@ export const TableInvoices = ({
                         <th></th>
                         <th></th>
                         <th className="text-center fs-6" scope="col">{ totapP }</th>
-                        <th></th>
+                        <td className="text-center">{ renderStatus(totalStatus) }</td>
                         <th className="text-end fs-6" scope="col">{ totalAmount }</th>
                         <th className="text-end fs-6" scope="col">{ totalTax }</th>
                         <th className="text-end fs-6" scope="col">{ totalT }</th>
-                        { permissions.canDelInvoices && (<th></th>) }
+                        { permissions.canDelOrd && (<th></th>) }
                     </tr>
                 </tfoot>
             </table>

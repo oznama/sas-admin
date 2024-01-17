@@ -84,9 +84,9 @@ export const TableOrders = ({
             <td className="text-end text-primary">{ tax }</td>
             <td className="text-end text-primary">{ total }</td>
             {
-                permissions.canDelOrders && (
+                permissions.canDelOrd && (
                     <td className="text-center">
-                        <button type="button" className="btn btn-danger">
+                        <button type="button" className="btn btn-danger btn-sm">
                             <span><i className="bi bi-trash"></i></span>
                         </button>
                     </td>
@@ -110,7 +110,7 @@ export const TableOrders = ({
                         <th className="text-center fs-6" scope="col">Monto</th>
                         <th className="text-center fs-6" scope="col">Iva</th>
                         <th className="text-center fs-6" scope="col">Total</th>
-                        { permissions.canDelOrders && (<th className="text-center fs-6" scope="col">Borrar</th>) }
+                        { permissions.canDelOrd && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                     </tr>
                 </thead>
                 <tbody>
@@ -127,7 +127,7 @@ export const TableOrders = ({
                         <th className="text-end fs-6" scope="col">{ totalAmount }</th>
                         <th className="text-end fs-6" scope="col">{ totalTax }</th>
                         <th className="text-end fs-6" scope="col">{ totalT }</th>
-                        { permissions.canDelOrders && (<th></th>) }
+                        { permissions.canDelOrd && (<th></th>) }
                     </tr>
                 </tfoot>
             </table>

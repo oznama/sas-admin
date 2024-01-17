@@ -192,7 +192,7 @@ export const CatalogSingle = ({
       { permissions.isAdminRoot && (<td className="text-center">{ company }</td>)}
       { permissions.isAdminRoot && (<td className="text-center">{ renderStatus(status, statusDesc) }</td>)}
       { permissions.canDelCat && (<td className="text-center">
-          <button type="button" className="btn btn-danger" onClick={ () => deleteChild(id) }>
+          <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteChild(id) }>
               <span><i className="bi bi-trash"></i></span>
           </button>
       </td>)}

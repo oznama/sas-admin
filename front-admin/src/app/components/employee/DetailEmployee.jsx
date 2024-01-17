@@ -151,6 +151,9 @@ export const DetailEmployee = () => {
               <div className='col-6'>
                 <InputText name='email' label='Correo' placeholder='Ingresa correo' value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
               </div>
+              <div className='col-6'>
+                @sas-mexico.com
+              </div>
             </div>
             <div className="row text-start">
               <div className='col-6'>

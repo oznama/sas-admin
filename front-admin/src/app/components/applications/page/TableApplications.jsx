@@ -87,7 +87,7 @@ export const TableApplications = ({ projectId }) => {
             {
                 permissions.canDelProjApp && (
                     <td className="text-center">
-                        <button type="button" className="btn btn-danger">
+                        <button type="button" className="btn btn-danger btn-sm">
                             <span><i className="bi bi-trash"></i></span>
                         </button>
                     </td>
