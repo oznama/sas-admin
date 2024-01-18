@@ -12,6 +12,7 @@ import com.mexico.sas.admin.api.exception.LoginException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.model.Catalog;
 import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.EmployeeRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
@@ -66,6 +67,25 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         employee.setPositionId(employeeDto.getPositionId());
         repository.save(employee);
         return employeeDto;
+    }
+
+    @Override
+    public void deleteLogic(Long id) {
+        log.debug("Delete logic: {}", id);
+        repository.deleteLogic(id);
+        save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+    }
+
+    @Override
+    public void delete(Long id) throws CustomException {
+        findEntityById(id);
+        try{
+            repository.deleteById(id);
+            save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+        } catch (Exception e) {
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
+        }
     }
 
     @Override

@@ -1,10 +1,13 @@
 package com.mexico.sas.admin.api.controller;
 
+import com.mexico.sas.admin.api.dto.ResponseDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.i18n.I18nKeys;
+import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -39,25 +42,25 @@ public class EmployeeController {
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar catalogo", nickname = "update")
+  @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar empleado", nickname = "update")
   public ResponseEntity<EmployeeDto> update(
           @PathVariable("id") Long id, @Valid @RequestBody EmployeeDto catalogDto) throws CustomException {
     log.info("Updating catalog");
     return ResponseEntity.ok().body(service.update(id, catalogDto));
   }
 
-//  @PatchMapping
-//  @ResponseStatus(code = HttpStatus.OK)
-//  @ApiOperation(httpMethod = "PATCH", value = "Servicio para actualizar status de catalogo", nickname = "updateStatus")
-//  @ApiResponses(value = {
-//          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
-//  })
-//  public ResponseEntity<ResponseDto> updateStatus(@Valid @RequestBody UpdateStatusDto updateStatusDto) throws CustomException {
-//    log.info("Updating catalog's status");
-//    service.updateStatus(updateStatusDto);
-//    return ResponseEntity.ok(
-//            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), updateStatusDto));
-//  }
+  @DeleteMapping(path = "/{id}")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar empleado", nickname = "delete")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
+  })
+  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+    log.info("Delete employee");
+    service.deleteLogic(id);
+    return ResponseEntity.ok(
+            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
+  }
 
   @GetMapping("/{id}")
   @ResponseStatus(code = HttpStatus.OK)

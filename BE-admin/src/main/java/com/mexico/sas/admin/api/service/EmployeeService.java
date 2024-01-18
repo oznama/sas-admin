@@ -15,6 +15,8 @@ public interface EmployeeService {
 
     EmployeeDto save(EmployeeDto employeeDto) throws CustomException;
     EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException;
+    void deleteLogic(Long id);
+    void delete(Long id) throws CustomException;
     Employee findEntityById(Long id) throws CustomException;
     EmployeeFindDto findById(Long id) throws CustomException;
     Employee findEntityByEmail(String email) throws CustomException;
