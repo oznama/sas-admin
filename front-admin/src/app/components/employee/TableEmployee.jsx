@@ -18,13 +18,13 @@ export const TableEmployee = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { permissions } = useSelector( state => state.auth );
-
+    const { permissions, user } = useSelector( state => state.auth );
+    console.log(user);
     const [currentPage, setCurrentPage] = useState(0);
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
     const [filter, setFilter] = useState('')
-    const [companyId, setCompanyId] = useState('');
+    const [companyId, setCompanyId] = useState( permissions.isAdminRoot ? '' : user.companyId) ;
     const [companies, setCompanies] = useState([]);
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
@@ -78,10 +78,10 @@ export const TableEmployee = ({
 
     const renderSearcher = () => (
         <div className="input-group w-50 pt-3">
-            <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
+            { permissions.isAdminRoot && (<select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
                 <option value=''>Seleccionar...</option>
                 { companies && companies.map( option  => ( <option key={ option.id } value={ option.id }>{ option.value }</option> )) }
-            </select>
+            </select>)}
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
@@ -135,7 +135,7 @@ export const TableEmployee = ({
         <div>
 
             <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">Empleados</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">{`Empleados${!permissions.isAdminRoot ? ` > `+user.company : ''}`}</h3>
             </div>
 
             { renderSearcher() }

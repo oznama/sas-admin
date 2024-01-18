@@ -12,6 +12,7 @@ import { alertType } from "../custom/alerts/types/types";
 
 export const DetailEmployee = () => {
 
+  const { permissions, user } = useSelector( state => state.auth );
   const {id} = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,11 +28,16 @@ export const DetailEmployee = () => {
   const onChangeSecondSurname = ({ target }) => setSecondSurname(target.value);
   const [phone, setPhone] = useState('');
   const onChangePhone = ({ target }) => setPhone(target.value);
-  const [company, setCompany] = useState('');
+  const [company, setCompany] = useState( permissions.isAdminRoot ? '' : user.companyId);
+  
+  const [companyDesc, setCompanyDesc] = useState('');
   const onChangeCompany = ({ target }) => {
     fetchLeaders(target.value);
     setCompany(target.value);
+    setCompanyDesc( companies.find( c => c.id === c.target.value));
   }
+console.log(companyDesc);
+
   const [position, setPosition] = useState('');
   const onChangePosition = ({ target }) => setPosition(target.value);
   const [companies, setCompanies] = useState([]);
@@ -39,6 +45,12 @@ export const DetailEmployee = () => {
   const [positions, setPositions] = useState([]);
   const [leader, setLeader] = useState('');
   const onChangeLeader = ({ target }) => setLeader(target.value);
+
+  // const catCompany = companies.find(compania => compania.id === company);
+  // console.log(companies);
+  // console.log(company);
+  // console.log(companies.find(compania => compania.id === company));
+  // console.log(catCompany);
 
   const onSubmit = event => {
     event.preventDefault()
@@ -147,12 +159,20 @@ export const DetailEmployee = () => {
   return (
       <div className='d-grid gap-2 col-6 mx-auto'>
           <form className="needs-validation" onSubmit={ onSubmit }>
+          <div className="d-flex d-flex justify-content-center">
+                <h3 className="fs-4 card-title fw-bold mb-4">{`Empleados > ${company ? user.company : ''}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
+            </div>
+            { permissions.isAdminRoot && (<div className="row text-start">
+              <div className='col-6'>
+                <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
+              </div>
+            </div>)}
             <div className="row text-start">
               <div className='col-6'>
                 <InputText name='email' label='Correo' placeholder='Ingresa correo' value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
               </div>
               <div className='col-6'>
-                @sas-mexico.com
+                <InputText name='emaildomain' label='‎ ' readOnly value={ user.companyDomain ? user.companyDomain : '@sas-mexico.com'} />
               </div>
             </div>
             <div className="row text-start">
@@ -177,13 +197,10 @@ export const DetailEmployee = () => {
               </div>
             </div>
             <div className="row text-start">
-              <div className='col-4'>
-                <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
-              </div>
-              <div className='col-4'>
+              <div className='col-6'>
                 <Select name="bossId" label="L&iacute;der" options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
               </div>
-              <div className='col-4'>
+              <div className='col-6'>
                 <Select name="positionId" label="Puesto" options={ positions } value={ position } required onChange={ onChangePosition } />
               </div>
             </div>
