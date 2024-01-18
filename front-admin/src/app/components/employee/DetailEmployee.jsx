@@ -30,11 +30,16 @@ export const DetailEmployee = () => {
   const onChangePhone = ({ target }) => setPhone(target.value);
   const [company, setCompany] = useState( permissions.isAdminRoot ? '' : user.companyId);
   
-  const [companyDesc, setCompanyDesc] = useState('');
+  const [companyDesc, setCompanyDesc] = useState(!permissions.isAdminRoot ? user.company : '');
   const onChangeCompany = ({ target }) => {
     fetchLeaders(target.value);
     setCompany(target.value);
-    setCompanyDesc( companies.find( c => c.id === c.target.value));
+    const companySelected = companies.find( c => {
+      const isFind = c.id === Number(target.value)
+      console.log('isFind???', isFind, 'companyId', c.id, 'companySelected', Number(target.value));
+      return isFind;
+    });
+    setCompanyDesc( companySelected ? `> ${companySelected.value}` : '' );
   }
 console.log(companyDesc);
 
@@ -160,7 +165,7 @@ console.log(companyDesc);
       <div className='d-grid gap-2 col-6 mx-auto'>
           <form className="needs-validation" onSubmit={ onSubmit }>
           <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">{`Empleados > ${company ? user.company : ''}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">{`Empleado ${companyDesc}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
             </div>
             { permissions.isAdminRoot && (<div className="row text-start">
               <div className='col-6'>
