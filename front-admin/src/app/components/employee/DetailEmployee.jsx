@@ -29,14 +29,14 @@ export const DetailEmployee = () => {
   const [phone, setPhone] = useState('');
   const onChangePhone = ({ target }) => setPhone(target.value);
   const [company, setCompany] = useState( permissions.isAdminRoot ? '' : user.companyId);
-  
+
   const [companyDesc, setCompanyDesc] = useState('');
   const onChangeCompany = ({ target }) => {
     fetchLeaders(target.value);
     setCompany(target.value);
     setCompanyDesc( companies.find( c => c.id === c.target.value));
   }
-console.log(companyDesc);
+// console.log(companyDesc);
 
   const [position, setPosition] = useState('');
   const onChangePosition = ({ target }) => setPosition(target.value);

@@ -2,13 +2,15 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getEmployees } from "../../services/EmployeeService";
+import { getEmployeeById, getEmployees } from "../../services/EmployeeService";
 import { setMessage } from "../../../store/alert/alertSlice";
 import { buildPayloadMessage } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { Select } from '../custom/Select';
 import { getCompanySelect } from '../../services/CompanyService';
+import { deleteLogic } from '../../services/CatalogService';
+import { changeLoading } from '../../../store/loading/loadingSlice';
 
 export const TableEmployee = ({
     pageSize = 10,
@@ -31,6 +33,7 @@ export const TableEmployee = ({
     const onChangeCompany = ({ target }) => setCompanyId(target.value);
 
     const fetchEmployees = (page) => {
+        console.log('Filtro: '+filter+' Companhias: '+companyId)
         getEmployees(page, pageSize, sort, filter, companyId)
             .then( response => {
                 if( response.code && response.code === 401 ) {
@@ -100,7 +103,23 @@ export const TableEmployee = ({
         const backColor = status ? 'bg-success' : 'bg-danger';
         const desc = status ? 'Activo' : 'Inactivo';
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
-      }
+    }
+
+    const deleteChild = TableEmployee => {
+        deleteLogic(TableEmployee).then( response => {
+            if(response.code && response.code !== 200) {
+                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            } else {
+                dispatch(setMessage(buildPayloadMessage('¡Registro eliminado correctamente!', alertType.success)));
+                fetchEmployees();
+            }
+            dispatch(changeLoading(false));
+        }).catch(error => {
+            dispatch(changeLoading(false));
+            console.log(error);
+            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
+        });
+    }
     
     const renderRows = () => employees && employees.map(({
         id,
