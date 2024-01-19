@@ -1,6 +1,6 @@
 -- Compañias
-INSERT INTO companies (id, name) VALUES (1, 'SAS');
-INSERT INTO companies (id, name) VALUES (2, 'PROSA');
+INSERT INTO companies (id, name, email_domain, type) VALUES (1, 'SAS', 'sas-mexico.com', 2000900001);
+INSERT INTO companies (id, name, email_domain, type) VALUES (2, 'PROSA', 'prosa.com.mx', 2000900002);
 
 SELECT setval('companies_id_seq', 2);
 
@@ -71,7 +71,7 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 18);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 19);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 20);
 
-
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 1);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 3);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 4);
@@ -118,7 +118,7 @@ UPDATE users SET role_id = 4 WHERE id = 6;
 -- Catalogos
 
 ---- Maquina de estados
-INSERT INTO catalog (id, value, description) VALUES (1000000001, 'Catalogo de estatus', 'Maquina de estado');
+INSERT INTO catalog (id, value, description, internal) VALUES (1000000001, 'Catalogo de estatus', 'Maquina de estado', true);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100001, 'Activo', 'Registro activo', 1000000001);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100002, 'Inactivo', 'Registro inactivo', 1000000001);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000100003, 'Eliminado', 'Registro eliminado', 1000000001);
@@ -128,7 +128,7 @@ INSERT INTO catalog (id, value, description) VALUES (1000000002, 'Estatus proyec
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000200001, 'Nuevo', 'Nuevo', 1000000002);
 
 ---- Crear catalogo bitacora
-INSERT INTO catalog (id, value, description) VALUES (1000000003, 'Bitacora detalle', 'Catalogo de detalle de bitacora');
+INSERT INTO catalog (id, value, description, internal) VALUES (1000000003, 'Bitacora detalle', 'Catalogo de detalle de bitacora', true);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300001, 'Insert', 'New record', 1000000003);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300002, 'Update', 'Change data', 1000000003);
 INSERT INTO catalog (id, value, description, catalog_parent_id) VALUES (2000300003, 'Delete', 'Physical delete', 1000000003);
@@ -184,6 +184,12 @@ INSERT INTO catalog (id, value, description) VALUES (1000000008, 'Estatus de fac
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800001, 'Proceso', 1000000008);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800002, 'Pagada', 1000000008);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000800003, 'Cancelada', 1000000008);
+
+-- Tipos de companias
+INSERT INTO catalog (id, value, description) VALUES (1000000009, CONCAT('Tipo de compa',E'\u00F1','ia'), CONCAT('Tipo de compa',E'\u00F1','ia'));
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000900001, 'Interna', 1000000009);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000900002, 'Cliente', 1000000009);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000900003, 'Proveedor', 1000000009);
 
 -- Proyectos
 --INSERT INTO projects (id, p_key, description, status, client_id, project_manager_id) VALUES (1, 'T-62-9900-22', 'Generación de reportes por módulo en SIA para MIFEL', 1, 1, 1, 3, current_timestamp);

@@ -2,10 +2,7 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
-import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
+import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.LoginException;
@@ -18,6 +15,7 @@ import com.mexico.sas.admin.api.repository.EmployeeRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +32,8 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mexico.sas.admin.api.util.ChangeBeanUtils.*;
+
 @Slf4j
 @Service
 public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeService {
@@ -48,24 +48,23 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     private CatalogService catalogService;
 
     @Override
-    public EmployeeDto save(EmployeeDto employeeDto) throws CustomException {
+    public EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException {
         Employee employee = from_M_To_N(employeeDto, Employee.class);
         repository.save(employee);
-        employeeDto.setId(employee.getId());
-        return employeeDto;
+        EmployeeFindDto employeeFindDto = from_M_To_N(employeeDto, EmployeeFindDto.class);
+        employeeFindDto.setId(employee.getId());
+        return employeeFindDto;
     }
 
     @Override
-    public EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException {
+    public EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeDto) throws CustomException {
         Employee employee = findEntityById(id);
-        employee.setEmail(employeeDto.getEmail());
-        employee.setName(employeeDto.getName());
-        employee.setSecondName(employeeDto.getSecondName());
-        employee.setSurname(employeeDto.getSurname());
-        employee.setSecondSurname(employeeDto.getSecondSurname());
-        employee.setCompanyId(employeeDto.getCompanyId());
-        employee.setPositionId(employeeDto.getPositionId());
-        repository.save(employee);
+        String message = ChangeBeanUtils.checkEmployee(employee, employeeDto);
+
+        if(!message.isEmpty()) {
+            repository.save(employee);
+            save(Employee.class.getSimpleName(), employee.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+        }
         return employeeDto;
     }
 

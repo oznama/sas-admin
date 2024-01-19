@@ -113,7 +113,7 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     public List<CatalogPaggedDto> findAll() throws CustomException {
         List<Catalog> catalogs = getCurrentUser().getRoleId().equals(CatalogKeys.ROLE_ROOT)
                 ? repository.findByCatalogParentIsNullAndIdNotInOrderByIdAsc(catalogsNotIn())
-                : repository.findByCatalogParentIsNullAndStatusIsNotAndIdNotInOrderByIdAsc(
+                : repository.findByCatalogParentIsNullAndStatusIsNotAndInternalIsFalseAndIdNotInOrderByIdAsc(
                         CatalogKeys.ESTATUS_MACHINE_ELIMINATED, catalogsNotIn());
         return parsingPage(catalogs);
     }

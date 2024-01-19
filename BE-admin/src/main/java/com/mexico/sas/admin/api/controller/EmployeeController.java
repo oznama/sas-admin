@@ -1,10 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
+import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
@@ -34,19 +31,18 @@ public class EmployeeController {
   @PostMapping(headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.CREATED)
   @ApiOperation(httpMethod = "POST", value = "Servicio para crear empleado", nickname = "save")
-  public ResponseEntity<EmployeeDto> save(@Valid @RequestBody EmployeeDto employeeDto) throws CustomException {
+  public ResponseEntity<EmployeeFindDto> save(@Valid @RequestBody EmployeeDto employeeDto) throws CustomException {
     log.info("Saving employee");
-    service.save(employeeDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(employeeDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(service.save(employeeDto));
   }
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar empleado", nickname = "update")
-  public ResponseEntity<EmployeeDto> update(
-          @PathVariable("id") Long id, @Valid @RequestBody EmployeeDto catalogDto) throws CustomException {
+  public ResponseEntity<EmployeeUpdateDto> update(
+          @PathVariable("id") Long id, @Valid @RequestBody EmployeeUpdateDto employeeUpdateDto) throws CustomException {
     log.info("Updating catalog");
-    return ResponseEntity.ok().body(service.update(id, catalogDto));
+    return ResponseEntity.ok().body(service.update(id, employeeUpdateDto));
   }
 
   @DeleteMapping(path = "/{id}")

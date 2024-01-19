@@ -1,9 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
-import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeePaggeableDto;
+import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Employee;
 import org.springframework.data.domain.Page;
@@ -13,8 +10,8 @@ import java.util.List;
 
 public interface EmployeeService {
 
-    EmployeeDto save(EmployeeDto employeeDto) throws CustomException;
-    EmployeeDto update(Long id, EmployeeDto employeeDto) throws CustomException;
+    EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException;
+    EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeUpdateDto) throws CustomException;
     void deleteLogic(Long id);
     void delete(Long id) throws CustomException;
     Employee findEntityById(Long id) throws CustomException;

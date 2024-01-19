@@ -27,6 +27,7 @@ public class Catalog implements Serializable {
     private String description;
     private Long status;
     private Long companyId;
+    private Boolean internal;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;

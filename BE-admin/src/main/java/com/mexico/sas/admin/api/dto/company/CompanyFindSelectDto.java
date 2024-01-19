@@ -11,9 +11,12 @@ import java.util.List;
 @Getter
 @Setter
 public class CompanyFindSelectDto implements Serializable {
+    private static final long serialVersionUID = 4709531127736236259L;
+
     private Long id;
     @JsonProperty("value")
     private String name;
+    private String emailDomain;
 
     private List<EmployeeFindSelectDto> employess;
 }
