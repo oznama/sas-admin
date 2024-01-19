@@ -9,6 +9,7 @@ import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getCompanySelect } from '../../services/CompanyService';
 import { changeLoading } from '../../../store/loading/loadingSlice';
+import { deleteLogic } from '../../services/CatalogService';
 
 export const TableEmployee = ({
     pageSize = 10,
@@ -19,7 +20,6 @@ export const TableEmployee = ({
     const navigate = useNavigate();
 
     const { permissions, user } = useSelector( state => state.auth );
-    console.log(user);
     const [currentPage, setCurrentPage] = useState(0);
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
@@ -31,7 +31,6 @@ export const TableEmployee = ({
     const onChangeCompany = ({ target }) => setCompanyId(target.value);
 
     const fetchEmployees = (page) => {
-        console.log('Filtro: '+filter+' Companhias: '+companyId)
         getEmployees(page, pageSize, sort, filter, companyId)
             .then( response => {
                 if( response.code && response.code === 401 ) {
@@ -113,9 +112,7 @@ export const TableEmployee = ({
                 dispatch(setMessage(buildPayloadMessage('¡Registro eliminado correctamente!', alertType.success)));
                 fetchEmployees();
             }
-            dispatch(changeLoading(false));
         }).catch(error => {
-            dispatch(changeLoading(false));
             console.log(error);
             dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
         });
