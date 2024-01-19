@@ -2,6 +2,8 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
 import com.mexico.sas.admin.api.dto.invoice.InvoiceDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.project.ProjectApplicationUpdateDto;
@@ -22,11 +24,13 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, CatalogUpdateDto.Fields.value,
                     catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
-        } if(catalogUpdateDto.getDescription() != null && !catalogUpdateDto.getDescription().equalsIgnoreCase(catalog.getDescription())) {
+        }
+        if(catalogUpdateDto.getDescription() != null && !catalogUpdateDto.getDescription().equalsIgnoreCase(catalog.getDescription())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.description,
                     catalog.getDescription(), catalogUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             catalog.setDescription(catalogUpdateDto.getDescription());
-        } if(catalogUpdateDto.getStatus() != null && !catalogUpdateDto.getStatus().equals(catalog.getStatus())) {
+        }
+        if(catalogUpdateDto.getStatus() != null && !catalogUpdateDto.getStatus().equals(catalog.getStatus())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.status,
                     catalog.getStatus(), catalogUpdateDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             catalog.setStatus(catalogUpdateDto.getStatus());
@@ -250,6 +254,67 @@ public class ChangeBeanUtils extends Utils {
             }
         } catch (CustomException e) {
             log.error("Error checking payment date, error: {}", e.getMessage());
+        }
+        return sb.toString().trim();
+    }
+
+    public static String checkEmployee(Employee employee, EmployeeUpdateDto employeeUpdateDto) {
+        StringBuilder sb = new StringBuilder();
+        if(employeeUpdateDto.getEmail() != null && !employeeUpdateDto.getEmail().equalsIgnoreCase(employee.getEmail())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.email,
+                    employee.getEmail(), employeeUpdateDto.getEmail())).append(GeneralKeys.JUMP_LINE);
+            employee.setEmail(employeeUpdateDto.getEmail());
+        }
+        if(employeeUpdateDto.getName() != null && !employeeUpdateDto.getName().equalsIgnoreCase(employee.getName())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.name,
+                    employee.getName(), employeeUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
+            employee.setName(employeeUpdateDto.getName());
+        }
+        if((employee.getSecondName() == null && employeeUpdateDto.getSecondName() != null)
+                || (employeeUpdateDto.getSecondName() != null && !employeeUpdateDto.getSecondName().equalsIgnoreCase(employee.getSecondName()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.secondName,
+                    employee.getSecondName(), employeeUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
+            employee.setSecondName(employeeUpdateDto.getSecondName());
+        }
+        if(employeeUpdateDto.getSurname() != null && !employeeUpdateDto.getSurname().equalsIgnoreCase(employee.getSurname())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.surname,
+                    employee.getSurname(), employeeUpdateDto.getSurname())).append(GeneralKeys.JUMP_LINE);
+            employee.setSurname(employeeUpdateDto.getSurname());
+        }
+        if((employee.getSecondSurname() == null && employeeUpdateDto.getSecondSurname() != null)
+                || (employeeUpdateDto.getSecondSurname() != null && !employeeUpdateDto.getSecondSurname().equalsIgnoreCase(employee.getSecondSurname()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.secondSurname,
+                    employee.getSecondSurname(), employeeUpdateDto.getSecondSurname())).append(GeneralKeys.JUMP_LINE);
+            employee.setSecondSurname(employeeUpdateDto.getSecondSurname());
+        }
+        if((employee.getCompanyId() == null && employeeUpdateDto.getCompanyId() != null)
+                || (employeeUpdateDto.getCompanyId() != null && !employeeUpdateDto.getCompanyId().equals(employee.getCompanyId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.companyId,
+                    employee.getCompanyId(), employeeUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
+            employee.setCompanyId(employeeUpdateDto.getCompanyId());
+        }
+        if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null)
+                || (employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.positionId,
+                    employee.getPositionId(), employeeUpdateDto.getPositionId())).append(GeneralKeys.JUMP_LINE);
+            employee.setPositionId(employeeUpdateDto.getPositionId());
+        }
+        if((employee.getPhone() == null && employeeUpdateDto.getPhone() != null)
+                || (employeeUpdateDto.getPhone() != null && !employeeUpdateDto.getPhone().equalsIgnoreCase(employee.getPhone()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.phone,
+                    employee.getPhone(), employeeUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
+            employee.setPhone(employeeUpdateDto.getPhone());
+        }
+        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
+                || (employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.bossId,
+                    employee.getBossId(), employeeUpdateDto.getBossId())).append(GeneralKeys.JUMP_LINE);
+            employee.setBossId(employeeUpdateDto.getBossId());
+        }
+        if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, EmployeeUpdateDto.Fields.active,
+                    employee.getActive(), employeeUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
+            employee.setActive(employeeUpdateDto.getActive());
         }
         return sb.toString().trim();
     }

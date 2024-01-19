@@ -59,24 +59,12 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     @Override
     public EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeDto) throws CustomException {
         Employee employee = findEntityById(id);
-<<<<<<< HEAD
-        employee.setEmail(employeeDto.getEmail());
-        employee.setName(employeeDto.getName());
-        employee.setSecondName(employeeDto.getSecondName());
-        employee.setSurname(employeeDto.getSurname());
-        employee.setSecondSurname(employeeDto.getSecondSurname());
-        employee.setCompanyId(employeeDto.getCompanyId());
-        employee.setPositionId(employeeDto.getPositionId());
-        employee.setPhone(employeeDto.getPhone());
-        repository.save(employee);
-=======
         String message = ChangeBeanUtils.checkEmployee(employee, employeeDto);
 
         if(!message.isEmpty()) {
             repository.save(employee);
             save(Employee.class.getSimpleName(), employee.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
->>>>>>> 88dbe32c1ff3daef8021596d7e1a2bc5e5c9f9df
         return employeeDto;
     }
 
@@ -209,7 +197,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     private Page<Employee> findByFilter(String filter, Long companyId, Long createdBy, Boolean active,
-                                       Pageable pageable) {
+        Pageable pageable) {
         return repository.findAll((Specification<Employee>) (root, query, criteriaBuilder) ->
                 getPredicateDinamycFilter(filter, companyId, createdBy, active, criteriaBuilder, root), pageable);
     }

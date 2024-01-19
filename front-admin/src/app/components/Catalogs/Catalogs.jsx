@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { changeLoading } from '../../../store/loading/loadingSlice';
 import { getCatalogs, save, update } from '../../services/CatalogService';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { buildPayloadMessage } from '../../helpers/utils';
@@ -14,16 +13,13 @@ export const Catalogs = () => {
     const [currentOpen, setCurrentOpen] = useState();
     
     const fetchCatalogs = () => {
-    dispatch(changeLoading(true));
         getCatalogs()
         .then( response => {
             if( response.code && response.code === 401 ) {
             dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
             }
             setCatalogs(response);
-            dispatch(changeLoading(false));
         }).catch( error => {
-            dispatch(changeLoading(false));
             dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
         });
     }

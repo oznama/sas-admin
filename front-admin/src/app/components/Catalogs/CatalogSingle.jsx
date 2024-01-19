@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeLoading } from '../../../store/loading/loadingSlice';
 import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { buildPayloadMessage, numberToString } from '../../helpers/utils';
@@ -48,16 +47,13 @@ export const CatalogSingle = ({
   }
 
   const fetchChilds = () => {
-    dispatch(changeLoading(true));
     getCatalogChilds(catalogId)
       .then( response => {
         if( response.code && response.code === 401 ) {
           dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
         }
         setCatalogChilds(response);
-        dispatch(changeLoading(false));
       }).catch( error => {
-        dispatch(changeLoading(false));
         dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
       });
   }
@@ -80,7 +76,6 @@ export const CatalogSingle = ({
   }
 
   const saveChild = request => {
-    dispatch(changeLoading(true));
     save(request).then( response => {
       if(response.code && response.code !== 201) {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
@@ -89,16 +84,13 @@ export const CatalogSingle = ({
         setCatalogChilds([...catalogChilds, response]);
         cleanForm();
       }
-      dispatch(changeLoading(false));
     }).catch(error => {
-      dispatch(changeLoading(false));
       console.log(error);
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el registro, contacte al administrador', alertType.error)));
     });
   }
 
   const updateChild = request => {
-    dispatch(changeLoading(true));
     update(id, request).then( response => {
       if(response.code && response.code !== 201) {
         dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
@@ -107,9 +99,7 @@ export const CatalogSingle = ({
         fetchChilds();
         cleanForm();
       }
-      dispatch(changeLoading(false));
     }).catch(error => {
-      dispatch(changeLoading(false));
       console.log(error);
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el registro, contacte al administrador', alertType.error)));
     });
@@ -123,9 +113,7 @@ export const CatalogSingle = ({
         dispatch(setMessage(buildPayloadMessage('¡Registro eliminado correctamente!', alertType.success)));
         fetchChilds();
       }
-      dispatch(changeLoading(false));
     }).catch(error => {
-      dispatch(changeLoading(false));
       console.log(error);
       dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
     });

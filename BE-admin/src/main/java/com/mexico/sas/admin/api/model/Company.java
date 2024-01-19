@@ -22,6 +22,8 @@ public class Company {
     private String rfc;
     private String address;
     private String phone;
+    private String emailDomain;
+    private Long type;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")

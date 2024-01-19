@@ -78,9 +78,11 @@ public class SSOServiceImpl extends Utils implements SSOService {
   private SSOUserDto getSSOUserDto(UserDto userDto, Employee employee) throws CustomException {
     SSOUserDto ssoUserDto = from_M_To_N(userDto, SSOUserDto.class);
     ssoUserDto.setName(buildFullname(employee));
+    ssoUserDto.setEmail(employee.getEmail());
     CompanyFindDto companyFindDto = companyService.findById(employee.getCompanyId());
     ssoUserDto.setCompanyId(companyFindDto.getId());
     ssoUserDto.setCompany(companyFindDto.getName());
+    ssoUserDto.setEmailDomain(companyFindDto.getEmailDomain());
     if (Optional.ofNullable(employee.getPositionId()).isPresent())
       ssoUserDto.setPosition(catalogService.findById(employee.getPositionId()).getValue());
     ssoUserDto.setRole(from_M_To_N(userDto.getRoleDto(), SSORoleDto.class));

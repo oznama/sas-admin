@@ -8,7 +8,6 @@ import { buildPayloadMessage } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getCompanySelect } from '../../services/CompanyService';
-import { changeLoading } from '../../../store/loading/loadingSlice';
 import { deleteLogic } from '../../services/CatalogService';
 
 export const TableEmployee = ({

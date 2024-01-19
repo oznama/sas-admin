@@ -50,9 +50,9 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
             companies.forEach( company -> {
                 try {
                     if( company.getId().equals(CatalogKeys.COMPANY_SAS) ) {
-                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, bossesPositions()));
+                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, bossesPositions())));
                     } else {
-                        getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM));
+                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM)));
                     }
                 } catch (CustomException e) {
                     log.error("Impossible add company {}", company.getId());
@@ -61,7 +61,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         } else {
             try {
                 Company company = findEntityById(getCurrentUser().getCompanyId());
-                getSelectSingle(companiesSelect, company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM));
+                companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM)));
             } catch (CustomException e) {
                 log.error("Impossible add company, {}", e.getMessage());
             }
@@ -71,10 +71,10 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         return companiesSelect;
     }
 
-    private void getSelectSingle(List<CompanyFindSelectDto> companiesSelect, Company company, List<EmployeeFindSelectDto> employees) throws CustomException {
+    private CompanyFindSelectDto getSelectSingle(Company company, List<EmployeeFindSelectDto> employees) throws CustomException {
         CompanyFindSelectDto companyFindSelectDto = from_M_To_N(company, CompanyFindSelectDto.class);
         companyFindSelectDto.setEmployess(employees);
-        companiesSelect.add(companyFindSelectDto);
+        return companyFindSelectDto;
     }
 
 }

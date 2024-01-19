@@ -14,9 +14,10 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class EmployeeDto implements Serializable {
-
-    private static final long serialVersionUID = -6134622339586984308L;
+@FieldNameConstants
+public class EmployeeUpdateDto implements Serializable {
+    private static final long serialVersionUID = -2193673364162609612L;
+    private Long id;
 
     @NotBlank(message = "{validation.email.required}")
     @Email(message = "{validation.format.invalid}")
@@ -44,4 +45,5 @@ public class EmployeeDto implements Serializable {
     private Long companyId;
     private Long positionId;
     private Long bossId;
+    private Boolean active;
 }
