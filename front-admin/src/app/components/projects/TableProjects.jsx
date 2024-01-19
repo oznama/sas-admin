@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeLoading } from '../../../store/loading/loadingSlice';
 import { setMessage } from '../../../store/alert/alertSlice';
 import { setCurrentTab } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
@@ -25,10 +24,12 @@ export const TableProject = ({
     const [totalProjects, setTotalProjects] = useState(0);
     const [filter, setFilter] = useState('')
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
+    const onChangeFilter = ({ target }) => {
+        setFilter(target.value);
+        fetchProjects(currentPage, target.value);
+    };
 
-    const fetchProjects = (page) => {
-        dispatch(changeLoading(true));
+    const fetchProjects = (page, filter) => {
         getProjects(page, pageSize, sort, filter)
             .then( response => {
                 if( response.code && response.code === 401 ) {
@@ -36,20 +37,18 @@ export const TableProject = ({
                 }
                 setProjects(response.content);
                 setTotalProjects(response.totalElements);
-                dispatch(changeLoading(false));
             }).catch( error => {
-                dispatch(changeLoading(false));
                 dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar los proyectos, contacte al administrador', alertType.error)));
             });
     }
 
     useEffect(() => {
-      fetchProjects(currentPage);
+      fetchProjects(currentPage, filter);
     }, [currentPage]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchProjects(currentPage);
+        fetchProjects(currentPage, filter);
     }
 
     const handleAddProject = () => {
@@ -70,9 +69,9 @@ export const TableProject = ({
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
+            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
                 <i className="bi bi-search"></i>
-            </button>
+            </button> */}
         </div>
     )
 
