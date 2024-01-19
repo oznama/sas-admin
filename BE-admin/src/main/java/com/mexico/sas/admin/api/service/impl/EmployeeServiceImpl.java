@@ -65,6 +65,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         employee.setSecondSurname(employeeDto.getSecondSurname());
         employee.setCompanyId(employeeDto.getCompanyId());
         employee.setPositionId(employeeDto.getPositionId());
+        employee.setPhone(employeeDto.getPhone());
         repository.save(employee);
         return employeeDto;
     }

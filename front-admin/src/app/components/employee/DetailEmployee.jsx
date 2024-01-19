@@ -41,7 +41,6 @@ export const DetailEmployee = () => {
     });
     setCompanyDesc( companySelected ? `> ${companySelected.value}` : '' );
   }
-// console.log(companyDesc);
 
   const [position, setPosition] = useState('');
   const onChangePosition = ({ target }) => setPosition(target.value);
@@ -51,16 +50,11 @@ export const DetailEmployee = () => {
   const [leader, setLeader] = useState('');
   const onChangeLeader = ({ target }) => setLeader(target.value);
 
-  // const catCompany = companies.find(compania => compania.id === company);
-  // console.log(companies);
-  // console.log(company);
-  // console.log(companies.find(compania => compania.id === company));
-  // console.log(catCompany);
-
   const onSubmit = event => {
     event.preventDefault()
     const data = new FormData(event.target)
     const request = Object.fromEntries(data.entries())
+    request['email'] = email + (user.companyDomain ? user.companyDomain : '@sas-mexico.com')
     if (id){
       updateEmployee(request);
     }else{
@@ -72,7 +66,7 @@ export const DetailEmployee = () => {
         if( response.code ) {
             dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
         } else {
-            setEmail(response.email);
+            setEmail((response.email+'').substring(0, (response.email+'').indexOf('@')));
             setName(response.name);
             setSecondName(response.secondName);
             setSurname(response.surname);
@@ -81,7 +75,7 @@ export const DetailEmployee = () => {
             if( response.companyId ) {
               fetchLeaders(response.companyId);
             }
-            setCompany(numberToString(response.companyId, ''));
+            setCompany(numberToString(user.companyId), '');
             setPosition(numberToString(response.positionId, ''));
             setLeader(numberToString(response.bossId, ''));
         }
@@ -125,6 +119,7 @@ export const DetailEmployee = () => {
             }
         } else {
             dispatch(setMessage(buildPayloadMessage('¡Empleado actualizado correctamente!', alertType.success)));
+            navigate('/employee', { replace: true });
         }
     }).catch(error => {
         dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el empleado, contacte al administrador', alertType.error)));
@@ -167,9 +162,13 @@ export const DetailEmployee = () => {
           <div className="d-flex d-flex justify-content-center">
                 <h3 className="fs-4 card-title fw-bold mb-4">{`Empleado ${companyDesc}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
             </div>
-            { permissions.isAdminRoot && (<div className="row text-start">
+            { permissions.isAdminRoot ? (<div className="row text-start">
               <div className='col-6'>
                 <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
+              </div>
+            </div>) : (<div className="row text-start" hidden>
+              <div className='col-6'>
+                <Select name="companyId" label="Empresa" readOnly options={ companies } value={ company } required onChange={ onChangeCompany } />
               </div>
             </div>)}
             <div className="row text-start">
@@ -203,10 +202,10 @@ export const DetailEmployee = () => {
             </div>
             <div className="row text-start">
               <div className='col-6'>
-                <Select name="bossId" label="L&iacute;der" options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+                <Select name="bossId" label="L&iacute;der" options={ catEmployees } value={ leader } onChange={ onChangeLeader } />
               </div>
               <div className='col-6'>
-                <Select name="positionId" label="Puesto" options={ positions } value={ position } required onChange={ onChangePosition } />
+                <Select name="positionId" label="Puesto" options={ positions } value={ position } onChange={ onChangePosition } />
               </div>
             </div>
 

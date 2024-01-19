@@ -54,6 +54,15 @@ export const NavBarPage = () => {
     </li>
   );
 
+  const renderTabPrueva = () => permissions.isAdminSas && (
+    <li className="nav-item">
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(4) } to="">
+        Prueba
+      </NavLink>
+    </li>
+  );
+
   return (
     <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
       <div className="container-fluid">
@@ -66,6 +75,7 @@ export const NavBarPage = () => {
             { renderTabApplications() }
             { renderTabCompany() }
             { renderTabEmployee() }
+            { renderTabPrueva() }
           </ul>
         </div>
 
