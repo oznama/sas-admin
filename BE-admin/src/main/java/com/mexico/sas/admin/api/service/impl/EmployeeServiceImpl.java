@@ -59,6 +59,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     @Override
     public EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeDto) throws CustomException {
         Employee employee = findEntityById(id);
+        employeeDto.setId(id);
         String message = ChangeBeanUtils.checkEmployee(employee, employeeDto);
 
         if(!message.isEmpty()) {

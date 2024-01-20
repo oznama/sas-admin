@@ -37,8 +37,8 @@ public class EmployeeUpdateDto implements Serializable {
     @Pattern(regexp = Regex.ONLY_LETTERS_WHIT_SPACE, message = "{validation.format.invalid} {validation.only.letter}")
     private String secondSurname;
 
-    @NotBlank(message = "{validation.phone.required}")
-    @Pattern(regexp = Regex.PHONE_NUMBER, message = "{validation.format.invalid} {validation.only.number}")
+//    @NotBlank(message = "{validation.phone.required}")
+//    @Pattern(regexp = Regex.PHONE_NUMBER, message = "{validation.format.invalid} {validation.only.number}")
     private String phone;
     private String image;
 
