@@ -54,7 +54,7 @@ export const DetailEmployee = () => {
     event.preventDefault()
     const data = new FormData(event.target)
     const request = Object.fromEntries(data.entries())
-    request['email'] = email + (user.companyDomain ? user.companyDomain : '@sas-mexico.com')
+	  request['email'] = email + (user.companyDomain ? user.companyDomain : '@sas-mexico.com')
     if (id){
       updateEmployee(request);
     }else{
@@ -75,7 +75,7 @@ export const DetailEmployee = () => {
             if( response.companyId ) {
               fetchLeaders(response.companyId);
             }
-            setCompany(numberToString(user.companyId), '');
+            setCompany(numberToString(user.companyId, ''));
             setPosition(numberToString(response.positionId, ''));
             setLeader(numberToString(response.bossId, ''));
         }

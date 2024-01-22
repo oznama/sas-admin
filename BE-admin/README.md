@@ -76,6 +76,10 @@ docker-compose -f <<proyect_path>>\docker-compose.yml up
 - PhpMyAdmin: http://localhost:8080
 - Swagger: http://localhost:8990/api/swagger-ui/
 
+## Clean Docker container
+
+docker container prune -f
+
 ## Docker container Postgres
 
 ```bash
