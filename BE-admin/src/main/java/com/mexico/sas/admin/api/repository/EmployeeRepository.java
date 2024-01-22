@@ -28,6 +28,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
     @Transactional
     @Modifying
-    @Query("update Employee e set e.eliminate = true where e.id = :id")
-    void deleteLogic(@Param(value = "id") Long id);
+    @Query("update Employee e set e.eliminate = :eliminate, e.active = :active where e.id = :id")
+    void deleteLogic(@Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 }

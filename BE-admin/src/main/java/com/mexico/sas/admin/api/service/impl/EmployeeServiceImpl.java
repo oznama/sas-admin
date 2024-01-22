@@ -70,9 +70,10 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public void deleteLogic(Long id) {
+    public void deleteLogic(Long id) throws CustomException {
         log.debug("Delete logic: {}", id);
-        repository.deleteLogic(id);
+        Employee employee = findEntityById(id);
+        repository.deleteLogic(id, !employee.getEliminate(), employee.getEliminate());
         save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
                 I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
     }
@@ -211,7 +212,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     private Predicate getPredicateDinamycFilter(String filter, Long companyId, Long createdBy, Boolean active,
                                                 CriteriaBuilder builder, Root<Employee> root) {
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(builder.isFalse(root.get(Employee.Fields.eliminate)));
+//        predicates.add(builder.isFalse(root.get(Employee.Fields.eliminate)));
         predicates.add(root.get(Employee.Fields.id).in(employessNotIn()).not());
 
         if(!StringUtils.isEmpty(filter)) {

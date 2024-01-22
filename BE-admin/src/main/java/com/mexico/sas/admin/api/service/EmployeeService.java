@@ -12,7 +12,7 @@ public interface EmployeeService {
 
     EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException;
     EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeUpdateDto) throws CustomException;
-    void deleteLogic(Long id);
+    void deleteLogic(Long id) throws CustomException;
     void delete(Long id) throws CustomException;
     Employee findEntityById(Long id) throws CustomException;
     EmployeeFindDto findById(Long id) throws CustomException;
