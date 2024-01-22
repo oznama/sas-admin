@@ -18,6 +18,8 @@ export const DetailEmployee = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const onChangeEmail = ({ target }) => setEmail(target.value);
+  const [emailDomain, setEmailDomain] = useState('');
+  const onChangeEmailDomain = ({ target }) => setEmailDomain(target.value);
   const [name, setName] = useState('');
   const onChangeName = ({ target }) => setName(target.value);
   const [secondName, setSecondName] = useState('');
@@ -32,13 +34,16 @@ export const DetailEmployee = () => {
   
   const [companyDesc, setCompanyDesc] = useState(!permissions.isAdminRoot ? user.company : '');
   const onChangeCompany = ({ target }) => {
-    fetchLeaders(target.value);
+    if (permissions.isAdminRoot) {
+      fetchLeaders(target.value);
+    }
     setCompany(target.value);
-    const companySelected = companies.find( c => {
+    const companySelected = companies.find( c => { //Cuando selecciona una compañia
       const isFind = c.id === Number(target.value)
       console.log('isFind???', isFind, 'companyId', c.id, 'companySelected', Number(target.value));
       return isFind;
     });
+    setEmailDomain( companySelected ? companySelected.emailDomain : '' );
     setCompanyDesc( companySelected ? `> ${companySelected.value}` : '' );
   }
 
@@ -61,12 +66,15 @@ export const DetailEmployee = () => {
       saveEmployee(request);
     }
   }
+
   const fetchEmployee = () => {
+    //console.log('Aqui carga el usuario seleccionado')
     getEmployeeById(id).then( response => {
         if( response.code ) {
             dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
         } else {
             setEmail((response.email+'').substring(0, (response.email+'').indexOf('@')));
+            setEmailDomain((response.email+'').substring((response.email+'').indexOf('@'), (response.email+'').length));
             setName(response.name);
             setSecondName(response.secondName);
             setSurname(response.surname);
@@ -86,6 +94,7 @@ export const DetailEmployee = () => {
   };
 
   const saveEmployee = request => {
+    //console.log('Aqui guarda el usuario')
     save(request).then( response => {
         if(response.code && response.code === 401) {
             dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
@@ -106,6 +115,7 @@ export const DetailEmployee = () => {
   };
   
   const updateEmployee = request => {
+    //console.log('Aqui actualiza el usuario seleccionado')
     update(id, request).then( response => {
       console.log(response);
         if(response.code && response.code === 401) {
@@ -149,7 +159,12 @@ export const DetailEmployee = () => {
   }
 
   useEffect(() => {
+    //console.log('Aqui pasa cuando agrega un usuario')
     fetchSelects()
+    if (!permissions.isAdminRoot) { //aqui coloca el valor de lideres
+      fetchLeaders(user.companyId);
+      setEmailDomain(user.emailDomain);
+    }
     if(id){
       fetchEmployee();
     }
@@ -176,7 +191,7 @@ export const DetailEmployee = () => {
                 <InputText name='email' label='Correo' placeholder='Ingresa correo' value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
               </div>
               <div className='col-6'>
-                <InputText name='emaildomain' label='‎ ' readOnly value={ user.companyDomain ? user.companyDomain : '@sas-mexico.com'} />
+                <InputText name='emaildomain' label='‎ ' readOnly value={ emailDomain } onChange= {onChangeEmailDomain} />
               </div>
             </div>
             <div className="row text-start">

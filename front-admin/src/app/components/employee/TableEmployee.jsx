@@ -128,7 +128,7 @@ export const TableEmployee = ({
         creationDate,
         active
     }) => (
-        <tr key={ id } onClick={ () => console.log('Click en row') }>
+        <tr key={ id } onClick={ () => handledSelect(id) }>
             <td className="text-start" scope="row">{ fullName }</td>
             <th className="text-start">{ email }</th>
             { permissions.isAdminRoot && (<td className="text-start">{ company }</td>) }
