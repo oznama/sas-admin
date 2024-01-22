@@ -82,7 +82,7 @@ export const TableEmployee = ({
             </select>)}
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ onChangeFilter } />
+                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchEmployees(currentPage); } } />
             <button type="button" className="btn btn-outline-primary" onClick={ () => fetchEmployees(currentPage) }>
                 <i className="bi bi-search"></i>
             </button>
@@ -128,7 +128,7 @@ export const TableEmployee = ({
         creationDate,
         active
     }) => (
-        <tr key={ id } onClick={ () => handledSelect(id) }>
+        <tr key={ id } onClick={ () => console.log('Click en row') }>
             <td className="text-start" scope="row">{ fullName }</td>
             <th className="text-start">{ email }</th>
             { permissions.isAdminRoot && (<td className="text-start">{ company }</td>) }
