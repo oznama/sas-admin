@@ -65,13 +65,26 @@ export const TableProject = ({
     );
 
     const renderSearcher = () => (
-        <div className="input-group w-50 py-3">
+        <div className={`input-group w-${ permissions.canCreateProj ? '25' : '50' } py-3`}>
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
             {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
                 <i className="bi bi-search"></i>
             </button> */}
+        </div>   
+    )
+
+    const renderHeader = () => (
+        <div className="d-flex justify-content-between align-items-center">
+            { renderSearcher() }
+            <Pagination
+                currentPage={ currentPage + 1 }
+                totalCount={ totalProjects }
+                pageSize={ pageSize }
+                onPageChange={ page => onPaginationClick(page) } 
+            />
+            { renderAddButton() }
         </div>
     )
 
@@ -130,9 +143,7 @@ export const TableProject = ({
 
     return (
         <div>
-            { renderSearcher() }
-
-            { renderAddButton() }
+            { renderHeader() }
 
             <div className='table-responsive text-nowrap'>
 
@@ -159,12 +170,6 @@ export const TableProject = ({
                 </table>
 
             </div>
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalProjects }
-                pageSize={ pageSize }
-                onPageChange={ page => onPaginationClick(page) } 
-            />
         </div>
     )
 }

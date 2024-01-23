@@ -75,7 +75,7 @@ export const TableEmployee = ({
     );
 
     const renderSearcher = () => (
-        <div className="input-group w-50 pt-3">
+        <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
             { permissions.isAdminRoot && (<select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
                 <option value=''>Seleccionar...</option>
                 { companies && companies.map( option  => ( <option key={ option.id } value={ option.id }>{ option.value }</option> )) }
@@ -86,6 +86,19 @@ export const TableEmployee = ({
             <button type="button" className="btn btn-outline-primary" onClick={ () => fetchEmployees(currentPage) }>
                 <i className="bi bi-search"></i>
             </button>
+        </div>
+    )
+
+    const renderHeader = () => (
+        <div className="d-flex justify-content-between align-items-center">
+            { renderSearcher() }
+            <Pagination
+                currentPage={ currentPage + 1 }
+                totalCount={ totalEmployees }
+                pageSize={ pageSize }
+                onPageChange={ page => onPaginationClick(page) } 
+            />
+            { renderAddButton() }
         </div>
     )
 
@@ -158,9 +171,7 @@ export const TableEmployee = ({
                 <h3 className="fs-4 card-title fw-bold mb-4">{`Empleados${!permissions.isAdminRoot ? ` > `+user.company : ''}`}</h3>
             </div>
 
-            { renderSearcher() }
-
-            { renderAddButton() }
+            { renderHeader() }
 
             <div className='table-responsive text-nowrap'>
 
@@ -185,12 +196,6 @@ export const TableEmployee = ({
                 </table>
 
             </div>
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalEmployees }
-                pageSize={ pageSize }
-                onPageChange={ page => onPaginationClick(page) } 
-            />
         </div>
     )
 }
