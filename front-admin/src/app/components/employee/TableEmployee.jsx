@@ -66,7 +66,7 @@ export const TableEmployee = ({
         navigate(`/employee/add`);
     }
 
-    const renderAddButton = () => /*permissions.canCreateProj && */(
+    const renderAddButton = () => permissions.canCreateEmp && (
         <div className="d-flex flex-row-reverse pb-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddEmployee }>
                 <span className="bi bi-plus"></span>
@@ -115,7 +115,7 @@ export const TableEmployee = ({
             dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
         });
     }
-    
+
     const renderRows = () => employees && employees.map(({
         id,
         email,
@@ -138,21 +138,22 @@ export const TableEmployee = ({
             { permissions.isAdminRoot && (<td className="text-center">{ creationDate }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
-                <button type="button" className="btn btn-sm" onClick={ () => handledSelect(id) }>
-                    <span><i className="bi bi-pencil-square"></i></span>
+                <button type="button" className="btn btn-success btn-sm" onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
+            { permissions.canDelEmp && (
             <td className="text-center">
                 <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteChild(id) }>
                     <span><i className="bi bi-trash"></i></span>
                 </button>
             </td>
+            )}
         </tr>
     ));
 
     return (
         <div>
-
             <div className="d-flex d-flex justify-content-center">
                 <h3 className="fs-4 card-title fw-bold mb-4">{`Empleados${!permissions.isAdminRoot ? ` > `+user.company : ''}`}</h3>
             </div>
@@ -174,8 +175,8 @@ export const TableEmployee = ({
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Creado por</th>) }
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>) }
                             <th className="text-center fs-6" scope="col">Estatus</th>
-                            <th className="text-center fs-6" scope="col">Editar</th>
-                            <th className="text-center fs-6" scope="col">Borrar</th>
+                            <th className="text-center fs-6" scope="col">{permissions.canEditEmp ? 'Editar' : 'Ver'}</th>
+                            { permissions.canDelEmp && (<th className="text-center fs-6" scope="col">Borrar</th>)}
                         </tr>
                     </thead>
                     <tbody>

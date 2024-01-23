@@ -2,31 +2,37 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const findPermmission = ( permissions = [], roleName = '' ) => permissions.some( p => p.name === roleName);
 
+const permissionsInit = {
+    isAdminRoot: false,
+    isAdminSas: false,
+    canAdminCat: false,
+    canCreateCat: false,
+    canEditCat: false,
+    canDelCat: false,
+    canAdminUsr: false,
+    canAdminApp: false,
+    canDelCat: false,
+    canCreateProj: false,
+    canEditProj: false,
+    canCreateProjApp: false,
+    canEditProjApp: false,
+    canDelProjApp: false,
+    canAdminOrd: false,
+    canCreateOrd: false,
+    canEditOrd: false,
+    canDelOrd: false,
+    canGetEmp: false,
+    canCreateEmp: false,
+    canEditEmp: false,
+    canDelEmp: false,
+};
+
 export const authSlice = createSlice({
     name: 'auth',
     initialState: {
         logged: false,
         user: null,
-        permissions: {
-            isAdminRoot: false,
-            isAdminSas: false,
-            canAdminCat: false,
-            canCreateCat: false,
-            canEditCat: false,
-            canDelCat: false,
-            canAdminUsr: false,
-            canAdminApp: false,
-            canDelCat: false,
-            canCreateProj: false,
-            canEditProj: false,
-            canCreateProjApp: false,
-            canEditProjApp: false,
-            canDelProjApp: false,
-            canAdminOrd: false,
-            canCreateOrd: false,
-            canEditOrd: false,
-            canDelOrd: false,
-        }
+        permissions: permissionsInit,
     },
     reducers: {
         login: (state, action) => {
@@ -51,28 +57,17 @@ export const authSlice = createSlice({
                 canAdminOrd: findPermmission( permissions, 'Get-Ord' ),
                 canCreateOrd: findPermmission( permissions, 'Create-Ord' ),
                 canEditOrd: findPermmission( permissions, 'Edit-Ord' ),
-                canDelOrd: findPermmission( permissions, 'Del-Ord' )
+                canDelOrd: findPermmission( permissions, 'Del-Ord' ),
+                canGetEmp: findPermmission( permissions, 'Get-Emp' ),//Ver o no empleados
+                canCreateEmp: findPermmission( permissions, 'Create-Emp' ),//Ver o no el boton de +
+                canEditEmp: findPermmission( permissions, 'Edit-Emp' ),// Ver el boton de lapiz
+                canDelEmp: findPermmission( permissions, 'Del-Emp' )// Ver el boton de basurero
             };
         },
         logout: (state) => {
             state.user = null;
             state.logged = false;
-            state.permissions = {
-                isAdminRoot: false,
-                isAdminSas: false,
-                canAdminCat: false,
-                canCreateCat: false,
-                canEditCat: false,
-                canDelCat: false,
-                canAdminUsr: false,
-                canAdminApp: false,
-                canDelCat: false,
-                canCreateProj: false,
-                canEditProj: false,
-                canCreateProjApp: false,
-                canEditProjApp: false,
-                canDelProjApp: false,
-            };
+            state.permissions = permissionsInit;
         }
     }
 })

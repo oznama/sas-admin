@@ -9,10 +9,12 @@ import { getEmployeeById, getEmployess, getEmployessByCompanyId, save, update } 
 import { setMessage } from "../../../store/alert/alertSlice";
 import { buildPayloadMessage, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
+import { TableLog } from "../custom/TableLog";
 
 export const DetailEmployee = () => {
 
   const { permissions, user } = useSelector( state => state.auth );
+  const [currentTab, setCurrentTab] = useState(1);
   const {id} = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -55,6 +57,8 @@ export const DetailEmployee = () => {
   const [leader, setLeader] = useState('');
   const onChangeLeader = ({ target }) => setLeader(target.value);
 
+  const isModeEdit = ( id && !permissions.canEditEmp );
+
   const onSubmit = event => {
     event.preventDefault()
     const data = new FormData(event.target)
@@ -66,6 +70,17 @@ export const DetailEmployee = () => {
       saveEmployee(request);
     }
   }
+  
+  const renderTabs = () => (//Esto controla los tabs
+    <ul className="nav nav-tabs">
+      <li className="nav-item" onClick={ () => setCurrentTab(1) }>
+        <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
+      </li>
+      <li className="nav-item" onClick={ () => setCurrentTab(2) }>
+        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+      </li>
+    </ul>
+  )
 
   const fetchEmployee = () => {
     //console.log('Aqui carga el usuario seleccionado')
@@ -170,66 +185,71 @@ export const DetailEmployee = () => {
     }
   }, [])
   
+  const renderDetail = () => {
+    return (<div className='d-grid gap-2 col-6 mx-auto'>
+              <form className="needs-validation" onSubmit={ onSubmit }>
+                { permissions.isAdminRoot ? (<div className="row text-start">
+                  <div className='col-6'>
+                    <Select name="companyId" label="Empresa" options={ companies } disabled={ isModeEdit } value={ company } required onChange={ onChangeCompany } />
+                  </div>
+                </div>) : (<div className="row text-start" hidden>
+                  <div className='col-6'>
+                    <Select name="companyId" label="Empresa" readOnly options={ companies } disabled={ isModeEdit } value={ company } required onChange={ onChangeCompany } />
+                  </div>
+                </div>)}
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <InputText name='email' label='Correo' placeholder='Ingresa correo' disabled={ isModeEdit } value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
+                  </div>
+                  <div className='col-6'>
+                    <InputText name='emaildomain' label='‎ ' readOnly disabled={ isModeEdit } value={ emailDomain } onChange= {onChangeEmailDomain} />
+                  </div>
+                </div>
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <InputText name='name' label='Nombre' placeholder='Escribe el nombre' disabled={ isModeEdit } value={ name } required onChange={ onChangeName } maxLength={ 50 } />
+                  </div>
+                  <div className='col-6'>
+                    <InputText name='secondName' label='Segundo Nombre' placeholder='Escribe segundo nombre' disabled={ isModeEdit } value={ secondName } onChange={ onChangeSecondName } maxLength={ 50 } />
+                  </div>
+                </div>
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <InputText name='surname' label='Apellido paterno' placeholder='Escribe apellido paterno' disabled={ isModeEdit } value={ surname } required onChange={ onChangeSurname } maxLength={ 50 } />
+                  </div>
+                  <div className='col-6'>
+                    <InputText name='secondSurname' label='Segundo Apellido' placeholder='Escribe apellido materno' disabled={ isModeEdit } value={ secondSurname } onChange={ onChangeSecondSurname } maxLength={ 50 } />
+                  </div>
+                </div>
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <InputText name='phone' label='Telefono' placeholder='Escribe telefono' disabled={ isModeEdit } value={ phone } onChange={ onChangePhone } maxLength={ 13 } />
+                  </div>
+                </div>
+                <div className="row text-start">
+                  <div className='col-6'>
+                    <Select name="bossId" label="L&iacute;der" options={ catEmployees } disabled={ isModeEdit } value={ leader } onChange={ onChangeLeader } />
+                  </div>
+                  <div className='col-6'>
+                    <Select name="positionId" label="Puesto" options={ positions } disabled={ isModeEdit } value={ position } onChange={ onChangePosition } />
+                  </div>
+                </div>
+                  <div className="pt-3 d-flex flex-row-reverse">
+                      <button type="submit" className="btn btn-primary" >Guardar</button>
+                      &nbsp;
+                      <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>Cancelar</button>
+                  </div>
+              </form>
+          </div>)
+  };
 
   return (
-      <div className='d-grid gap-2 col-6 mx-auto'>
-          <form className="needs-validation" onSubmit={ onSubmit }>
-          <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">{`Empleado ${companyDesc}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
-            </div>
-            { permissions.isAdminRoot ? (<div className="row text-start">
-              <div className='col-6'>
-                <Select name="companyId" label="Empresa" options={ companies } value={ company } required onChange={ onChangeCompany } />
-              </div>
-            </div>) : (<div className="row text-start" hidden>
-              <div className='col-6'>
-                <Select name="companyId" label="Empresa" readOnly options={ companies } value={ company } required onChange={ onChangeCompany } />
-              </div>
-            </div>)}
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name='email' label='Correo' placeholder='Ingresa correo' value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />
-              </div>
-              <div className='col-6'>
-                <InputText name='emaildomain' label='‎ ' readOnly value={ emailDomain } onChange= {onChangeEmailDomain} />
-              </div>
-            </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name='name' label='Nombre' placeholder='Escribe el nombre' value={ name } required onChange={ onChangeName } maxLength={ 50 } />
-              </div>
-              <div className='col-6'>
-                <InputText name='secondName' label='Segundo Nombre' placeholder='Escribe segundo nombre' value={ secondName } onChange={ onChangeSecondName } maxLength={ 50 } />
-              </div>
-            </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name='surname' label='Apellido paterno' placeholder='Escribe apellido paterno' value={ surname } required onChange={ onChangeSurname } maxLength={ 50 } />
-              </div>
-              <div className='col-6'>
-                <InputText name='secondSurname' label='Segundo Apellido' placeholder='Escribe apellido materno' value={ secondSurname } onChange={ onChangeSecondSurname } maxLength={ 50 } />
-              </div>
-            </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name='phone' label='Telefono' placeholder='Escribe telefono' value={ phone } onChange={ onChangePhone } maxLength={ 13 } />
-              </div>
-            </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <Select name="bossId" label="L&iacute;der" options={ catEmployees } value={ leader } onChange={ onChangeLeader } />
-              </div>
-              <div className='col-6'>
-                <Select name="positionId" label="Puesto" options={ positions } value={ position } onChange={ onChangePosition } />
-              </div>
-            </div>
-
-              <div className="pt-3 d-flex flex-row-reverse">
-                  <button type="submit" className="btn btn-primary" >Guardar</button>
-                  &nbsp;
-                  <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>Cancelar</button>
-              </div>
-          </form>
+    <>
+      <div className="d-flex d-flex justify-content-center">
+        <h3 className="fs-4 card-title fw-bold mb-4">{`Empleado ${companyDesc}${name ? ' > Detalles de ' + name + ' ' + surname : ''}`}</h3>
       </div>
+      { id && renderTabs() }
+      { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Employee' recordId={ id } />) }
+    </>
   )
 }

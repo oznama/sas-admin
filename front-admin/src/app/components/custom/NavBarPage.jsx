@@ -45,7 +45,7 @@ export const NavBarPage = () => {
     </li>
   );
 
-  const renderTabEmployee = () => permissions.isAdminSas && (
+  const renderTabEmployee = () => permissions.canGetEmp && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(4) } to="employee">
