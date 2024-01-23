@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getOrdersByProjectId } from "../../../services/OrderService";
-import { setMessage } from "../../../../store/alert/alertSlice";
-import { buildPayloadMessage } from "../../../helpers/utils";
+import { displayNotification, genericErrorMsg } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 
 export const TableOrders = ({
@@ -21,7 +20,7 @@ export const TableOrders = ({
     const fetchOrders = () => {
         getOrdersByProjectId(projectId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else {
                 setOrders(response.filter( r => r.orderNum !== 'total' ));
                 const { amount, tax, total } = response.find( r => r.orderNum === 'total' );
@@ -31,7 +30,7 @@ export const TableOrders = ({
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar las ordenes, contacte al administrador', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
 
@@ -96,7 +95,7 @@ export const TableOrders = ({
     ));
 
     return (
-        <div className='table-responsive text-nowrap'>
+        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>

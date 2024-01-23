@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types';
 import { getApplicationsByProjectId } from '../../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../../store/alert/alertSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../../custom/alerts/types/types';
-import { buildPayloadMessage } from '../../../helpers/utils';
+import { displayNotification, genericErrorMsg } from '../../../helpers/utils';
 import { useEffect, useState } from 'react';
 
 export const TableApplications = ({ projectId }) => {
@@ -21,7 +20,7 @@ export const TableApplications = ({ projectId }) => {
     const fetchApplications = () => {
         getApplicationsByProjectId(projectId).then( response => {
             if( response.code ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else {
                 setApplications(response.filter( r => r.application !== 'total' ));
                 const { amount, tax, total } = response.find( r => r.application === 'total' );
@@ -31,7 +30,7 @@ export const TableApplications = ({ projectId }) => {
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar las aplicaciones, contacte al administrador', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
 
@@ -97,7 +96,7 @@ export const TableApplications = ({ projectId }) => {
     ));
 
     return (
-        <div className='table-responsive text-nowrap'>
+        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getCatalogs, save, update } from '../../services/CatalogService';
-import { setMessage } from '../../../store/alert/alertSlice';
-import { buildPayloadMessage } from '../../helpers/utils';
+import { getCatalogs } from '../../services/CatalogService';
 import { alertType } from '../custom/alerts/types/types';
 import { CatalogSingle } from './CatalogSingle';
+import { displayNotification } from '../../helpers/utils';
 
 export const Catalogs = () => {
     const dispatch = useDispatch();
@@ -16,11 +15,12 @@ export const Catalogs = () => {
         getCatalogs()
         .then( response => {
             if( response.code && response.code === 401 ) {
-            dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            displayNotification(dispatch, response.message, alertType.error);
             }
             setCatalogs(response);
         }).catch( error => {
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
   
@@ -44,14 +44,14 @@ export const Catalogs = () => {
             </h2>
             <div id={ `collapse${id}` } className="accordion-collapse collapse" aria-labelledby={ `heading${id}` } data-bs-parent="#accordionCatalogs">
                 <div className="accordion-body">
-                    { <CatalogSingle catalogId={ id } /> }
+                    { <CatalogSingle catalogId={ id } singleMode={ false } /> }
                 </div>
             </div>
         </div> 
     ));
 
     return (
-        <div className="accordion" id="accordionCatalogs">
+        <div className="table-responsive accordion" id="accordionCatalogs" style={{ height: '350px' }}>
             { renderAccordion() }
         </div>
     )

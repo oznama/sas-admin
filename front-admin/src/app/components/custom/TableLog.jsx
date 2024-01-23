@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { get } from '../../services/LogService';
-import { setMessage } from '../../../store/alert/alertSlice';
-import { buildPayloadMessage } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg } from '../../helpers/utils';
 
 export const TableLog = ({
     tableName,
@@ -17,11 +16,12 @@ export const TableLog = ({
         get(tableName, recordId)
           .then( response => {
             if( response.code && response.code === 401 ) {
-              dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+              displayNotification(dispatch, response.message, alertType.error);
             }
             setHistory(response);
           }).catch( error => {
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
           });
       }
       
@@ -49,7 +49,7 @@ export const TableLog = ({
     ));
 
     return (
-        <div className='table-responsive text-nowrap'>
+        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
 
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">

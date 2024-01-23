@@ -2,9 +2,8 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getEmployeeById, getEmployees, deleteLogic } from "../../services/EmployeeService";
-import { setMessage } from "../../../store/alert/alertSlice";
-import { buildPayloadMessage } from "../../helpers/utils";
+import { getEmployees, deleteLogic } from "../../services/EmployeeService";
+import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getCompanySelect } from '../../services/CompanyService';
@@ -32,12 +31,13 @@ export const TableEmployee = ({
         getEmployees(page, pageSize, sort, filter, companyId)
             .then( response => {
                 if( response.code && response.code === 401 ) {
-                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                    displayNotification(dispatch, response.message, alertType.error);
                 }
                 setEmployees(response.content);
                 setTotalEmployees(response.totalElements);
             }).catch( error => {
-                dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar los empleados, contacte al administrador', alertType.error)));
+                console.log(error);
+                displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
     }
 
@@ -118,14 +118,14 @@ export const TableEmployee = ({
         deleteLogic(employeeID).then( response => {
             console.log('Response: '+response);
             if(response.code && response.code !== 200) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else {
-                dispatch(setMessage(buildPayloadMessage('¡Registro eliminado correctamente!', alertType.success)));
+                displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
                 fetchEmployees();
             }
         }).catch(error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
 
@@ -173,7 +173,7 @@ export const TableEmployee = ({
 
             { renderHeader() }
 
-            <div className='table-responsive text-nowrap'>
+            <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">

@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setMessage } from "../../../../store/alert/alertSlice";
-import { buildPayloadMessage } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 import { getInvoicesByOrderId } from "../../../services/InvoiceService";
 import { setPaid } from "../../../../store/project/projectSlice";
+import { displayNotification } from "../../../helpers/utils";
 
 export const TableInvoices = ({
     projectId,
@@ -25,7 +24,7 @@ export const TableInvoices = ({
     const fetchInvoices = () => {
         getInvoicesByOrderId(orderId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else {                
                 const paid = response.find( r => r.invoiceNum === 'paid' );
                 dispatch(setPaid(paid));
@@ -39,7 +38,7 @@ export const TableInvoices = ({
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar las facturas, contacte al administrador', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
 
@@ -98,7 +97,7 @@ export const TableInvoices = ({
     ));
 
     return (
-        <div className='table-responsive text-nowrap'>
+        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>

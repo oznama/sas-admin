@@ -2,12 +2,12 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
-import { setMessage } from '../../../store/alert/alertSlice';
-import { buildPayloadMessage, numberToString } from '../../helpers/utils';
 import { alertType } from '../custom/alerts/types/types';
+import { displayNotification } from '../../helpers/utils';
 
 export const CatalogSingle = ({
   catalogId,
+  singleMode,
 }) => {
 
   const dispatch = useDispatch();
@@ -38,7 +38,7 @@ export const CatalogSingle = ({
     getCatalogChilds(1000000001)
       .then( response => {
         if( response.code && response.code === 401 ) {
-          dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+          displayNotification(dispatch, response,message, alertType.error);
         }
         setCatStatus(response);
       }).catch( error => {
@@ -50,11 +50,12 @@ export const CatalogSingle = ({
     getCatalogChilds(catalogId)
       .then( response => {
         if( response.code && response.code === 401 ) {
-          dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+          displayNotification(dispatch, response.message, alertType.error);
         }
         setCatalogChilds(response);
       }).catch( error => {
-        dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar la información, contacte al administrador', alertType.error)));
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
       });
   }
   
@@ -78,44 +79,44 @@ export const CatalogSingle = ({
   const saveChild = request => {
     save(request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡El registro se ha creado correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡El registro se ha creado correctamente!', success);
         setCatalogChilds([...catalogChilds, response]);
         cleanForm();
       }
     }).catch(error => {
       console.log(error);
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el registro, contacte al administrador', alertType.error)));
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
   const updateChild = request => {
     update(id, request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡El registro se ha actualizado correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
         fetchChilds();
         cleanForm();
       }
     }).catch(error => {
       console.log(error);
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el registro, contacte al administrador', alertType.error)));
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
   const deleteChild = catalogId => {
     deleteLogic(catalogId).then( response => {
       if(response.code && response.code !== 200) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡Registro eliminado correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
         fetchChilds();
       }
     }).catch(error => {
       console.log(error);
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al eliminar el registro, contacte al administrador', alertType.error)));
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -188,7 +189,7 @@ export const CatalogSingle = ({
   ));
 
   const renderSingleCatalog = () => (
-    <div className='table-responsive text-nowrap'>
+    <div className='table-responsive text-nowrap' style={ singleMode ? { height: '350px' } : {} }>
       <table className="table table-sm table-bordered table-striped table-hover">
         <thead className="thead-dark">
           <tr>
@@ -216,5 +217,9 @@ export const CatalogSingle = ({
 
 CatalogSingle.propTypes = {
   catalogId: PropTypes.number.isRequired,
-  canDelete: PropTypes.bool,
+  singleMode: PropTypes.bool
+}
+
+CatalogSingle.defaultProps = {
+  singleMode: true
 }

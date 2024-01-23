@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { Alert } from '../custom/alerts/page/Alert';
 import { CatalogSingle } from './CatalogSingle';
 import { Catalogs } from './Catalogs';
 import { useState } from 'react';
@@ -35,7 +34,6 @@ export const CatalogPage = ({
           <h1 className="fs-4 card-title fw-bold mb-4">{ title }</h1>
           { permissions.isAdminSas && catalogId && renderTabs() }
         </div>
-        <Alert />
         { currentTab === 1 ? renderPage() : (<TableLog tableName={ 'Catalog' } recordId={ numberToString(catalogId, '') } />) }
       </div>
     </>

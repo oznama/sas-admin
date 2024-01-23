@@ -3,11 +3,9 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { handleDateStr, numberToString, buildPayloadMessage, mountMax, taxRate } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
-import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
 import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
@@ -42,7 +40,7 @@ export const DetailInvoice = () => {
   const fetchInvoice = () => {
     getInvoiceById(id).then( response => {
       if( response.code ) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAmount(numberToString(response.amount, ''));
         setTax(numberToString(response.tax, ''))
@@ -54,12 +52,8 @@ export const DetailInvoice = () => {
         setStatus(numberToString(response.status, ''));
       }
     }).catch( error => {
-        dispatch(setMessage(
-            buildPayloadMessage(
-                'Ha ocurrido un error al cargar la orden, contacte al adminitrador', 
-                alertType.error
-            )
-        ));
+        console.log(error)
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -110,28 +104,30 @@ export const DetailInvoice = () => {
   const saveInvoice = request => {
     save(request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('Factura agregada correctamente!', alertType.success)));
+        displayNotification(dispatch, 'Factura agregada correctamente!', alertType.success);
         navigate(`/project/${projectId}/order/${orderId}/edit`, { replace: true });
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear la factura, contacte al administrador', alertType.error)));
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
   const updateInvoice = request => {
     update(id, request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('Factura actualizada correctamente!', alertType.success)));
+        displayNotification(dispatch, 'Factura actualizada correctamente!', alertType.success);
         if( request.requisition ) {
           setHasRequisition(true);
         }
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar la factura, contacte al administrador', alertType.error)));
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -203,7 +199,6 @@ export const DetailInvoice = () => {
       <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h3>
         { id && renderTabs() }
       </div>
-      <Alert />
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>
   )

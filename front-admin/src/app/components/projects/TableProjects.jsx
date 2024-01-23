@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../store/alert/alertSlice';
 import { setCurrentTab } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
-import { buildPayloadMessage } from '../../helpers/utils';
+import { displayNotification } from '../../helpers/utils';
 
 export const TableProject = ({
     pageSize = 10,
@@ -33,12 +32,13 @@ export const TableProject = ({
         getProjects(page, pageSize, sort, filter)
             .then( response => {
                 if( response.code && response.code === 401 ) {
-                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                    displayNotification(dispatch, response.message, alertType.error);
                 }
                 setProjects(response.content);
                 setTotalProjects(response.totalElements);
             }).catch( error => {
-                dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar los proyectos, contacte al administrador', alertType.error)));
+                console.log(error);
+                displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
     }
 
@@ -145,7 +145,7 @@ export const TableProject = ({
         <div>
             { renderHeader() }
 
-            <div className='table-responsive text-nowrap'>
+            <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">

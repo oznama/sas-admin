@@ -1,5 +1,4 @@
 import { TableProject } from '../projects/TableProjects';
-import { Alert } from '../custom/alerts/page/Alert';
 
 export const Home = () => {
     return (
@@ -9,7 +8,6 @@ export const Home = () => {
                     <h1 className="fs-4 card-title fw-bold mb-1">Proyectos</h1>
                 </div>
             </div>
-            <Alert />
             <TableProject />
         </div>
     );

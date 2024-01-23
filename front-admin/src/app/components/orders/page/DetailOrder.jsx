@@ -5,11 +5,9 @@ import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getProjectById } from '../../../services/ProjectService';
 import { save, update } from '../../../services/OrderService';
-import { handleDateStr, numberToString, buildPayloadMessage, mountMax, taxRate } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
-import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
 import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
@@ -55,24 +53,20 @@ export const DetailOrder = () => {
   const fetchApplication = () => {
     getProjectById(projectId).then( response => {
       if( response.code ) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
         setApplication(response);
       }
     }).catch( error => {
-        dispatch(setMessage(
-            buildPayloadMessage(
-                'Ha ocurrido un error al cargar los montos de la aplicación, contacte al adminitrador', 
-                alertType.error
-            )
-        ));
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
   const fetchOrder = () => {
     getOrderById(id).then( response => {
       if( response.code ) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAmount(numberToString(response.amount, ''));
         setTax(numberToString(response.tax, ''))
@@ -86,12 +80,8 @@ export const DetailOrder = () => {
         dispatch( setOrder(response) );
       }
     }).catch( error => {
-        dispatch(setMessage(
-            buildPayloadMessage(
-                'Ha ocurrido un error al cargar la orden, contacte al adminitrador', 
-                alertType.error
-            )
-        ));
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -139,25 +129,27 @@ export const DetailOrder = () => {
   const saveOrder = request => {
     save(request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('Orden agregada correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡Orden agregada correctamente!', alertType.success);
         navigate(`/project/${projectId}/edit`, { replace: true });
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear la orden, contacte al administrador', alertType.error)));
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.success);
     });
   }
 
   const updateOrder = request => {
     update(id, request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡Orden actualizada correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡Orden actualizada correctamente!', alertType.success);
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar la orden, contacte al administrador', alertType.error)));
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.success);
     });
   }
 
@@ -261,7 +253,6 @@ export const DetailOrder = () => {
       <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` } &gt; Orden{ titleWithOrder() }</h3>
         { id && renderTabs() }
       </div>
-      <Alert />
       { (currentTab === 3 && id ) ? renderAddInvoiceButton() : null }
       {
         currentTab === 1 ? renderDetail() : ( currentTab === 3 

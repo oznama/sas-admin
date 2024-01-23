@@ -3,12 +3,10 @@ import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
-import { Alert } from '../custom/alerts/page/Alert';
 import { TableLog } from '../custom/TableLog';
-import { buildPayloadMessage, numberToString } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg, numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
 import { getProjectById } from '../../services/ProjectService';
-import { setMessage } from '../../../store/alert/alertSlice';
 import { alertType } from '../custom/alerts/types/types';
 import { useEffect } from 'react';
 
@@ -23,13 +21,13 @@ export const ProjectPage = () => {
   const fetchProject = () => {
     getProjectById(id).then( response => {
         if( response.code ) {
-          dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+          displayNotification(dispatch, response.message, alertType.error);
         } else {
           dispatch(setProject(response));
         }
     }).catch( error => {
         console.log(error);
-        dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el proyecto, contacte al administrador', alertType.error)));
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -92,7 +90,6 @@ export const ProjectPage = () => {
         <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` }</h3>
         { ( id ) ? renderTabs() : null }
       </div>
-      <Alert />
       { (currentTab === 2 && id ) ? renderAddButton() : (
         (currentTab === 4 && id ) ? renderAddOrderButton() : null
         )

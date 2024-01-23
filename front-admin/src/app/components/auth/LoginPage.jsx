@@ -1,12 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Footer } from '../custom/Footer';
 import { alertType } from '../custom/alerts/types/types';
 import { Alert } from '../custom/alerts/page/Alert';
 import { login } from '../../../store/auth/authSlice';
-import { setMessage } from '../../../store/alert/alertSlice';
 import { doLogin } from '../../services/AuthService';
-import { buildPayloadMessage } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg } from '../../helpers/utils';
 import logo from '../../../assets/img/SAS_logo.png';
 
 export const LoginPage = () => {
@@ -21,7 +20,7 @@ export const LoginPage = () => {
         const request = Object.fromEntries(data.entries());
         doLogin(request).then( response => {
             if( response.code ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else {
                 dispatch(login(response));
                 localStorage.setItem('token', response.accessToken);
@@ -29,21 +28,21 @@ export const LoginPage = () => {
             }
         }).catch( error => {
             console.log(error);
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error, contacta al area de sistemas', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
 
     return (
-        <section className="h-100">
+        <section className="h-100 pt-5">
             <div className="container h-100">
                 <div className="row justify-content-sm-center h-100">
                     <div className="col-xxl-4 col-xl-5 col-lg-5 col-md-7 col-sm-9">
-                        <div className="text-center my-2">
-                            <img src={ logo } alt="logo" width="100" />
-                        </div>
                         <div className="card shadow-lg">
                             <div className="card-body p-5">
-                                <h1 className="fs-4 card-title fw-bold mb-4">Iniciar Sesi&oacute;n</h1>
+                                <h1 className="fs-4 card-title fw-bold mb-4 text-center">Iniciar Sesi&oacute;n</h1>
+                                <div className="text-center my-2">
+                                    <img src={ logo } alt="logo" width="100" />
+                                </div>
                                 <Alert />
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
@@ -66,7 +65,6 @@ export const LoginPage = () => {
                                             </a>
                                         </div> */}
                                     </div>
-
                                     <div className="d-flex align-items-center">
                                         {/* <div className="form-check">
                                             <input type="checkbox" name="remember" id="remember" className="form-check-input" />

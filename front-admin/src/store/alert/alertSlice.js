@@ -5,19 +5,21 @@ export const alertSlice = createSlice({
     initialState: {
         message: '',
         type: '',
+        show: false,
     },
     reducers: {
         setMessage: (state, action) => {
             state.message = action.payload.message;
             state.type = action.payload.type;
+            state.show = true;
         },
-        cleanMessage: (state) => {
-            state.message = '';
+        hide: (state) => {
+            state.show = false;
         }
     }
 })
 
 export const { 
     setMessage, 
-    cleanMessage 
+    hide, 
 } = alertSlice.actions;

@@ -5,9 +5,8 @@ import { getCatalogChilds } from "../../services/CatalogService";
 import { getCompanySelect } from "../../services/CompanyService";
 import { InputText } from "../custom/InputText";
 import { Select } from "../custom/Select";
-import { getEmployeeById, getEmployess, getEmployessByCompanyId, save, update } from "../../services/EmployeeService";
-import { setMessage } from "../../../store/alert/alertSlice";
-import { buildPayloadMessage, numberToString } from "../../helpers/utils";
+import { getEmployeeById, getEmployessByCompanyId, save, update } from "../../services/EmployeeService";
+import { displayNotification, genericErrorMsg, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
 
@@ -86,7 +85,7 @@ export const DetailEmployee = () => {
     //console.log('Aqui carga el usuario seleccionado')
     getEmployeeById(id).then( response => {
         if( response.code ) {
-            dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            displayNotification(dispatch, response.message, alertType.error);
         } else {
             setEmail((response.email+'').substring(0, (response.email+'').indexOf('@')));
             setEmailDomain((response.email+'').substring((response.email+'').indexOf('@'), (response.email+'').length));
@@ -104,7 +103,7 @@ export const DetailEmployee = () => {
         }
     }).catch( error => {
         console.log(error);
-        dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al cargar el empleado, contacte al administrador', alertType.error)));
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   };
 
@@ -112,20 +111,21 @@ export const DetailEmployee = () => {
     //console.log('Aqui guarda el usuario')
     save(request).then( response => {
         if(response.code && response.code === 401) {
-            dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+            displayNotification(dispatch, response.message, alertType.error);
         } else if (response.code && response.code !== 201) {
             if( response.message ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else if (response.errors) {
                 console.log(response.errors);
-                dispatch(setMessage(buildPayloadMessage('No se ha podido crear el empleado', alertType.error)));
+                displayNotification(dispatch, 'No se ha podido crear el empleado', alertType.error);
             }
         } else {
-            dispatch(setMessage(buildPayloadMessage('¡Empleado creado correctamente!', alertType.success)));
+            displayNotification(dispatch, '¡Empleado creado correctamente!', alertType.success);
             navigate('/employee', { replace: true });
         }
     }).catch(error => {
-        dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el empleado, contacte al administrador', alertType.error)));
+        console.log(error)
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   };
   
@@ -134,20 +134,21 @@ export const DetailEmployee = () => {
     update(id, request).then( response => {
       console.log(response);
         if(response.code && response.code === 401) {
-            dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+          displayNotification(dispatch, response.message, alertType.error);
         } else if (response.code && response.code !== 200) {
             if( response.message ) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+              displayNotification(dispatch, response.message, alertType.error);
             } else if (response.errors) {
                 console.log(response.errors);
-                dispatch(setMessage(buildPayloadMessage('No se ha podido actualizar el empleado', alertType.error)));
+                displayNotification(dispatch, 'No se ha podido actualizar el empleado', alertType.error);
             }
         } else {
-            dispatch(setMessage(buildPayloadMessage('¡Empleado actualizado correctamente!', alertType.success)));
+            displayNotification(dispatch, '¡Empleado actualizado correctamente!', alertType.success);
             navigate('/employee', { replace: true });
         }
     }).catch(error => {
-        dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el empleado, contacte al administrador', alertType.error)));
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   };
   

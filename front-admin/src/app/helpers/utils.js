@@ -1,4 +1,5 @@
-    
+import { hide, setMessage } from "../../store/alert/alertSlice";
+
 export const mountMax = 999999;
 export const numberMaxLength = 3;
 export const taxRate = 0.16;
@@ -40,7 +41,17 @@ const convertDateToUTC = ( strDate ) => {
     return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
 };
 
-export const buildPayloadMessage = (msg, typ) => ({
+const buildPayloadMessage = (msg, typ) => ({
     message: msg,
     type: typ
 });
+
+export const genericErrorMsg = 'Ha ocurrido un error, favor de contactar al area de sistemas';
+
+export const displayNotification = (dispatch, message, type) => {
+    dispatch(setMessage(buildPayloadMessage(message, type)));
+
+    setTimeout(() => {
+      dispatch(hide())
+    }, 5000);
+  }

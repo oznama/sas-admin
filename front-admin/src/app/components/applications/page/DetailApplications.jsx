@@ -6,13 +6,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
 import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
-import { handleDateStr, numberToString, buildPayloadMessage, mountMax, numberMaxLength, taxRate } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../../store/alert/alertSlice';
 import { alertType } from '../../custom/alerts/types/types';
-import { Alert } from '../../custom/alerts/page/Alert';
 import { TableLog } from '../../custom/TableLog';
-import { TableOrders } from '../../orders/page/TableOrders';
 
 export const DetailApplications = () => {
 
@@ -45,7 +42,7 @@ export const DetailApplications = () => {
   const fetchApplication = () => {
     getProjectApplicationById(projectId, id).then( response => {
       if( response.code ) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAplication(numberToString(response.applicationId, ''));
         setAmount(numberToString(response.amount, ''));
@@ -60,12 +57,8 @@ export const DetailApplications = () => {
         setDevelopmentDate(handleDateStr(response.developmentDate));
       }
     }).catch( error => {
-        dispatch(setMessage(
-            buildPayloadMessage(
-                'Ha ocurrido un error al cargar la aplicacion, contacte al adminitrador', 
-                alertType.error
-            )
-        ));
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -139,25 +132,27 @@ export const DetailApplications = () => {
   const save = request => {
     saveApplication(request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡Aplicacion agregada a proyecto correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡Aplicación agregada correctamente al proyecto!', alertType.success);
         navigate(`/project/${projectId}/edit`, { replace: true });
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear aplicación, contacte al administrador', alertType.error)));
+      console.log(error)
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
   const update = request => {
     updateApplication(id, request).then( response => {
       if(response.code && response.code !== 201) {
-        dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+        displayNotification(dispatch, response.message, alertType.error);
       } else {
-        dispatch(setMessage(buildPayloadMessage('¡Aplicacion actualizada correctamente!', alertType.success)));
+        displayNotification(dispatch, '¡Aplicacion actualizada correctamente!', alertType.success);
       }
     }).catch(error => {
-      dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar aplicación, contacte al administrador', alertType.error)));
+      console.log(error)
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -250,7 +245,6 @@ export const DetailApplications = () => {
         <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` } &gt; Aplicacion</h3>
         { id && renderTabs() }
       </div>
-      <Alert />
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='ProjectApplication' recordId={ id } />) }
     </div>
   )

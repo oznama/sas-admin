@@ -3,10 +3,9 @@ import { InputText } from '../custom/InputText';
 import { Select } from '../custom/Select';
 import { DatePicker } from '../custom/DatePicker';
 import { useNavigate } from 'react-router-dom';
-import { getProjectById, save, update } from '../../services/ProjectService';
-import { buildPayloadMessage, handleDate, handleDateStr, handleText, numberToString } from '../../helpers/utils';
+import { save, update } from '../../services/ProjectService';
+import { displayNotification, genericErrorMsg, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMessage } from '../../../store/alert/alertSlice';
 import { alertType } from '../custom/alerts/types/types';
 import { getEmployess } from '../../services/EmployeeService';
 
@@ -57,7 +56,7 @@ export const DetailProject = () => {
             if( regex.test(request.key) ) {
                 saveProject(request);
             } else {
-                dispatch(setMessage(buildPayloadMessage('¡Clave invalida!', alertType.warning)));
+                displayNotification(dispatch, '¡Clave invalida!', alertType.warning);
             }
         }
     }
@@ -65,39 +64,40 @@ export const DetailProject = () => {
     const saveProject = request => {
         save(request).then( response => {
             if(response.code && response.code === 401) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else if (response.code && response.code !== 201) {
                 if( response.message ) {
-                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                    displayNotification(dispatch, response.message, alertType.error);
                 } else if (response.errors) {
                     console.log(response.errors);
-                    dispatch(setMessage(buildPayloadMessage('No se ha podido crear el proyecto', alertType.error)));
+                    displayNotification(dispatch, 'No se ha podido crear el proyecto', alertType.error);
                 }
             } else {
-                dispatch(setMessage(buildPayloadMessage('¡Proyecto creado correctamente!', alertType.success)));
+                displayNotification(dispatch, '¡Proyecto creado correctamente!', alertType.success);
                 navigate('/', { replace: true });
             }
         }).catch(error => {
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al crear el proyecto, contacte al administrador', alertType.error)));
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     };
 
     const updateProject = request => {
         update(projectId, request).then( response => {
             if(response.code && response.code === 401) {
-                dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                displayNotification(dispatch, response.message, alertType.error);
             } else if (response.code && response.code !== 200) {
                 if( response.message ) {
-                    dispatch(setMessage(buildPayloadMessage(response.message, alertType.error)));
+                    displayNotification(dispatch, response.message, alertType.error);
                 } else if (response.errors) {
                     console.log(response.errors);
-                    dispatch(setMessage(buildPayloadMessage('No se ha podido actualizar el proyecto', alertType.error)));
+                    displayNotification(dispatch, 'No se ha podido actualizar el proyecto', alertType.error);
                 }
             } else {
-                dispatch(setMessage(buildPayloadMessage('¡Proyecto actualizado correctamente!', alertType.success)));
+                displayNotification(dispatch, '¡Proyecto actualizado correctamente!', alertType.success);
             }
         }).catch(error => {
-            dispatch(setMessage(buildPayloadMessage('Ha ocurrido un error al actualizar el proyecto, contacte al administrador', alertType.error)));
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     };
 
