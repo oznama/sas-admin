@@ -17,6 +17,7 @@ public class CompanyFindSelectDto implements Serializable {
     @JsonProperty("value")
     private String name;
     private String emailDomain;
+    private Long type;
 
     private List<EmployeeFindSelectDto> employess;
 }

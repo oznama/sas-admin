@@ -54,11 +54,11 @@ export const NavBarPage = () => {
     </li>
   );
 
-  const renderTabPrueva = () => permissions.isAdminSas && (
+  const renderTabClients = () => permissions.isAdminSas && (
     <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(4) } to="">
-        Prueba
+      <NavLink className={ `nav-item nav-link ${ (currentTab === 5) ? 'active' : '' }` }
+        onClick={ () => setCurrentTab(5) } to="client">
+        Clientes
       </NavLink>
     </li>
   );
@@ -75,7 +75,7 @@ export const NavBarPage = () => {
             { renderTabApplications() }
             { renderTabCompany() }
             { renderTabEmployee() }
-            { renderTabPrueva() }
+            { renderTabClients() }
           </ul>
         </div>
 
