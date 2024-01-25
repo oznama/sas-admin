@@ -45,6 +45,16 @@ export const update = async(id, data) => {
     return jsonResponse;
 }
 
+export const deleteLogic = async(id) => {
+    const request = {
+        method: "DELETE",
+        headers: getHeaders()
+    }
+    const urlInternal = `${context}/${id}`;
+    const response = await api( urlInternal, request );
+    return await response.json();
+};
+
 export const saveApplication = async(data) => {
     const request = {
         method: "POST",
@@ -87,12 +97,12 @@ export const getProjectApplicationById = async(projectId, id) => {
     return projectApplication;
 };
 
-export const deleteLogic = async(id) => {
+export const deleteApplicationLogic = async(id) => {
     const request = {
         method: "DELETE",
         headers: getHeaders()
     }
-    const urlInternal = `${context}/${id}`;
+    const urlInternal = `${context}/application/${id}`;
     const response = await api( urlInternal, request );
     return await response.json();
 };

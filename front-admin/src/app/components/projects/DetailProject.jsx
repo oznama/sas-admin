@@ -15,6 +15,7 @@ export const DetailProject = () => {
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
     const { project } = useSelector( state => state.projectReducer );
+
     const [projectId, setProjectId] = useState(project.id);
     const [pKey, setPKey] = useState(project.key ? project.key : '');
     const [description, setDescription] = useState(project.description ? project.description : '');
@@ -114,21 +115,25 @@ export const DetailProject = () => {
         <div className='d-grid gap-2 col-6 mx-auto'>
             <form className="needs-validation" onSubmit={ onSubmit }>
                 
-                <InputText name='key' label='Clave' placeholder='Ingresa clave' 
+                <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ !project.active }
                     value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
-                <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
+                <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ !project.active }
                     value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
-                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required
+                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required disabled={ !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 { renderCreatedBy() }
                 { renderCreationDate() }
-                <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } />
+                <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ !project.active } />
 
-                <div className="pt-3 d-flex flex-row-reverse">
-                    <button type="submit" className="btn btn-primary" disabled={ (projectId && !permissions.canEditProj) }>Guardar</button>
-                    &nbsp;
-                    <button type="button" className="btn btn-danger" onClick={ () => navigate(`/home`) }>Cancelar</button>
-                </div>
+                { project.active &&
+                    (
+                        <div className="pt-3 d-flex flex-row-reverse">
+                            <button type="submit" className="btn btn-primary" disabled={ (projectId && !permissions.canEditProj) }>Guardar</button>
+                            &nbsp;
+                            <button type="button" className="btn btn-danger" onClick={ () => navigate(`/home`) }>Cancelar</button>
+                        </div>
+                    )
+                }
             </form>
         </div>
     )

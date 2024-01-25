@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { get } from '../../services/LogService';
-import { displayNotification, genericErrorMsg, styleTable } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg, styleTable, styleTableRow } from '../../helpers/utils';
 
 export const TableLog = ({
     tableName,
@@ -32,7 +32,7 @@ export const TableLog = ({
     const renderDescription = (description) => {
         const lines = description.split('\n');
         const lis = lines.map( (line, index) => ( <li key={ index }>{ line }</li> ) )
-        return (<ul>{ lis }</ul>);
+        return (<ul style={ { marginBottom: '0' } } >{ lis }</ul>);
     }
 
     const renderRows = () => history && history.map(({
@@ -42,14 +42,14 @@ export const TableLog = ({
         description
     }) => (
         <tr key={ id }>
-            <td className="text-start">{ renderDescription(description) }</td>
-            <td className="text-start" scope="row">{ userName }</td>
-            <td className="text-center">{ date }</td>
+            <td className="text-start" style={ styleTableRow }>{ renderDescription(description) }</td>
+            <td className="text-start" style={ styleTableRow } scope="row">{ userName }</td>
+            <td className="text-center" style={ styleTableRow }>{ date }</td>
         </tr>
     ));
 
     return (
-        <div className='table-responsive text-nowrap' style={ styleTable }>
+        <div className='table-responsive' style={ styleTable }>
 
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
@@ -71,9 +71,9 @@ export const TableLog = ({
 
 TableLog.propTypes = {
     tableName: PropTypes.string.isRequired,
-    recordId: PropTypes.number,
+    recordId: PropTypes.string,
 }
 
 TableLog.defaultProps = {
-    recordId: 0
+    recordId: '0'
 }

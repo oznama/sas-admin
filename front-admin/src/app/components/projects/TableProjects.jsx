@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { deleteLogic, getProjects } from '../../services/ProjectService';
+import { deleteLogic, getProjectById, getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
-import { displayNotification, styleTable, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
+import { displayNotification, styleInput, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
 
 export const TableProject = ({
     pageSize = 10,
@@ -42,6 +42,21 @@ export const TableProject = ({
             });
     }
 
+    const fetchProject = id => {
+        getProjectById(id).then( response => {
+            if( response.code ) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                dispatch(setProject(response));
+                dispatch(setCurrentTab( permissions.canEditEmp ? 1 : 2));
+                navigate(`/project/${id}/edit`);
+            }
+        }).catch( error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+      }
+
     useEffect(() => {
       fetchProjects(currentPage, filter);
     }, [currentPage]);
@@ -67,7 +82,7 @@ export const TableProject = ({
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateProj ? '25' : '50' } py-1`}>
-            <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
+            <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
             {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
@@ -87,8 +102,7 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        dispatch(setCurrentTab( permissions.canEditEmp ? 1 : 2));
-        navigate(`/project/${id}/edit`);
+        fetchProject(id);
     }
 
     const renderStatus = status => {
@@ -97,12 +111,12 @@ export const TableProject = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
-    const deleteChild = id => {
+    const deleteChild = (id, active) => {
         deleteLogic(id).then( response => {
             if(response.code && response.code !== 200) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
-                displayNotification(dispatch, 'Proyecto eliminado correctamente!', alertType.success);
+                displayNotification(dispatch, `Proyecto ${ active ? 'eliminado' : 'reactivado' } correctamente!`, active ? alertType.warning : alertType.success);
                 fetchProjects();
             }
         }).catch(error => {
@@ -121,14 +135,13 @@ export const TableProject = ({
         installationDate,
         company,
         projectManager,
-        status,
         amount,
         tax,
         total,
         active
     }) => (
         <tr key={ id }>
-            <th className="text-start" style={ styleTableRow } scope="row">{ key }</th>
+            <th className="text-center" style={ styleTableRow } scope="row">{ key }</th>
             {/* <td className="text-start">{ name }</td> */}
             <td className="text-start" style={ styleTableRow }>{ description.substring(0,70) }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
@@ -142,15 +155,15 @@ export const TableProject = ({
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center" style={ styleTableRow }>
-                <button type="button" className="btn btn-success btn-sm" style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditEmp ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelEmp && 
                 (
                     <td className="text-center" style={ styleTableRow }>
-                        <button type="button" className="btn btn-danger btn-sm" style={ styleTableRowBtn } onClick={ () => deleteChild(id) }>
-                            <span><i className="bi bi-trash"></i></span>
+                        <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} style={ styleTableRowBtn } onClick={ () => deleteChild(id, active) }>
+                            <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>
                 )

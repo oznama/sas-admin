@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { styleInput } from '../../helpers/utils';
 
 export const InputText = ({
     name,
@@ -18,6 +19,7 @@ export const InputText = ({
       <label className="form-label">{ label }</label>
       <div className="input-group has-validation">
         <input className="form-control"
+          style={ styleInput }
           name={ name }
           type={ type }
           placeholder={ placeholder }

@@ -2,13 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentOrdTab, setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setCurrentOrdTab, setCurrentTab } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
-import { displayNotification, genericErrorMsg, numberToString } from '../../helpers/utils';
+import { numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
-import { getProjectById } from '../../services/ProjectService';
-import { alertType } from '../custom/alerts/types/types';
-import { useEffect } from 'react';
 
 export const ProjectPage = () => {
 
@@ -17,25 +14,6 @@ export const ProjectPage = () => {
   const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
   const {currentTab, project, paid} = useSelector( state => state.projectReducer );
-
-  const fetchProject = () => {
-    getProjectById(id).then( response => {
-        if( response.code ) {
-          displayNotification(dispatch, response.message, alertType.error);
-        } else {
-          dispatch(setProject(response));
-        }
-    }).catch( error => {
-        console.log(error);
-        displayNotification(dispatch, genericErrorMsg, alertType.error);
-    });
-  }
-
-  useEffect(() => {
-    if( id ) {
-      fetchProject();
-    }
-  }, []);
   
   const handleAddApplication = () => {
     navigate(`/project/${ id }/application/add`);
@@ -64,42 +42,42 @@ export const ProjectPage = () => {
     </div>
   );
 
-  const renderTabs = () => (
-    <ul className="nav nav-tabs">
-      <li>
-        <button type="button" className="btn btn-link" onClick={ () => navigate('/home') }>&lt;&lt; Regresar</button>
-      </li>
-      {
-        permissions.canEditEmp && (
-          <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
-            <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
-          </li>
-        )
-      }
-      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
-        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
-      </li>
-      {
-        permissions.canAdminOrd && (
-          <li className="nav-item" onClick={ () => dispatch(setCurrentTab(4)) }>
-            <a className={ `nav-link ${ (currentTab === 4) ? 'active' : '' }` }>Ordenes</a>
-          </li>
-        )
-      }
-      <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
-        <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
-      </li>
-    </ul>
+  const renderTabs = () => id && (
+    <div className="d-flex flex-row-reverse">
+      <ul className="nav nav-tabs">
+        <li>
+          <button type="button" className="btn btn-link" onClick={ () => navigate('/home') }>&lt;&lt; Regresar</button>
+        </li>
+        {
+          permissions.canEditEmp && (
+            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
+              <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
+            </li>
+          )
+        }
+        <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
+          <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
+        </li>
+        {
+          permissions.canAdminOrd && (
+            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(4)) }>
+              <a className={ `nav-link ${ (currentTab === 4) ? 'active' : '' }` }>Ordenes</a>
+            </li>
+          )
+        }
+        <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
+          <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
+        </li>
+      </ul>
+    </div>
   )
 
   const title = project && project.key ? `${project.key} ${project.description}` : 'Proyecto nuevo';
 
   return (
     <div className='px-5'>
-      <div className={`d-flex ${ (id) ? 'justify-content-between' : 'd-flex justify-content-center'}`}>
-        <h3 className="fs-6 card-title fw-bold mb-4">{ title }</h3>
-        { ( id ) ? renderTabs() : null }
-      </div>
+      <h3 className="fs-4 card-title fw-bold">{ title }</h3>
+      { renderTabs() }
       { (currentTab === 2 && id ) ? renderAddButton() : (
         (currentTab === 4 && id ) ? renderAddOrderButton() : null
         )

@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
 import { hide } from '../../../../../store/alert/alertSlice';
 
 export const Alert = ({
@@ -20,12 +19,4 @@ export const Alert = ({
       </div>
     </div>
   )
-}
-
-Alert.propTypes = {
-  padded: PropTypes.boolean
-}
-
-Alert.defaultProps = {
-  padded: false
 }

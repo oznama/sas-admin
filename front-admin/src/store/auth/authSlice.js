@@ -54,7 +54,7 @@ export const authSlice = createSlice({
                 canEditProj: findPermmission( permissions, 'Edit-proj' ),
                 canDelProj: findPermmission( permissions, 'Edit-proj' ),
                 canCreateProjApp: findPermmission( permissions, 'Create-proj-app' ),
-                canEditProjApp: findPermmission( permissions, 'Edit-proj-app' ),
+                canEditProjApp: findPermmission( permissions, 'Del-proj' ),
                 canDelProjApp: findPermmission( permissions, 'Del-proj-app' ),
                 canAdminOrd: findPermmission( permissions, 'Get-Ord' ),
                 canCreateOrd: findPermmission( permissions, 'Create-Ord' ),

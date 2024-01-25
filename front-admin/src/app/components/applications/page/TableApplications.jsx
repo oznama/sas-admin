@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
-import { getApplicationsByProjectId } from '../../../services/ProjectService';
+import { deleteApplicationLogic, getApplicationsByProjectId } from '../../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../../custom/alerts/types/types';
-import { displayNotification, genericErrorMsg, styleTable } from '../../../helpers/utils';
+import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
 import { useEffect, useState } from 'react';
+import { setCurrentAppTab } from '../../../../store/project/projectSlice';
 
 export const TableApplications = ({ projectId }) => {
 
@@ -39,16 +40,30 @@ export const TableApplications = ({ projectId }) => {
     }, []);
 
     const handledSelect = id => {
+        dispatch(setCurrentAppTab(1));
         const urlRedirect = `/project/${ projectId }/application/${ id }/edit`;
         navigate(urlRedirect);
     }
 
-    // const renderStatus = (status) => {
-    //     const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
-    //     // TODO Remove by value
-    //     const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
-    //     return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
-    // }
+    const renderStatus = status => {
+        const backColor = status ? 'bg-success' : 'bg-danger';
+        const desc = status ? 'Activo' : 'Inactivo';
+        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
+    }
+
+    const deleteChild = (id, active) => {
+        deleteApplicationLogic(id).then( response => {
+            if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, `Aplicación ${ active ? 'eliminada' : 'reactivada' } correctamente!`, active ? alertType.warning : alertType.success);
+                fetchApplications();
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
 
     const renderRows = () => applications && applications.map(({
         id,
@@ -56,7 +71,6 @@ export const TableApplications = ({ projectId }) => {
         amount,
         tax,
         total,
-        // status,
         leader,
         developer,
         hours,
@@ -64,30 +78,37 @@ export const TableApplications = ({ projectId }) => {
         designDate,
         endDate,
         startDate,
+        active
     }) => (
-        <tr key={ id } onClick={ () => handledSelect(id) }>
+        <tr key={ id }>
             {/* <td className="text-center">
                 <button type="button" className="btn btn-primary">
                     <span><i className="bi bi-pencil"></i></span>
                 </button>
             </td> */}
-            <th className="text-start" scope="row">{ application }</th>
+            <th className="text-center" style={ styleTableRow } scope="row">{ application }</th>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
-            <td className="text-start">{ leader }</td>
-            <td className="text-start">{ developer }</td>
-            <td className="text-center">{ hours }</td>
-            <td className="text-center">{ startDate }</td>
-            <td className="text-center">{ designDate }</td>
-            <td className="text-center">{ developmentDate }</td>
-            <td className="text-center">{ endDate }</td>
-            <td className="text-end text-primary">{ amount }</td>
-            <td className="text-end text-primary">{ tax }</td>
-            <td className="text-end text-primary">{ total }</td>
+            <td className="text-start" style={ styleTableRow }>{ leader }</td>
+            <td className="text-start" style={ styleTableRow }>{ developer }</td>
+            <td className="text-center" style={ styleTableRow }>{ hours }</td>
+            <td className="text-center" style={ styleTableRow }>{ startDate }</td>
+            <td className="text-center" style={ styleTableRow }>{ designDate }</td>
+            <td className="text-center" style={ styleTableRow }>{ developmentDate }</td>
+            <td className="text-center" style={ styleTableRow }>{ endDate }</td>
+            <td className="text-end text-primary" style={ styleTableRow }>{ amount }</td>
+            <td className="text-end text-primary" style={ styleTableRow }>{ tax }</td>
+            <td className="text-end text-primary" style={ styleTableRow }>{ total }</td>
+            <td className="text-center">{ renderStatus(active) }</td>
+            <td className="text-center" style={ styleTableRow }>
+                <button type="button" className={`btn btn-${ active && permissions.canEditEmp ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                </button>
+            </td>
             {
                 permissions.canDelProjApp && (
-                    <td className="text-center">
-                        <button type="button" className="btn btn-danger btn-sm">
-                            <span><i className="bi bi-trash"></i></span>
+                    <td className="text-center" style={ styleTableRow }>
+                        <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} style={ styleTableRowBtn } onClick={ () => deleteChild(id, active) }>
+                            <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>
                 )
@@ -96,7 +117,7 @@ export const TableApplications = ({ projectId }) => {
     ));
 
     return (
-        <div className='table-responsive text-nowrap' style={ styleTable }>
+        <div className='table-responsive text-nowrap'>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>
@@ -113,6 +134,8 @@ export const TableApplications = ({ projectId }) => {
                         <th className="text-center fs-6" scope="col">Monto</th>
                         <th className="text-center fs-6" scope="col">Iva</th>
                         <th className="text-center fs-6" scope="col">Total</th>
+                        <th className="text-center fs-6" scope="col">Estatus</th>
+                        <th className="text-center fs-6" scope="col">{permissions.canEditProjApp ? 'Editar' : 'Ver'}</th>
                         { permissions.canDelProjApp && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                     </tr>
                 </thead>

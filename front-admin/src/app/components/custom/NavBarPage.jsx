@@ -64,7 +64,7 @@ export const NavBarPage = () => {
   );
 
   return (
-    <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <nav className="navbar navbar-expand-lg bg-primary" style={{ padding: '0'}} data-bs-theme="dark">
       <div className="container-fluid">
         
         <Link className="navbar-brand" onClick={ () => setCurrentTab(0) } to="/">SAS Administrador</Link>
@@ -80,12 +80,12 @@ export const NavBarPage = () => {
         </div>
 
         <div className="d-flex flex-row-reverse bd-highlight">
-          <div className="p-2 bd-highlight">
+          <div className="p-1 bd-highlight">
             <button className="btn btn-danger" onClick={ onLogout }>
               <span><i className="bi bi-power"></i></span>
             </button>
           </div>
-          <div className="p-2 bd-highlight">
+          <div className="p-1 bd-highlight">
             <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
             <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
           </div>

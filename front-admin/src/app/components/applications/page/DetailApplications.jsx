@@ -33,6 +33,7 @@ export const DetailApplications = () => {
   const [designDate, setDesignDate] = useState();
   const [startDate, setStartDate] = useState()
   const [developmentDate, setDevelopmentDate] = useState();
+  const [active, setActive] = useState(true)
 
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
@@ -56,6 +57,7 @@ export const DetailApplications = () => {
         setEndDate(handleDateStr(response.endDate));
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
+        setActive(response.active);
       }
     }).catch( error => {
         console.log(error);
@@ -167,89 +169,93 @@ export const DetailApplications = () => {
     }
   };
 
-  const renderTabs = () => (
-    <ul className="nav nav-tabs">
-      <li>
-        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
-      </li>
-      <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
-        <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
-      </li>
-      <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
-        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
-      </li>
-    </ul>
+  const renderTabs = () => id && (
+    <div className='d-flex flex-row-reverse'>
+      <ul className="nav nav-tabs">
+        <li>
+          <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+        </li>
+        <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
+          <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
+        </li>
+        <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(2)) }>
+          <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+        </li>
+      </ul>
+    </div>
   )
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
       <form onSubmit={ onSubmit }>
-          <div className='text-center'>
-            <div className="row text-start">
-              <div className='col-6'>
-                <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
-              </div>
+        <div className='text-center'>
+          <div className="row text-start">
+            <div className='col-6'>
+              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ !active || isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
             </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ isModeEdit } value={ `${amount}` } required onChange={ onChangeAmount } />
-              </div>
-              <div className='col-3'>
-                <InputText name="tax" label='Iva' type='text' disabled={ isModeEdit } readOnly value={ `${tax}` } />
-              </div>
-              <div className='col-3'>
-                <InputText name="total" label='Total' type='text' disabled={ isModeEdit } readOnly value={ `${total}` } />
-              </div>
+          </div>
+          <div className="row text-start">
+            <div className='col-6'>
+              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ !active ||isModeEdit } value={ `${amount}` } required onChange={ onChangeAmount } />
             </div>
-            <div className="row text-start">
-              {/* <div className='col-4'>
-                <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
-              </div> */}
-              <div className='col-6'>
-                <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ isModeEdit } required value={ hours } onChange={ onChangeHours } />
-              </div>
+            <div className='col-3'>
+              <InputText name="tax" label='Iva' type='text' disabled={ !active ||isModeEdit } readOnly value={ `${tax}` } />
             </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <Select name="leaderId" label="L&iacute;der" disabled={ isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
-              </div>
-              <div className='col-6'>
-                <Select name="developerId" label="Desarrollador" disabled={ isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
-              </div>
+            <div className='col-3'>
+              <InputText name="total" label='Total' type='text' disabled={ !active ||isModeEdit } readOnly value={ `${total}` } />
             </div>
+          </div>
+          <div className="row text-start">
+            {/* <div className='col-4'>
+              <Select name = "statusId" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+            </div> */}
+            <div className='col-6'>
+              <InputText name="hours" label='Horas' type='number'  placeholder='Ingresa las horas' disabled={ !active ||isModeEdit } required value={ hours } onChange={ onChangeHours } />
+            </div>
+          </div>
+          <div className="row text-start">
+            <div className='col-6'>
+              <Select name="leaderId" label="L&iacute;der" disabled={ !active ||isModeEdit } options={ catEmployees } value={ leader } required onChange={ onChangeLeader } />
+            </div>
+            <div className='col-6'>
+              <Select name="developerId" label="Desarrollador" disabled={ !active || isModeEdit } options={ catEmployees } value={ developer } required onChange={ onChangeDeveloper } />
+            </div>
+          </div>
 
-            <div className="row text-start">
-              <div className='col-6'>
-                <DatePicker name="startDate" label="Inicio" disabled={ isModeEdit } value={ startDate } required onChange={ (date) => onChangeStartDate(date) } />
-              </div>
-              <div className='col-6'>
-                <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
-              </div>
+          <div className="row text-start">
+            <div className='col-6'>
+              <DatePicker name="startDate" label="Inicio" disabled={ !active || isModeEdit } value={ startDate } required onChange={ (date) => onChangeStartDate(date) } />
             </div>
-            <div className="row text-start">
-              <div className='col-6'>
-                <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
-              </div>
-              <div className='col-6'>
-                <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
-              </div>
+            <div className='col-6'>
+              <DatePicker name="designDate" label="Analisis y dise&ntilde;o" disabled={ !active || isModeEdit } value={ designDate } required onChange={ (date) => onChangeDesignDate(date) } />
             </div>
           </div>
-          <div className="pt-3 d-flex flex-row-reverse">
-              { renderSaveButton() }
-              &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
+          <div className="row text-start">
+            <div className='col-6'>
+              <DatePicker name="developmentDate" label="Construcci&oacute;n" disabled={ !active || isModeEdit } value={ developmentDate } required onChange={ (date) => onChangeDevelopmentDate(date) } />
+            </div>
+            <div className='col-6'>
+              <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ !active || isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
+            </div>
           </div>
+        </div>
+        { active &&
+          (
+            <div className="pt-3 d-flex flex-row-reverse">
+                { renderSaveButton() }
+                &nbsp;
+                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
+            </div>
+          )
+        }
       </form>
     </div>
   )
  
   return (
     <div className='px-5'>
-      <div className='d-flex justify-content-between'>
-        <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` } &gt; Aplicacion</h3>
-        { id && renderTabs() }
-      </div>
+      <h3 className="fs-4 card-title fw-bold">{ `${project.key} ${project.description}` } &gt; Aplicacion</h3>
+      { renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='ProjectApplication' recordId={ id } />) }
     </div>
   )

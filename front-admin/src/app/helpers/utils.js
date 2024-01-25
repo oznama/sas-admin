@@ -3,6 +3,8 @@ import { hide, setMessage } from "../../store/alert/alertSlice";
 export const mountMax = 999999;
 export const numberMaxLength = 3;
 export const taxRate = 0.16;
+
+export const styleInput = { padding: '2px 10px'}
 export const styleTable = { height: '345px' };
 export const styleTableRow = { padding: '1px' };
 export const styleTableRowBtn = { ...styleTableRow, width: '35px' };
