@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @ToString
-@FieldNameConstants
 public class ProjectApplicationUpdateDto implements Serializable {
 
     private static final long serialVersionUID = 1277148987583745666L;

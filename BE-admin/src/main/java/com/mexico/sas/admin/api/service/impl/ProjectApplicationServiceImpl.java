@@ -69,7 +69,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     @Override
     public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto);
+        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, catalogService, employeeService);
 
         if(!message.isEmpty()) {
             repository.save(projectApplication);
@@ -84,8 +84,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         log.debug("Delete logic: {}", id);
         ProjectApplication projectApplication = findEntityByApplicationId(id);
         repository.deleteLogic(id, !projectApplication.getEliminate(), projectApplication.getEliminate());
-        save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
-                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        save(ProjectApplication.class.getSimpleName(), id,
+                !projectApplication.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!projectApplication.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
@@ -93,7 +94,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         findEntityByApplicationId(id);
         try{
             repository.deleteById(id);
-            save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+            save(ProjectApplication.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
         }

@@ -15,7 +15,6 @@ import java.util.Date;
 @NoArgsConstructor
 @DynamicInsert
 @FieldNameConstants
-@ToString
 public class Company {
 
     @Id

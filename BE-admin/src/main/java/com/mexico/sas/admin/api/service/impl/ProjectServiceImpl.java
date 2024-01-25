@@ -123,7 +123,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
         log.debug("Update project {} with {}", projectId, projectUpdateDto);
         Project project = findEntityById(projectId);
-        String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto);
+        String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto, companyService, employeeService);
         if(!message.isEmpty()) {
             repository.save(project);
             save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -140,8 +140,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         log.debug("Delete logic: {}", id);
         Project project = findEntityById(id);
         repository.deleteLogic(id, !project.getEliminate(), project.getEliminate());
-        save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
-                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        save(Project.class.getSimpleName(), id,
+                !project.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!project.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override

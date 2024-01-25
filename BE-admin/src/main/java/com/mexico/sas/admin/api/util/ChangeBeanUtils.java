@@ -13,7 +13,12 @@ import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.*;
+import com.mexico.sas.admin.api.service.CatalogService;
+import com.mexico.sas.admin.api.service.CompanyService;
+import com.mexico.sas.admin.api.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 public class ChangeBeanUtils extends Utils {
@@ -59,42 +64,38 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkProyect(Project project, ProjectUpdateDto projectUpdateDto) {
+    public static String checkProyect(Project project, ProjectUpdateDto projectUpdateDto,
+                                      CompanyService companyService, EmployeeService employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
 
         if( !project.getKey().equals(projectUpdateDto.getKey()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.key,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Clave",
                     project.getKey(), projectUpdateDto.getKey())).append(GeneralKeys.JUMP_LINE);
             project.setKey(projectUpdateDto.getKey());
         }
         if( !project.getDescription().equals(projectUpdateDto.getDescription()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.description,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripción",
                     project.getDescription(), projectUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             project.setDescription(projectUpdateDto.getDescription());
         }
         if( projectUpdateDto.getCompanyId() != null && !project.getCompany().getId().equals(projectUpdateDto.getCompanyId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.companyId,
-                    project.getCompany().getId(), projectUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Compañia",
+                    companyService.findById(project.getCompany().getId()).getName(),
+                    companyService.findById(projectUpdateDto.getCompanyId())))
+                    .append(GeneralKeys.JUMP_LINE);
             project.setCompany(new Company(projectUpdateDto.getCompanyId()));
         }
         if( !project.getProjectManager().getId().equals(projectUpdateDto.getProjectManagerId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.projectManagerId,
-                    project.getProjectManager().getId(), projectUpdateDto.getProjectManagerId())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "PM",
+                    getFullname(employeeService.findEntityById(project.getProjectManager().getId())),
+                    getFullname(employeeService.findEntityById(projectUpdateDto.getProjectManagerId()))))
+                    .append(GeneralKeys.JUMP_LINE);
             project.setProjectManager(new Employee(projectUpdateDto.getProjectManagerId()));
-        }
-        double currentAmount = doubleScale(project.getAmount().doubleValue());
-        double newAmount = doubleScale(projectUpdateDto.getAmount().doubleValue());
-        if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.amount,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-            project.setAmount(projectUpdateDto.getAmount());
-            project.setTax(projectUpdateDto.getTax());
-            project.setTotal(projectUpdateDto.getTotal());
         }
         try {
             String currentDate = dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if ((project.getInstallationDate() == null && projectUpdateDto.getInstallationDate() != null) || (!currentDate.equals(projectUpdateDto.getInstallationDate()))) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectUpdateDto.Fields.installationDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de instalación",
                         currentDate, projectUpdateDto.getInstallationDate())).append(GeneralKeys.JUMP_LINE);
                 project.setInstallationDate(stringToDate(projectUpdateDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -105,37 +106,45 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto) {
+    public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto,
+                                                 CatalogService catalogService, EmployeeService employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
         if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.applicationId,
-                    projectApplication.getApplicationId(), projectApplicationUpdateDto.getApplicationId())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Aplicación",
+                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
+                    catalogService.findById(projectApplicationUpdateDto.getApplicationId()).getValue()))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
         }
         double currentAmount = doubleScale(projectApplication.getAmount().doubleValue());
         double newAmount = doubleScale(projectApplicationUpdateDto.getAmount().doubleValue());
         if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.amount,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Monto",
+                    formatCurrency(currentAmount), formatCurrency(newAmount)))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
             projectApplication.setTax(projectApplicationUpdateDto.getTax());
             projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
         }
         if( !projectApplication.getLeader().getId().equals(projectApplicationUpdateDto.getLeaderId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.leaderId,
-                    projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Líder",
+                    getFullname(employeeService.findEntityById(projectApplication.getLeader().getId())),
+                    getFullname(employeeService.findEntityById(projectApplicationUpdateDto.getLeaderId()))))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setLeader(new Employee(projectApplicationUpdateDto.getLeaderId()));
         }
         if( !projectApplication.getDeveloper().getId().equals(projectApplicationUpdateDto.getDeveloperId()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developerId,
-                    projectApplication.getDeveloper().getId(), projectApplicationUpdateDto.getDeveloperId())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Desarrollador",
+                            getFullname(employeeService.findEntityById(projectApplication.getDeveloper().getId())),
+                            getFullname(employeeService.findEntityById(projectApplicationUpdateDto.getDeveloperId()))))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setDeveloper(new Employee(projectApplicationUpdateDto.getDeveloperId()));
         }
         try {
             currentDate = dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(projectApplicationUpdateDto.getStartDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.startDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Inicio",
                         currentDate, projectApplicationUpdateDto.getStartDate())).append(GeneralKeys.JUMP_LINE);
                 projectApplication.setStartDate(stringToDate(projectApplicationUpdateDto.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -145,7 +154,7 @@ public class ChangeBeanUtils extends Utils {
         try {
             currentDate = dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(projectApplicationUpdateDto.getDesignDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.designDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Analisis y diseño",
                         currentDate, projectApplicationUpdateDto.getDesignDate())).append(GeneralKeys.JUMP_LINE);
                 projectApplication.setDesignDate(stringToDate(projectApplicationUpdateDto.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -155,7 +164,7 @@ public class ChangeBeanUtils extends Utils {
         try {
             currentDate = dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(projectApplicationUpdateDto.getDevelopmentDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.developmentDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Construcción",
                         currentDate, projectApplicationUpdateDto.getDevelopmentDate())).append(GeneralKeys.JUMP_LINE);
                 projectApplication.setDevelopmentDate(stringToDate(projectApplicationUpdateDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -165,7 +174,7 @@ public class ChangeBeanUtils extends Utils {
         try {
             currentDate = dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(projectApplicationUpdateDto.getEndDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, ProjectApplicationUpdateDto.Fields.endDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Cierre",
                         currentDate, projectApplicationUpdateDto.getEndDate())).append(GeneralKeys.JUMP_LINE);
                 projectApplication.setEndDate(stringToDate(projectApplicationUpdateDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }

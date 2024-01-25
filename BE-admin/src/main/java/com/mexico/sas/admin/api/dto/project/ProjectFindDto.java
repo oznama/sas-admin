@@ -27,5 +27,6 @@ public class ProjectFindDto implements Serializable {
     private String totalStr;
     private Long companyId;
     private Long projectManagerId;
+    private Boolean active;
 
 }
