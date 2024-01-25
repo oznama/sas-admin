@@ -80,6 +80,26 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
+    public void deleteLogic(Long id) throws CustomException {
+        log.debug("Delete logic: {}", id);
+        ProjectApplication projectApplication = findEntityByApplicationId(id);
+        repository.deleteLogic(id, !projectApplication.getEliminate(), projectApplication.getEliminate());
+        save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+    }
+
+    @Override
+    public void delete(Long id) throws CustomException {
+        findEntityByApplicationId(id);
+        try{
+            repository.deleteById(id);
+            save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+        } catch (Exception e) {
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
+        }
+    }
+
+    @Override
     public ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException {
         return getProjectApplicationFindDto(findEntityByApplicationId(id));
     }

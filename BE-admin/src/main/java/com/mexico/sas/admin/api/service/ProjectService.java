@@ -21,5 +21,7 @@ public interface ProjectService {
     void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException;
 
     void updateAmounts(Long projectId, BigDecimal amount, BigDecimal tax, BigDecimal total);
+    void deleteLogic(Long id) throws CustomException;
+    void delete(Long id) throws CustomException;
 
 }

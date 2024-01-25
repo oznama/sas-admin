@@ -9,7 +9,6 @@ import com.mexico.sas.admin.api.exception.LoginException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.model.Catalog;
 import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.EmployeeRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
@@ -32,8 +31,6 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mexico.sas.admin.api.util.ChangeBeanUtils.*;
-
 @Slf4j
 @Service
 public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeService {
@@ -53,6 +50,8 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         repository.save(employee);
         EmployeeFindDto employeeFindDto = from_M_To_N(employeeDto, EmployeeFindDto.class);
         employeeFindDto.setId(employee.getId());
+        save(Employee.class.getSimpleName(), employee.getId(), CatalogKeys.LOG_DETAIL_INSERT,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         return employeeFindDto;
     }
 
@@ -74,7 +73,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         log.debug("Delete logic: {}", id);
         Employee employee = findEntityById(id);
         repository.deleteLogic(id, !employee.getEliminate(), employee.getEliminate());
-        save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+        save(Employee.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
                 I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
     }
 
@@ -83,7 +82,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         findEntityById(id);
         try{
             repository.deleteById(id);
-            save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+            save(Employee.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
         }

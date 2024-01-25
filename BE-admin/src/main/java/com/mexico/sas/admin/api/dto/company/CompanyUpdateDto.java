@@ -2,14 +2,18 @@ package com.mexico.sas.admin.api.dto.company;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Getter
 @Setter
-public class CompanyFindDto implements Serializable {
-    private static final long serialVersionUID = -7522084241926804325L;
+@ToString
+@FieldNameConstants
+public class CompanyUpdateDto implements Serializable {
+
+    private static final long serialVersionUID = 3097161078391200494L;
 
     private Long id;
     private String name;
@@ -19,6 +23,4 @@ public class CompanyFindDto implements Serializable {
     private String emailDomain;
     private Long type;
     private Boolean active;
-    private Date creationDate;
-    private Long createdBy;
 }

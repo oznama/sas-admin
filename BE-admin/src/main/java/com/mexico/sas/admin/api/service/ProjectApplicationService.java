@@ -12,6 +12,8 @@ public interface ProjectApplicationService {
 
     void save(ProjectApplicationDto projectApplicationDto) throws CustomException;
     void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException;
+    void deleteLogic(Long id) throws CustomException;
+    void delete(Long id) throws CustomException;
     ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException;
     ProjectApplication findEntityByApplicationId(Long id) throws CustomException;
     List<ProjectApplicationFindDto> findByProjectId(Long projectId) throws CustomException;

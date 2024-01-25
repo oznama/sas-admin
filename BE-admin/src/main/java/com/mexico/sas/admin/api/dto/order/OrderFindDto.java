@@ -18,6 +18,9 @@ public class OrderFindDto implements Serializable {
     private String amount;
     private String tax;
     private String total;
+    private String amountPaid;
+    private String taxPaid;
+    private String totalPaid;
     private Boolean active;
     private Boolean eliminate;
     private String requisition;

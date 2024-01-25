@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @DynamicInsert
+@ToString
 public class Invoice {
 
     @Id

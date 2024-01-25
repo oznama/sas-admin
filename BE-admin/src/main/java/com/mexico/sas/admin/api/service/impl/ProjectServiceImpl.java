@@ -135,6 +135,26 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         repository.updateAmount(projectId, amount, tax, total);
     }
 
+    @Override
+    public void deleteLogic(Long id) throws CustomException {
+        log.debug("Delete logic: {}", id);
+        Project project = findEntityById(id);
+        repository.deleteLogic(id, !project.getEliminate(), project.getEliminate());
+        save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+    }
+
+    @Override
+    public void delete(Long id) throws CustomException {
+        findEntityById(id);
+        try{
+            repository.deleteById(id);
+            save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+        } catch (Exception e) {
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
+        }
+    }
+
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
         projectFindDto.setCreatedBy(logMovementService
@@ -144,9 +164,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectFindDto.setAmount(formatCurrency(project.getAmount().doubleValue()));
-        projectFindDto.setTax(formatCurrency(project.getTax().doubleValue()));
-        projectFindDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
+        projectFindDto.setAmountStr(formatCurrency(project.getAmount().doubleValue()));
+        projectFindDto.setTaxStr(formatCurrency(project.getTax().doubleValue()));
+        projectFindDto.setTotalStr(formatCurrency(project.getTotal().doubleValue()));
         return projectFindDto;
     }
 
@@ -174,10 +194,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             if ( e instanceof BadRequestException)
                 throw e;
         }
-        Company company = new Company(getCurrentUser().getCompanyId());
-        project.setCompany(company);
-        employeeService.findByCompanyAndId(company.getId() , projectDto.getProjectManagerId());
-        project.setProjectManager(new Employee(projectDto.getProjectManagerId()));
+        project.setCompany(new Company(getCurrentUser().getCompanyId()));
+        project.setProjectManager(employeeService.findEntityById(projectDto.getProjectManagerId()));
         project.setCreatedBy(getCurrentUser().getUserId());
     }
 
@@ -217,7 +235,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                                                 Date installationDate, Date startDate, Date endDate,
                                                 CriteriaBuilder builder, Root<Project> root) {
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(builder.isFalse(root.get(Project.Fields.eliminate)));
+//        predicates.add(builder.isFalse(root.get(Project.Fields.eliminate)));
 
         if(!StringUtils.isEmpty(filter)) {
             String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());

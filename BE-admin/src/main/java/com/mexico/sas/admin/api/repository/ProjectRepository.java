@@ -31,4 +31,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                       @Param(value = "amount") BigDecimal amount,
                       @Param(value = "tax") BigDecimal tax,
                       @Param(value = "total") BigDecimal total);
+
+    @Transactional
+    @Modifying
+    @Query("update Project p set p.eliminate = :eliminate, p.active = :active where p.id = :id")
+    void deleteLogic(@Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 }

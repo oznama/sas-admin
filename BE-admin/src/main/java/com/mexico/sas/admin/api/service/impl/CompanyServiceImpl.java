@@ -1,23 +1,31 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
-import com.mexico.sas.admin.api.dto.company.CompanyFindDto;
-import com.mexico.sas.admin.api.dto.company.CompanyFindSelectDto;
+import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.company.*;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Company;
-import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.CompanyRepository;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +37,64 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     private CompanyRepository repository;
     @Autowired
     private EmployeeService employeeService;
+
+    @Override
+    public CompanyFindDto save(CompanyDto companyDto) throws CustomException {
+        Company company = from_M_To_N(companyDto, Company.class);
+        repository.save(company);
+        CompanyFindDto companyFindDto = from_M_To_N(companyDto, CompanyFindDto.class);
+        companyFindDto.setId(company.getId());
+        save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_INSERT,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+        return companyFindDto;
+    }
+
+    @Override
+    public CompanyUpdateDto update(Long id, CompanyUpdateDto companyUpdateDto) throws CustomException {
+        Company company = findEntityById(id);
+        companyUpdateDto.setId(id);
+        String message = ChangeBeanUtils.checkCompany(company, companyUpdateDto);
+
+        if(!message.isEmpty()) {
+            repository.save(company);
+            save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+        }
+        return companyUpdateDto;
+    }
+
+    @Override
+    public void deleteLogic(Long id) throws CustomException {
+        log.debug("Delete logic: {}", id);
+        Company company = findEntityById(id);
+        repository.deleteLogic(id, !company.getEliminate(), company.getEliminate());
+        save(Company.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+    }
+
+    @Override
+    public void delete(Long id) throws CustomException {
+        findEntityById(id);
+        try{
+            repository.deleteById(id);
+            save(Company.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+        } catch (Exception e) {
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
+        }
+    }
+
+    @Override
+    public Page<CompanyPaggeableDto> findAll(String filter, Long type, Pageable pageable) {
+        Page<Company> companies = findByFilter(filter, type, null, null, pageable);
+        List<CompanyPaggeableDto> companyPaggeableDtos = new ArrayList<>();
+        companies.forEach( company -> {
+            try {
+                companyPaggeableDtos.add(from_M_To_N(company, CompanyPaggeableDto.class));
+            } catch (CustomException e) {
+                log.error(e.getMessage());
+            }
+        } );
+        return new PageImpl<>(companyPaggeableDtos, pageable, companies.getTotalElements());
+    }
 
     @Override
     public CompanyFindDto findById(Long id) throws CustomException {
@@ -75,6 +141,46 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         CompanyFindSelectDto companyFindSelectDto = from_M_To_N(company, CompanyFindSelectDto.class);
         companyFindSelectDto.setEmployess(employees);
         return companyFindSelectDto;
+    }
+
+    private Page<Company> findByFilter(String filter, Long type, Long createdBy, Boolean active,
+                                        Pageable pageable) {
+        return repository.findAll((Specification<Company>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, type, createdBy, active, criteriaBuilder, root), pageable);
+    }
+
+    private Long countByFilter(String filter, Long type, Long createdBy, Boolean active) {
+        return repository.count((Specification<Company>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, type, createdBy, active, criteriaBuilder, root));
+    }
+
+    private Predicate getPredicateDinamycFilter(String filter, Long type, Long createdBy, Boolean active,
+                                                CriteriaBuilder builder, Root<Company> root) {
+        List<Predicate> predicates = new ArrayList<>();
+//        predicates.add(builder.isFalse(root.get(Company.Fields.eliminate)));
+
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pName = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Company.Fields.name))), patternFilter);
+            Predicate pRfc = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Company.Fields.rfc))), patternFilter);
+//            Predicate pAddress = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Company.Fields.address))), patternFilter);
+//            Predicate pPhone = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(Company.Fields.phone))), patternFilter);
+            predicates.add(builder.or(pName, pRfc /*, pAddress, pPhone */ ));
+        }
+
+        if(type != null) {
+            predicates.add(builder.equal(root.get(Company.Fields.type), type));
+        }
+
+        if(createdBy != null) {
+            predicates.add(builder.equal(root.get(Company.Fields.createdBy), createdBy));
+        }
+
+        if(active != null) {
+            predicates.add(builder.equal(root.get(Company.Fields.active), active));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 
 }

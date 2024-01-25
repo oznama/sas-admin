@@ -25,4 +25,5 @@ public class ProjectPageableDto implements Serializable {
     private String amount;
     private String tax;
     private String total;
+    private Boolean active;
 }

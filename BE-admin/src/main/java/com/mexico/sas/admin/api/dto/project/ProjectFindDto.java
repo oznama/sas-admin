@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -18,9 +19,12 @@ public class ProjectFindDto implements Serializable {
     private String createdBy;
     private String creationDate;
     private String installationDate;
-    private String amount;
-    private String tax;
-    private String total;
+    private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
+    private String amountStr;
+    private String taxStr;
+    private String totalStr;
     private Long companyId;
     private Long projectManagerId;
 

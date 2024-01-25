@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.invoice.InvoiceFindDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
@@ -11,8 +12,8 @@ import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
-import com.mexico.sas.admin.api.model.ProjectApplication;
 import com.mexico.sas.admin.api.repository.OrderRepository;
+import com.mexico.sas.admin.api.service.InvoiceService;
 import com.mexico.sas.admin.api.service.OrderService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,6 +33,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     @Autowired
     private OrderRepository repository;
+
+    @Autowired
+    private InvoiceService invoiceService;
 
     @Override
     public void save(OrderDto orderDto) throws CustomException {
@@ -81,6 +87,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     @Override
     public List<OrderFindDto> findByProjectId(Long projectId) throws CustomException {
+        log.debug("Finding Orders by proyect {}", projectId);
         List<Order> orders = repository.findByProject(new Project(projectId));
         List<OrderFindDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
@@ -107,12 +114,17 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     private OrderFindDto getOrderFindDto(Order order) throws CustomException {
+        log.debug("Parsing order to orderFindDto");
         OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
         orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderFindDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderFindDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
         orderFindDto.setTax(formatCurrency(order.getTax().doubleValue()));
         orderFindDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
+        List<BigDecimal> amounts = setAmountPaid(order.getId());
+        orderFindDto.setAmountPaid(formatCurrency(amounts.get(0).doubleValue()));
+        orderFindDto.setTaxPaid(formatCurrency(amounts.get(1).doubleValue()));
+        orderFindDto.setTotalPaid(formatCurrency(amounts.get(2).doubleValue()));
         return orderFindDto;
     }
 
@@ -125,7 +137,39 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orderFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
         orderFindDto.setTax(formatCurrency(totalTax.doubleValue()));
         orderFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        totalAmount = BigDecimal.ZERO;
+        totalTax = BigDecimal.ZERO;
+        totalT = BigDecimal.ZERO;
+        for(Order order : orders) {
+            List<BigDecimal> amounts = setAmountPaid(order.getId());
+            totalAmount.add(amounts.get(0));
+            totalTax.add(amounts.get(1));
+            totalT.add(amounts.get(2));
+        }
+        orderFindDto.setAmountPaid(formatCurrency(totalAmount.doubleValue()));
+        orderFindDto.setTaxPaid(formatCurrency(totalTax.doubleValue()));
+        orderFindDto.setTotalPaid(formatCurrency(totalT.doubleValue()));
         return orderFindDto;
+    }
+
+    private List<BigDecimal> setAmountPaid(Long orderId) throws CustomException {
+        List<BigDecimal> amounts = new ArrayList<>();
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalT = BigDecimal.ZERO;
+        Optional<InvoiceFindDto> invoicePaid = invoiceService.findByOrderId(orderId)
+                .stream()
+                .filter( i -> i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL))
+                .findFirst();
+        if( invoicePaid.isPresent() ) {
+            totalAmount = invoicePaid.get().getAmount() != null ? invoicePaid.get().getAmount() : BigDecimal.ZERO;
+            totalTax = invoicePaid.get().getTax() != null ? invoicePaid.get().getTax() : BigDecimal.ZERO;
+            totalT = invoicePaid.get().getTotal() != null ? invoicePaid.get().getTotal() : BigDecimal.ZERO;
+        }
+        amounts.add(totalAmount);
+        amounts.add(totalTax);
+        amounts.add(totalT);
+        return amounts;
     }
 
     private void validateSave(OrderDto orderDto, Order order) throws CustomException {

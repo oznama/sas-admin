@@ -81,13 +81,14 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 
     @Override
     public List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException {
+        log.debug("Finding invoices by order {}", orderId);
         List<Invoice> invoices = repository.findByOrder(new Order(orderId));
         List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
-        invoices.forEach( order -> {
+        invoices.forEach( invoice -> {
             try {
-                invoiceFindDtos.add(getInvoiceFindDto(order));
+                invoiceFindDtos.add(getInvoiceFindDto(invoice));
             } catch (CustomException e) {
-                log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
+                log.error("Impossible add invoice {}, error: {}", invoice.getId(), e.getMessage());
             }
         });
         try {
@@ -98,6 +99,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         } catch (CustomException e) {
             log.error("Impossible add invoice total, error: {}", e.getMessage());
         }
+        log.debug("Invoices find {}", invoiceFindDtos.size());
         return invoiceFindDtos;
     }
 
@@ -110,12 +112,14 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     private InvoiceFindDto getInvoiceFindDto(Invoice invoice) throws CustomException {
+        log.debug("Parsing invoice {}", invoice);
         InvoiceFindDto invoiceFindDto = from_M_To_N(invoice, InvoiceFindDto.class);
+        log.debug("InvoiceDTO parsed {}", invoiceFindDto);
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        invoiceFindDto.setAmount(formatCurrency(invoice.getAmount().doubleValue()));
-        invoiceFindDto.setTax(formatCurrency(invoice.getTax().doubleValue()));
-        invoiceFindDto.setTotal(formatCurrency(invoice.getTotal().doubleValue()));
+        invoiceFindDto.setAmountStr(formatCurrency(invoice.getAmount().doubleValue()));
+        invoiceFindDto.setTaxStr(formatCurrency(invoice.getTax().doubleValue()));
+        invoiceFindDto.setTotalStr(formatCurrency(invoice.getTotal().doubleValue()));
         return invoiceFindDto;
     }
 
@@ -125,9 +129,12 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.ROW_TOTAL);
-        invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
-        invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        invoiceFindDto.setAmount(totalAmount);
+        invoiceFindDto.setTax(totalTax);
+        invoiceFindDto.setTotal(totalT);
+        invoiceFindDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
+        invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
+        invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));
         return invoiceFindDto;
     }
 
@@ -141,9 +148,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 //        Long canceled = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ).count();
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
-        invoiceFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        invoiceFindDto.setTax(formatCurrency(totalTax.doubleValue()));
-        invoiceFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        invoiceFindDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
+        invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
+        invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));
         invoiceFindDto.setPercentage(totalP);
 //        invoiceFindDto.setStatus(canceled > 0 ? CatalogKeys.INVOICE_STATUS_CANCELED : (
 //                pending > 0 ? CatalogKeys.INVOICE_STATUS_PENDING :
@@ -157,7 +164,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         invoice.setPaymentDate(stringToDate(invoiceDto.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
             findByInvoiceNum(invoiceDto.getInvoiceNum());
-            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.ORDER_NUMBER_DUPLICATED, invoiceDto.getInvoiceNum()), null);
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.INVOICE_NUMBER_DUPLICATED, invoiceDto.getInvoiceNum()), null);
         } catch (CustomException e) {
             if(e instanceof BadRequestException)
                 throw e;

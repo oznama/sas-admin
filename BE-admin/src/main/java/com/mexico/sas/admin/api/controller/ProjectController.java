@@ -1,7 +1,10 @@
 package com.mexico.sas.admin.api.controller;
 
+import com.mexico.sas.admin.api.dto.ResponseDto;
 import com.mexico.sas.admin.api.dto.project.*;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.i18n.I18nKeys;
+import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -62,16 +65,18 @@ public class ProjectController {
 //    return ResponseEntity.ok().body(service.setActive(id, userEnaDisDto.getLock()));
 //  }
 
-//  @DeleteMapping("/{id}")
-//  @ResponseStatus(code = HttpStatus.OK)
-//  @ApiOperation(httpMethod = "DELETE",
-//          value = "Servicio para eliminar usuario",
-//          nickname = "delete")
-//  public ResponseEntity<Long> deleteLogic(@PathVariable("id") Long id) throws CustomException {
-//    log.info("Deleting user");
-//    service.deleteLogic(id);
-//    return ResponseEntity.ok(id);
-//  }
+  @DeleteMapping(path = "/{id}")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar proyecto", nickname = "delete")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
+  })
+  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+    log.info("Delete project");
+    service.deleteLogic(id);
+    return ResponseEntity.ok(
+            new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
+  }
 
   @GetMapping("/{id}")
   @ApiOperation(httpMethod = "GET",
