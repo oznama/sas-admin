@@ -18,7 +18,7 @@ export const MainPage = () => {
         <div className={ classNameDivMain } >
           <Alert padded />
         </div>
-        <div className='w-100 p-2'>
+        <div className='w-100 p-1'>
             <AppRouter />
         </div>
         <Footer />

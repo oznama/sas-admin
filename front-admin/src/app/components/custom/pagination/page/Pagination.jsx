@@ -58,7 +58,7 @@ export const Pagination = ({
     return (
         <div className="d-flex justify-content-end mt-1">
             <nav aria-label="Page navigation example">
-                <ul className="pagination">
+                <ul className="pagination py-1">
                     
                     <li className={ classPageItemWithDisabled( currentPage === 1 ) } onClick={ onPrevious }>
                         <a className="page-link" href="#" aria-label="Previous">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { get } from '../../services/LogService';
-import { displayNotification, genericErrorMsg } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg, styleTable } from '../../helpers/utils';
 
 export const TableLog = ({
     tableName,
@@ -49,7 +49,7 @@ export const TableLog = ({
     ));
 
     return (
-        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+        <div className='table-responsive text-nowrap' style={ styleTable }>
 
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
@@ -71,5 +71,9 @@ export const TableLog = ({
 
 TableLog.propTypes = {
     tableName: PropTypes.string.isRequired,
-    recordId: PropTypes.number.isRequired,
+    recordId: PropTypes.number,
+}
+
+TableLog.defaultProps = {
+    recordId: 0
 }

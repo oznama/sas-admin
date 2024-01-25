@@ -16,6 +16,7 @@ export const TableOrders = ({
     const [totalAmount, setTotalAmount] = useState(0);
     const [totalTax, setTotalTax] = useState(0);
     const [totalT, setTotalT] = useState(0);
+    const [totalAmountPaid, setTotalAmountPaid] = useState(0);
 
     const fetchOrders = () => {
         getOrdersByProjectId(projectId).then( response => {
@@ -23,10 +24,11 @@ export const TableOrders = ({
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 setOrders(response.filter( r => r.orderNum !== 'total' ));
-                const { amount, tax, total } = response.find( r => r.orderNum === 'total' );
+                const { amount, tax, total, amountPaid } = response.find( r => r.orderNum === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
                 setTotalT( total );
+                setTotalAmountPaid( amountPaid );
             }
         }).catch( error => {
             console.log(error);
@@ -62,6 +64,7 @@ export const TableOrders = ({
         amount,
         tax,
         total,
+        amountPaid,
         status,
         requisition,
         requisitionDate,
@@ -80,8 +83,9 @@ export const TableOrders = ({
             <td className="text-center">{ requisitionDate }</td>
             <td className="text-center">{ renderRequisitionStatus(requisitionStatus, '') }</td>
             <td className="text-end text-primary">{ amount }</td>
-            <td className="text-end text-primary">{ tax }</td>
-            <td className="text-end text-primary">{ total }</td>
+            { permissions.isAdminRoot && (<td className="text-end text-primary">{ tax }</td>) }
+            { permissions.isAdminRoot && (<td className="text-end text-primary">{ total }</td>) }
+            <td className="text-end text-primary">{ amountPaid }</td>
             {
                 permissions.canDelOrd && (
                     <td className="text-center">
@@ -107,8 +111,9 @@ export const TableOrders = ({
                         <th className="text-center fs-6" scope="col">Fecha Requisici&oacute;n</th>
                         <th className="text-center fs-6" scope="col">Status Requisici&oacute;n</th>
                         <th className="text-center fs-6" scope="col">Monto</th>
-                        <th className="text-center fs-6" scope="col">Iva</th>
-                        <th className="text-center fs-6" scope="col">Total</th>
+                        { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Iva</th>) }
+                        { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Total</th>) }
+                        <th className="text-center fs-6" scope="col">Monto Pagado</th>
                         { permissions.canDelOrd && (<th className="text-center fs-6" scope="col">Borrar</th>) }
                     </tr>
                 </thead>
@@ -124,8 +129,9 @@ export const TableOrders = ({
                         <th></th>
                         <th></th>
                         <th className="text-end fs-6" scope="col">{ totalAmount }</th>
-                        <th className="text-end fs-6" scope="col">{ totalTax }</th>
-                        <th className="text-end fs-6" scope="col">{ totalT }</th>
+                        { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalTax }</th>) }
+                        { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalT }</th>) }
+                        <th className="text-end fs-6" scope="col">{ totalAmountPaid }</th>
                         { permissions.canDelOrd && (<th></th>) }
                     </tr>
                 </tfoot>

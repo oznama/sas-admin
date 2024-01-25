@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { alertType } from "../../custom/alerts/types/types";
 import { getInvoicesByOrderId } from "../../../services/InvoiceService";
 import { setPaid } from "../../../../store/project/projectSlice";
-import { displayNotification } from "../../../helpers/utils";
+import { displayNotification, genericErrorMsg, styleTable } from "../../../helpers/utils";
 
 export const TableInvoices = ({
     projectId,
@@ -65,9 +65,9 @@ export const TableInvoices = ({
         issuedDate,
         paymentDate,
         percentage,
-        amount,
-        tax,
-        total,
+        amountStr,
+        taxStr,
+        totalStr,
         status
     }) => (
         <tr key={ id } onClick={ () => handledSelect(id) }>
@@ -81,9 +81,9 @@ export const TableInvoices = ({
             <td className="text-center">{ paymentDate }</td>
             <td className="text-center">{ percentage }</td>
             <td className="text-center">{ renderStatus(status) }</td>
-            <td className="text-end text-primary">{ amount }</td>
-            <td className="text-end text-primary">{ tax }</td>
-            <td className="text-end text-primary">{ total }</td>
+            <td className="text-end text-primary">{ amountStr }</td>
+            <td className="text-end text-primary">{ taxStr }</td>
+            <td className="text-end text-primary">{ totalStr }</td>
             {
                 permissions.canDelOrd && (
                     <td className="text-center">
@@ -97,7 +97,7 @@ export const TableInvoices = ({
     ));
 
     return (
-        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+        <div className='table-responsive text-nowrap' style={ styleTable }>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>

@@ -4,6 +4,8 @@ export const projectSlice = createSlice({
     name: 'projectReducer',
     initialState: {
         currentTab: 1,
+        currentAppTab: 1,
+        currentOrdTab: 1,
         project: {},
         order: {},
         paid: {
@@ -15,6 +17,12 @@ export const projectSlice = createSlice({
     reducers: {
         setCurrentTab: (state, action) => {
             state.currentTab = action.payload;
+        },
+        setCurrentAppTab: (state, action) => {
+            state.currentAppTab = action.payload;
+        },
+        setCurrentOrdTab: (state, action) => {
+            state.currentOrdTab = action.payload;
         },
         setProject: (state, action) => {
             state.project = action.payload;
@@ -30,6 +38,8 @@ export const projectSlice = createSlice({
 
 export const { 
     setCurrentTab,
+    setCurrentAppTab,
+    setCurrentOrdTab,
     setProject,
     setOrder,
     setPaid

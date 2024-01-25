@@ -16,10 +16,10 @@ export const DetailProject = () => {
     const { permissions } = useSelector( state => state.auth );
     const { project } = useSelector( state => state.projectReducer );
     const [projectId, setProjectId] = useState(project.id);
-    const [pKey, setPKey] = useState(project.key);
-    const [description, setDescription] = useState(project.description);
+    const [pKey, setPKey] = useState(project.key ? project.key : '');
+    const [description, setDescription] = useState(project.description ? project.description : '');
     const [createdBy, setCreatedBy] = useState(project.createdBy);
-    const [dateCreated, setDateCreated] = useState(project.creationDate);
+    const [dateCreated, setDateCreated] = useState(handleDateStr(project.creationDate));
     const [pm, setPm] = useState(numberToString(project.projectManagerId, ''));
     const [installationDate, setInstallationDate] = useState(handleDateStr(project.installationDate));
     const [pms, setPms] = useState([]);
@@ -94,6 +94,7 @@ export const DetailProject = () => {
                 }
             } else {
                 displayNotification(dispatch, '¡Proyecto actualizado correctamente!', alertType.success);
+                navigate('/', { replace: true });
             }
         }).catch(error => {
             console.log(error);
@@ -101,11 +102,11 @@ export const DetailProject = () => {
         });
     };
 
-    const renderCreatedBy = () => projectId && (
+    const renderCreatedBy = () => permissions.isAdminRoot && projectId && (
         <InputText name='createdBy' label='Creado por' value={ createdBy } disabled />
     )
     
-    const renderCreationDate = () => projectId && (
+    const renderCreationDate = () => permissions.isAdminRoot && projectId && (
         <DatePicker name='creationDate' label="Fecha" disabled value={ dateCreated } onChange={ (date) => onChangeCreatedDate(date) } />
     )
 
@@ -114,7 +115,7 @@ export const DetailProject = () => {
             <form className="needs-validation" onSubmit={ onSubmit }>
                 
                 <InputText name='key' label='Clave' placeholder='Ingresa clave' 
-                    disabled={ projectId } value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
+                    value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n' 
                     value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
                 <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required

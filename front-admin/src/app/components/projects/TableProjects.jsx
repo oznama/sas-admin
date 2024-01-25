@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { getProjects } from '../../services/ProjectService';
+import { deleteLogic, getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentTab } from '../../../store/project/projectSlice';
+import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
-import { displayNotification } from '../../helpers/utils';
+import { displayNotification, styleTable, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
 
 export const TableProject = ({
     pageSize = 10,
@@ -53,6 +53,7 @@ export const TableProject = ({
 
     const handleAddProject = () => {
         dispatch(setCurrentTab(1));
+        dispatch(setProject({}));
         navigate(`/project/add`);
     }
 
@@ -65,7 +66,7 @@ export const TableProject = ({
     );
 
     const renderSearcher = () => (
-        <div className={`input-group w-${ permissions.canCreateProj ? '25' : '50' } py-3`}>
+        <div className={`input-group w-${ permissions.canCreateProj ? '25' : '50' } py-1`}>
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
@@ -73,19 +74,6 @@ export const TableProject = ({
                 <i className="bi bi-search"></i>
             </button> */}
         </div>   
-    )
-
-    const renderHeader = () => (
-        <div className="d-flex justify-content-between align-items-center">
-            { renderSearcher() }
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalProjects }
-                pageSize={ pageSize }
-                onPageChange={ page => onPaginationClick(page) } 
-            />
-            { renderAddButton() }
-        </div>
     )
 
     // const addNewElement = newElement => {
@@ -99,16 +87,29 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        dispatch(setCurrentTab(2));
+        dispatch(setCurrentTab( permissions.canEditEmp ? 1 : 2));
         navigate(`/project/${id}/edit`);
     }
 
-    // const renderStatus = (status) => {
-    //     const backColor = status === 3 ? 'bg-danger' : ( status === 1 || status === 4 ? 'bg-success' : 'bg-warning' );
-    //     // TODO Remove by value
-    //     const statusDesc = status === 3 ? 'Desfasado' : ( status === 2 ? 'Retrazado' : 'En tiempo' );
-    //     return (<span className={ `w-100 p-1 rounded ${backColor} text-white` }>{ statusDesc }</span>);
-    // }
+    const renderStatus = status => {
+        const backColor = status ? 'bg-success' : 'bg-danger';
+        const desc = status ? 'Activo' : 'Inactivo';
+        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
+    }
+
+    const deleteChild = id => {
+        deleteLogic(id).then( response => {
+            if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, 'Proyecto eliminado correctamente!', alertType.success);
+                fetchProjects();
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
 
     const renderRows = () => projects && projects.map(({
         id,
@@ -123,29 +124,47 @@ export const TableProject = ({
         status,
         amount,
         tax,
-        total
+        total,
+        active
     }) => (
-        <tr key={ id } onClick={ () => handledSelect(id) }>
-            <th className="text-start" scope="row">{ key }</th>
+        <tr key={ id }>
+            <th className="text-start" style={ styleTableRow } scope="row">{ key }</th>
             {/* <td className="text-start">{ name }</td> */}
-            <td className="text-start">{ description }</td>
+            <td className="text-start" style={ styleTableRow }>{ description.substring(0,70) }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
-            { permissions.isAdminSas && (<td className="text-start">{ createdBy }</td>) }
-            <td className="text-center">{ creationDate }</td>
-            { permissions.isAdminRoot && (<th className="text-start">{ company }</th>) }
-            <td className="text-start">{ projectManager }</td>
-            <td className="text-center">{ installationDate }</td>
-            <td className="text-end text-primary">{ amount }</td>
-            <td className="text-end text-primary">{ tax }</td>
-            <td className="text-end text-primary">{ total }</td>
+            { permissions.isAdminRoot && (<td className="text-start" style={ styleTableRow }>{ createdBy }</td>) }
+            { permissions.isAdminRoot && (<td className="text-center" style={ styleTableRow }>{ creationDate }</td>) }
+            { permissions.isAdminRoot && (<th className="text-start" style={ styleTableRow }>{ company }</th>) }
+            <td className="text-start" style={ styleTableRow }>{ projectManager }</td>
+            <td className="text-center" style={ styleTableRow }>{ installationDate }</td>
+            <td className="text-end text-primary" style={ styleTableRow }>{ amount }</td>
+            { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ tax }</td>) }
+            { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
+            <td className="text-center">{ renderStatus(active) }</td>
+            <td className="text-center" style={ styleTableRow }>
+                <button type="button" className="btn btn-success btn-sm" style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                </button>
+            </td>
+            { permissions.canDelEmp && 
+                (
+                    <td className="text-center" style={ styleTableRow }>
+                        <button type="button" className="btn btn-danger btn-sm" style={ styleTableRowBtn } onClick={ () => deleteChild(id) }>
+                            <span><i className="bi bi-trash"></i></span>
+                        </button>
+                    </td>
+                )
+            }
         </tr>
     ));
 
     return (
         <div>
-            { renderHeader() }
-
-            <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+            <div className="d-flex justify-content-between align-items-center">
+                { renderSearcher() }
+                { renderAddButton() }
+            </div>
+            <div className='table-responsive text-nowrap'>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
@@ -154,14 +173,17 @@ export const TableProject = ({
                             {/* <th className="text-center fs-6" scope="col">Nombre</th> */}
                             <th className="text-center fs-6" scope="col">Descripci&oacute;n</th>
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
-                            { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Creado por</th>) }
-                            <th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Creado por</th>) }
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>) }
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Cliente</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
-                            <th className="text-center fs-6" scope="col">Iva</th>
-                            <th className="text-center fs-6" scope="col">Total</th>
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Iva</th>) }
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Total</th>) }
+                            <th className="text-center fs-6" scope="col">Estatus</th>
+                            <th className="text-center fs-6" scope="col">{permissions.canEditProj ? 'Editar' : 'Ver'}</th>
+                            { permissions.canDelProj && (<th className="text-center fs-6" scope="col">Borrar</th>)}
                         </tr>
                     </thead>
                     <tbody>
@@ -170,6 +192,12 @@ export const TableProject = ({
                 </table>
 
             </div>
+            <Pagination
+                currentPage={ currentPage + 1 }
+                totalCount={ totalProjects }
+                pageSize={ pageSize }
+                onPageChange={ page => onPaginationClick(page) } 
+            />
         </div>
     )
 }

@@ -5,7 +5,6 @@ import { hide } from '../../../../../store/alert/alertSlice';
 export const Alert = ({
   padded
 }) => {
-  
   const { message, type, show } = useSelector(state => state.alert);
   const dispatch = useDispatch();
 
@@ -24,9 +23,9 @@ export const Alert = ({
 }
 
 Alert.propTypes = {
-  padded: PropTypes.boolean,
+  padded: PropTypes.boolean
 }
 
 Alert.defaultProps = {
-  padded: false,
+  padded: false
 }

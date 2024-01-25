@@ -86,3 +86,13 @@ export const getProjectApplicationById = async(projectId, id) => {
     const projectApplication = await response.json();
     return projectApplication;
 };
+
+export const deleteLogic = async(id) => {
+    const request = {
+        method: "DELETE",
+        headers: getHeaders()
+    }
+    const urlInternal = `${context}/${id}`;
+    const response = await api( urlInternal, request );
+    return await response.json();
+};

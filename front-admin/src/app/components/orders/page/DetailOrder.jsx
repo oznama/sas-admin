@@ -12,17 +12,17 @@ import { TableLog } from '../../custom/TableLog';
 import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
 import { getCatalogChilds } from '../../../services/CatalogService';
-import { setOrder } from '../../../../store/project/projectSlice';
+import { setCurrentOrdTab, setOrder } from '../../../../store/project/projectSlice';
 
 export const DetailOrder = () => {
 
   const dispatch = useDispatch();
   const { project, order, paid } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
+  const {currentOrdTab: currentTab} = useSelector( state => state.projectReducer );
   const { projectId, id } = useParams();
 
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState( permissions.canCreateOrd ? 1 : 3);
   const [orderNum, setOrderNum] = useState('');
   const [orderDate, setOrderDate] = useState();
   const [status, setStatus] = useState('');
@@ -86,6 +86,9 @@ export const DetailOrder = () => {
   }
 
   useEffect(() => {
+    if( currentTab === 1 ) {
+      dispatch(setCurrentOrdTab(permissions.canCreateOrd ? 1 : 3));
+    }
     fetchSelects();
     fetchApplication();
     if( id ) {
@@ -146,6 +149,7 @@ export const DetailOrder = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Orden actualizada correctamente!', alertType.success);
+        navigate(`/project/${projectId}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error);
@@ -163,9 +167,9 @@ export const DetailOrder = () => {
   }
 
   const renderAddInvoiceButton = () => permissions.canCreateOrd && (
-    <div className="d-flex justify-content-between p-2">
-      <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
-      <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p>
+    <div className="d-flex flex-row-reverse p-2">
+      {/* <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p> */}
+      {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
       <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
           <span className="bi bi-plus"></span>
       </button>
@@ -174,21 +178,24 @@ export const DetailOrder = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
+      <li>
+        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+      </li>
       {
         permissions.canCreateOrd && (
-          <li className="nav-item" onClick={ () => setCurrentTab(1) }>
+          <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(1)) }>
             <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
           </li>
         )
       }
       {
         permissions.canAdminOrd && (
-          <li className="nav-item" onClick={ () => setCurrentTab(3) }>
+          <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(3)) }>
             <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Facturas</a>
           </li>
         )
       }
-      <li className="nav-item" onClick={ () => setCurrentTab(2) }>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(2)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
       </li>
     </ul>
@@ -250,7 +257,7 @@ export const DetailOrder = () => {
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-      <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` } &gt; Orden{ titleWithOrder() }</h3>
+      <span className={`fs-${ currentTab === 1 ? '4' : '6'} card-title fw-bold mb-4`}>{ `${project.key} ${project.description}` } &gt; Orden{ titleWithOrder() }</span>
         { id && renderTabs() }
       </div>
       { (currentTab === 3 && id ) ? renderAddInvoiceButton() : null }

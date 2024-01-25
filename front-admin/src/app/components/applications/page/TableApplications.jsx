@@ -3,7 +3,7 @@ import { getApplicationsByProjectId } from '../../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../../custom/alerts/types/types';
-import { displayNotification, genericErrorMsg } from '../../../helpers/utils';
+import { displayNotification, genericErrorMsg, styleTable } from '../../../helpers/utils';
 import { useEffect, useState } from 'react';
 
 export const TableApplications = ({ projectId }) => {
@@ -96,7 +96,7 @@ export const TableApplications = ({ projectId }) => {
     ));
 
     return (
-        <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+        <div className='table-responsive text-nowrap' style={ styleTable }>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>

@@ -10,16 +10,17 @@ import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, gene
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
+import { setCurrentAppTab } from '../../../../store/project/projectSlice';
 
 export const DetailApplications = () => {
 
   const dispatch = useDispatch();
   const { project } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
+  const {currentAppTab: currentTab} = useSelector( state => state.projectReducer );
   const { projectId, id } = useParams();
 
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState(1);
   const [aplication, setAplication] = useState('');
   const [amount, setAmount] = useState('');
   const [tax, setTax] = useState('');
@@ -149,6 +150,7 @@ export const DetailApplications = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Aplicacion actualizada correctamente!', alertType.success);
+        navigate(`/project/${projectId}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error)
@@ -167,10 +169,13 @@ export const DetailApplications = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
-      <li className="nav-item" onClick={ () => setCurrentTab(1) }>
+      <li>
+        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+      </li>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
-      <li className="nav-item" onClick={ () => setCurrentTab(2) }>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
       </li>
     </ul>

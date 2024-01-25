@@ -124,6 +124,7 @@ export const DetailInvoice = () => {
         if( request.requisition ) {
           setHasRequisition(true);
         }
+        navigate(`/project/${projectId}/order/${orderId}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error);
@@ -138,6 +139,9 @@ export const DetailInvoice = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
+      <li>
+        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>&lt;&lt; Regresar</button>
+      </li>
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
@@ -149,8 +153,8 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-        <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
-        <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p>
+        {/* <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p> */}
+        {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
         <form onSubmit={ onSubmit }>
             <div className='text-center'>
                 <div className="row text-start">

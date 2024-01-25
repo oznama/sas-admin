@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setCurrentOrdTab, setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
 import { displayNotification, genericErrorMsg, numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
@@ -50,13 +50,14 @@ export const ProjectPage = () => {
   );
 
   const handleAddOrder = () => {
+    dispatch(setCurrentOrdTab(1));
     navigate(`/project/${ id }/order/add`);
   }
 
   const renderAddOrderButton = () => permissions.canCreateOrd && (
     <div className="d-flex justify-content-between p-2">
       <p className="h5">Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span></p>
-      <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p>
+      {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
       <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
           <span className="bi bi-plus"></span>
       </button>
@@ -65,9 +66,16 @@ export const ProjectPage = () => {
 
   const renderTabs = () => (
     <ul className="nav nav-tabs">
-      {/* <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
-        <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
-      </li> */}
+      <li>
+        <button type="button" className="btn btn-link" onClick={ () => navigate('/home') }>&lt;&lt; Regresar</button>
+      </li>
+      {
+        permissions.canEditEmp && (
+          <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
+            <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
+          </li>
+        )
+      }
       <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
         <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
       </li>
@@ -84,10 +92,12 @@ export const ProjectPage = () => {
     </ul>
   )
 
+  const title = project && project.key ? `${project.key} ${project.description}` : 'Proyecto nuevo';
+
   return (
     <div className='px-5'>
       <div className={`d-flex ${ (id) ? 'justify-content-between' : 'd-flex justify-content-center'}`}>
-        <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description}` }</h3>
+        <h3 className="fs-6 card-title fw-bold mb-4">{ title }</h3>
         { ( id ) ? renderTabs() : null }
       </div>
       { (currentTab === 2 && id ) ? renderAddButton() : (
