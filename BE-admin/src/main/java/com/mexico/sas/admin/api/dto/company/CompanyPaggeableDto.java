@@ -17,5 +17,6 @@ public class CompanyPaggeableDto implements Serializable {
     private String rfc;
     private String address;
     private String phone;
+    private Long type;//new
     private Boolean active;
 }

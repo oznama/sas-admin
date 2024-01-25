@@ -10,7 +10,7 @@ export const CatalogPage = ({
   title,
   catalogId,
 }) => {
-
+  console.log(title+' '+catalogId);
   const { permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(1);
 
@@ -25,7 +25,7 @@ export const CatalogPage = ({
     </ul>
   )
 
-  const renderPage = () => catalogId ? <CatalogSingle catalogId={ catalogId } /> : <Catalogs />;
+  const renderPage = () => catalogId ? <CatalogSingle catalogId={ catalogId } /> : <Catalogs />; // Magic
 
   return (
     <>

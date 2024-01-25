@@ -236,9 +236,9 @@ export const DetailEmployee = () => {
                   </div>
                 </div>
                   <div className="pt-3 d-flex flex-row-reverse">
-                      <button type="submit" className="btn btn-primary" >Guardar</button>
+                      {permissions.canEditEmp && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
                       &nbsp;
-                      <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>Cancelar</button>
+                      <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>{permissions.canEditEmp ? 'Cancelar' : 'Regresar'}</button>
                   </div>
               </form>
           </div>)
