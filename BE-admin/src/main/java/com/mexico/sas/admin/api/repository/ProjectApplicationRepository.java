@@ -18,6 +18,8 @@ public interface ProjectApplicationRepository extends JpaRepository<ProjectAppli
     Optional<ProjectApplication> findByProjectAndApplicationIdAndActiveIsTrueAndEliminateIsFalse(Project project, Long applicationId);
     List<ProjectApplication> findByProject(Project project);
 
+    List<ProjectApplication> findByProjectAndActiveIsTrueAndEliminateIsFalse(Project project);
+
     @Transactional
     @Modifying
     @Query("update ProjectApplication p set p.eliminate = :eliminate, p.active = :active where p.id = :id")

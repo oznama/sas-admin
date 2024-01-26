@@ -15,6 +15,8 @@ public class InvoiceFindDto implements Serializable {
     private static final long serialVersionUID = 6662468293567833135L;
 
     private Long id;
+    private Long orderId;
+    private Long projectId;
     private String invoiceNum;
     private String issuedDate;
     private String paymentDate;

@@ -103,6 +103,11 @@ public class ChangeBeanUtils extends Utils {
             log.error("Error checking project installation dates, error: {}", e.getMessage());
         }
 
+        if( validateStringNoRequiredUpdate(project.getObservations(), projectUpdateDto.getObservations()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
+            project.setObservations(projectUpdateDto.getObservations());
+        }
+
         return sb.toString().trim();
     }
 
@@ -181,7 +186,10 @@ public class ChangeBeanUtils extends Utils {
         } catch (CustomException e) {
             log.error("Error checking end date, error: {}", e.getMessage());
         }
-
+        if( validateStringNoRequiredUpdate(projectApplication.getObservations(), projectApplicationUpdateDto.getObservations()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
+            projectApplication.setObservations(projectApplicationUpdateDto.getObservations());
+        }
         return sb.toString().trim();
     }
 
@@ -235,7 +243,10 @@ public class ChangeBeanUtils extends Utils {
                     order.getRequisitionStatus(), orderDto.getRequisitionStatus())).append(GeneralKeys.JUMP_LINE);
             order.setRequisitionStatus(orderDto.getRequisitionStatus());
         }
-
+        if( validateStringNoRequiredUpdate(order.getObservations(), orderDto.getObservations()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
+            order.setObservations(orderDto.getObservations());
+        }
         return sb.toString().trim();
     }
 
@@ -288,6 +299,10 @@ public class ChangeBeanUtils extends Utils {
             }
         } catch (CustomException e) {
             log.error("Error checking payment date, error: {}", e.getMessage());
+        }
+        if( validateStringNoRequiredUpdate(invoice.getObservations(), invoiceDto.getObservations()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
+            invoice.setObservations(invoiceDto.getObservations());
         }
         return sb.toString().trim();
     }

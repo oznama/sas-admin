@@ -27,4 +27,5 @@ public class OrderDto implements Serializable {
     private String requisition;
     private String requisitionDate;
     private Long requisitionStatus;
+    private String observations;
 }

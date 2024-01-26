@@ -29,6 +29,7 @@ public class Invoice {
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;
+    private String observations;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")

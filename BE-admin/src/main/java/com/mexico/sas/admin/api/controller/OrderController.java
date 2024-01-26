@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,6 +76,18 @@ public class OrderController {
   public ResponseEntity<OrderDto> findById(@PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
     return ResponseEntity.ok(service.findById(id));
+  }
+
+  @GetMapping
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar todas las ordenes",
+          nickname = "/findAll")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = OrderFindDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<Page<OrderFindDto>> findAll(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
+    log.info("Finding all orders");
+    return ResponseEntity.ok(service.findAll(filter, pageable));
   }
 
 }

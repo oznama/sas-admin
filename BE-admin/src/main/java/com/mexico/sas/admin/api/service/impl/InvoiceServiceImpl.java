@@ -17,6 +17,9 @@ import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -103,6 +106,30 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         return invoiceFindDtos;
     }
 
+    @Override
+    public Page<InvoiceFindDto> findAll(String filter, Pageable pageable) {
+        log.debug("Finding all Invoices");
+        List<Invoice> invoices = repository.findAll();
+        List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
+        invoices.forEach( invoice -> {
+            try {
+                invoiceFindDtos.add(getInvoiceFindDto(invoice));
+            } catch (CustomException e) {
+                log.error("Impossible add invoice {}, error: {}", invoice.getId(), e.getMessage());
+            }
+        });
+        try {
+            invoiceFindDtos.add((getPaid(invoices.stream()
+                    .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
+                    .collect(Collectors.toList()))));
+            invoiceFindDtos.add(getTotal(invoices));
+        } catch (CustomException e) {
+            log.error("Impossible add invoice total, error: {}", e.getMessage());
+        }
+        log.debug("Invoices find {}", invoiceFindDtos.size());
+        return new PageImpl<>(invoiceFindDtos, pageable, repository.count());
+    }
+
     private InvoiceDto parseFromEntity(Invoice invoice) throws CustomException {
         InvoiceDto invoiceDto = from_M_To_N(invoice, InvoiceDto.class);
         invoiceDto.setOrderId(invoice.getOrder().getId());
@@ -112,9 +139,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     private InvoiceFindDto getInvoiceFindDto(Invoice invoice) throws CustomException {
-        log.debug("Parsing invoice {}", invoice);
         InvoiceFindDto invoiceFindDto = from_M_To_N(invoice, InvoiceFindDto.class);
-        log.debug("InvoiceDTO parsed {}", invoiceFindDto);
+        invoiceFindDto.setOrderId(invoice.getOrder().getId());
+        invoiceFindDto.setProjectId(invoice.getOrder().getProject().getId());
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setAmountStr(formatCurrency(invoice.getAmount().doubleValue()));

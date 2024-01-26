@@ -26,4 +26,5 @@ public class InvoiceDto implements Serializable {
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;
+    private String observations;
 }

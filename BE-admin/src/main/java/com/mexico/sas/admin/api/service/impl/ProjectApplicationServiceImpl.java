@@ -70,7 +70,6 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
         String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, catalogService, employeeService);
-
         if(!message.isEmpty()) {
             repository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -87,6 +86,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         save(ProjectApplication.class.getSimpleName(), id,
                 !projectApplication.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
                 I18nResolver.getMessage(!projectApplication.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+        updateProjectAmount(projectApplication.getProject());
     }
 
     @Override
@@ -113,12 +113,12 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public List<ProjectApplicationFindDto> findByProjectId(Long projectId) {
+    public List<ProjectApplicationPaggeableDto> findByProjectId(Long projectId) {
         List<ProjectApplication> projectApplications = repository.findByProject(new Project(projectId));
-        List<ProjectApplicationFindDto> applications = new ArrayList<>();
+        List<ProjectApplicationPaggeableDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {
-                applications.add(getProjectApplicationFindDto(pa));
+                applications.add(getProjectApplicationPaggeableDto(pa));
             } catch (CustomException e) {
                 log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
             }
@@ -172,16 +172,31 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         return projectApplicationFindDto;
     }
 
-    private ProjectApplicationFindDto getTotal(List<ProjectApplication> projectApplications) throws CustomException {
+    private ProjectApplicationPaggeableDto getProjectApplicationPaggeableDto(ProjectApplication projectApplication) throws CustomException {
+        ProjectApplicationPaggeableDto projectApplicationPaggeableDto = from_M_To_N(projectApplication, ProjectApplicationPaggeableDto.class);
+        projectApplicationPaggeableDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
+        projectApplicationPaggeableDto.setLeader(buildFullname(projectApplication.getLeader()));
+        projectApplicationPaggeableDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
+        projectApplicationPaggeableDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
+        projectApplicationPaggeableDto.setTax(formatCurrency(projectApplication.getTax().doubleValue()));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(projectApplication.getTotal().doubleValue()));
+        projectApplicationPaggeableDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationPaggeableDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        return projectApplicationPaggeableDto;
+    }
+
+    private ProjectApplicationPaggeableDto getTotal(List<ProjectApplication> projectApplications) throws CustomException {
         BigDecimal totalAmount = projectApplications.stream().map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalTax = projectApplications.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalT = projectApplications.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        ProjectApplicationFindDto projectApplicationFindDto = new ProjectApplicationFindDto();
-        projectApplicationFindDto.setApplication(GeneralKeys.FOOTER_TOTAL);
-        projectApplicationFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        projectApplicationFindDto.setTax(formatCurrency(totalTax.doubleValue()));
-        projectApplicationFindDto.setTotal(formatCurrency(totalT.doubleValue()));
-        return projectApplicationFindDto;
+        ProjectApplicationPaggeableDto projectApplicationPaggeableDto = new ProjectApplicationPaggeableDto();
+        projectApplicationPaggeableDto.setApplication(GeneralKeys.FOOTER_TOTAL);
+        projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount.doubleValue()));
+        projectApplicationPaggeableDto.setTax(formatCurrency(totalTax.doubleValue()));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(totalT.doubleValue()));
+        return projectApplicationPaggeableDto;
     }
 
     private void validationSave(ProjectApplicationDto projectApplicationDto, ProjectApplication projectApplication) throws CustomException {
@@ -206,14 +221,16 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     private void updateProjectAmount(Project project) {
-        List<ProjectApplication> projectApplications = repository.findByProject(project);
+        log.debug(" :::::: UPDATE PROJECT AMOUNT {} :::::::", project.getId());
+        List<ProjectApplication> projectApplications = repository.findByProjectAndActiveIsTrueAndEliminateIsFalse(project);
+        log.debug(" :::::: APPLICATIONS: {} :::::::", projectApplications.size());
         BigDecimal amount = projectApplications.stream()
                 .map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal tax = projectApplications.stream()
                 .map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal total = projectApplications.stream()
                 .map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        log.debug("Update project totals ...");
+        log.debug(" :::::: Update project totals, AMOUNT: {} :::::: ", amount);
         projectService.updateAmounts(project.getId(), amount, tax, total);
     }
 }

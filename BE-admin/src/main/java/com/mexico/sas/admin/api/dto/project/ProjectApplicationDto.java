@@ -28,4 +28,5 @@ public class ProjectApplicationDto implements Serializable {
     private String developmentDate;
     private String endDate;
     private Boolean active;
+    private String observations;
 }

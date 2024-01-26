@@ -19,6 +19,9 @@ import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -62,6 +65,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         String message = ChangeBeanUtils.checkOrder(order, orderDto);
 
         if(!message.isEmpty()) {
+
             repository.save(order);
             save(Order.class.getSimpleName(), order.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
             log.debug("Order updated!");
@@ -105,6 +109,26 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         return ordersFindDto;
     }
 
+    @Override
+    public Page<OrderFindDto> findAll(String filter, Pageable pageable) {
+        log.debug("Finding all Orders");
+        List<Order> orders = repository.findAll();
+        List<OrderFindDto> ordersFindDto = new ArrayList<>();
+        orders.forEach( order -> {
+            try {
+                ordersFindDto.add(getOrderFindDto(order));
+            } catch (CustomException e) {
+                log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
+            }
+        });
+        try {
+            ordersFindDto.add(getTotal(orders));
+        } catch (CustomException e) {
+            log.error("Impossible add order total, error: {}", e.getMessage());
+        }
+        return new PageImpl<>(ordersFindDto, pageable, repository.count());
+    }
+
     private OrderDto parseFromEntity(Order order) throws CustomException {
         OrderDto orderDto = from_M_To_N(order, OrderDto.class);
         orderDto.setProjectId(order.getProject().getId());
@@ -116,6 +140,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private OrderFindDto getOrderFindDto(Order order) throws CustomException {
         log.debug("Parsing order to orderFindDto");
         OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
+        orderFindDto.setProjectId(order.getProject().getId());
         orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderFindDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderFindDto.setAmount(formatCurrency(order.getAmount().doubleValue()));

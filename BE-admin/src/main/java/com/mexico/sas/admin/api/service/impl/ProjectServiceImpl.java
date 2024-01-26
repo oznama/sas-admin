@@ -123,6 +123,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
         log.debug("Update project {} with {}", projectId, projectUpdateDto);
         Project project = findEntityById(projectId);
+        if( !project.getKey().equals(projectUpdateDto.getKey()) ) {
+            validateKey(projectUpdateDto.getKey());
+        }
         String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto, companyService, employeeService);
         if(!message.isEmpty()) {
             repository.save(project);
@@ -187,17 +190,22 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     }
 
     private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
-        project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        if( projectDto.getInstallationDate() != null && !projectDto.getInstallationDate().isEmpty() )
+            project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        validateKey(projectDto.getKey());
+        project.setCompany(new Company(getCurrentUser().getCompanyId()));
+        project.setProjectManager(employeeService.findEntityById(projectDto.getProjectManagerId()));
+        project.setCreatedBy(getCurrentUser().getUserId());
+    }
+
+    private void validateKey(String key) throws CustomException {
         try {
-            findByKey(project.getKey());
-            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, projectDto.getKey()), null);
+            findByKey(key);
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_KEY_DUPLICATED, key), null);
         } catch (CustomException e) {
             if ( e instanceof BadRequestException)
                 throw e;
         }
-        project.setCompany(new Company(getCurrentUser().getCompanyId()));
-        project.setProjectManager(employeeService.findEntityById(projectDto.getProjectManagerId()));
-        project.setCreatedBy(getCurrentUser().getUserId());
     }
 
     private Page<Project> findByFilter(String filter, Company company, Long createdBy,

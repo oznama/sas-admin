@@ -72,9 +72,9 @@ public class ProjectApplicationController {
           value = "Servicio para recuperar aplicaciones de proyecto por id",
           nickname = "/findApplicationById")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationFindDto.class, responseContainer = "List")
+          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<ProjectApplicationFindDto>> findByProjectId(@PathVariable("projectId") Long projectId) throws CustomException {
+  public ResponseEntity<List<ProjectApplicationPaggeableDto>> findByProjectId(@PathVariable("projectId") Long projectId) throws CustomException {
     log.info("Finding project by id");
     return ResponseEntity.ok(service.findByProjectId(projectId));
   }

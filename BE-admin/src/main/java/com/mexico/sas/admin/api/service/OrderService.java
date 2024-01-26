@@ -4,6 +4,8 @@ import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,5 +17,6 @@ public interface OrderService {
     Order findEntityById(Long id) throws CustomException;
     OrderDto findByOrderNum(String orderNum) throws CustomException;
     List<OrderFindDto> findByProjectId(Long projectId) throws CustomException;
+    Page<OrderFindDto> findAll(String filter, Pageable pageable);
 
 }

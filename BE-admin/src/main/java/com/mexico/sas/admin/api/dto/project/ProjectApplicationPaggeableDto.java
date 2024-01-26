@@ -7,9 +7,9 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class ProjectApplicationFindDto implements Serializable {
-    private static final long serialVersionUID = 2997336432117891262L;
+public class ProjectApplicationPaggeableDto implements Serializable {
 
+    private static final long serialVersionUID = 4095265061471563075L;
     private Long id;
     private String application;
     private String amount;
@@ -26,6 +26,4 @@ public class ProjectApplicationFindDto implements Serializable {
     private String creationDate;
     private String leader;
     private String developer;
-    private String observations;
-
 }

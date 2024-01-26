@@ -28,6 +28,7 @@ public class Order {
     private String requisition;
     private Date requisitionDate;
     private Long requisitionStatus;
+    private String observations;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
     @Column(columnDefinition = "boolean default false")
