@@ -115,15 +115,15 @@ export const DetailProject = () => {
         <div className='d-grid gap-2 col-6 mx-auto'>
             <form className="needs-validation" onSubmit={ onSubmit }>
                 
-                <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ !project.active }
+                <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ projectId && !project.active }
                     value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
-                <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ !project.active }
+                <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ projectId && !project.active }
                     value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
-                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required disabled={ !project.active }
+                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required disabled={ projectId && !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 { renderCreatedBy() }
                 { renderCreationDate() }
-                <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ !project.active } />
+                <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ projectId && !project.active } />
 
                 { project.active &&
                     (

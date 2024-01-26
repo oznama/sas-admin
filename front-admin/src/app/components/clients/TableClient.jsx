@@ -65,7 +65,7 @@ export const TableClient = ({
     }
 
     const handleAddEmployee = () => {
-        navigate(`/client/add`);
+        // navigate(`/client/add`);
     }
 
     const renderAddButton = () => permissions.canCreateEmp && (
@@ -78,16 +78,16 @@ export const TableClient = ({
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
-            <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
+            {/* <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
                 <option value=''>Seleccionar...</option>
                 {/* { companies && companies.map( option  => ( <option key={ option.id } value={ option.id }>{ option.value }</option> )) } */}
-                { companies && companies.filter(company => company.type === catalogId).map(option => (
+                { /* companies && companies.filter(company => company.type === catalogId).map(option => (
                 <option key={option.id} value={option.id}>
                     {option.value}
                 </option>
                     ))
                 }
-            </select>
+            </select> */}
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchCompanies(currentPage); } } />
@@ -112,7 +112,7 @@ export const TableClient = ({
 
     const handledSelect = id => {
         // dispatch(setCurrentTab(2));
-        navigate(`/employee/${id}/edit`);
+        // navigate(`/employee/${id}/edit`);
     }
 
     const renderStatus = status => {
@@ -123,18 +123,18 @@ export const TableClient = ({
 
     const deleteChild = employeeID => {
         console.log('employeeID; '+employeeID);
-        deleteLogic(employeeID).then( response => {
-            console.log('Response: '+response);
-            if(response.code && response.code !== 200) {
-                displayNotification(dispatch, response.message, alertType.error);
-            } else {
-                displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
-                fetchCompanies();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
+        // deleteLogic(employeeID).then( response => {
+        //     console.log('Response: '+response);
+        //     if(response.code && response.code !== 200) {
+        //         displayNotification(dispatch, response.message, alertType.error);
+        //     } else {
+        //         displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
+        //         fetchCompanies();
+        //     }
+        // }).catch(error => {
+        //     console.log(error);
+        //     displayNotification(dispatch, genericErrorMsg, alertType.error);
+        // });
     }
 
     const renderRows = () => employees && employees.map(({
@@ -146,9 +146,9 @@ export const TableClient = ({
         active
     }) => (
         <tr key={ id } onClick={ () => console.log('Click en row') }>
-            <td className="text-start" scope="row">{ address }</td>
-            <th className="text-start">{ rfc }</th>
-            <th className="text-start">{ name }</th>
+            <th className="text-center" scope="row">{ rfc }</th>
+            <td className="text-start">{ name }</td>
+            <td className="text-start">{ address }</td>
             <td className="text-start">{ phone }</td>
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
@@ -169,7 +169,7 @@ export const TableClient = ({
     return (
         <div>
             <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">{`${type} ${!permissions.isAdminRoot ? ` > `+user.company : ''}`}</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">Clientes</h3>
             </div>
 
             { renderHeader() }
@@ -179,9 +179,9 @@ export const TableClient = ({
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
-                            <th className="text-center fs-6" scope="col">Nombre</th>
                             <th className="text-center fs-6" scope="col">RFC</th>
-                            <th className="text-center fs-6" scope="col">Direccion</th>
+                            <th className="text-center fs-6" scope="col">Nombre</th>
+                            <th className="text-center fs-6" scope="col">Direcci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Telefono</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
                             <th className="text-center fs-6" scope="col">{permissions.canEditEmp ? 'Editar' : 'Ver'}</th>

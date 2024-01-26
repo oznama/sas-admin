@@ -99,7 +99,7 @@ export const DetailApplications = () => {
   const onChangeAplication = ({ target }) => setAplication(target.value);
   const onChangeAmount = ({ target }) => {
     const amount = Number(target.value);
-    if( amount <= mountMax ) {
+    if( amount >= 0 && amount <= mountMax ) {
       const tax = amount * taxRate;
       const total = amount + tax;
       setAmount(amount);
@@ -124,12 +124,16 @@ export const DetailApplications = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
-      update(request);
-    } else if ( permissions.canCreateProjApp ) {
-      request.projectId = projectId;
-      save(request);
-    }    
+    if( request.amount == 0 ) {
+      displayNotification(dispatch, 'El monto del proyecto no puede ser 0', alertType.error);
+    } else {
+      if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
+        update(request);
+      } else if ( permissions.canCreateProjApp ) {
+        request.projectId = projectId;
+        save(request);
+      }
+    }
   }
 
   const save = request => {

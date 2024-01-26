@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentOrdTab, setCurrentTab } from '../../../store/project/projectSlice';
+import { setCurrentAppTab, setCurrentOrdTab, setCurrentTab } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
 import { numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
@@ -16,6 +16,7 @@ export const ProjectPage = () => {
   const {currentTab, project, paid} = useSelector( state => state.projectReducer );
   
   const handleAddApplication = () => {
+    dispatch(setCurrentAppTab(1));
     navigate(`/project/${ id }/application/add`);
   }
 
