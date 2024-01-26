@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getOrdersByProjectId } from "../../../services/OrderService";
+import { getOrders, getOrdersByProjectId } from "../../../services/OrderService";
 import { displayNotification, genericErrorMsg } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 
@@ -19,6 +19,24 @@ export const TableOrders = ({
     const [totalAmountPaid, setTotalAmountPaid] = useState(0);
 
     const fetchOrders = () => {
+        getOrders(null,null,null,null).then( response => {
+            if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                setOrders(response.content.filter( r => r.orderNum !== 'total' ));
+                const { amount, tax, total, amountPaid } = response.content.find( r => r.orderNum === 'total' );
+                setTotalAmount( amount );
+                setTotalTax( tax ) ;
+                setTotalT( total );
+                setTotalAmountPaid( amountPaid );
+            }
+        }).catch( error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
+
+    const fetchOrdersByProject = () => {
         getOrdersByProjectId(projectId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -37,10 +55,14 @@ export const TableOrders = ({
     }
 
     useEffect(() => {
-        fetchOrders();
+        if( projectId ) {
+            fetchOrdersByProject();
+        } else {
+            fetchOrders();
+        }
     }, []);
 
-    const handledSelect = id => {
+    const handledSelect = (projectId, id) => {
         const urlRedirect = `/project/${ projectId }/order/${ id }/edit`;
         navigate(urlRedirect);
     }
@@ -68,9 +90,10 @@ export const TableOrders = ({
         status,
         requisition,
         requisitionDate,
-        requisitionStatus
+        requisitionStatus,
+        projectId,
     }) => (
-        <tr key={ id } onClick={ () => handledSelect(id) }>
+        <tr key={ id } onClick={ () => handledSelect(projectId, id) }>
             {/* <td className="text-center">
                 <button type="button" className="btn btn-primary">
                     <span><i className="bi bi-pencil"></i></span>

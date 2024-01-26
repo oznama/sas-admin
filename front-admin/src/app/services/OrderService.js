@@ -41,3 +41,14 @@ export const getOrderById = async(id) => {
     const jsonResponse = await response.json();
     return jsonResponse;
 };
+
+export const getOrders = async(page=0, size=10, sort='id,asc', filter='') => {
+    const request = {
+        headers: getHeaders()
+    }
+    const filterParam = filter ? `&filter=${filter}` : ''
+    const urlOrders = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const response = await api( urlOrders, request );
+    const orders = await response.json();
+    return orders;
+};

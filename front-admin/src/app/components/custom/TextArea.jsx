@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 
 export const TextArea = ({
+    name,
     label, 
     placeholder, 
     value,
@@ -12,6 +13,7 @@ export const TextArea = ({
     <>
         <label className="form-label">{ label }</label>
         <textarea className="form-control text-area-100"
+            name={ name }
             type="textarea"
             placeholder={ placeholder } 
             value={ value } 
@@ -23,6 +25,7 @@ export const TextArea = ({
 }
 
 TextArea.propTypes = {
+    name: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     placeholder: PropTypes.string,
     value: PropTypes.string.isRequired,

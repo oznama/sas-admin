@@ -41,3 +41,14 @@ export const getInvoiceById = async(id) => {
     const jsonResponse = await response.json();
     return jsonResponse;
 };
+
+export const getInvoices = async(page=0, size=10, sort='id,asc', filter='') => {
+    const request = {
+        headers: getHeaders()
+    }
+    const filterParam = filter ? `&filter=${filter}` : ''
+    const urlOrders = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const response = await api( urlOrders, request );
+    const invoices = await response.json();
+    return invoices;
+};

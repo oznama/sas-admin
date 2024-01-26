@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
 import { setCurrentAppTab } from '../../../../store/project/projectSlice';
+import { TextArea } from '../../custom/TextArea';
 
 export const DetailApplications = () => {
 
@@ -34,6 +35,7 @@ export const DetailApplications = () => {
   const [startDate, setStartDate] = useState()
   const [developmentDate, setDevelopmentDate] = useState();
   const [active, setActive] = useState(true)
+  const [observations, setObservations] = useState('');
 
   // const [catStatus, setCatStatus] = useState([]);
   const [catAplications, setCatApliations] = useState([]);
@@ -58,6 +60,7 @@ export const DetailApplications = () => {
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
         setActive(response.active);
+        setObservations(response.observations);
       }
     }).catch( error => {
         console.log(error);
@@ -118,7 +121,8 @@ export const DetailApplications = () => {
   const onChangeEndDate = date => setEndDate(date);
   const onChangeDesignDate = date => setDesignDate(date);
   const onChangeDevelopmentDate = date => setDevelopmentDate(date);
-  const onChangeStartDate = date => setStartDate(date)
+  const onChangeStartDate = date => setStartDate(date);
+  const onChangeObservations = ({ target }) => setObservations(target.value);
 
   const onSubmit = event => {
     event.preventDefault();
@@ -240,6 +244,12 @@ export const DetailApplications = () => {
             </div>
             <div className='col-6'>
               <DatePicker name="endDate" label="Cierre" value={ endDate } disabled={ !active || isModeEdit } required onChange={ (date) => onChangeEndDate(date) } />
+            </div>
+          </div>
+          <div className="row text-start">
+            <div className='col-12'>
+              <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
+                    value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } disabled={ !active || isModeEdit } />
             </div>
           </div>
         </div>

@@ -5,12 +5,16 @@ import { CatalogPage } from '../components/Catalogs/CatalogPage';
 import { UserPage } from '../components/auth/UserPage';
 import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { ClientRouter } from '../components/clients/ClientRouter';
+import { TableOrders } from '../components/orders/page/TableOrders';
+import { TableInvoices } from '../components/invoices/page/TableInvoices';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
+        <Route path="orders" element={ <TableOrders /> } />
+        <Route path="invoices" element={ <TableInvoices /> } />
         <Route path="catalog" element={ <CatalogPage /> } />
         <Route path="application" element={ <CatalogPage title="Aplicaciones" catalogId={ 1000000004 } /> } />
         <Route path="employee/*" element={ <EmployeeRouter /> } />

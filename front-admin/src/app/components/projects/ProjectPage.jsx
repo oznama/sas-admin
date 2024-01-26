@@ -43,11 +43,19 @@ export const ProjectPage = () => {
     </div>
   );
 
+  const onClickBack = () => {
+    if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
+      navigate('/home')
+    } else {
+      dispatch(setCurrentTab(currentTab - 1));
+    }
+  }
+
   const renderTabs = () => id && (
     <div className="d-flex flex-row-reverse">
       <ul className="nav nav-tabs">
         <li>
-          <button type="button" className="btn btn-link" onClick={ () => navigate('/home') }>&lt;&lt; Regresar</button>
+          <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
         </li>
         {
           permissions.canEditEmp && (
@@ -61,13 +69,13 @@ export const ProjectPage = () => {
         </li>
         {
           permissions.canAdminOrd && (
-            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(4)) }>
-              <a className={ `nav-link ${ (currentTab === 4) ? 'active' : '' }` }>Ordenes</a>
+            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
+              <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Ordenes</a>
             </li>
           )
         }
-        <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
-          <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
+        <li className="nav-item" onClick={ () => dispatch(setCurrentTab(4)) }>
+          <a className={ `nav-link ${ (currentTab === 4) ? 'active' : '' }` }>Historial</a>
         </li>
       </ul>
     </div>
@@ -80,13 +88,13 @@ export const ProjectPage = () => {
       <h3 className="fs-4 card-title fw-bold">{ title }</h3>
       { renderTabs() }
       { (currentTab === 2 && id ) ? renderAddButton() : (
-        (currentTab === 4 && id ) ? renderAddOrderButton() : null
+        (currentTab === 3 && id ) ? renderAddOrderButton() : null
         )
       }
       { 
         currentTab === 2 ? ( <TableApplications projectId = { id } /> ) : ( 
-          currentTab === 3 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (
-          currentTab === 4 ? (<TableOrders projectId={ id } />) : (<DetailProject />)
+          currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (
+          currentTab === 3 ? (<TableOrders projectId={ id } />) : (<DetailProject />)
           ) 
         )
       }

@@ -13,6 +13,7 @@ import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { setCurrentOrdTab, setOrder } from '../../../../store/project/projectSlice';
+import { TextArea } from '../../custom/TextArea';
 
 export const DetailOrder = () => {
 
@@ -24,27 +25,22 @@ export const DetailOrder = () => {
 
   const navigate = useNavigate();
   const [orderNum, setOrderNum] = useState('');
-  const [orderDate, setOrderDate] = useState();
-  const [status, setStatus] = useState('');
+  const [orderDate, setOrderDate] = useState(new Date());
+  const [status, setStatus] = useState('2000600001');
   const [requisition, setRequisition] = useState('');
-  const [requisitionDate, setRequisitionDate] = useState();
-  const [requisitionStatus, setRequisitionStatus] = useState('')
+  const [requisitionDate, setRequisitionDate] = useState(new Date());
+  const [requisitionStatus, setRequisitionStatus] = useState('2000600001')
   const [amount, setAmount] = useState('');
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
+  const [observations, setObservations] = useState('');
   const [application, setApplication] = useState({});
 
   const [catStatus, setCatStatus] = useState([]);
-  const [catReqStatus, setCatReqStatus] = useState([]);
 
   const fetchSelects = () => {
     getCatalogChilds(1000000006).then( response => {
       setCatStatus(response.filter( cat => cat.status === 2000100001 ));
-    }).catch( error => {
-      console.log(error);
-    });
-    getCatalogChilds(1000000007).then( response => {
-      setCatReqStatus(response.filter( cat => cat.status === 2000100001 ));
     }).catch( error => {
       console.log(error);
     });
@@ -77,6 +73,7 @@ export const DetailOrder = () => {
         setRequisition(response.requisition ? response.requisition : '');
         setRequisitionDate(handleDateStr(response.requisitionDate));
         setRequisitionStatus(numberToString(response.requisitionStatus, ''));
+        setObservations(response.observations);
         dispatch( setOrder(response) );
       }
     }).catch( error => {
@@ -106,27 +103,35 @@ export const DetailOrder = () => {
       setTotal(total.toFixed(2));
     }
   }
-  const onChangeStatus = ({target }) => setStatus(target.value);
+  const onChangeStatus = ({target }) => {
+    setStatus(target.value);
+    setRequisitionStatus(target.value);
+  }
   const onChangeNumOrder = ({ target }) => setOrderNum(target.value);
-  const onChangeOrderDate = date => setOrderDate(date)
+  const onChangeOrderDate = date => {
+    setOrderDate(date);
+    setRequisitionDate(date);
+  }
   const onChangeRequisition = ({ target }) => setRequisition(target.value);
   const onChangeRequisitionDate = date => setRequisitionDate(date)
   const onChangeRequisitionStatus = ({target }) => setRequisitionStatus(target.value);
+  const onChangeObservations = ({ target }) => setObservations(target.value);
 
   const onSubmit = event => {
+    console.log(project);
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    // if ( amount !== numberToString(application.amount) ) {
-    //   dispatch(setMessage(buildPayloadMessage(`El monto '${amount}' no coincide con el de la aplicación '${application.amount}'`, alertType.warning)));
-    //   return;
-    // }
-    if ( id && permissions.canEditOrd ) {
-      updateOrder(request);
-    } else if ( permissions.canCreateOrd ) {
-      request.projectId = projectId;
-      saveOrder(request);
-    }    
+    if ( amount > project.amount ) {
+      displayNotification(dispatch, 'El monto de la orden supera el monto del proyecto', alertType.info);
+    } else {
+      if ( id && permissions.canEditOrd ) {
+        updateOrder(request);
+      } else if ( permissions.canCreateOrd ) {
+        request.projectId = projectId;
+        saveOrder(request);
+      }    
+    }
   }
 
   const saveOrder = request => {
@@ -176,10 +181,18 @@ export const DetailOrder = () => {
     </div>
   );
 
+  const onClickBack = () => {
+    if ( (!permissions.canCreateOrd && currentTab == 2) || currentTab === 1 ) {
+      navigate(`/project/${ projectId }/edit`)
+    } else {
+      dispatch(setCurrentOrdTab(currentTab - 1));
+    }
+  }
+
   const renderTabs = () => (
     <ul className="nav nav-tabs">
       <li>
-        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+        <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
       </li>
       {
         permissions.canCreateOrd && (
@@ -190,13 +203,13 @@ export const DetailOrder = () => {
       }
       {
         permissions.canAdminOrd && (
-          <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(3)) }>
-            <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Facturas</a>
+          <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(2)) }>
+            <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Facturas</a>
           </li>
         )
       }
-      <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(2)) }>
-        <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+      <li className="nav-item" onClick={ () => dispatch(setCurrentOrdTab(3)) }>
+        <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Historial</a>
       </li>
     </ul>
   )
@@ -226,7 +239,7 @@ export const DetailOrder = () => {
                 <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" required value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
               </div>
               <div className='col-4'>
-                <Select name = "requisitionStatus" label="Status de Requisici&oacute;n" required options={ catReqStatus } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
+                <Select name = "requisitionStatus" label="Status de Requisici&oacute;n" required options={ catStatus } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
               </div>
             </div>
             <div className="row text-start">
@@ -238,6 +251,12 @@ export const DetailOrder = () => {
               </div>
               <div className='col-4'>
                 <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
+              </div>
+            </div>
+            <div className="row text-start">
+              <div className='col-12'>
+                <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
+                      value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
               </div>
             </div>
           </div>
@@ -258,11 +277,12 @@ export const DetailOrder = () => {
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
       <span className={`fs-${ currentTab === 1 ? '4' : '6'} card-title fw-bold mb-4`}>{ `${project.key} ${project.description}` } &gt; Orden{ titleWithOrder() }</span>
-        { id && renderTabs() }
+      <p className="h5">Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span></p>
+      { id && renderTabs() }
       </div>
-      { (currentTab === 3 && id ) ? renderAddInvoiceButton() : null }
+      { (currentTab === 2 && id ) ? renderAddInvoiceButton() : null }
       {
-        currentTab === 1 ? renderDetail() : ( currentTab === 3 
+        currentTab === 1 ? renderDetail() : ( currentTab === 2 
           ? <TableInvoices projectId={projectId} orderId={id} /> 
           : <TableLog tableName='Order' recordId={ id } />
         )

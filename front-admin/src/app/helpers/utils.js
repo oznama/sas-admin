@@ -1,6 +1,6 @@
 import { hide, setMessage } from "../../store/alert/alertSlice";
 
-export const mountMax = 999999;
+export const mountMax = 99999999;
 export const numberMaxLength = 3;
 export const taxRate = 0.16;
 
@@ -59,4 +59,4 @@ export const displayNotification = (dispatch, message, type) => {
     setTimeout(() => {
       dispatch(hide())
     }, 5000);
-  }
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { alertType } from "../../custom/alerts/types/types";
-import { getInvoicesByOrderId } from "../../../services/InvoiceService";
+import { getInvoices, getInvoicesByOrderId } from "../../../services/InvoiceService";
 import { setPaid } from "../../../../store/project/projectSlice";
 import { displayNotification, genericErrorMsg, styleTable } from "../../../helpers/utils";
 
@@ -22,6 +22,27 @@ export const TableInvoices = ({
     const [totalStatus, setTotalStatus] = useState();
 
     const fetchInvoices = () => {
+        getInvoices(null,null,null,null).then( response => {
+            if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                const paid = response.content.find( r => r.invoiceNum === 'paid' );
+                dispatch(setPaid(paid));
+                setInvoices(response.content.filter( r => r.invoiceNum !== 'total' && r.invoiceNum !== 'paid' ));
+                const { amount, tax, total, percentage, status } = response.content.find( r => r.invoiceNum === 'total' );
+                setTotalAmount( amount );
+                setTotalTax( tax ) ;
+                setTotalT( total );
+                setTotapP( percentage );
+                // setTotalStatus( status )
+            }
+        }).catch( error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
+
+    const fetchInvoicesByOrder = () => {
         getInvoicesByOrderId(orderId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -43,10 +64,14 @@ export const TableInvoices = ({
     }
 
     useEffect(() => {
-        fetchInvoices();
+        if( projectId ) {
+            fetchInvoicesByOrder();
+        } else {
+            fetchInvoices();
+        }
     }, []);
 
-    const handledSelect = id => {
+    const handledSelect = (projectId, orderId, id) => {
         if ( permissions.canCreateOrd ) {
             const urlRedirect = `/project/${ projectId }/order/${ orderId }/invoice/${ id }/edit`;
             navigate(urlRedirect);
@@ -68,9 +93,11 @@ export const TableInvoices = ({
         amountStr,
         taxStr,
         totalStr,
-        status
+        status,
+        orderId,
+        projectId
     }) => (
-        <tr key={ id } onClick={ () => handledSelect(id) }>
+        <tr key={ id } onClick={ () => handledSelect(projectId, orderId, id) }>
             {/* <td className="text-center">
                 <button type="button" className="btn btn-primary">
                     <span><i className="bi bi-pencil"></i></span>

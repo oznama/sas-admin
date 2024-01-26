@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
 import { alertType } from '../custom/alerts/types/types';
-import { displayNotification } from '../../helpers/utils';
+import { displayNotification, genericErrorMsg } from '../../helpers/utils';
 
 export const CatalogSingle = ({
   catalogId,

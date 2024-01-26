@@ -8,6 +8,7 @@ import { displayNotification, genericErrorMsg, handleDateStr, handleText, number
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../custom/alerts/types/types';
 import { getEmployess } from '../../services/EmployeeService';
+import { TextArea } from '../custom/TextArea';
 
 export const DetailProject = () => {
 
@@ -23,6 +24,7 @@ export const DetailProject = () => {
     const [dateCreated, setDateCreated] = useState(handleDateStr(project.creationDate));
     const [pm, setPm] = useState(numberToString(project.projectManagerId, ''));
     const [installationDate, setInstallationDate] = useState(handleDateStr(project.installationDate));
+    const [observations, setObservations] = useState(project.observations ? project.observations : '');
     const [pms, setPms] = useState([]);
 
     const fetchCatalogEmployee = () => {
@@ -45,6 +47,7 @@ export const DetailProject = () => {
     const onChangeCreatedDate = (date) => setDateCreated(date);
     const onChangeInstallationDate = (date) => setInstallationDate(date);
     const onChangePm = ({ target }) => setPm(target.value);
+    const onChangeObservations = ({ target }) => setObservations(target.value);
     
     const onSubmit = event => {
         event.preventDefault();
@@ -119,13 +122,15 @@ export const DetailProject = () => {
                     value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ projectId && !project.active }
                     value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
-                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" required disabled={ projectId && !project.active }
+                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ projectId && !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 { renderCreatedBy() }
                 { renderCreationDate() }
                 <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ projectId && !project.active } />
+                <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
+                    value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } disabled={ projectId && !project.active } />
 
-                { project.active &&
+                { (!projectId || project.active) &&
                     (
                         <div className="pt-3 d-flex flex-row-reverse">
                             <button type="submit" className="btn btn-primary" disabled={ (projectId && !permissions.canEditProj) }>Guardar</button>

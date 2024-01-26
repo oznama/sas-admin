@@ -9,6 +9,13 @@ import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
 import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
+import { TextArea } from '../../custom/TextArea';
+
+const getPaymentDate = () => {
+  const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() + 22);
+  return currentDate;
+}
 
 export const DetailInvoice = () => {
 
@@ -19,14 +26,15 @@ export const DetailInvoice = () => {
 
   const navigate = useNavigate();
   const [invoiceNum, setInvoiceNum] = useState('');
-  const [issuedDate, setIssuedDate] = useState();
-  const [paymentDate, setPaymentDate] = useState();
+  const [issuedDate, setIssuedDate] = useState(new Date());
+  const [paymentDate, setPaymentDate] = useState( getPaymentDate() );
   const [percentage, setPercentage] = useState(0);
   const [currentTab, setCurrentTab] = useState(1);
   const [amount, setAmount] = useState('');
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
-  const [status, setStatus] = useState('');
+  const [observations, setObservations] = useState('');
+  const [status, setStatus] = useState('2000800001');
   const [catStatus, setCatStatus] = useState([])
 
   const fetchSelects = () => {
@@ -50,6 +58,7 @@ export const DetailInvoice = () => {
         setPaymentDate(handleDateStr(response.paymentDate));
         setPercentage(response.percentage ? response.percentage : 0);
         setStatus(numberToString(response.status, ''));
+        setObservations(response.observations);
       }
     }).catch( error => {
         console.log(error)
@@ -65,12 +74,15 @@ export const DetailInvoice = () => {
   }, []);
 
   const calculateAmounts = amount => {
-    if( amount <= mountMax ) {
+    if( amount >= 0 && amount <= mountMax ) {
         const tax = amount * taxRate;
         const total = amount + tax;
         setAmount(amount);
         setTax(tax.toFixed(2));
         setTotal(total.toFixed(2));
+
+        const porc = (amount * 100)/order.amount;
+        setPercentage(porc);
       }
   }
 
@@ -87,18 +99,24 @@ export const DetailInvoice = () => {
     const porcDec = Number(target.value) / 100;
     calculateAmounts(order.amount * porcDec);
   };
+  const onChangeObservations = ({ target }) => setObservations(target.value);
 
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    // TODO Validacion para monto vs porcentaje y orden de pago
-    if ( id && permissions.canEditOrd ) {
-      updateInvoice(request);
-    } else if ( permissions.canCreateOrd ) {
-      request.orderId = orderId;
-      saveInvoice(request);
-    }    
+    
+    if( amount > order.amount ) {
+      displayNotification(dispatch, 'El monto de la factura no puede superar el monto de la orden', alertType.warning);
+    } else {
+      if ( id && permissions.canEditOrd ) {
+        updateInvoice(request);
+      } else if ( permissions.canCreateOrd ) {
+        request.orderId = orderId;
+        saveInvoice(request);
+      }    
+    }
+
   }
 
   const saveInvoice = request => {
@@ -137,10 +155,18 @@ export const DetailInvoice = () => {
     return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
   };
 
+  const onClickBack = () => {
+    if ( currentTab === 1 ) {
+      navigate(`/project/${ projectId }/order/${orderId}/edit`)
+    } else {
+      setCurrentTab(currentTab - 1);
+    }
+  }
+
   const renderTabs = () => (
     <ul className="nav nav-tabs">
       <li>
-        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>&lt;&lt; Regresar</button>
+        <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
       </li>
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
@@ -153,7 +179,7 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-        {/* <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p> */}
+        <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
         {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
         <form onSubmit={ onSubmit }>
             <div className='text-center'>
@@ -186,6 +212,12 @@ export const DetailInvoice = () => {
                     <div className='col-3'>
                         <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
                     </div>
+                </div>
+                <div className="row text-start">
+                  <div className='col-12'>
+                    <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
+                          value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+                  </div>
                 </div>
             </div>
             <div className="pt-3 d-flex flex-row-reverse">
