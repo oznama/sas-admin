@@ -24,6 +24,16 @@ export const update = async(id, data) => {
     return jsonResponse;
 };
 
+export const deleteLogic = async(id) => {
+    const request = {
+        method: "DELETE",
+        headers: getHeaders()
+    }
+    const url = `${context}/${id}`;
+    const response = await api( url, request );
+    return await response.json();
+};
+
 export const getOrdersByProjectId = async(projectId) => {
     const request = {
         headers: getHeaders()

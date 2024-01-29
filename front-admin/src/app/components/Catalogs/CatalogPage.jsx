@@ -10,7 +10,6 @@ export const CatalogPage = ({
   title,
   catalogId,
 }) => {
-  console.log(title+' '+catalogId);
   const { permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(1);
 

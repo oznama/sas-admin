@@ -14,6 +14,7 @@ import { getCatalogChilds } from '../../../services/CatalogService';
 import { setCurrentOrdTab, setOrder, setProject } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
 import { getProjectById, getProjectSelect } from '../../../services/ProjectService';
+import { setModalChild } from '../../../../store/modal/modalSlice';
 
 export const DetailOrder = () => {
 
@@ -38,6 +39,8 @@ export const DetailOrder = () => {
   const [projects, setProjects] = useState([]);
 
   const [catStatus, setCatStatus] = useState([]);
+
+  const [request, setRequest] = useState();
 
   const fetchSelects = () => {
     getCatalogChilds(1000000006).then( response => {
@@ -92,7 +95,7 @@ export const DetailOrder = () => {
 
   const onChangeAmount = ({ target }) => {
     const amount = Number(target.value);
-    if( amount <= mountMax ) {
+    if( amount >= 0 && amount <= mountMax ) {
       const tax = amount * taxRate;
       const total = amount + tax;
       setAmount(amount);
@@ -124,19 +127,13 @@ export const DetailOrder = () => {
   }
 
   const onSubmit = event => {
-    console.log(project);
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( amount > project.amount ) {
-      displayNotification(dispatch, 'El monto de la orden supera el monto del proyecto', alertType.info);
+    if ( amount !== project.amount ) {
+      dispatch( setModalChild( renderModal(request) ) )
     } else {
-      if ( id && permissions.canEditOrd ) {
-        updateOrder(request);
-      } else if ( permissions.canCreateOrd ) {
-        request.projectId = pId;
-        saveOrder(request);
-      }    
+      persistOrder(request);
     }
   }
 
@@ -170,6 +167,16 @@ export const DetailOrder = () => {
       console.log(error);
       displayNotification(dispatch, genericErrorMsg, alertType.success);
     });
+  }
+
+  const persistOrder = request => {
+    if ( id && permissions.canEditOrd ) {
+      updateOrder(request);
+    } else if ( permissions.canCreateOrd ) {
+      request.projectId = pId;
+      saveOrder(request);
+    }
+    dispatch( setModalChild(null) );
   }
 
   const renderSaveButton = () => {
@@ -224,6 +231,24 @@ export const DetailOrder = () => {
     </div>
   )
 
+  const renderModal = request => (
+    <div className='p-5 bg-white rounded-3'>
+      <div className='text-start'>
+          <p className="h2">¡El monto de la orden es diferente al monto del proyecto!</p>
+          <ul style={ { marginBottom: '0' } }>
+            <li key={ 1 }><p className="h3">Monto del proyecto: <span className='text-primary'>{ project.amount }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto de la orden: <span className='text-primary'>{ amount }</span></p></li>
+          </ul>
+          <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
+      </div>
+      <div className="pt-3 d-flex justify-content-between">
+          <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cancelar</button>
+          &nbsp;
+          <button type="button" className="btn btn-primary" onClick={ () => persistOrder(request) }>Guardar</button>
+      </div>
+    </div>
+  )
+
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
       <form onSubmit={ onSubmit }>
@@ -231,59 +256,59 @@ export const DetailOrder = () => {
             { projectId === '0' && (
               <div className="row text-start">
                 <div className='col-12'>
-                  <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pId } required onChange={ onChangePId } />
+                  <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd || !order.active } value={ pId } required onChange={ onChangePId } />
                 </div>
               </div>
             )}
             <div className="row text-start">
               <div className='col-4'>
                 <InputText name='orderNum' label='No. de orden' placeholder='Ingresa no. de orden' required
-                  disabled = { !permissions.canEditOrd } value={ orderNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ orderNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
               </div>
               <div className='col-4'>
-                <DatePicker name="orderDate" label="Fecha De Orden" required 
-                  disabled = { !permissions.canEditOrd }value={ orderDate } onChange={ (date) => onChangeOrderDate(date) } />
+                <DatePicker name="orderDate" label="Fecha De Orden" required maxDate={ new Date() }
+                  disabled = { !permissions.canEditOrd || !order.active }value={ orderDate } onChange={ (date) => onChangeOrderDate(date) } />
               </div>
               <div className='col-4'>
                 <Select name = "status" label="Status" required options={ catStatus } 
-                  disabled = { !permissions.canEditOrd } value={ status } onChange={ onChangeStatus } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ status } onChange={ onChangeStatus } />
               </div>
             </div>
             <div className='row text-start'>
               <div className='col-4'>
                 <InputText name='requisition' label='No. de Requisici&oacute;n' placeholder='Ingresa no. de requisici&oacute;n' required
-                  disabled = { !permissions.canEditOrd } value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
               </div>
               <div className='col-4'>
-                <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" required
-                  disabled = { !permissions.canEditOrd } value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
+                <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" required maxDate={ new Date() }
+                  disabled = { !permissions.canEditOrd || !order.active } value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
               </div>
               <div className='col-4'>
                 <Select name = "requisitionStatus" label="Status de Requisici&oacute;n" required options={ catStatus } 
-                  disabled = { !permissions.canEditOrd } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
               </div>
             </div>
             <div className="row text-start">
               <div className='col-4'>
                 <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' 
-                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required onChange={ onChangeAmount } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ `${amount}` } required onChange={ onChangeAmount } />
               </div>
               <div className='col-4'>
-                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
+                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd || !order.active } value={ `${tax}` } />
               </div>
               <div className='col-4'>
-                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
+                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd || !order.active } value={ `${total}` } />
               </div>
             </div>
             <div className="row text-start">
               <div className='col-12'>
                 <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
-                  disabled = { !permissions.canEditOrd } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+                  disabled = { !permissions.canEditOrd || !order.active } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
               </div>
             </div>
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
-              { renderSaveButton() }
+              {  order.active && renderSaveButton() }
               &nbsp;
               <button type="button" className="btn btn-danger" onClick={ () => navigate( projectId !== '0' ? `/project/${ projectId }/edit` : '/orders') }>Cancelar</button>
           </div>
@@ -297,9 +322,14 @@ export const DetailOrder = () => {
   return (
     <div className='px-5'>
       <span className='fs-6 card-title fw-bold mb-4'>{ title }</span>
-      { pId !== '' && (
-        <p className="h5">
+      { pId !== '' && currentTab === 1 && (
+        <p className="h6">
           Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span>
+        </p>
+      )}
+      { pId !== '' && currentTab === 2 && (
+        <p className="h6">
+          Costo de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span>
         </p>
       )}
       { renderTabs() }

@@ -3,19 +3,14 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, getPaymentDate } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
 import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { TextArea } from '../../custom/TextArea';
-
-const getPaymentDate = () => {
-  const currentDate = new Date();
-  currentDate.setDate(currentDate.getDate() + 22);
-  return currentDate;
-}
+import { setModalChild } from '../../../../store/modal/modalSlice';
 
 export const DetailInvoice = () => {
 
@@ -25,9 +20,10 @@ export const DetailInvoice = () => {
   const { projectId, orderId, id } = useParams();
 
   const navigate = useNavigate();
+  const [holyDates, setHolyDates] = useState([]);
   const [invoiceNum, setInvoiceNum] = useState('');
   const [issuedDate, setIssuedDate] = useState(new Date());
-  const [paymentDate, setPaymentDate] = useState( getPaymentDate() );
+  const [paymentDate, setPaymentDate] = useState( getPaymentDate(new Date(), holyDates) );
   const [percentage, setPercentage] = useState(0);
   const [currentTab, setCurrentTab] = useState(1);
   const [amount, setAmount] = useState('');
@@ -35,11 +31,20 @@ export const DetailInvoice = () => {
   const [total, setTotal] = useState('');
   const [observations, setObservations] = useState('');
   const [status, setStatus] = useState('2000800001');
-  const [catStatus, setCatStatus] = useState([])
+  const [catStatus, setCatStatus] = useState([]);
 
   const fetchSelects = () => {
     getCatalogChilds(1000000008).then( response => {
       setCatStatus(response.filter( cat => cat.status === 2000100001 ));
+    }).catch( error => {
+      console.log(error);
+    });
+
+    getCatalogChilds(1000000007).then( response => {
+      const catHolyDates = response.filter( cat => cat.status === 2000100001 );
+      const arrayHolyDates = [];
+      catHolyDates.forEach( ({ value }) => arrayHolyDates.push(new Date(value)) );
+      setHolyDates(arrayHolyDates);
     }).catch( error => {
       console.log(error);
     });
@@ -74,16 +79,17 @@ export const DetailInvoice = () => {
   }, []);
 
   const calculateAmounts = amount => {
-    if( amount >= 0 && amount <= mountMax ) {
-        const tax = amount * taxRate;
-        const total = amount + tax;
-        setAmount(amount);
-        setTax(tax.toFixed(2));
-        setTotal(total.toFixed(2));
+    const allowAmount = amount >= 0 && amount <= mountMax;
+    if( allowAmount ) {
+      const tax = amount * taxRate;
+      const total = amount + tax;
+      setAmount(amount);
+      setTax(tax.toFixed(2));
+      setTotal(total.toFixed(2));
 
-        const porc = (amount * 100)/order.amount;
-        setPercentage(porc);
-      }
+      const porc = Math.round((amount * 100)/order.amount);
+      setPercentage(porc);
+    }
   }
 
   const onChangeAmount = ({ target }) => {
@@ -92,7 +98,10 @@ export const DetailInvoice = () => {
   }
   const onChangeStatus = ({target }) => setStatus(target.value);
   const onChangeNumOrder = ({ target }) => setInvoiceNum(target.value);
-  const onChangeIssuedDate = date => setIssuedDate(date)
+  const onChangeIssuedDate = date => {
+    setIssuedDate(date)
+    setPaymentDate(getPaymentDate(new Date(date), holyDates));
+  }
   const onChangePaymentDate = date => setPaymentDate(date);
   const onChangePercentage = ({target}) => {
     setPercentage(target.value)
@@ -107,7 +116,7 @@ export const DetailInvoice = () => {
     const request = Object.fromEntries(data.entries());
     
     if( amount > order.amount ) {
-      displayNotification(dispatch, 'El monto de la factura no puede superar el monto de la orden', alertType.warning);
+      dispatch(setModalChild(renderModal()));
     } else {
       if ( id && permissions.canEditOrd ) {
         updateInvoice(request);
@@ -152,7 +161,7 @@ export const DetailInvoice = () => {
 
   const renderSaveButton = () => {
     const saveButton = (<button type="submit" className="btn btn-primary">Guardar</button>);
-    return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
+    return (( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) && status !== '2000800002' ) ? saveButton : null;
   };
 
   const onClickBack = () => {
@@ -177,6 +186,17 @@ export const DetailInvoice = () => {
     </ul>
   )
 
+  const renderModal = () => (
+    <div className='p-5 bg-white rounded-3'>
+      <div className='text-start'>
+          <h3>¡El monto de la factura no puede ser mayor al monto de la orden!</h3>
+      </div>
+      <div className="pt-3 d-flex justify-content-center">
+          <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cerrar</button>
+      </div>
+    </div>
+  )
+
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
         <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
@@ -185,21 +205,21 @@ export const DetailInvoice = () => {
             <div className='text-center'>
                 <div className="row text-start">
                     <div className='col-4'>
-                        <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
+                        <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' disabled={ status === '2000800002' } value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
                     </div>
                     <div className='col-4'>
-                        <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+                        <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' disabled={ status === '2000800002' } value={ `${percentage}` } required onChange={ onChangePercentage } />
                     </div>
                     <div className='col-4'>
-                        <Select name = "status" label="Status" options={ catStatus } value={ status } onChange={ onChangeStatus } />
+                        <Select name = "status" label="Status" options={ catStatus } disabled={ status === '2000800002' } value={ status } onChange={ onChangeStatus } />
                     </div>
                 </div>
                 <div className="row text-start">
                     <div className='col-6'>
-                        <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } />
+                        <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" disabled={ status === '2000800002' } value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } maxDate={ new Date() } />
                     </div>
                     <div className='col-6'>
-                        <DatePicker name="paymentDate" label="Fecha De Pago" value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
+                        <DatePicker name="paymentDate" label="Fecha De Pago" disabled={ status === '2000800002' } value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
                     </div>
                 </div>
                 <div className="row text-start">
@@ -207,16 +227,16 @@ export const DetailInvoice = () => {
                         <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
                     </div>
                     <div className='col-3'>
-                        <InputText name="tax" label='Iva' type='text' readOnly value={ `${tax}` } />
+                        <InputText name="tax" label='Iva' type='text' readOnly disabled={ status === '2000800002' } value={ `${tax}` } />
                     </div>
                     <div className='col-3'>
-                        <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
+                        <InputText name="total" label='Total' type='text' readOnly disabled={ status === '2000800002' } value={ `${total}` } />
                     </div>
                 </div>
                 <div className="row text-start">
                   <div className='col-12'>
                     <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
-                          value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+                          disabled={ status === '2000800002' } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
                   </div>
                 </div>
             </div>

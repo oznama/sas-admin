@@ -11,6 +11,7 @@ import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Invoice;
 import com.mexico.sas.admin.api.model.Order;
+import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.InvoiceRepository;
 import com.mexico.sas.admin.api.service.InvoiceService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
@@ -66,6 +67,17 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     @Override
+    public void deleteLogic(Long id) throws CustomException {
+        log.debug("Delete logic: {}", id);
+        Invoice invoice = findEntityById(id);
+        repository.deleteLogic(id, !invoice.getEliminate() ? CatalogKeys.INVOICE_STATUS_CANCELED : CatalogKeys.INVOICE_STATUS_IN_PROCESS,
+                !invoice.getEliminate(), invoice.getEliminate());
+        save(Invoice.class.getSimpleName(), id,
+                !invoice.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!invoice.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+    }
+
+    @Override
     public InvoiceDto findById(Long id) throws CustomException {
         return parseFromEntity(findEntityById(id));
     }
@@ -85,7 +97,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     @Override
     public List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException {
         log.debug("Finding invoices by order {}", orderId);
-        List<Invoice> invoices = repository.findByOrder(new Order(orderId));
+        List<Invoice> invoices = repository.findByOrderOrderByIssuedDateDesc(new Order(orderId));
         List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
         invoices.forEach( invoice -> {
             try {
@@ -175,6 +187,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 //        Long canceled = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ).count();
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
+        invoiceFindDto.setAmount(totalAmount);
+        invoiceFindDto.setTax(totalTax);
+        invoiceFindDto.setTotal(totalT);
         invoiceFindDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
         invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
         invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));

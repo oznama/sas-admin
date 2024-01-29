@@ -5,12 +5,12 @@ import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.invoice.InvoiceFindDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
+import com.mexico.sas.admin.api.dto.order.OrderPaggeableDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
-import com.mexico.sas.admin.api.model.Company;
 import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.OrderRepository;
@@ -34,7 +34,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,7 +47,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private InvoiceService invoiceService;
 
     @Override
-    public void save(OrderDto orderDto) throws CustomException {
+    public OrderFindDto save(OrderDto orderDto) throws CustomException {
         Order order = from_M_To_N(orderDto, Order.class);
         validateSave(orderDto, order);
         try {
@@ -59,6 +58,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                     I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
             orderDto.setId(order.getId());
             log.debug("Order with id {} created", order.getId());
+            return parseFromEntity(order);
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.ORDER_NOT_CREATED, orderDto.getOrderNum());
             log.error(msgError, e.getMessage());
@@ -80,7 +80,18 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public OrderDto findById(Long id) throws CustomException {
+    public void deleteLogic(Long id) throws CustomException {
+        log.debug("Delete logic: {}", id);
+        Order order = findEntityById(id);
+        repository.deleteLogic(id, !order.getEliminate() ? CatalogKeys.ORDER_STATUS_CANCELED : CatalogKeys.ORDER_STATUS_IN_PROCESS,
+                !order.getEliminate(), order.getEliminate());
+        save(Order.class.getSimpleName(), id,
+                !order.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!order.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+    }
+
+    @Override
+    public OrderFindDto findById(Long id) throws CustomException {
         return parseFromEntity(findEntityById(id));
     }
 
@@ -91,16 +102,16 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public OrderDto findByOrderNum(String orderNum) throws CustomException {
+    public OrderFindDto findByOrderNum(String orderNum) throws CustomException {
         return parseFromEntity(repository.findByOrderNum(orderNum)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.ORDER_NUMBER_NOT_FOUND, orderNum))));
     }
 
     @Override
-    public List<OrderFindDto> findByProjectId(Long projectId) throws CustomException {
+    public List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException {
         log.debug("Finding Orders by proyect {}", projectId);
-        List<Order> orders = repository.findByProject(new Project(projectId));
-        List<OrderFindDto> ordersFindDto = new ArrayList<>();
+        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(new Project(projectId));
+        List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
                 ordersFindDto.add(getOrderFindDto(order));
@@ -117,10 +128,10 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public Page<OrderFindDto> findAll(String filter, Pageable pageable) {
+    public Page<OrderPaggeableDto> findAll(String filter, Pageable pageable) {
         log.debug("Finding all Orders");
             Page<Order> orders = findByFilter(filter, null, null, null, null, null, pageable);
-        List<OrderFindDto> ordersFindDto = new ArrayList<>();
+        List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
                 ordersFindDto.add(getOrderFindDto(order));
@@ -131,71 +142,72 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         return new PageImpl<>(ordersFindDto, pageable, orders.getTotalElements());
     }
 
-    private OrderDto parseFromEntity(Order order) throws CustomException {
-        OrderDto orderDto = from_M_To_N(order, OrderDto.class);
+    private OrderFindDto parseFromEntity(Order order) throws CustomException {
+        OrderFindDto orderDto = from_M_To_N(order, OrderFindDto.class);
         orderDto.setProjectId(order.getProject().getId());
         orderDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return orderDto;
     }
 
-    private OrderFindDto getOrderFindDto(Order order) throws CustomException {
+    private OrderPaggeableDto getOrderFindDto(Order order) throws CustomException {
         log.debug("Parsing order to orderFindDto");
-        OrderFindDto orderFindDto = from_M_To_N(order, OrderFindDto.class);
-        orderFindDto.setProjectId(order.getProject().getId());
-        orderFindDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        orderFindDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        orderFindDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
-        orderFindDto.setTax(formatCurrency(order.getTax().doubleValue()));
-        orderFindDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
-        List<BigDecimal> amounts = setAmountPaid(order.getId());
-        orderFindDto.setAmountPaid(formatCurrency(amounts.get(0).doubleValue()));
-        orderFindDto.setTaxPaid(formatCurrency(amounts.get(1).doubleValue()));
-        orderFindDto.setTotalPaid(formatCurrency(amounts.get(2).doubleValue()));
-        return orderFindDto;
+        OrderPaggeableDto orderPaggeableDto = from_M_To_N(order, OrderPaggeableDto.class);
+        orderPaggeableDto.setProjectId(order.getProject().getId());
+        orderPaggeableDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        orderPaggeableDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        orderPaggeableDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
+        orderPaggeableDto.setTax(formatCurrency(order.getTax().doubleValue()));
+        orderPaggeableDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
+        List<BigDecimal> amounts = setAmountPaid(order);
+        orderPaggeableDto.setAmountPaid(formatCurrency(amounts.get(0).doubleValue()));
+        orderPaggeableDto.setTaxPaid(formatCurrency(amounts.get(1).doubleValue()));
+        orderPaggeableDto.setTotalPaid(formatCurrency(amounts.get(2).doubleValue()));
+        return orderPaggeableDto;
     }
 
-    private OrderFindDto getTotal(List<Order> orders) throws CustomException {
+    private OrderPaggeableDto getTotal(List<Order> orders) throws CustomException {
         BigDecimal totalAmount = orders.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalTax = orders.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalT = orders.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        OrderFindDto orderFindDto = new OrderFindDto();
-        orderFindDto.setOrderNum(GeneralKeys.FOOTER_TOTAL);
-        orderFindDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        orderFindDto.setTax(formatCurrency(totalTax.doubleValue()));
-        orderFindDto.setTotal(formatCurrency(totalT.doubleValue()));
+        OrderPaggeableDto orderPaggeableDto = new OrderPaggeableDto();
+        orderPaggeableDto.setOrderNum(GeneralKeys.FOOTER_TOTAL);
+        orderPaggeableDto.setAmount(formatCurrency(totalAmount.doubleValue()));
+        orderPaggeableDto.setTax(formatCurrency(totalTax.doubleValue()));
+        orderPaggeableDto.setTotal(formatCurrency(totalT.doubleValue()));
         totalAmount = BigDecimal.ZERO;
         totalTax = BigDecimal.ZERO;
         totalT = BigDecimal.ZERO;
         for(Order order : orders) {
-            List<BigDecimal> amounts = setAmountPaid(order.getId());
-            totalAmount.add(amounts.get(0));
-            totalTax.add(amounts.get(1));
-            totalT.add(amounts.get(2));
+            List<BigDecimal> amounts = setAmountPaid(order);
+            totalAmount = totalAmount.add(amounts.get(0));
+            totalTax = totalTax.add(amounts.get(1));
+            totalT = totalT.add(amounts.get(2));
         }
-        orderFindDto.setAmountPaid(formatCurrency(totalAmount.doubleValue()));
-        orderFindDto.setTaxPaid(formatCurrency(totalTax.doubleValue()));
-        orderFindDto.setTotalPaid(formatCurrency(totalT.doubleValue()));
-        return orderFindDto;
+        orderPaggeableDto.setAmountPaid(formatCurrency(totalAmount.doubleValue()));
+        orderPaggeableDto.setTaxPaid(formatCurrency(totalTax.doubleValue()));
+        orderPaggeableDto.setTotalPaid(formatCurrency(totalT.doubleValue()));
+        return orderPaggeableDto;
     }
 
-    private List<BigDecimal> setAmountPaid(Long orderId) throws CustomException {
+    private List<BigDecimal> setAmountPaid(Order order) throws CustomException {
         List<BigDecimal> amounts = new ArrayList<>();
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal totalTax = BigDecimal.ZERO;
-        BigDecimal totalT = BigDecimal.ZERO;
-        Optional<InvoiceFindDto> invoicePaid = invoiceService.findByOrderId(orderId)
+        List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId())
                 .stream()
-                .filter( i -> i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL))
-                .findFirst();
-        if( invoicePaid.isPresent() ) {
-            totalAmount = invoicePaid.get().getAmount() != null ? invoicePaid.get().getAmount() : BigDecimal.ZERO;
-            totalTax = invoicePaid.get().getTax() != null ? invoicePaid.get().getTax() : BigDecimal.ZERO;
-            totalT = invoicePaid.get().getTotal() != null ? invoicePaid.get().getTotal() : BigDecimal.ZERO;
+                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
+                        && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
+                        && i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) )
+                .collect(Collectors.toList());
+        BigDecimal amountPaid = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        amounts.add(amountPaid);
+        amounts.add(invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add));
+        amounts.add(invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add));
+        if( !order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && order.getAmount().equals(amountPaid) ) {
+            OrderDto orderUpdateDto = from_M_To_N(order, OrderDto.class);
+            orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_PAID);
+            orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_PAID);
+            update(order.getId(), orderUpdateDto);
         }
-        amounts.add(totalAmount);
-        amounts.add(totalTax);
-        amounts.add(totalT);
         return amounts;
     }
 

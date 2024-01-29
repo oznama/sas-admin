@@ -17,7 +17,19 @@ export const DetailCompany = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [rfc, setRfc] = useState('');
-    const onChangeRfc = ({ target }) => setRfc(target.value);
+    const [errorRfc, setErrorRfc] = useState();
+    const onChangeRfc = ({ target }) => {
+
+        setErrorRfc(null);
+        // TODO Make regex for RFC
+
+        if( target.value.startsWith('GERAR') ){
+            setErrorRfc('TE MAMASTE GERAR!');
+            return;
+        }
+
+        setRfc(target.value);
+    }
     const [emailDomain, setEmailDomain] = useState('');
     const onChangeEmailDomain = ({ target }) => setEmailDomain(target.value);
     const [name, setName] = useState('');
@@ -33,15 +45,20 @@ export const DetailCompany = () => {
     const isModeEdit = ( id && !permissions.canEditComp );
 
     const onSubmit = event => {
-    event.preventDefault()
-    const data = new FormData(event.target)
-    const request = Object.fromEntries(data.entries())
-    if (id){
-        updateEmployee(request);
-    }else{
-        saveEmployee(request);
+        if( errorRfc ) {
+            displayNotification(dispatch, 'corrige los errores', alertType.error);
+        } else {
+            event.preventDefault()
+            const data = new FormData(event.target)
+            const request = Object.fromEntries(data.entries())
+            if (id){
+                updateEmployee(request);
+            }else{
+                saveEmployee(request);
+            }
+        }
     }
-    }
+    
     const renderTabs = () => (//Esto controla los tabs
     <ul className="nav nav-tabs">
         <li className="nav-item" onClick={ () => setCurrentTab(1) }>
@@ -139,7 +156,7 @@ export const DetailCompany = () => {
                 <form className="needs-validation" onSubmit={ onSubmit }>
                 <div className="row text-start">
                     <div className='col-6'>
-                        <InputText name='rfc' label='RFC' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 12 } />
+                        <InputText name='rfc' label='RFC' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 12 } error={ errorRfc } />
                     </div>
                 </div>
                 <div className="row text-start">

@@ -10,7 +10,7 @@ import { displayNotification, styleInput, styleTableRow, styleTableRowBtn } from
 
 export const TableProject = ({
     pageSize = 10,
-    sort = 'creationDate,desc',
+    sort = 'id,asc',
 }) => {
 
     const dispatch = useDispatch();
@@ -111,7 +111,7 @@ export const TableProject = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
-    const deleteChild = (id, active) => {
+    const deleteProject = (id, active) => {
         deleteLogic(id).then( response => {
             if(response.code && response.code !== 200) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -162,7 +162,7 @@ export const TableProject = ({
             { permissions.canDelEmp && 
                 (
                     <td className="text-center" style={ styleTableRow }>
-                        <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} style={ styleTableRowBtn } onClick={ () => deleteChild(id, active) }>
+                        <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} style={ styleTableRowBtn } onClick={ () => deleteProject(id, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>

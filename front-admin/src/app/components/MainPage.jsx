@@ -5,6 +5,7 @@ import { NavBarPage } from './custom/NavBarPage'
 import { AppRouter } from '../router/AppRouter'
 import { Footer } from './custom/Footer'
 import { useSelector } from 'react-redux'
+import { ModalContainer } from './custom/ModalContainer'
 
 export const MainPage = () => {
 
@@ -14,6 +15,7 @@ export const MainPage = () => {
   return (
     <>
         {/* <Loading /> */}
+        <ModalContainer />
         <NavBarPage />
         <div className={ classNameDivMain } >
           <Alert padded />

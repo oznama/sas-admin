@@ -102,6 +102,7 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 14);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 15);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 16);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 17);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 20);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 21);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 22);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 23);
@@ -118,8 +119,8 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 11);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 17);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 18);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 19);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 20);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 24);
---INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 20);
 
 
 -- Usuarios
@@ -194,12 +195,10 @@ INSERT INTO catalog (id, value, description) VALUES (1000000006, 'Estatus de ord
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600001, 'Proceso', 1000000006);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600002, 'Pagada', 1000000006);
 INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600003, 'Cancelada', 1000000006);
+INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000600004, 'Vencida', 1000000006);
 
--- Estatus requisiciones
-INSERT INTO catalog (id, value, description) VALUES (1000000007, 'Estatus de requisiciones', 'Estatus de requisiciones');
-INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700001, 'Proceso', 1000000007);
-INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700002, 'Pagada', 1000000007);
-INSERT INTO catalog (id, value, catalog_parent_id) VALUES (2000700003, 'Cancelada', 1000000007);
+-- Dias Feriados
+INSERT INTO catalog (id, value, description) VALUES (1000000007, 'Dias feriados', 'Dias feriados');
 
 -- Estatus facturas
 INSERT INTO catalog (id, value, description) VALUES (1000000008, 'Estatus de facturas', 'Estatus de facturas');
