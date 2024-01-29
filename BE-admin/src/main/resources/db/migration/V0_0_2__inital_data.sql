@@ -48,6 +48,10 @@ INSERT INTO permission (id, name, description) VALUES(20, 'Del-Ord', 'Eliminar O
 INSERT INTO permission (id, name, description) VALUES(21, 'Create-Emp', 'Crear empleados');
 INSERT INTO permission (id, name, description) VALUES(22, 'Edit-Emp', 'Editar empleados');
 INSERT INTO permission (id, name, description) VALUES(23, 'Del-Emp', 'Eliminar empleados');
+INSERT INTO permission (id, name, description) VALUES(24, 'Get-Comp', 'Ver de empresas');
+INSERT INTO permission (id, name, description) VALUES(25, 'Create-Comp', 'Crear empresas');
+INSERT INTO permission (id, name, description) VALUES(26, 'Edit-Comp', 'Editar empresas');
+INSERT INTO permission (id, name, description) VALUES(27, 'Del-Comp', 'Eliminar empresas');
 
 
 SELECT setval('permission_id_seq', 15);
@@ -76,6 +80,10 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 20);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 21);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 22);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 23);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 24);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 25);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 26);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(1, 27);
 
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 1);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 2);
@@ -97,6 +105,10 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 17);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 21);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 22);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 23);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 24);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 25);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 26);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(2, 27);
 
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 2);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 6);
@@ -106,6 +118,7 @@ INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 11);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 17);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 18);
 INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 19);
+INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 24);
 --INSERT INTO sso_roles_permissions (role_id, permission_id) VALUES(3, 20);
 
 

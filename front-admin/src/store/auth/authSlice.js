@@ -26,6 +26,10 @@ const permissionsInit = {
     canCreateEmp: false,
     canEditEmp: false,
     canDelEmp: false,
+    canGetComp: false,
+    canCreateComp: false,
+    canEditComp: false,
+    canDelComp: false,
 };
 
 export const authSlice = createSlice({
@@ -63,7 +67,11 @@ export const authSlice = createSlice({
                 canGetEmp: findPermmission( permissions, 'Get-Emp' ),//Ver o no empleados
                 canCreateEmp: findPermmission( permissions, 'Create-Emp' ),//Ver o no el boton de +
                 canEditEmp: findPermmission( permissions, 'Edit-Emp' ),// Ver el boton de lapiz
-                canDelEmp: findPermmission( permissions, 'Del-Emp' )// Ver el boton de basurero
+                canDelEmp: findPermmission( permissions, 'Del-Emp' ),// Ver el boton de basurero
+                canGetComp: findPermmission( permissions, 'Get-Comp' ),//Ver o no empresas
+                canCreateComp: findPermmission( permissions, 'Create-Comp' ),//Ver o no el boton de +
+                canEditComp: findPermmission( permissions, 'Edit-Comp' ),// Ver el boton de lapiz
+                canDelComp: findPermmission( permissions, 'Del-Comp' )// Ver el boton de basurero
             };
         },
         logout: (state) => {

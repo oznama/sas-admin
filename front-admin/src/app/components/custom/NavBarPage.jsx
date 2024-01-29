@@ -54,7 +54,7 @@ export const NavBarPage = () => {
     </li>
   );
 
-  const renderTabCompany = () => permissions.isAdminRoot && (
+  const renderTabCompany = () => permissions.canGetComp && (
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 6) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(6) } to="company">
@@ -68,15 +68,6 @@ export const NavBarPage = () => {
       <NavLink className={ `nav-item nav-link ${ (currentTab === 7) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(7) } to="employee">
         Empleados
-      </NavLink>
-    </li>
-  );
-
-  const renderTabClients = () => permissions.isAdminSas && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 8) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(8) } to="client">
-        Clientes
       </NavLink>
     </li>
   );
@@ -101,7 +92,6 @@ export const NavBarPage = () => {
             { renderTabApplications() }
             { renderTabCompany() }
             { renderTabEmployee() }
-            { renderTabClients() }
           </ul>
         </div>
 
