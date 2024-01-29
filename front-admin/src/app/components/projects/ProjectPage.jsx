@@ -71,6 +71,11 @@ export const ProjectPage = () => {
   return (
     <div className='px-5'>
       <h3 className="fs-4 card-title fw-bold">{ title }</h3>
+      { project && project.key && currentTab === 3 && (
+        <p className="h6">
+          Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span>
+        </p>
+      )}
       { renderTabs() }
       { (currentTab === 2 && id ) && renderAddButton() }
       { 

@@ -121,7 +121,7 @@ export const TableClient = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
-    const deleteChild = employeeID => {
+    const deleteClient = employeeID => {
         console.log('employeeID; '+employeeID);
         // deleteLogic(employeeID).then( response => {
         //     console.log('Response: '+response);
@@ -158,7 +158,7 @@ export const TableClient = ({
             </td>
             { permissions.canDelEmp && (
             <td className="text-center">
-                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteChild(id) }>
+                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteClient(id) }>
                     <span><i className="bi bi-trash"></i></span>
                 </button>
             </td>

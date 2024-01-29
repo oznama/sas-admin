@@ -60,3 +60,19 @@ export const displayNotification = (dispatch, message, type) => {
       dispatch(hide())
     }, 5000);
 }
+
+export const getPaymentDate = (currentDate, holyDates) => {
+    const paymentDateToAdd = 22;
+    let n = 0;
+    while (n < paymentDateToAdd) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        if( (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) && !holyDates.includes(currentDate) ) {
+        n++;
+        }
+    }
+    if( currentDate.getDay() !== 3 ) {
+        const restDaysForWend = 3 - currentDate.getDay();
+        currentDate.setDate(currentDate.getDate() + restDaysForWend );
+    }
+    return currentDate;
+}

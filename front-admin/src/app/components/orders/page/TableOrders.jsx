@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getOrders, getOrdersByProjectId } from "../../../services/OrderService";
+import { deleteLogic, getOrders, getOrdersByProjectId } from "../../../services/OrderService";
 import { displayNotification, genericErrorMsg, styleInput, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 import { setCurrentOrdTab } from "../../../../store/project/projectSlice";
@@ -16,6 +16,7 @@ export const TableOrders = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
+    const { project } = useSelector( state => state.projectReducer );
 
     const [orders, setOrders] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -64,12 +65,16 @@ export const TableOrders = ({
         });
     }
 
-    useEffect(() => {
+    const loadOrders = () => {
         if( projectId ) {
             fetchOrdersByProject();
         } else {
             fetchOrders(currentPage, filter);
         }
+    }
+
+    useEffect(() => {
+        loadOrders();
     }, []);
 
     const handledSelect = (projectId, id) => {
@@ -102,15 +107,29 @@ export const TableOrders = ({
         </div>   
     );
 
+    const deleteOrder = (id, active) => {
+        deleteLogic(id).then( response => {
+            if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, `Orden ${ active ? 'eliminada' : 'reactivada' } correctamente!`, active ? alertType.warning : alertType.success);
+                loadOrders();
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
+
     const renderStatus = (status) => {
-        const backColor = status === 2000600003 ? 'bg-danger' : ( status === 2000600002 ? 'bg-success' : 'bg-warning' );
-        const statusDesc = status === 2000600003 ? 'Cancelada' : ( status === 2000600002 ? 'Pagada' : 'Proceso' );
+        const backColor = (status === 2000600003 || status === 2000600004) ? 'bg-danger' : ( status === 2000600002 ? 'bg-success' : 'bg-warning' );
+        const statusDesc = status === 2000600004 ? 'Vencida' : (status === 2000600003 ? 'Cancelada' : ( status === 2000600002 ? 'Pagada' : 'Proceso' ));
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
     const renderRequisitionStatus = (status) => {
-        const backColor = status === 2000600003 ? 'bg-danger' : ( status === 2000600002 ? 'bg-success' : 'bg-warning' );
-        const statusDesc = status === 2000600003 ? 'Cancelada' : ( status === 2000600002 ? 'Pagada' : 'Proceso' );
+        const backColor = (status === 2000600003 || status === 2000600004) ? 'bg-danger' : ( status === 2000600002 ? 'bg-success' : 'bg-warning' );
+        const statusDesc = status === 2000600004 ? 'Vencida' : (status === 2000600003 ? 'Cancelada' : ( status === 2000600002 ? 'Pagada' : 'Proceso' ));
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
@@ -130,11 +149,6 @@ export const TableOrders = ({
         active
     }) => (
         <tr key={ id }>
-            {/* <td className="text-center">
-                <button type="button" className="btn btn-primary">
-                    <span><i className="bi bi-pencil"></i></span>
-                </button>
-            </td> */}
             <th className="text-center" style={ styleTableRow } scope="row">{ orderNum }</th>
             <td className="text-center" style={ styleTableRow }>{ orderDate }</td>
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status, '') }</td>
@@ -152,9 +166,9 @@ export const TableOrders = ({
             </td>
             {
                 permissions.canDelOrd && (
-                    <td className="text-center">
-                        <button type="button" className="btn btn-danger btn-sm" style={ styleTableRowBtn }>
-                            <span><i className="bi bi-trash"></i></span>
+                    <td className="text-center" style={ styleTableRow }>
+                        <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} style={ styleTableRowBtn } onClick={ () => deleteOrder(id, active) }>
+                            <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>
                 )
@@ -172,7 +186,6 @@ export const TableOrders = ({
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
-                            {/* <th className="text-center fs-6" scope="col">Editar</th> */}
                             <th className="text-center fs-6" scope="col">No. orden</th>
                             <th className="text-center fs-6" scope="col">Fecha No. De Orden</th>
                             <th className="text-center fs-6" scope="col">Status</th>
@@ -203,6 +216,7 @@ export const TableOrders = ({
                                 { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalTax }</th>) }
                                 { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalT }</th>) }
                                 <th className="text-end fs-6" scope="col">{ totalAmountPaid }</th>
+                                { permissions.canEditOrd && (<th></th>) }
                                 { permissions.canEditOrd && (<th></th>) }
                                 { permissions.canDelOrd && (<th></th>) }
                             </tr>

@@ -69,7 +69,7 @@ export const deleteLogic = async(id) => {
         method: "DELETE",
         headers: getHeaders()
     }
-    const urlInternal = `${context}/${id}`;
-    const response = await api( urlInternal, request );
+    const url = `${context}/${id}`;
+    const response = await api( url, request );
     return await response.json();
 };

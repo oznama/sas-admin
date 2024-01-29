@@ -14,8 +14,8 @@ export const getCatalogById = async(id) => {
     const request = {
         headers: getHeaders()
     }
-    const urlInternal = `${context}/${id}`;
-    const response = await api( urlInternal, request );
+    const url = `${context}/${id}`;
+    const response = await api( url, request );
     return await response.json();
 };
 
@@ -23,8 +23,8 @@ export const getCatalogChilds = async(parentId) => {
     const request = {
         headers: getHeaders()
     }
-    const urlInternal = `${context}/${parentId}/childs`;
-    const response = await api( urlInternal, request );
+    const url = `${context}/${parentId}/childs`;
+    const response = await api( url, request );
     return await response.json();
 };
 
@@ -55,7 +55,7 @@ export const deleteLogic = async(id) => {
         method: "DELETE",
         headers: getHeaders()
     }
-    const urlInternal = `${context}/${id}`;
-    const response = await api( urlInternal, request );
+    const url = `${context}/${id}`;
+    const response = await api( url, request );
     return await response.json();
 };
