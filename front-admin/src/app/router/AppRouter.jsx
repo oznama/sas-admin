@@ -4,7 +4,7 @@ import { ProjectRouter } from '../components/projects/ProjectRouter';
 import { CatalogPage } from '../components/Catalogs/CatalogPage';
 import { UserPage } from '../components/auth/UserPage';
 import { EmployeeRouter } from '../components/employee/EmployeeRouter';
-import { ClientRouter } from '../components/clients/ClientRouter';
+import { CompanyRouter } from '../components/clients/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 
@@ -19,7 +19,7 @@ export const AppRouter = () => (
         <Route path="application" element={ <CatalogPage title="Aplicaciones" catalogId={ 1000000004 } /> } />
         <Route path="employee/*" element={ <EmployeeRouter /> } />
         <Route path="user" element={ <UserPage /> } />
-        <Route path="client" element={ <ClientRouter typeC="Clientes" catalogIdC={ 2000900002 } /> } />
+        <Route path="company/*" element={ <CompanyRouter /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

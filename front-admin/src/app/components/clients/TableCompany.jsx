@@ -2,13 +2,13 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getEmployees, deleteLogic } from "../../services/EmployeeService";
+//import { getEmployees, deleteLogic } from "../../services/EmployeeService";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { getCompanies, getCompanySelect } from '../../services/CompanyService';
+import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
 
-export const TableClient = ({
+export const TableCompany = ({
     pageSize = 10,
     sort = 'name,asc',
     type,
@@ -23,15 +23,13 @@ export const TableClient = ({
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
     const [filter, setFilter] = useState('')
-    const [companyId, setCompanyId] = useState('') ;
     const [companies, setCompanies] = useState([]);
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
-    const onChangeCompany = ({ target }) => setCompanyId(target.value);
     console.log(companies);
 
     const fetchCompanies = (page) => {
-        getCompanies(page, pageSize, sort, filter, '2000900002')
+        getCompanies(page, pageSize, sort, filter, '')
             .then( response => {
                 if( response.code && response.code === 401 ) {
                     displayNotification(dispatch, response.message, alertType.error);
@@ -65,7 +63,7 @@ export const TableClient = ({
     }
 
     const handleAddEmployee = () => {
-        // navigate(`/client/add`);
+        navigate(`/company/add`);
     }
 
     const renderAddButton = () => permissions.canCreateEmp && (
@@ -78,16 +76,6 @@ export const TableClient = ({
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
-            {/* <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
-                <option value=''>Seleccionar...</option>
-                {/* { companies && companies.map( option  => ( <option key={ option.id } value={ option.id }>{ option.value }</option> )) } */}
-                { /* companies && companies.filter(company => company.type === catalogId).map(option => (
-                <option key={option.id} value={option.id}>
-                    {option.value}
-                </option>
-                    ))
-                }
-            </select> */}
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchCompanies(currentPage); } } />
@@ -112,7 +100,7 @@ export const TableClient = ({
 
     const handledSelect = id => {
         // dispatch(setCurrentTab(2));
-        // navigate(`/employee/${id}/edit`);
+        navigate(`/company/${id}/edit`);
     }
 
     const renderStatus = status => {
@@ -121,20 +109,20 @@ export const TableClient = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
-    const deleteClient = employeeID => {
-        console.log('employeeID; '+employeeID);
-        // deleteLogic(employeeID).then( response => {
-        //     console.log('Response: '+response);
-        //     if(response.code && response.code !== 200) {
-        //         displayNotification(dispatch, response.message, alertType.error);
-        //     } else {
-        //         displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
-        //         fetchCompanies();
-        //     }
-        // }).catch(error => {
-        //     console.log(error);
-        //     displayNotification(dispatch, genericErrorMsg, alertType.error);
-        // });
+    const deleteChild = companyID => {
+        console.log('companyID: '+companyID);
+        deleteLogic(companyID).then( response => {
+            console.log('Response: '+response);
+            if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
+                fetchCompanies();
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
     }
 
     const renderRows = () => employees && employees.map(({
@@ -158,7 +146,7 @@ export const TableClient = ({
             </td>
             { permissions.canDelEmp && (
             <td className="text-center">
-                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteClient(id) }>
+                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteChild(id) }>
                     <span><i className="bi bi-trash"></i></span>
                 </button>
             </td>
@@ -169,7 +157,7 @@ export const TableClient = ({
     return (
         <div>
             <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">Clientes</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">Compañias</h3>
             </div>
 
             { renderHeader() }
@@ -198,7 +186,7 @@ export const TableClient = ({
     )
 }
 
-TableClient.propTypes = {
+TableCompany.propTypes = {
     pageSize: PropTypes.number,
     type: PropTypes.string,
     catalogId: PropTypes.number,
