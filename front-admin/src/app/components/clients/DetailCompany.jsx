@@ -178,7 +178,7 @@ export const DetailCompany = () => {
             <h3 className="fs-4 card-title fw-bold mb-4">{`Compañia ${name ? ' > Detalles de ' + name  : ''}`}</h3>
         </div>
         { id && renderTabs() }
-        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Employee' recordId={ id } />) }
+        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Company' recordId={ id } />) }
     </>
     )
 }

@@ -140,14 +140,14 @@ export const TableCompany = ({
             <td className="text-start">{ phone }</td>
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
-                <button type="button" className="btn btn-success btn-sm" onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditComp ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditComp ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
-            { permissions.canDelEmp && (
+            { permissions.canDelComp && (
             <td className="text-center">
-                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteChild(id) }>
-                    <span><i className="bi bi-trash"></i></span>
+                <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(id, active) }>
+                    <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}
