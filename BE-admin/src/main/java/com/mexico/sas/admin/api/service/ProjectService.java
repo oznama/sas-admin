@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.project.ProjectDto;
 import com.mexico.sas.admin.api.dto.project.ProjectFindDto;
 import com.mexico.sas.admin.api.dto.project.ProjectPageableDto;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface ProjectService {
     Page<ProjectPageableDto> findAll(String filter, Pageable pageable);
@@ -23,5 +25,7 @@ public interface ProjectService {
     void updateAmounts(Long projectId, BigDecimal amount, BigDecimal tax, BigDecimal total);
     void deleteLogic(Long id) throws CustomException;
     void delete(Long id) throws CustomException;
+
+    List<SelectDto> getForSelect();
 
 }

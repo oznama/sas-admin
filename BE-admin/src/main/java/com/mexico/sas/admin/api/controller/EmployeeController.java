@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
@@ -80,8 +81,8 @@ public class EmployeeController {
   @GetMapping("/select")
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleados para select", nickname = "/select")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
-  public ResponseEntity<List<EmployeeFindSelectDto>> select() throws CustomException {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> select() throws CustomException {
     log.info("Getting catalog employee");
     return ResponseEntity.ok(service.getForSelect(false));
   }
@@ -89,8 +90,8 @@ public class EmployeeController {
   @GetMapping("/select/developers")
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar desarrolladores para select", nickname = "/select")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
-  public ResponseEntity<List<EmployeeFindSelectDto>> selectDevelopers() throws CustomException {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> selectDevelopers() throws CustomException {
     log.info("Getting catalog employee");
     return ResponseEntity.ok(service.getForSelect(true));
   }
@@ -98,8 +99,8 @@ public class EmployeeController {
   @GetMapping("/select/{companyId}")
   @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleados por compania para select", nickname = "/selectByCompanyId")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = EmployeeFindSelectDto.class, responseContainer = "List") })
-  public ResponseEntity<List<EmployeeFindSelectDto>> selectByCompanyId(@PathVariable("companyId") Long companyId) throws CustomException {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> selectByCompanyId(@PathVariable("companyId") Long companyId) throws CustomException {
     log.info("Getting catalog employee");
     return ResponseEntity.ok(service.getForSelect(companyId));
   }

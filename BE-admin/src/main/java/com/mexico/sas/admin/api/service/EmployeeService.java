@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Employee;
@@ -21,8 +22,8 @@ public interface EmployeeService {
 
     EmployeeFindDto findByCompanyAndId(Long companyId, Long id) throws CustomException;
 
-    List<EmployeeFindSelectDto> getForSelect(Boolean developers);
-    List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developer, List<Long> positionIds);
-    List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developer, Long positionId);
-    List<EmployeeFindSelectDto> getForSelect(Long companyId);
+    List<SelectDto> getForSelect(Boolean developers);
+    List<SelectDto> getForSelect(Long companyId, Boolean developer, List<Long> positionIds);
+    List<SelectDto> getForSelect(Long companyId, Boolean developer, Long positionId);
+    List<SelectDto> getForSelect(Long companyId);
 }

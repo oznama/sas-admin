@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Table(name = "orders")
 @Data
 @NoArgsConstructor
+@FieldNameConstants
 @DynamicInsert
 public class Order {
 

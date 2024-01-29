@@ -10,6 +10,7 @@ import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.model.Company;
 import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.OrderRepository;
@@ -22,10 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,7 +119,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Override
     public Page<OrderFindDto> findAll(String filter, Pageable pageable) {
         log.debug("Finding all Orders");
-        List<Order> orders = repository.findAll();
+            Page<Order> orders = findByFilter(filter, null, null, null, null, null, pageable);
         List<OrderFindDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
@@ -121,12 +128,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                 log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
             }
         });
-        try {
-            ordersFindDto.add(getTotal(orders));
-        } catch (CustomException e) {
-            log.error("Impossible add order total, error: {}", e.getMessage());
-        }
-        return new PageImpl<>(ordersFindDto, pageable, repository.count());
+        return new PageImpl<>(ordersFindDto, pageable, orders.getTotalElements());
     }
 
     private OrderDto parseFromEntity(Order order) throws CustomException {
@@ -209,5 +211,49 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         }
         order.setProject(new Project(orderDto.getProjectId()));
         order.setCreatedBy(getCurrentUser().getUserId());
+    }
+
+    private Page<Order> findByFilter(String filter, Project project, Long createdBy,
+                                       Long status, Boolean active, Date orderDate,
+                                       Pageable pageable) {
+        log.debug("Find by filter: {}", filter);
+        return repository.findAll((Specification<Order>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, project, createdBy, status, active,
+                        orderDate, criteriaBuilder, root), pageable);
+    }
+
+    private Predicate getPredicateDinamycFilter(String filter, Project project, Long createdBy,
+                                                Long status, Boolean active, Date orderDate,
+                                                CriteriaBuilder builder, Root<Order> root) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pOrderNum = builder.like(builder.lower(root.get(Order.Fields.orderNum)), patternFilter);
+            Predicate pRequisition = builder.like(builder.lower(root.get(Order.Fields.requisition)), patternFilter);
+            predicates.add(builder.or(pOrderNum, pRequisition));
+        }
+
+        if(project != null) {
+            predicates.add(builder.equal(root.get(Order.Fields.project), project));
+        }
+
+        if(createdBy != null) {
+            predicates.add(builder.equal(root.get(Order.Fields.createdBy), createdBy));
+        }
+
+        if(status != null) {
+            predicates.add(builder.equal(root.get(Order.Fields.status), status));
+        }
+
+        if(active != null) {
+            predicates.add(builder.equal(root.get(Order.Fields.active), active));
+        }
+
+        if(orderDate != null) {
+            predicates.add(builder.equal(root.get(Order.Fields.orderDate), orderDate));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }

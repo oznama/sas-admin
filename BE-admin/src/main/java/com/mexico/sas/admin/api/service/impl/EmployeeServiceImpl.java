@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.employee.*;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -129,12 +130,12 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Boolean developers) {
+    public List<SelectDto> getForSelect(Boolean developers) {
         return getForSelect(getCurrentUser().getCompanyId(), developers, bossesAndPmPositions());
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, List<Long> positionIds) {
+    public List<SelectDto> getForSelect(Long companyId, Boolean developers, List<Long> positionIds) {
         List<Employee> employees = getCurrentUser().getRoleId().equals(GeneralKeys.ROOT_USER_ID)
                 || (companyId.equals(CatalogKeys.COMPANY_SAS) && !developers) ? repository.findAll()
                 : repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds);
@@ -142,12 +143,12 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
+    public List<SelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
         return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
     }
 
     @Override
-    public List<EmployeeFindSelectDto> getForSelect(Long companyId) {
+    public List<SelectDto> getForSelect(Long companyId) {
         return getSelect(repository.findByCompanyIdAndIdNotIn(companyId, employessNotIn()));
     }
 
@@ -171,13 +172,13 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         return employeeFindDto;
     }
 
-    private List<EmployeeFindSelectDto> getSelect(List<Employee> employees) {
-        List<EmployeeFindSelectDto> employeesFindSelectDto = new ArrayList<>();
+    private List<SelectDto> getSelect(List<Employee> employees) {
+        List<SelectDto> employeesFindSelectDto = new ArrayList<>();
         employees.forEach( employee -> {
             try {
-                EmployeeFindSelectDto employeeFindSelectDto = from_M_To_N(employee, EmployeeFindSelectDto.class);
-                employeeFindSelectDto.setName(buildFullname(employee));
-                employeesFindSelectDto.add(employeeFindSelectDto);
+                SelectDto selectDto = from_M_To_N(employee, SelectDto.class);
+                selectDto.setName(buildFullname(employee));
+                employeesFindSelectDto.add(selectDto);
             } catch (CustomException e2) {
                 log.error("Impossible add employee {}", employee.getId());
             }

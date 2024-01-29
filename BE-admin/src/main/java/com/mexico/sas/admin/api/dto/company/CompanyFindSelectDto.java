@@ -1,7 +1,7 @@
 package com.mexico.sas.admin.api.dto.company;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +19,5 @@ public class CompanyFindSelectDto implements Serializable {
     private String emailDomain;
     private Long type;
 
-    private List<EmployeeFindSelectDto> employess;
+    private List<SelectDto> employess;
 }

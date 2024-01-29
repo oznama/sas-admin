@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.project.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -100,6 +102,15 @@ public class ProjectController {
   public ResponseEntity<Page<ProjectPageableDto>> findAll(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
     log.info("Finding all projects");
     return ResponseEntity.ok(service.findAll(filter, pageable));
+  }
+
+  @GetMapping("/select")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos para select", nickname = "/select")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> select() throws CustomException {
+    log.info("Getting catalog project");
+    return ResponseEntity.ok(service.getForSelect());
   }
 
 }

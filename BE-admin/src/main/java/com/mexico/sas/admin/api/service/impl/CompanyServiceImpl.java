@@ -2,8 +2,8 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.company.*;
-import com.mexico.sas.admin.api.dto.employee.EmployeeFindSelectDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
@@ -137,7 +137,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         return companiesSelect;
     }
 
-    private CompanyFindSelectDto getSelectSingle(Company company, List<EmployeeFindSelectDto> employees) throws CustomException {
+    private CompanyFindSelectDto getSelectSingle(Company company, List<SelectDto> employees) throws CustomException {
         CompanyFindSelectDto companyFindSelectDto = from_M_To_N(company, CompanyFindSelectDto.class);
         companyFindSelectDto.setEmployess(employees);
         return companyFindSelectDto;

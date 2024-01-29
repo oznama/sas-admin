@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.project.*;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -159,6 +160,11 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         }
     }
 
+    @Override
+    public List<SelectDto> getForSelect() {
+        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalse());
+    }
+
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
         projectFindDto.setCreatedBy(logMovementService
@@ -187,6 +193,20 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectPageableDto.setTax(formatCurrency(project.getTax().doubleValue()));
         projectPageableDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
         return projectPageableDto;
+    }
+
+    private List<SelectDto> getSelect(List<Project> projects) {
+        List<SelectDto> selectDtos = new ArrayList<>();
+        projects.forEach( project -> {
+            try {
+                SelectDto selectDto = from_M_To_N(project, SelectDto.class);
+                selectDto.setName(String.format("%s - %s", project.getKey(), project.getDescription()));
+                selectDtos.add(selectDto);
+            } catch (CustomException e) {
+                log.error("Impossible add project {}", project.getId());
+            }
+        });
+        return selectDtos;
     }
 
     private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
