@@ -13,6 +13,7 @@ public interface InvoiceService {
 
     void save(InvoiceDto invoiceDto) throws CustomException;
     void update(Long invoiceId, InvoiceDto invoiceDto) throws CustomException;
+    void deleteLogic(Long id) throws CustomException;
     InvoiceDto findById(Long id) throws CustomException;
     Invoice findEntityById(Long id) throws CustomException;
     InvoiceDto findByInvoiceNum(String invoiceNum) throws CustomException;

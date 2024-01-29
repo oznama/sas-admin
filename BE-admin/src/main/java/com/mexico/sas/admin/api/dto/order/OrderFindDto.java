@@ -2,30 +2,31 @@ package com.mexico.sas.admin.api.dto.order;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
+@ToString
+@FieldNameConstants
 public class OrderFindDto implements Serializable {
 
-    private static final long serialVersionUID = 7487435623797834423L;
+    private static final long serialVersionUID = -5976540867156573928L;
 
     private Long id;
     private Long projectId;
     private String orderNum;
     private String orderDate;
     private Long status;
-    private String amount;
-    private String tax;
-    private String total;
-    private String amountPaid;
-    private String taxPaid;
-    private String totalPaid;
-    private Boolean active;
-    private Boolean eliminate;
+    private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
     private String requisition;
     private String requisitionDate;
     private Long requisitionStatus;
-
+    private String observations;
+    private Boolean active;
 }

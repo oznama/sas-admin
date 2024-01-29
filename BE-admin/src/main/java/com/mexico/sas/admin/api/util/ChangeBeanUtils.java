@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.util;
 
+import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.dto.company.CompanyUpdateDto;
@@ -196,20 +197,16 @@ public class ChangeBeanUtils extends Utils {
     public static String checkOrder(Order order, OrderDto orderDto) {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( (order.getStatus() == null && orderDto.getStatus() != null)
-                || ( order.getStatus() != null && orderDto.getStatus() != null && !order.getStatus().equals(orderDto.getStatus())) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.status,
-                    order.getStatus(), orderDto.getStatus())).append(GeneralKeys.JUMP_LINE);
-            order.setStatus(orderDto.getStatus());
-        }
         double currentAmount = doubleScale(order.getAmount().doubleValue());
         double newAmount = doubleScale(orderDto.getAmount().doubleValue());
-        if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.amount,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-            order.setAmount(orderDto.getAmount());
-            order.setTax(orderDto.getTax());
-            order.setTotal(orderDto.getTotal());
+        if( orderDto.getAmount() != null ) {
+            if( currentAmount != newAmount ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.amount,
+                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                order.setAmount(orderDto.getAmount());
+                order.setTax(orderDto.getTax());
+                order.setTotal(orderDto.getTotal());
+            }
         }
         try {
             currentDate = dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
@@ -237,15 +234,25 @@ public class ChangeBeanUtils extends Utils {
         } catch (CustomException e) {
             log.error("Error checking end date, error: {}", e.getMessage());
         }
+        if( validateStringNoRequiredUpdate(order.getObservations(), orderDto.getObservations()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
+            order.setObservations(orderDto.getObservations());
+        }
+        if( (order.getStatus() == null && orderDto.getStatus() != null)
+                || ( order.getStatus() != null && orderDto.getStatus() != null && !order.getStatus().equals(orderDto.getStatus())) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.status,
+                    order.getStatus(), orderDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            order.setStatus(orderDto.getStatus());
+            if( orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) || orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED) ) {
+                order.setActive(false);
+                order.setEliminate(true);
+            }
+        }
         if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
                 || ( order.getRequisitionStatus() != null && orderDto.getRequisitionStatus() != null && !order.getRequisitionStatus().equals(orderDto.getRequisitionStatus())) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisitionStatus,
                     order.getRequisitionStatus(), orderDto.getRequisitionStatus())).append(GeneralKeys.JUMP_LINE);
             order.setRequisitionStatus(orderDto.getRequisitionStatus());
-        }
-        if( validateStringNoRequiredUpdate(order.getObservations(), orderDto.getObservations()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
-            order.setObservations(orderDto.getObservations());
         }
         return sb.toString().trim();
     }
@@ -259,26 +266,28 @@ public class ChangeBeanUtils extends Utils {
                     invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             invoice.setStatus(invoiceDto.getStatus());
         }
-        double currentAmount = doubleScale(invoice.getAmount().doubleValue());
-        double newAmount = doubleScale(invoiceDto.getAmount().doubleValue());
-        if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.amount,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-            invoice.setAmount(invoiceDto.getAmount());
-        }
-        currentAmount = doubleScale(invoice.getTax().doubleValue());
-        newAmount = doubleScale(invoiceDto.getTax().doubleValue());
-        if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.tax,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-            invoice.setTax(invoiceDto.getTax());
-        }
-        currentAmount = doubleScale(invoice.getTotal().doubleValue());
-        newAmount = doubleScale(invoiceDto.getTotal().doubleValue());
-        if( currentAmount != newAmount ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.total,
-                    currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
-            invoice.setTotal(invoiceDto.getTotal());
+        if( invoiceDto.getAmount() != null ) {
+            double currentAmount = doubleScale(invoice.getAmount().doubleValue());
+            double newAmount = doubleScale(invoiceDto.getAmount().doubleValue());
+            if( currentAmount != newAmount ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.amount,
+                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                invoice.setAmount(invoiceDto.getAmount());
+            }
+            currentAmount = doubleScale(invoice.getTax().doubleValue());
+            newAmount = doubleScale(invoiceDto.getTax().doubleValue());
+            if( currentAmount != newAmount ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.tax,
+                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                invoice.setTax(invoiceDto.getTax());
+            }
+            currentAmount = doubleScale(invoice.getTotal().doubleValue());
+            newAmount = doubleScale(invoiceDto.getTotal().doubleValue());
+            if( currentAmount != newAmount ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.total,
+                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                invoice.setTotal(invoiceDto.getTotal());
+            }
         }
         try {
             currentDate = dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
