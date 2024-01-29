@@ -2,6 +2,16 @@ import { api, getHeaders } from '../api/Api';
 
 const context = 'projects';
 
+export const getProjectSelect = async() => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlProjects = `${context}/select`;
+    const response = await api( urlProjects, request );
+    const projects = await response.json();
+    return projects;
+};
+
 export const getProjects = async(page=0, size=10, sort='id,asc', filter='') => {
     const request = {
         headers: getHeaders()

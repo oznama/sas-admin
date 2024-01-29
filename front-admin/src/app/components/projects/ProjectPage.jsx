@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentAppTab, setCurrentOrdTab, setCurrentTab } from '../../../store/project/projectSlice';
+import { setCurrentAppTab, setCurrentTab } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
 import { numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
@@ -26,21 +26,6 @@ export const ProjectPage = () => {
               <span className="bi bi-plus"></span>
           </button>
       </div>
-  );
-
-  const handleAddOrder = () => {
-    dispatch(setCurrentOrdTab(1));
-    navigate(`/project/${ id }/order/add`);
-  }
-
-  const renderAddOrderButton = () => permissions.canCreateOrd && (
-    <div className="d-flex justify-content-between p-2">
-      <p className="h5">Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span></p>
-      {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
-      <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
-          <span className="bi bi-plus"></span>
-      </button>
-    </div>
   );
 
   const onClickBack = () => {
@@ -87,10 +72,7 @@ export const ProjectPage = () => {
     <div className='px-5'>
       <h3 className="fs-4 card-title fw-bold">{ title }</h3>
       { renderTabs() }
-      { (currentTab === 2 && id ) ? renderAddButton() : (
-        (currentTab === 3 && id ) ? renderAddOrderButton() : null
-        )
-      }
+      { (currentTab === 2 && id ) && renderAddButton() }
       { 
         currentTab === 2 ? ( <TableApplications projectId = { id } /> ) : ( 
           currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (

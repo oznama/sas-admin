@@ -157,13 +157,6 @@ export const TableInvoices = ({
                     </tr>
                 </tfoot>
             </table>
-            {
-                !permissions.canCreateOrd && (
-                    <div>
-                        <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
-                    </div>
-                 )
-            }
         </div>
     )
 }
