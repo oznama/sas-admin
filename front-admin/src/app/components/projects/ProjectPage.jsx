@@ -13,7 +13,7 @@ export const ProjectPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
-  const {currentTab, project, paid} = useSelector( state => state.projectReducer );
+  const {currentTab, project} = useSelector( state => state.projectReducer );
   
   const handleAddApplication = () => {
     dispatch(setCurrentAppTab(1));

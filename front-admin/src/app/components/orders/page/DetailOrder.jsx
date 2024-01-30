@@ -11,7 +11,7 @@ import { TableLog } from '../../custom/TableLog';
 import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
 import { getCatalogChilds } from '../../../services/CatalogService';
-import { setCurrentOrdTab, setOrder, setProject } from '../../../../store/project/projectSlice';
+import { setCurrentOrdTab, setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
 import { getProjectById, getProjectSelect } from '../../../services/ProjectService';
 import { setModalChild } from '../../../../store/modal/modalSlice';
@@ -104,6 +104,10 @@ export const DetailOrder = () => {
     }
   }
   const onChangeStatus = ({target }) => {
+    if( status !== '2000600003' && target.value === '2000600003' && status !== '2000600004' && target.value === '2000600004' ) {
+      const newAmount = paid.amount - amount;
+      dispatch( setPaid( { ...paid, amount: newAmount } ) );
+    }
     setStatus(target.value);
     setRequisitionStatus(target.value);
   }
@@ -130,7 +134,7 @@ export const DetailOrder = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( amount !== project.amount ) {
+    if ( Number(amount) !== project.amount ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
       persistOrder(request);
@@ -188,7 +192,7 @@ export const DetailOrder = () => {
     navigate(`/project/${ pId }/order/${id}/invoice/add`);
   }
 
-  const renderAddInvoiceButton = () => permissions.canCreateOrd && (
+  const renderAddInvoiceButton = () => permissions.canCreateOrd && (paid.amount < order.amount) && (
     <div className="d-flex flex-row-reverse p-2">
       <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
           <span className="bi bi-plus"></span>
@@ -256,59 +260,59 @@ export const DetailOrder = () => {
             { projectId === '0' && (
               <div className="row text-start">
                 <div className='col-12'>
-                  <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd || !order.active } value={ pId } required onChange={ onChangePId } />
+                  <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pId } required onChange={ onChangePId } />
                 </div>
               </div>
             )}
             <div className="row text-start">
               <div className='col-4'>
                 <InputText name='orderNum' label='No. de orden' placeholder='Ingresa no. de orden' required
-                  disabled = { !permissions.canEditOrd || !order.active } value={ orderNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
+                  disabled = { !permissions.canEditOrd } value={ orderNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
               </div>
               <div className='col-4'>
                 <DatePicker name="orderDate" label="Fecha De Orden" required maxDate={ new Date() }
-                  disabled = { !permissions.canEditOrd || !order.active }value={ orderDate } onChange={ (date) => onChangeOrderDate(date) } />
+                  disabled = { !permissions.canEditOrd }value={ orderDate } onChange={ (date) => onChangeOrderDate(date) } />
               </div>
               <div className='col-4'>
-                <Select name = "status" label="Status" required options={ catStatus } 
-                  disabled = { !permissions.canEditOrd || !order.active } value={ status } onChange={ onChangeStatus } />
+                <Select name = "status" label="Status" required options={ catStatus } value={ status } onChange={ onChangeStatus } 
+                  disabled = { !permissions.canEditOrd || ((order.status === 2000600003 || order.status === 2000600004) && paid.amount >= order.amount) }  />
               </div>
             </div>
             <div className='row text-start'>
               <div className='col-4'>
                 <InputText name='requisition' label='No. de Requisici&oacute;n' placeholder='Ingresa no. de requisici&oacute;n' required
-                  disabled = { !permissions.canEditOrd || !order.active } value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
+                  disabled = { !permissions.canEditOrd } value={ requisition } onChange={ onChangeRequisition } maxLength={ 8 } />
               </div>
               <div className='col-4'>
                 <DatePicker name="requisitionDate" label="Fecha No. De Requisici&oacute;n" required maxDate={ new Date() }
-                  disabled = { !permissions.canEditOrd || !order.active } value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
+                  disabled = { !permissions.canEditOrd } value={ requisitionDate } onChange={ (date) => onChangeRequisitionDate(date) } />
               </div>
               <div className='col-4'>
                 <Select name = "requisitionStatus" label="Status de Requisici&oacute;n" required options={ catStatus } 
-                  disabled = { !permissions.canEditOrd || !order.active } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
+                  disabled = { !permissions.canEditOrd } value={ requisitionStatus } onChange={ onChangeRequisitionStatus } />
               </div>
             </div>
             <div className="row text-start">
               <div className='col-4'>
                 <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' 
-                  disabled = { !permissions.canEditOrd || !order.active } value={ `${amount}` } required onChange={ onChangeAmount } />
+                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required onChange={ onChangeAmount } />
               </div>
               <div className='col-4'>
-                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd || !order.active } value={ `${tax}` } />
+                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
               </div>
               <div className='col-4'>
-                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd || !order.active } value={ `${total}` } />
+                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
               </div>
             </div>
             <div className="row text-start">
               <div className='col-12'>
                 <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
-                  disabled = { !permissions.canEditOrd || !order.active } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+                  disabled = { !permissions.canEditOrd } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
               </div>
             </div>
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
-              {  order.active && renderSaveButton() }
+              { (!id || (id && order.active)) && renderSaveButton() }
               &nbsp;
               <button type="button" className="btn btn-danger" onClick={ () => navigate( projectId !== '0' ? `/project/${ projectId }/edit` : '/orders') }>Cancelar</button>
           </div>

@@ -24,19 +24,6 @@ export const update = async(id, data) => {
     return jsonResponse;
 };
 
-export const pay = async(id) => {
-    const request = {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({
-            status: 2000800002
-        })
-    }
-    const response = await api( `${context}/${id}`, request );
-    const jsonResponse = await response.json();
-    return jsonResponse;
-};
-
 export const deleteLogic = async(id) => {
     const request = {
         method: "DELETE",

@@ -11,6 +11,7 @@ import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { TextArea } from '../../custom/TextArea';
 import { setModalChild } from '../../../../store/modal/modalSlice';
+import { setPaid } from '../../../../store/project/projectSlice';
 
 export const DetailInvoice = () => {
 
@@ -96,7 +97,13 @@ export const DetailInvoice = () => {
     const amount = Number(target.value);
     calculateAmounts(amount);
   }
-  const onChangeStatus = ({target }) => setStatus(target.value);
+  const onChangeStatus = ({target }) => {
+    if( status !== '2000800003' && target.value === '2000800003' ) {
+      const newAmount = paid.amount - amount;
+      dispatch( setPaid( { ...paid, amount: newAmount } ) );
+    }
+    setStatus(target.value)
+  };
   const onChangeNumOrder = ({ target }) => setInvoiceNum(target.value);
   const onChangeIssuedDate = date => {
     setIssuedDate(date)
@@ -114,7 +121,6 @@ export const DetailInvoice = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    
     if( amount > order.amount ) {
       dispatch(setModalChild(renderModal()));
     } else {
@@ -161,7 +167,7 @@ export const DetailInvoice = () => {
 
   const renderSaveButton = () => {
     const saveButton = (<button type="submit" className="btn btn-primary">Guardar</button>);
-    return (( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) && status !== '2000800002' ) ? saveButton : null;
+    return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
   };
 
   const onClickBack = () => {
@@ -199,61 +205,61 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-        <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
-        {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
-        <form onSubmit={ onSubmit }>
-            <div className='text-center'>
-                <div className="row text-start">
-                    <div className='col-4'>
-                        <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' disabled={ status === '2000800002' } value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
-                    </div>
-                    <div className='col-4'>
-                        <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' disabled={ status === '2000800002' } value={ `${percentage}` } required onChange={ onChangePercentage } />
-                    </div>
-                    <div className='col-4'>
-                        <Select name = "status" label="Status" options={ catStatus } disabled={ status === '2000800002' } value={ status } onChange={ onChangeStatus } />
-                    </div>
-                </div>
-                <div className="row text-start">
-                    <div className='col-6'>
-                        <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" disabled={ status === '2000800002' } value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } maxDate={ new Date() } />
-                    </div>
-                    <div className='col-6'>
-                        <DatePicker name="paymentDate" label="Fecha De Pago" disabled={ status === '2000800002' } value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
-                    </div>
-                </div>
-                <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
-                    </div>
-                    <div className='col-3'>
-                        <InputText name="tax" label='Iva' type='text' readOnly disabled={ status === '2000800002' } value={ `${tax}` } />
-                    </div>
-                    <div className='col-3'>
-                        <InputText name="total" label='Total' type='text' readOnly disabled={ status === '2000800002' } value={ `${total}` } />
-                    </div>
-                </div>
-                <div className="row text-start">
-                  <div className='col-12'>
-                    <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
-                          disabled={ status === '2000800002' } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+      <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
+      {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
+      <form onSubmit={ onSubmit }>
+          <div className='text-center'>
+              <div className="row text-start">
+                  <div className='col-4'>
+                      <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
                   </div>
+                  <div className='col-4'>
+                      <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+                  </div>
+                  <div className='col-4'>
+                      <Select name = "status" label="Status" options={ catStatus } disabled={ Number(status) === 2000800003 && paid.amount >= order.amount } value={ status } onChange={ onChangeStatus } />
+                  </div>
+              </div>
+              <div className="row text-start">
+                  <div className='col-6'>
+                      <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } maxDate={ new Date() } />
+                  </div>
+                  <div className='col-6'>
+                      <DatePicker name="paymentDate" label="Fecha De Pago" value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
+                  </div>
+              </div>
+              <div className="row text-start">
+                  <div className='col-6'>
+                      <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
+                  </div>
+                  <div className='col-3'>
+                      <InputText name="tax" label='Iva' type='text' readOnly value={ `${tax}` } />
+                  </div>
+                  <div className='col-3'>
+                      <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
+                  </div>
+              </div>
+              <div className="row text-start">
+                <div className='col-12'>
+                  <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
+                          value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
                 </div>
-            </div>
-            <div className="pt-3 d-flex flex-row-reverse">
-                { renderSaveButton() }
-                &nbsp;
-                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
-            </div>
-        </form>
+              </div>
+          </div>
+          <div className="pt-3 d-flex flex-row-reverse">
+              { renderSaveButton() }
+              &nbsp;
+              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
+          </div>
+      </form>
     </div>
   )
  
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-      <h3 className="fs-4 card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h3>
-        { id && renderTabs() }
+      <h3 className="fs-5 card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h3>
+      { id && renderTabs() }
       </div>
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>

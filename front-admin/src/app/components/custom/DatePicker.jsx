@@ -24,7 +24,7 @@ export const DatePicker = ({
   maxDate
 }) => {
 
-  const filterWeekends = date => date.getDay() !== 0 && date.getDay() !== 6;
+  // const filterWeekends = date => date.getDay() !== 0 && date.getDay() !== 6;
 
   const [holyDates, setHolyDates] = useState([]);
 
@@ -51,7 +51,8 @@ export const DatePicker = ({
         <br/>
         <DatePickerReact className="form-control" name={ name } disabled={ disabled } required={ required }
           selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' autoComplete='off'
-          minDate={ minDate } maxDate={ maxDate } filterDate={ filterWeekends } excludeDates={ holyDates } />
+          minDate={ minDate } maxDate={ maxDate } excludeDates={ holyDates } />
+          {/* filterDate={ filterWeekends } */}
     </>
   )
 }
