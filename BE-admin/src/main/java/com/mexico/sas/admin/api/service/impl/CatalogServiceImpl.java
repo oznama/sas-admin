@@ -152,7 +152,6 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         CatalogPaggedDto catalogDto = from_M_To_N(catalog, CatalogPaggedDto.class);
         catalogDto.setCompany(companyService.findById(catalog.getCompanyId()).getName());
         catalogDto.setStatusDesc(findEntityById(catalog.getStatus()).getValue());
-        log.debug("Catalog {} finded!", catalogDto.getId());
         return catalogDto;
     }
 

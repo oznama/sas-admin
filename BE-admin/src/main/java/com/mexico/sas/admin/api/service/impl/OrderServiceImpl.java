@@ -16,6 +16,7 @@ import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.OrderRepository;
 import com.mexico.sas.admin.api.service.InvoiceService;
 import com.mexico.sas.admin.api.service.OrderService;
+import com.mexico.sas.admin.api.service.ProjectService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     @Autowired
     private InvoiceService invoiceService;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public OrderFindDto save(OrderDto orderDto) throws CustomException {
@@ -110,7 +114,8 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Override
     public List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException {
         log.debug("Finding Orders by proyect {}", projectId);
-        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(new Project(projectId));
+        Project project = projectService.findEntityById(projectId);
+        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
@@ -120,7 +125,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             }
         });
         try {
-            ordersFindDto.add(getTotal(orders));
+            ordersFindDto.add(getTotal(orders, project));
         } catch (CustomException e) {
             log.error("Impossible add order total, error: {}", e.getMessage());
         }
@@ -156,37 +161,64 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orderPaggeableDto.setProjectId(order.getProject().getId());
         orderPaggeableDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderPaggeableDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        orderPaggeableDto.setAmount(formatCurrency(order.getAmount().doubleValue()));
-        orderPaggeableDto.setTax(formatCurrency(order.getTax().doubleValue()));
-        orderPaggeableDto.setTotal(formatCurrency(order.getTotal().doubleValue()));
+        orderPaggeableDto.setAmount(order.getAmount());
+        orderPaggeableDto.setTax(order.getTax());
+        orderPaggeableDto.setTotal(order.getTotal());
+        orderPaggeableDto.setAmountStr(formatCurrency(order.getAmount().doubleValue()));
+        orderPaggeableDto.setTaxStr(formatCurrency(order.getTax().doubleValue()));
+        orderPaggeableDto.setTotalStr(formatCurrency(order.getTotal().doubleValue()));
         List<BigDecimal> amounts = setAmountPaid(order);
-        orderPaggeableDto.setAmountPaid(formatCurrency(amounts.get(0).doubleValue()));
-        orderPaggeableDto.setTaxPaid(formatCurrency(amounts.get(1).doubleValue()));
-        orderPaggeableDto.setTotalPaid(formatCurrency(amounts.get(2).doubleValue()));
+        orderPaggeableDto.setAmountPaid(amounts.get(0));
+        orderPaggeableDto.setTaxPaid(amounts.get(1));
+        orderPaggeableDto.setTotalPaid(amounts.get(2));
+        orderPaggeableDto.setAmountPaidStr(formatCurrency(amounts.get(0).doubleValue()));
+        orderPaggeableDto.setTaxPaidStr(formatCurrency(amounts.get(1).doubleValue()));
+        orderPaggeableDto.setTotalPaidStr(formatCurrency(amounts.get(2).doubleValue()));
         return orderPaggeableDto;
     }
 
-    private OrderPaggeableDto getTotal(List<Order> orders) throws CustomException {
-        BigDecimal totalAmount = orders.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalTax = orders.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalT = orders.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private OrderPaggeableDto getTotal(List<Order> orders, Project project) throws CustomException {
         OrderPaggeableDto orderPaggeableDto = new OrderPaggeableDto();
         orderPaggeableDto.setOrderNum(GeneralKeys.FOOTER_TOTAL);
-        orderPaggeableDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        orderPaggeableDto.setTax(formatCurrency(totalTax.doubleValue()));
-        orderPaggeableDto.setTotal(formatCurrency(totalT.doubleValue()));
-        totalAmount = BigDecimal.ZERO;
-        totalTax = BigDecimal.ZERO;
-        totalT = BigDecimal.ZERO;
-        for(Order order : orders) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalT = BigDecimal.ZERO;
+        BigDecimal totalAmountPaid = BigDecimal.ZERO;
+        BigDecimal totalTaxPaid = BigDecimal.ZERO;
+        BigDecimal totalTPaid = BigDecimal.ZERO;
+        for( Order order : orders ) {
             List<BigDecimal> amounts = setAmountPaid(order);
-            totalAmount = totalAmount.add(amounts.get(0));
-            totalTax = totalTax.add(amounts.get(1));
-            totalT = totalT.add(amounts.get(2));
+            totalAmountPaid = totalAmountPaid.add(amounts.get(0));
+            totalTaxPaid = totalTaxPaid.add(amounts.get(1));
+            totalTPaid = totalTPaid.add(amounts.get(2));
+            if( order.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) || order.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED)) {
+                totalAmount = totalAmount.add(amounts.get(0));
+                totalTax = totalTax.add(amounts.get(1));
+                totalT = totalT.add(amounts.get(2));
+            } else {
+                totalAmount = totalAmount.add(order.getAmount());
+                totalTax = totalTax.add(order.getTax());
+                totalT = totalT.add(order.getTotal());
+            }
         }
-        orderPaggeableDto.setAmountPaid(formatCurrency(totalAmount.doubleValue()));
-        orderPaggeableDto.setTaxPaid(formatCurrency(totalTax.doubleValue()));
-        orderPaggeableDto.setTotalPaid(formatCurrency(totalT.doubleValue()));
+        long canceled = orders.stream().filter( o -> o.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) ).count();
+        // long expired = orders.stream().filter( o -> o.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED)).count();
+        log.debug("Orders canceleds ??? {}", canceled);
+        orderPaggeableDto.setAmount(totalAmount);
+        orderPaggeableDto.setTax(totalTax);
+        orderPaggeableDto.setTotal(totalT);
+        orderPaggeableDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
+        orderPaggeableDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
+        orderPaggeableDto.setTotalStr(formatCurrency(totalT.doubleValue()));
+        orderPaggeableDto.setAmountPaid(totalAmountPaid);
+        orderPaggeableDto.setTaxPaid(totalTaxPaid);
+        orderPaggeableDto.setTotalPaid(totalTPaid);
+        orderPaggeableDto.setAmountPaidStr(formatCurrency(totalAmountPaid.doubleValue()));
+        orderPaggeableDto.setTaxPaidStr(formatCurrency(totalTaxPaid.doubleValue()));
+        orderPaggeableDto.setTotalPaidStr(formatCurrency(totalTPaid.doubleValue()));
+        orderPaggeableDto.setStatus( totalAmountPaid.equals(project.getAmount()) ? CatalogKeys.ORDER_STATUS_PAID
+                : ( !orders.isEmpty() && canceled == orders.size() ? CatalogKeys.ORDER_STATUS_CANCELED
+                : ( !orders.isEmpty() ? CatalogKeys.ORDER_STATUS_IN_PROCESS : 0l ) ) );
         return orderPaggeableDto;
     }
 
@@ -196,16 +228,21 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                 .stream()
                 .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
                         && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
-                        && i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) )
+                        && i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
                 .collect(Collectors.toList());
         BigDecimal amountPaid = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         amounts.add(amountPaid);
         amounts.add(invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add));
         amounts.add(invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add));
+        
+        OrderDto orderUpdateDto = from_M_To_N(order, OrderDto.class);
         if( !order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && order.getAmount().equals(amountPaid) ) {
-            OrderDto orderUpdateDto = from_M_To_N(order, OrderDto.class);
             orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_PAID);
             orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_PAID);
+            update(order.getId(), orderUpdateDto);
+        } else if ( order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && !order.getAmount().equals(amountPaid) ) {
+            orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
+            orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
             update(order.getId(), orderUpdateDto);
         }
         return amounts;

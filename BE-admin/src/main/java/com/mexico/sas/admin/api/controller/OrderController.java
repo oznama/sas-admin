@@ -45,17 +45,17 @@ public class OrderController {
   }
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
-  @ResponseStatus(code = HttpStatus.CREATED)
+  @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar ordenes de pago",
           nickname = "/updateOrder")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = OrderDto.class)
+          @ApiResponse(code = 200, message = "Success", response = OrderDto.class)
   })
   public ResponseEntity<OrderDto> updateOrder(@PathVariable("id") Long id, @Valid @RequestBody OrderDto orderDto) throws CustomException {
     log.info("Updating order");
     service.update(id, orderDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(orderDto);
+    return ResponseEntity.ok().body(orderDto);
   }
 
   @DeleteMapping(path = "/{id}")

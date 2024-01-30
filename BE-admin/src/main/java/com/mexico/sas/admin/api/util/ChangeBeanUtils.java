@@ -246,6 +246,9 @@ public class ChangeBeanUtils extends Utils {
             if( orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) || orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED) ) {
                 order.setActive(false);
                 order.setEliminate(true);
+            } else {
+                order.setActive(true);
+                order.setEliminate(false);
             }
         }
         if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
@@ -260,12 +263,6 @@ public class ChangeBeanUtils extends Utils {
     public static String checkInvoice(Invoice invoice, InvoiceDto invoiceDto) {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( (invoice.getStatus() == null && invoiceDto.getStatus() != null)
-                || ( invoice.getStatus() != null && invoiceDto.getStatus() != null && !invoice.getStatus().equals(invoiceDto.getStatus()) ) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.status,
-                    invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
-            invoice.setStatus(invoiceDto.getStatus());
-        }
         if( invoiceDto.getAmount() != null ) {
             double currentAmount = doubleScale(invoice.getAmount().doubleValue());
             double newAmount = doubleScale(invoiceDto.getAmount().doubleValue());
@@ -312,6 +309,19 @@ public class ChangeBeanUtils extends Utils {
         if( validateStringNoRequiredUpdate(invoice.getObservations(), invoiceDto.getObservations()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
             invoice.setObservations(invoiceDto.getObservations());
+        }
+        if( (invoice.getStatus() == null && invoiceDto.getStatus() != null)
+                || ( invoice.getStatus() != null && invoiceDto.getStatus() != null && !invoice.getStatus().equals(invoiceDto.getStatus()) ) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.status,
+                    invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            invoice.setStatus(invoiceDto.getStatus());
+            if( invoiceDto.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ) {
+                invoice.setActive(false);
+                invoice.setEliminate(true);
+            } else {
+                invoice.setActive(true);
+                invoice.setEliminate(false);
+            }
         }
         return sb.toString().trim();
     }

@@ -44,17 +44,17 @@ public class InvoiceController {
   }
 
   @PutMapping(path = "/{id}", headers = "Accept=application/json")
-  @ResponseStatus(code = HttpStatus.CREATED)
+  @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar factura",
           nickname = "/updateInvoice")
   @ApiResponses(value = {
-          @ApiResponse(code = 201, message = "Success", response = InvoiceDto.class)
+          @ApiResponse(code = 200, message = "Success", response = InvoiceDto.class)
   })
   public ResponseEntity<InvoiceDto> updateInvoice(@PathVariable("id") Long id, @Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
     log.info("Updating invoice");
     service.update(id, invoiceDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(invoiceDto);
+    return ResponseEntity.ok().body(invoiceDto);
   }
 
   @DeleteMapping(path = "/{id}")
