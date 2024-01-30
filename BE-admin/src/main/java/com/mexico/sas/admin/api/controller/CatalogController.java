@@ -48,7 +48,7 @@ public class CatalogController {
 
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "PATCH", value = "Servicio para eliminar catalogo", nickname = "delete")
+  @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar catalogo", nickname = "delete")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })

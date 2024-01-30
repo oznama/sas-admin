@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -16,12 +17,18 @@ public class OrderPaggeableDto implements Serializable {
     private String orderNum;
     private String orderDate;
     private Long status;
-    private String amount;
-    private String tax;
-    private String total;
-    private String amountPaid;
-    private String taxPaid;
-    private String totalPaid;
+    private BigDecimal amount;
+    private BigDecimal tax;
+    private BigDecimal total;
+    private BigDecimal amountPaid;
+    private BigDecimal taxPaid;
+    private BigDecimal totalPaid;
+    private String amountStr;
+    private String taxStr;
+    private String totalStr;
+    private String amountPaidStr;
+    private String taxPaidStr;
+    private String totalPaidStr;
     private Boolean active;
     private Boolean eliminate;
     private String requisition;

@@ -14,6 +14,7 @@ import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.InvoiceRepository;
 import com.mexico.sas.admin.api.service.InvoiceService;
+import com.mexico.sas.admin.api.service.OrderService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 
     @Autowired
     private InvoiceRepository repository;
+
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public void save(InvoiceDto invoiceDto) throws CustomException {
@@ -97,7 +101,8 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     @Override
     public List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException {
         log.debug("Finding invoices by order {}", orderId);
-        List<Invoice> invoices = repository.findByOrderOrderByIssuedDateDesc(new Order(orderId));
+        Order order = orderService.findEntityById(orderId);
+        List<Invoice> invoices = repository.findByOrderOrderByInvoiceNumAscIssuedDateAsc(order);
         List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
         invoices.forEach( invoice -> {
             try {
@@ -107,10 +112,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             }
         });
         try {
-            invoiceFindDtos.add((getPaid(invoices.stream()
-                    .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
-                    .collect(Collectors.toList()))));
-            invoiceFindDtos.add(getTotal(invoices));
+            invoiceFindDtos.add(getTotal(invoices, order));
         } catch (CustomException e) {
             log.error("Impossible add invoice total, error: {}", e.getMessage());
         }
@@ -130,14 +132,16 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
                 log.error("Impossible add invoice {}, error: {}", invoice.getId(), e.getMessage());
             }
         });
-        try {
-            invoiceFindDtos.add((getPaid(invoices.stream()
-                    .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
-                    .collect(Collectors.toList()))));
-            invoiceFindDtos.add(getTotal(invoices));
-        } catch (CustomException e) {
-            log.error("Impossible add invoice total, error: {}", e.getMessage());
-        }
+//        try {
+//            invoiceFindDtos.add((getPaid(invoices.stream()
+//                    .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
+//                    .collect(Collectors.toList()))));
+//            invoiceFindDtos.add(getTotal(invoices.stream()
+//                    .filter( i -> !i.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED))
+//                    .collect(Collectors.toList())));
+//        } catch (CustomException e) {
+//            log.error("Impossible add invoice total, error: {}", e.getMessage());
+//        }
         log.debug("Invoices find {}", invoiceFindDtos.size());
         return new PageImpl<>(invoiceFindDtos, pageable, repository.count());
     }
@@ -162,29 +166,14 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         return invoiceFindDto;
     }
 
-    private InvoiceFindDto getPaid(List<Invoice> invoices) throws CustomException {
-        BigDecimal totalAmount = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
-        invoiceFindDto.setInvoiceNum(GeneralKeys.ROW_TOTAL);
-        invoiceFindDto.setAmount(totalAmount);
-        invoiceFindDto.setTax(totalTax);
-        invoiceFindDto.setTotal(totalT);
-        invoiceFindDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
-        invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
-        invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));
-        return invoiceFindDto;
-    }
-
-    private InvoiceFindDto getTotal(List<Invoice> invoices) throws CustomException {
-        BigDecimal totalAmount = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalTax = invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalT = invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        Integer totalP = invoices.stream().map( pa -> pa.getPercentage() ).reduce(0, (sum, p) -> sum + p);
-//        Long pending = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_PENDING) ).count();
-//        Long paid = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) ).count();
-//        Long canceled = invoices.stream().filter( pa -> pa.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ).count();
+    private InvoiceFindDto getTotal(List<Invoice> invoices, Order order) throws CustomException {
+        List<Invoice> invWithoutCanceleds = invoices.stream()
+                .filter( i -> !i.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED))
+                .collect(Collectors.toList());
+        BigDecimal totalAmount = invWithoutCanceleds.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = invWithoutCanceleds.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = invWithoutCanceleds.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalP = invWithoutCanceleds.stream().map( pa -> pa.getPercentage() ).reduce(0, (sum, p) -> sum + p);
         InvoiceFindDto invoiceFindDto = new InvoiceFindDto();
         invoiceFindDto.setInvoiceNum(GeneralKeys.FOOTER_TOTAL);
         invoiceFindDto.setAmount(totalAmount);
@@ -194,10 +183,12 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
         invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));
         invoiceFindDto.setPercentage(totalP);
-//        invoiceFindDto.setStatus(canceled > 0 ? CatalogKeys.INVOICE_STATUS_CANCELED : (
-//                pending > 0 ? CatalogKeys.INVOICE_STATUS_PENDING :
-//                        (paid == invoices.size() ? CatalogKeys.INVOICE_STATUS_PAID : null)
-//                ));
+        BigDecimal totalPaid = invWithoutCanceleds.stream()
+                .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) )
+                .map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        long canceled = invoices.stream().filter( o -> o.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ).count();
+        invoiceFindDto.setStatus( totalPaid.equals(order.getAmount()) ? CatalogKeys.INVOICE_STATUS_PAID
+                : ( !invoices.isEmpty() && canceled == invoices.size() ? CatalogKeys.INVOICE_STATUS_CANCELED : CatalogKeys.INVOICE_STATUS_IN_PROCESS ) );
         return invoiceFindDto;
     }
 

@@ -15,7 +15,7 @@ public interface CatalogService {
 
     CatalogDto save(CatalogDto catalogDto) throws CustomException;
     CatalogDto update(Long id, CatalogUpdateDto catalogDto) throws CustomException;
-    void deleteLogic(Long id);
+    void deleteLogic(Long id) throws CustomException;
     void delete(Long id) throws CustomException;
     Catalog findEntityById(Long id) throws CustomException;
     Catalog findEntityByIdAndCatalogParentId(Long id, Long catalogParentId) throws CustomException;
