@@ -80,11 +80,19 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     }
 
     @Override
-    public void deleteLogic(Long id) {
+    public void deleteLogic(Long id) throws CustomException {
         log.debug("Delete logic: {}", id);
-        repository.updateStatus(id, CatalogKeys.ESTATUS_MACHINE_ELIMINATED);
-        save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
-                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        Catalog catalog = findEntityById(id);
+
+        if( !catalog.getStatus().equals(CatalogKeys.ESTATUS_MACHINE_ELIMINATED) ) {
+            repository.updateStatus(id, CatalogKeys.ESTATUS_MACHINE_ELIMINATED);
+            save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        } else {
+            repository.updateStatus(id, CatalogKeys.ESTATUS_MACHINE_ENABLED);
+            save(Catalog.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_STATUS,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_REACTIVE));
+        }
     }
 
     @Override
