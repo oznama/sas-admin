@@ -16,7 +16,7 @@ export const TableOrders = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const { project, paid } = useSelector( state => state.projectReducer );
+    const { project, order, paid } = useSelector( state => state.projectReducer );
 
     const [orders, setOrders] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -28,7 +28,7 @@ export const TableOrders = ({
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
-    const [filter, setFilter] = useState('');
+    const [filter, setFilter] = useState(order ? order.orderNum : '');
 
     const onChangeFilter = ({ target }) => {
         setFilter(target.value);
@@ -94,7 +94,7 @@ export const TableOrders = ({
         navigate(`/project/${ projectId ? projectId : 0 }/order/add`);
     }
 
-    const renderAddOrderButton = () => permissions.canCreateOrd && (paid.amount < project.amount) && (
+    const renderAddOrderButton = () => permissions.canCreateOrd && (paid.amount < (project.amount - paid.amountPaid )) && (
         <div className="d-flex justify-content-between p-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
                 <span className="bi bi-plus"></span>
@@ -113,18 +113,22 @@ export const TableOrders = ({
         </div>   
     );
 
-    const deleteOrder = (id, active) => {
-        deleteLogic(id).then( response => {
-            if(response.code && response.code !== 200) {
-                displayNotification(dispatch, response.message, alertType.error);
-            } else {
-                displayNotification(dispatch, `Orden ${ active ? 'cancelada' : 'reactivada' } correctamente!`, active ? alertType.warning : alertType.success);
-                loadOrders();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
+    const deleteOrder = (id, amount, active) => {
+        if( !active && (amount > (project.amount - paid.amountPaid) ) ) {
+            displayNotification(dispatch, 'La orden no se puede reactivar ya que supera el monto pendiente', alertType.error);
+        } else {
+            deleteLogic(id).then( response => {
+                if(response.code && response.code !== 200) {
+                    displayNotification(dispatch, response.message, alertType.error);
+                } else {
+                    displayNotification(dispatch, `Orden ${ active ? 'cancelada' : 'reactivada' } correctamente!`, active ? alertType.warning : alertType.success);
+                    loadOrders();
+                }
+            }).catch(error => {
+                console.log(error);
+                displayNotification(dispatch, genericErrorMsg, alertType.error);
+            });
+        }
     }
 
     const renderStatus = (status) => {
@@ -137,9 +141,11 @@ export const TableOrders = ({
         id,
         orderNum,
         orderDate,
+        amount,
         amountStr,
         taxStr,
         totalStr,
+        amountPaid,
         amountPaidStr,
         status,
         requisition,
@@ -174,7 +180,7 @@ export const TableOrders = ({
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
                             disabled={ status === 2000600002 || ( (status === 2000600003 || status === 2000600004) && paid.amountPaid >= project.amount ) }
-                            onClick={ () => deleteOrder(id, active) }>
+                            onClick={ () => deleteOrder(id, amount, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>

@@ -17,11 +17,12 @@ export const TableProject = ({
     const navigate = useNavigate();
 
     const { permissions } = useSelector( state => state.auth );
+    const { project } = useSelector( state => state.projectReducer );
 
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
-    const [filter, setFilter] = useState('')
+    const [filter, setFilter] = useState( project ? project.key : '');
 
     const onChangeFilter = ({ target }) => {
         setFilter(target.value);
@@ -58,7 +59,8 @@ export const TableProject = ({
       }
 
     useEffect(() => {
-      fetchProjects(currentPage, filter);
+        setCurrentPage(0);
+        fetchProjects(0, filter);
     }, [currentPage]);
 
     const onPaginationClick = page => {
@@ -80,14 +82,20 @@ export const TableProject = ({
         </div>
     );
 
+    const cleanSearcher = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchProjects(0, '');
+    }
+
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateProj ? '25' : '50' } py-1`}>
             <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ onChangeFilter } />
-            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
-                <i className="bi bi-search"></i>
-            </button> */}
+                value={ filter } required onChange={ onChangeFilter }></input>
+            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
+                <i className="bi bi-x-lg"></i>
+            </span>
         </div>   
     )
 

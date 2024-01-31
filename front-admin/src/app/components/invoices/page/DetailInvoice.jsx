@@ -28,6 +28,7 @@ export const DetailInvoice = () => {
   const [percentage, setPercentage] = useState(0);
   const [currentTab, setCurrentTab] = useState(1);
   const [amount, setAmount] = useState('');
+  const [amountInDb, setAmountInDb] = useState();
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
   const [observations, setObservations] = useState('');
@@ -57,6 +58,7 @@ export const DetailInvoice = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAmount(numberToString(response.amount, ''));
+        setAmountInDb(response.amount);
         setTax(numberToString(response.tax, ''))
         setTotal(numberToString(response.total, ''))
         setInvoiceNum(response.invoiceNum ? response.invoiceNum : '');
@@ -121,7 +123,9 @@ export const DetailInvoice = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if( amount > order.amount ) {
+    const isAmountPending = ( order.amount - paid.amount ) > 0 && amount > ( order.amount - paid.amount );
+    const isAmoutPaid = ( order.amount - paid.amount ) === 0 && amount > amountInDb;
+    if( isAmountPending || isAmoutPaid ) {
       dispatch(setModalChild(renderModal()));
     } else {
       if ( id && permissions.canEditOrd ) {
@@ -195,7 +199,7 @@ export const DetailInvoice = () => {
   const renderModal = () => (
     <div className='p-5 bg-white rounded-3'>
       <div className='text-start'>
-          <h3>¡El monto de la factura no puede ser mayor al monto de la orden!</h3>
+          <h3>¡El monto de la factura no puede ser mayor al monto pendiente!</h3>
       </div>
       <div className="pt-3 d-flex justify-content-center">
           <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cerrar</button>
@@ -206,7 +210,7 @@ export const DetailInvoice = () => {
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
       <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
-      {/* <p className="h5">Monto pagado: <span className='text-success'>{ paid.amount }</span> Iva: <span className='text-success'>{ paid.tax }</span> Total: <span className='text-success'>{ paid.total }</span></p> */}
+      <p className="h5">Monto pendiente: <span className='text-danger'>{ order.amount - paid.amount }</span></p>
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
               <div className="row text-start">

@@ -7,6 +7,7 @@ import { login } from '../../../store/auth/authSlice';
 import { doLogin } from '../../services/AuthService';
 import { displayNotification, genericErrorMsg } from '../../helpers/utils';
 import logo from '../../../assets/img/SAS_logo.png';
+import { setProject } from '../../../store/project/projectSlice';
 
 export const LoginPage = () => {
 
@@ -23,6 +24,7 @@ export const LoginPage = () => {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 dispatch(login(response));
+                dispatch(setProject({}));
                 localStorage.setItem('token', response.accessToken);
                 navigate('/', { replace: true });
             }
