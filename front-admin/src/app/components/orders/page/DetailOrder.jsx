@@ -134,7 +134,7 @@ export const DetailOrder = () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const request = Object.fromEntries(data.entries());
-    if ( Number(amount) !== (project.amount - paid.amountPaid) ) {
+    if ( Number(amount) !== (project.amount - paid.amount) ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
       persistOrder(request);
@@ -240,7 +240,7 @@ export const DetailOrder = () => {
       <div className='text-start'>
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ project.amount - paid.amountPaid }</span></p></li>
+            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ project.amount - paid.amount }</span></p></li>
             <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
@@ -327,10 +327,15 @@ export const DetailOrder = () => {
     <div className='px-5'>
       <span className='fs-6 card-title fw-bold mb-4'>{ title }</span>
       { pId !== '' && currentTab === 1 && (
-        <p className="h6">
-          {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
-          Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
-        </p>
+        <>
+          <p className="h6">
+            {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
+            Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
+          </p>
+          <p className="h6">
+            Monto pendiente: <span className='text-danger'>{ project.amount - paid.amount }</span>
+          </p>
+        </>
       )}
       { pId !== '' && currentTab === 2 && (
         <p className="h6">

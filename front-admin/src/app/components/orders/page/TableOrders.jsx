@@ -94,7 +94,7 @@ export const TableOrders = ({
         navigate(`/project/${ projectId ? projectId : 0 }/order/add`);
     }
 
-    const renderAddOrderButton = () => permissions.canCreateOrd && (paid.amount < (project.amount - paid.amountPaid )) && (
+    const renderAddOrderButton = () => permissions.canCreateOrd && (
         <div className="d-flex justify-content-between p-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddOrder }>
                 <span className="bi bi-plus"></span>
