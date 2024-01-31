@@ -186,11 +186,13 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         BigDecimal totalAmountPaid = BigDecimal.ZERO;
         BigDecimal totalTaxPaid = BigDecimal.ZERO;
         BigDecimal totalTPaid = BigDecimal.ZERO;
+        BigDecimal totalRealPaid = BigDecimal.ZERO;
         for( Order order : orders ) {
             List<BigDecimal> amounts = setAmountPaid(order);
             totalAmountPaid = totalAmountPaid.add(amounts.get(0));
             totalTaxPaid = totalTaxPaid.add(amounts.get(1));
             totalTPaid = totalTPaid.add(amounts.get(2));
+            totalRealPaid = totalRealPaid.add(amounts.get(3));
             if( order.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) || order.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED)) {
                 totalAmount = totalAmount.add(amounts.get(0));
                 totalTax = totalTax.add(amounts.get(1));
@@ -216,7 +218,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orderPaggeableDto.setAmountPaidStr(formatCurrency(totalAmountPaid.doubleValue()));
         orderPaggeableDto.setTaxPaidStr(formatCurrency(totalTaxPaid.doubleValue()));
         orderPaggeableDto.setTotalPaidStr(formatCurrency(totalTPaid.doubleValue()));
-        orderPaggeableDto.setStatus( totalAmountPaid.equals(project.getAmount()) ? CatalogKeys.ORDER_STATUS_PAID
+        orderPaggeableDto.setStatus( totalRealPaid.equals(project.getAmount()) ? CatalogKeys.ORDER_STATUS_PAID
                 : ( !orders.isEmpty() && canceled == orders.size() ? CatalogKeys.ORDER_STATUS_CANCELED
                 : ( !orders.isEmpty() ? CatalogKeys.ORDER_STATUS_IN_PROCESS : 0l ) ) );
         return orderPaggeableDto;
@@ -224,23 +226,23 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     private List<BigDecimal> setAmountPaid(Order order) throws CustomException {
         List<BigDecimal> amounts = new ArrayList<>();
-        List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId())
-                .stream()
-                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
-                        && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
-                        && i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
+        List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId()).stream()
+                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL) && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL))
                 .collect(Collectors.toList());
         BigDecimal amountPaid = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalRealPaid = invoices.stream().filter(i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
+                .map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         amounts.add(amountPaid);
         amounts.add(invoices.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add));
         amounts.add(invoices.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add));
-        
+        amounts.add(totalRealPaid);
+
         OrderDto orderUpdateDto = from_M_To_N(order, OrderDto.class);
-        if( !order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && order.getAmount().equals(amountPaid) ) {
+        if( !order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && order.getAmount().equals(totalRealPaid) ) {
             orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_PAID);
             orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_PAID);
             update(order.getId(), orderUpdateDto);
-        } else if ( order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && !order.getAmount().equals(amountPaid) ) {
+        } else if ( order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && !order.getAmount().equals(totalRealPaid) ) {
             orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
             orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
             update(order.getId(), orderUpdateDto);

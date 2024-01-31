@@ -13,7 +13,7 @@ export const ProjectPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
-  const {currentTab, project} = useSelector( state => state.projectReducer );
+  const {currentTab, project, paid} = useSelector( state => state.projectReducer );
   
   const handleAddApplication = () => {
     dispatch(setCurrentAppTab(1));
@@ -72,9 +72,15 @@ export const ProjectPage = () => {
     <div className='px-5'>
       <h3 className="fs-4 card-title fw-bold">{ title }</h3>
       { project && project.key && currentTab === 3 && (
-        <p className="h6">
-          Costo del proyecto: <span className='text-primary'>{ project.amount }</span> Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span>
-        </p>
+        <>
+          <p className="h4">
+            {/* Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span> */}
+            Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
+          </p>
+          <p className="h5">
+            Monto pendiente: <span className='text-danger'>{ project.amount - paid.amount }</span>
+          </p>
+        </>
       )}
       { renderTabs() }
       { (currentTab === 2 && id ) && renderAddButton() }
