@@ -62,17 +62,33 @@ export const displayNotification = (dispatch, message, type) => {
 }
 
 export const getPaymentDate = (currentDate, holyDates) => {
-    const paymentDateToAdd = 22;
+    const paymentDateToAdd = 25;
     let n = 0;
     while (n < paymentDateToAdd) {
         currentDate.setDate(currentDate.getDate() + 1);
-        if( (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) && !holyDates.includes(currentDate) ) {
+        // if( (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) && !holyDates.includes(currentDate) ) {
         n++;
-        }
+        // }
     }
+    /*
+     * Days of date
+     * Domingo: 0
+     * Lunes: 1
+     * Martes: 2 
+     * Miercoles: 3
+     * Jueves: 4, diferencia siguiente miercoles 6
+     * Viernes: 5, diferencia siguiente miercoles 5
+     * Sabado: 6, diferencias siguiente miercoles 4
+     */
     if( currentDate.getDay() !== 3 ) {
-        const restDaysForWend = 3 - currentDate.getDay();
+        let restDaysForWend = 3 - currentDate.getDay();
+        if( restDaysForWend < 0 ) {
+            // Is current day is after wednesday in same week
+            // go to next week wednesday
+            restDaysForWend = 10 - currentDate.getDay();
+        }
         currentDate.setDate(currentDate.getDate() + restDaysForWend );
+        
     }
     return currentDate;
 }
