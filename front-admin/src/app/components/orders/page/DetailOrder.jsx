@@ -4,7 +4,7 @@ import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { save, update } from '../../../services/OrderService';
-import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
@@ -94,13 +94,33 @@ export const DetailOrder = () => {
   }, []);
 
   const onChangeAmount = ({ target }) => {
-    const amount = Number(target.value);
-    if( amount >= 0 && amount <= mountMax ) {
-      const tax = amount * taxRate;
-      const total = amount + tax;
-      setAmount(amount);
-      setTax(tax.toFixed(2));
-      setTotal(total.toFixed(2));
+    if( target.value === '' ) {
+      setAmount('');
+      setTax('');
+      setTotal('');
+    } else if( isNumDec(target.value) ) {
+      const amount = Number(target.value);
+      if( amount >= 0 && amount <= mountMax ) {
+        const tax = amount * taxRate;
+        const total = amount + tax;
+        setAmount(target.value);
+        setTax(tax.toFixed(2));
+        setTotal(total.toFixed(2));
+      }
+    }
+  }
+  const onFocusAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(removeCurrencyFormat(amount));
+      setTax(removeCurrencyFormat(tax));
+      setTotal(removeCurrencyFormat(total));
+    }
+  }
+  const onBlurAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(formatter.format(amount));
+      setTax(formatter.format(tax));
+      setTotal(formatter.format(total));
     }
   }
   const onChangeStatus = ({target }) => {
@@ -133,7 +153,12 @@ export const DetailOrder = () => {
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
-    const request = Object.fromEntries(data.entries());
+    const requestObj = Object.fromEntries(data.entries());
+    const request = { ...requestObj, 
+      amount: removeCurrencyFormat(amount),
+      tax: removeCurrencyFormat(tax),
+      total: removeCurrencyFormat(total)
+    };
     if ( Number(amount) !== (project.amount - paid.amount) ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
@@ -240,8 +265,8 @@ export const DetailOrder = () => {
       <div className='text-start'>
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ project.amount - paid.amount }</span></p></li>
-            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
+            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ formatter.format(amount) }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
       </div>
@@ -294,14 +319,15 @@ export const DetailOrder = () => {
             </div>
             <div className="row text-start">
               <div className='col-4'>
-                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' 
-                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required onChange={ onChangeAmount } />
+                <InputText name="amount" label='Monto' placeholder='Ingresa monto' 
+                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required 
+                  onChange={ onChangeAmount } onFocus={ onFocusAmount } onBlur={ onBlurAmount } />
               </div>
               <div className='col-4'>
-                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
+                <InputText name="tax" label='Iva' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
               </div>
               <div className='col-4'>
-                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
+                <InputText name="total" label='Total' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
               </div>
             </div>
             <div className="row text-start">
@@ -320,27 +346,32 @@ export const DetailOrder = () => {
     </div>
   )
 
-  const titleWithOrder = currentTab !== 1 ? `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}` : '';
-  const title = pId !== '' ? `${project.key} ${project.description} > Orden ${ titleWithOrder }` : 'Orden nueva';
+  const titleWithOrder = `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
+  const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Orden nueva';
  
   return (
     <div className='px-5'>
-      <span className='fs-6 card-title fw-bold mb-4'>{ title }</span>
+      <h4 className="card-title fw-bold">{ title }</h4>
       { pId !== '' && currentTab === 1 && (
         <>
-          <p className="h6">
+          <p className="h4">
             {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
-            Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
+            Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          <p className="h6">
-            Monto pendiente: <span className='text-danger'>{ project.amount - paid.amount }</span>
+          <p className="h4">
+            Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span>
           </p>
         </>
       )}
       { pId !== '' && currentTab === 2 && (
-        <p className="h6">
-          Costo de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span>
-        </p>
+        <>
+          <p className="h4">
+            Costo de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span>
+          </p>
+          <p className="h4">
+            Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span>
+          </p>
+        </>
       )}
       { renderTabs() }
       { (currentTab === 2 && id ) ? renderAddInvoiceButton() : null }

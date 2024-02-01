@@ -92,3 +92,18 @@ export const getPaymentDate = (currentDate, holyDates) => {
     }
     return currentDate;
 }
+
+export const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+});
+
+export const isNumDec = value => {
+    const expression = /^((?!0)\d{1,10}|0|\.\d{1,2})($|\.$|\.\d{1,2}$)/;
+    const regex = new RegExp(expression);
+    const result = regex.test(value);
+    return result;
+}
+
+export const removeCurrencyFormat = value => Number(value.replaceAll(/[^0-9\.-]+/g,""));

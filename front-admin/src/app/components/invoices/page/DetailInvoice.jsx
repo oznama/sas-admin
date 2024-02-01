@@ -3,7 +3,7 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, getPaymentDate } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, getPaymentDate, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
@@ -96,8 +96,28 @@ export const DetailInvoice = () => {
   }
 
   const onChangeAmount = ({ target }) => {
-    const amount = Number(target.value);
-    calculateAmounts(amount);
+    if( target.value === '' ) {
+      setAmount('');
+      setTax('');
+      setTotal('');
+    } else if( isNumDec(target.value) ) {
+      const amount = Number(target.value);
+      calculateAmounts(amount);
+    }
+  }
+  const onFocusAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(removeCurrencyFormat(amount));
+      setTax(removeCurrencyFormat(tax));
+      setTotal(removeCurrencyFormat(total));
+    }
+  }
+  const onBlurAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(formatter.format(amount));
+      setTax(formatter.format(tax));
+      setTotal(formatter.format(total));
+    }
   }
   const onChangeStatus = ({target }) => {
     if( status !== '2000800003' && target.value === '2000800003' ) {
@@ -121,13 +141,18 @@ export const DetailInvoice = () => {
 
   const onSubmit = event => {
     event.preventDefault();
-    const data = new FormData(event.target);
-    const request = Object.fromEntries(data.entries());
-    const isAmountPending = ( order.amount - paid.amount ) > 0 && amount > ( order.amount - paid.amount );
-    const isAmoutPaid = ( order.amount - paid.amount ) === 0 && amount > amountInDb;
+    const isAmountPending = ( order.amount - paid.amount ) > 0 && removeCurrencyFormat(amount) > ( order.amount - paid.amount );
+    const isAmoutPaid = ( order.amount - paid.amount ) === 0 && removeCurrencyFormat(amount) > amountInDb;
     if( isAmountPending || isAmoutPaid ) {
       dispatch(setModalChild(renderModal()));
     } else {
+      const data = new FormData(event.target);
+      const requestObj = Object.fromEntries(data.entries());
+      const request = { ...requestObj, 
+        amount: removeCurrencyFormat(amount),
+        tax: removeCurrencyFormat(tax),
+        total: removeCurrencyFormat(total)
+      };
       if ( id && permissions.canEditOrd ) {
         updateInvoice(request);
       } else if ( permissions.canCreateOrd ) {
@@ -200,6 +225,10 @@ export const DetailInvoice = () => {
     <div className='p-5 bg-white rounded-3'>
       <div className='text-start'>
           <h3>¡El monto de la factura no puede ser mayor al monto pendiente!</h3>
+          <ul style={ { marginBottom: '0' } }>
+            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ formatter.format(order.amount - paid.amount) }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
+          </ul>
       </div>
       <div className="pt-3 d-flex justify-content-center">
           <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cerrar</button>
@@ -209,8 +238,8 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-      <p className="h5">Valor de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span></p>
-      <p className="h5">Monto pendiente: <span className='text-danger'>{ order.amount - paid.amount }</span></p>
+      <p className="h5">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>
+      <p className="h5">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
               <div className="row text-start">
@@ -234,13 +263,14 @@ export const DetailInvoice = () => {
               </div>
               <div className="row text-start">
                   <div className='col-6'>
-                      <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' value={ `${amount}` } required onChange={ onChangeAmount } />
+                      <InputText name="amount" label='Monto' placeholder='Ingresa monto' value={ `${amount}` } required 
+                        onChange={ onChangeAmount } onFocus={ onFocusAmount } onBlur={ onBlurAmount } />
                   </div>
                   <div className='col-3'>
-                      <InputText name="tax" label='Iva' type='text' readOnly value={ `${tax}` } />
+                      <InputText name="tax" label='Iva' readOnly value={ `${tax}` } />
                   </div>
                   <div className='col-3'>
-                      <InputText name="total" label='Total' type='text' readOnly value={ `${total}` } />
+                      <InputText name="total" label='Total' readOnly value={ `${total}` } />
                   </div>
               </div>
               <div className="row text-start">
@@ -262,7 +292,7 @@ export const DetailInvoice = () => {
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-      <h3 className="fs-5 card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h3>
+      <h4 className="card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h4>
       { id && renderTabs() }
       </div>
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
