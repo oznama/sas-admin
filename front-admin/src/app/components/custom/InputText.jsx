@@ -10,6 +10,8 @@ export const InputText = ({
     required,
     maxLength,
     onChange,
+    onFocus,
+    onBlur,
     disabled,
     error,
     readOnly
@@ -28,6 +30,8 @@ export const InputText = ({
           maxLength={ maxLength }
           disabled={ disabled }
           onChange={ onChange }
+          onFocus={ onFocus }
+          onBlur={ onBlur }
           readOnly={ readOnly }
           autoComplete='off'>
         </input>
@@ -52,6 +56,8 @@ InputText.propTypes = {
     max: PropTypes.number,
     disabled: PropTypes.bool,
     onChange: PropTypes.func,
+    onFocus: PropTypes.func,
+    onBlur: PropTypes.func,
     error: PropTypes.string,
     readOnly: PropTypes.bool
 }
@@ -62,5 +68,7 @@ InputText.defaultProps = {
     require: false,
     error: null,
     readOnly: false,
-    onChange: () => {}
+    onChange: () => {},
+    onFocus: () => {},
+    onBlur: () => {}
 }

@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
 import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
-import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
@@ -101,13 +101,33 @@ export const DetailApplications = () => {
 
   const onChangeAplication = ({ target }) => setAplication(target.value);
   const onChangeAmount = ({ target }) => {
-    const amount = Number(target.value);
-    if( amount >= 0 && amount <= mountMax ) {
-      const tax = amount * taxRate;
-      const total = amount + tax;
-      setAmount(amount);
-      setTax(tax.toFixed(2));
-      setTotal(total.toFixed(2));
+    if( target.value === '' ) {
+      setAmount('');
+      setTax('');
+      setTotal('');
+    } else if( isNumDec(target.value) ) {
+      const amount = Number(target.value);
+      if( amount >= 0 && amount <= mountMax ) {
+        const tax = amount * taxRate;
+        const total = amount + tax;
+        setAmount(target.value);
+        setTax(tax.toFixed(2));
+        setTotal(total.toFixed(2));
+      }
+    }
+  }
+  const onFocusAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(removeCurrencyFormat(amount));
+      setTax(removeCurrencyFormat(tax));
+      setTotal(removeCurrencyFormat(total));
+    }
+  }
+  const onBlurAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(formatter.format(amount));
+      setTax(formatter.format(tax));
+      setTotal(formatter.format(total));
     }
   }
   const onChangeStatus = ({target }) => setStatus(target.value);
@@ -127,7 +147,12 @@ export const DetailApplications = () => {
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
-    const request = Object.fromEntries(data.entries());
+    const requestObj = Object.fromEntries(data.entries());
+    const request = { ...requestObj, 
+      amount: removeCurrencyFormat(amount),
+      tax: removeCurrencyFormat(tax),
+      total: removeCurrencyFormat(total)
+    };
     if( request.amount == 0 ) {
       displayNotification(dispatch, 'El monto del proyecto no puede ser 0', alertType.error);
     } else {
@@ -204,13 +229,15 @@ export const DetailApplications = () => {
           </div>
           <div className="row text-start">
             <div className='col-6'>
-              <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' disabled={ !active ||isModeEdit } value={ `${amount}` } required onChange={ onChangeAmount } />
+              <InputText name="amount" label='Monto' placeholder='Ingresa monto' 
+                disabled={ !active ||isModeEdit } value={ `${amount}` } required 
+                onChange={ onChangeAmount } onFocus={ onFocusAmount } onBlur={ onBlurAmount } />
             </div>
             <div className='col-3'>
-              <InputText name="tax" label='Iva' type='text' disabled={ !active ||isModeEdit } readOnly value={ `${tax}` } />
+              <InputText name="tax" label='Iva' disabled={ !active ||isModeEdit } readOnly value={ `${tax}` } />
             </div>
             <div className='col-3'>
-              <InputText name="total" label='Total' type='text' disabled={ !active ||isModeEdit } readOnly value={ `${total}` } />
+              <InputText name="total" label='Total' disabled={ !active ||isModeEdit } readOnly value={ `${total}` } />
             </div>
           </div>
           <div className="row text-start">
