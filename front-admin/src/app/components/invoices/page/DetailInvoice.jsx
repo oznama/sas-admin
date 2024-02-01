@@ -11,7 +11,9 @@ import { getInvoiceById, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { TextArea } from '../../custom/TextArea';
 import { setModalChild } from '../../../../store/modal/modalSlice';
-import { setPaid } from '../../../../store/project/projectSlice';
+import { setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
+import { getProjectById } from '../../../services/ProjectService';
+import { getOrderById } from '../../../services/OrderService';
 
 export const DetailInvoice = () => {
 
@@ -52,6 +54,28 @@ export const DetailInvoice = () => {
     });
   };
 
+  const fetchProject = id => {
+    getProjectById(id).then( response => {
+      dispatch(setProject(response));
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
+
+  const fetchOrder = id => {
+    getOrderById(id).then( response => {
+      if( response.code ) {
+        displayNotification(dispatch, response.message, alertType.error);
+      } else {
+        dispatch( setOrder(response) );
+      }
+    }).catch( error => {
+      console.log(error);
+      displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
+
   const fetchInvoice = () => {
     getInvoiceById(id).then( response => {
       if( response.code ) {
@@ -78,6 +102,10 @@ export const DetailInvoice = () => {
     fetchSelects();
     if( id ) {
       fetchInvoice();
+    }
+    if( (!(project && project.id) && projectId !== '0') || !(order && order.id) && orderId !== '0' ) {
+      fetchProject(projectId);
+      fetchOrder(orderId);
     }
   }, []);
 
@@ -244,39 +272,39 @@ export const DetailInvoice = () => {
           <div className='text-center'>
               <div className="row text-start">
                   <div className='col-4'>
-                      <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
+                      <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' disabled = { !permissions.canEditOrd } value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
                   </div>
                   <div className='col-4'>
-                      <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' value={ `${percentage}` } required onChange={ onChangePercentage } />
+                      <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' disabled = { !permissions.canEditOrd } value={ `${percentage}` } required onChange={ onChangePercentage } />
                   </div>
                   <div className='col-4'>
-                      <Select name = "status" label="Status" options={ catStatus } disabled={ Number(status) === 2000800003 && paid.amount >= order.amount } value={ status } onChange={ onChangeStatus } />
+                      <Select name = "status" label="Status" options={ catStatus } disabled={ !permissions.canEditOr || (Number(status) === 2000800003 && paid.amount >= order.amount) } value={ status } onChange={ onChangeStatus } />
                   </div>
               </div>
               <div className="row text-start">
                   <div className='col-6'>
-                      <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } maxDate={ new Date() } />
+                      <DatePicker name="issuedDate" label="Fecha De Emisi&oacute;n" disabled = { !permissions.canEditOrd } value={ issuedDate } onChange={ (date) => onChangeIssuedDate(date) } maxDate={ new Date() } />
                   </div>
                   <div className='col-6'>
-                      <DatePicker name="paymentDate" label="Fecha De Pago" value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
+                      <DatePicker name="paymentDate" label="Fecha De Pago" disabled = { !permissions.canEditOrd } value={ paymentDate } onChange={ (date) => onChangePaymentDate(date) } />
                   </div>
               </div>
               <div className="row text-start">
                   <div className='col-6'>
-                      <InputText name="amount" label='Monto' placeholder='Ingresa monto' value={ `${amount}` } required 
+                      <InputText name="amount" label='Monto' placeholder='Ingresa monto' disabled = { !permissions.canEditOrd } value={ `${amount}` } required 
                         onChange={ onChangeAmount } onFocus={ onFocusAmount } onBlur={ onBlurAmount } />
                   </div>
                   <div className='col-3'>
-                      <InputText name="tax" label='Iva' readOnly value={ `${tax}` } />
+                      <InputText name="tax" label='Iva' disabled = { !permissions.canEditOrd } readOnly value={ `${tax}` } />
                   </div>
                   <div className='col-3'>
-                      <InputText name="total" label='Total' readOnly value={ `${total}` } />
+                      <InputText name="total" label='Total' disabled = { !permissions.canEditOrd } readOnly value={ `${total}` } />
                   </div>
               </div>
               <div className="row text-start">
                 <div className='col-12'>
                   <TextArea name='observations' label='Observaciones' placeholder='Escribe observaciones' 
-                          value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
+                          disabled = { !permissions.canEditOrd } value={ observations } maxLength={ 1500 } onChange={ onChangeObservations } />
                 </div>
               </div>
           </div>

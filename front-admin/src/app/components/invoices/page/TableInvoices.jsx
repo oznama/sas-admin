@@ -3,8 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { alertType } from "../../custom/alerts/types/types";
 import { deleteLogic, getInvoices, getInvoicesByOrderId } from "../../../services/InvoiceService";
-import { setPaid } from "../../../../store/project/projectSlice";
-import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
+import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from "../../../../store/project/projectSlice";
+import { displayNotification, genericErrorMsg, styleInput, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
+import { Pagination } from "../../custom/pagination/page/Pagination";
+
+const pageSize = 10;
+const sort = 'invoiceNum,desc';
 
 export const TableInvoices = ({
     projectId,
@@ -25,12 +29,23 @@ export const TableInvoices = ({
     const [totalTStr, setTotalTStr] = useState(0);
     const [totalStatus, setTotalStatus] = useState();
 
-    const fetchInvoices = () => {
-        getInvoices(null,null,null,null).then( response => {
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalInvoices, setTotalInvoices] = useState(0);
+    const [filter, setFilter] = useState('');
+
+    const onChangeFilter = ({ target }) => {
+        setCurrentPage(0)
+        setFilter(target.value);
+        fetchInvoices(0, target.value);
+    };
+
+    const fetchInvoices = (page, filter) => {
+        getInvoices(page, pageSize, sort, filter).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 setInvoices(response.content);
+                setTotalInvoices(response.totalElements);
                 const { amount, tax, total, amountStr, taxStr, totalStr, percentage, status } = response.content;
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;
@@ -75,19 +90,62 @@ export const TableInvoices = ({
         if( projectId ) {
             fetchInvoicesByOrder();
         } else {
-            fetchInvoices();
+            fetchInvoices(currentPage, filter);
         }
     }
 
     useEffect(() => {
         loadInvoices();
+        if( !projectId || !orderId ) {
+            dispatch(setProject({}));
+            dispatch(setOrder({}));
+        }
     }, []);
 
-    const handledSelect = (projectId, orderId, id) => {
+    const handledSelect = (projectIdParam, orderIdParam, id) => {
+        if( !projectId || !orderIdParam ) {
+            dispatch(setCurrentTab(3));
+            dispatch(setCurrentOrdTab(2));
+        }
         if ( permissions.canAdminOrd ) {
-            const urlRedirect = `/project/${ projectId }/order/${ orderId }/invoice/${ id }/edit`;
+            const urlRedirect = `/project/${ projectIdParam }/order/${ orderIdParam }/invoice/${ id }/edit`;
             navigate(urlRedirect);
         }
+    }
+
+    const handleAddInvoice = () => {
+        navigate(`/project/${ projectId ? projectId : 0 }/order/${ orderId ? orderId : 0 }/invoice/add`);
+      }
+
+      console.log(projectId, orderId);
+    const renderAddInvoiceButton = () => permissions.canCreateOrd && (( !projectId || !orderId) || ((paid.amount < order.amount) && (order.status < 2000600003))) && (
+        <div className="d-flex flex-row-reverse p-2">
+          <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
+              <span className="bi bi-plus"></span>
+          </button>
+        </div>
+      );
+
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchInvoices(page, filter);
+    }
+
+    const renderSearcher = () => !orderId && (
+        <div className="input-group w-50 py-1">
+            <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
+                maxLength={ 100 } autoComplete='off'
+                value={ filter } required onChange={ onChangeFilter } />
+            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
+                <i className="bi bi-x-lg"></i>
+            </span>
+        </div>   
+    );
+
+    const cleanSearcher = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchInvoices(0, '');
     }
 
     const renderStatus = (status) => {
@@ -120,7 +178,7 @@ export const TableInvoices = ({
         taxStr,
         totalStr,
         status,
-        orderId,
+        orderId: odrId,
         projectId,
         active
     }) => (
@@ -128,7 +186,7 @@ export const TableInvoices = ({
             <th className="text-center" style={ styleTableRow } scope="row">{ invoiceNum }</th>
             <td className="text-center" style={ styleTableRow }>{ issuedDate }</td>
             <td className="text-center" style={ styleTableRow }>{ paymentDate }</td>
-            <td className="text-center" style={ styleTableRow }>{ percentage }</td>
+            { orderId && (<td className="text-center" style={ styleTableRow }>{ percentage }</td>) }
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status) }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ amountStr }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ taxStr }</td>
@@ -137,7 +195,7 @@ export const TableInvoices = ({
                 <button type="button" 
                     className={`btn btn-${ active && permissions.canEditOrd ? 'success' : 'primary' } btn-sm`} 
                     style={ styleTableRowBtn } 
-                    onClick={ () => handledSelect(projectId, orderId, id) }>
+                    onClick={ () => handledSelect(projectId, odrId, id) }>
                     <span><i className={`bi bi-${ active && permissions.canEditOrd ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
@@ -157,41 +215,62 @@ export const TableInvoices = ({
         </tr>
     ));
 
-    return (
-        <div className='table-responsive text-nowrap'>
-            <table className="table table-sm table-bordered table-striped table-hover">
-                <thead className="thead-dark">
-                    <tr>
-                        <th className="text-center fs-6" scope="col">No. factura</th>
-                        <th className="text-center fs-6" scope="col">Fecha Emisi&oacute;n</th>
-                        <th className="text-center fs-6" scope="col">Fecha Pago</th>
-                        <th className="text-center fs-6" scope="col">Porcentaje</th>
-                        <th className="text-center fs-6" scope="col">Status</th>
-                        <th className="text-center fs-6" scope="col">Monto</th>
-                        <th className="text-center fs-6" scope="col">Iva</th>
-                        <th className="text-center fs-6" scope="col">Total</th>
-                        <th className="text-center fs-6" scope="col">{permissions.canEditOrd ? 'Editar' : 'Ver'}</th>
-                        { permissions.canDelOrd && (<th className="text-center fs-6" scope="col">Borrar</th>) }
-                    </tr>
-                </thead>
-                <tbody>
-                    { renderRows() }
-                </tbody>
-                <tfoot className="thead-dark">
-                    <tr>
-                        <th className="text-center fs-6" scope="col">TOTAL</th>
-                        <th></th>
-                        <th></th>
-                        <th className="text-center fs-6" scope="col">{ totapP }</th>
-                        <td className="text-center fs-6" scope="col">{ renderStatus(totalStatus) }</td>
-                        <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
-                        <th className="text-end fs-6" scope="col">{ totalTaxStr }</th>
-                        <th className="text-end fs-6" scope="col">{ totalTStr }</th>
-                        <th></th>
-                        { permissions.canDelOrd && (<th></th>) }
-                    </tr>
-                </tfoot>
-            </table>
+    const tableByOrder = () => (
+        <div>
+            <div className={`d-flex ${ projectId ? 'flex-row-reverse' : 'justify-content-between align-items-center' }`}>
+                { renderSearcher() }
+                { renderAddInvoiceButton() }
+            </div>
+            <div className='table-responsive text-nowrap'>
+                <table className="table table-sm table-bordered table-striped table-hover">
+                    <thead className="thead-dark">
+                        <tr>
+                            <th className="text-center fs-6" scope="col">No. factura</th>
+                            <th className="text-center fs-6" scope="col">Fecha Emisi&oacute;n</th>
+                            <th className="text-center fs-6" scope="col">Fecha Pago</th>
+                            { orderId && (<th className="text-center fs-6" scope="col">Porcentaje</th>) }
+                            <th className="text-center fs-6" scope="col">Status</th>
+                            <th className="text-center fs-6" scope="col">Monto</th>
+                            <th className="text-center fs-6" scope="col">Iva</th>
+                            <th className="text-center fs-6" scope="col">Total</th>
+                            <th className="text-center fs-6" scope="col">{permissions.canEditOrd ? 'Editar' : 'Ver'}</th>
+                            { permissions.canDelOrd && (<th className="text-center fs-6" scope="col">Borrar</th>) }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { renderRows() }
+                    </tbody>
+                    <tfoot className="thead-dark">
+                        <tr>
+                            <th className="text-center fs-6" scope="col">TOTAL</th>
+                            <th></th>
+                            <th></th>
+                            { orderId && (<th className="text-center fs-6" scope="col">{ totapP }</th>) }
+                            <td className="text-center fs-6" scope="col">{ renderStatus(totalStatus) }</td>
+                            <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
+                            <th className="text-end fs-6" scope="col">{ totalTaxStr }</th>
+                            <th className="text-end fs-6" scope="col">{ totalTStr }</th>
+                            <th></th>
+                            { permissions.canDelOrd && (<th></th>) }
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     )
+
+    const tablePaged = () => (
+        <div className='px-5'>
+            <h4 className="card-title fw-bold">Facturas</h4>
+            { tableByOrder() }
+            <Pagination
+                currentPage={ currentPage + 1 }
+                totalCount={ totalInvoices }
+                pageSize={ pageSize }
+                onPageChange={ page => onPaginationClick(page) } 
+            />
+        </div>
+    )
+
+    return orderId ? tableByOrder() : tablePaged();
 }

@@ -28,11 +28,12 @@ export const TableOrders = ({
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
-    const [filter, setFilter] = useState(order && order.orderNum ? order.orderNum : '');
+    const [filter, setFilter] = useState(''); //order && order.orderNum ? order.orderNum : '');
 
     const onChangeFilter = ({ target }) => {
+        setCurrentPage(0)
         setFilter(target.value);
-        fetchOrders(currentPage, target.value);
+        fetchOrders(0, target.value);
     };
 
     const fetchOrders = (page, filter) => {
@@ -108,6 +109,11 @@ export const TableOrders = ({
         </div>
     );
 
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchOrders(page, filter);
+    }
+
     const cleanSearcher = () => {
         setFilter('');
         setCurrentPage(0);
@@ -115,16 +121,13 @@ export const TableOrders = ({
     }
 
     const renderSearcher = () => !projectId && (
-        <div className="input-group w-25 py-1">
+        <div className="input-group w-50 py-1">
             <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
             <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
                 <i className="bi bi-x-lg"></i>
             </span>
-            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
-                <i className="bi bi-search"></i>
-            </button> */}
         </div>   
     );
 
@@ -254,16 +257,9 @@ export const TableOrders = ({
         </div>
     );
 
-    const onPaginationClick = page => {
-        setCurrentPage(page);
-        fetchOrders(page, filter);
-    }
-
     const tablePaged = () => (
         <div className='px-5'>
-            <div className="d-flex justify-content-center">
-                <h1 className="fs-4 card-title fw-bold mb-1">Ordenes</h1>
-            </div>
+            <h4 className="card-title fw-bold">Ordenes</h4>
             { tableByProject() }
             <Pagination
                 currentPage={ currentPage + 1 }

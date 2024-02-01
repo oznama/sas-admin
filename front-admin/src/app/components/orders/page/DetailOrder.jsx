@@ -219,20 +219,8 @@ export const DetailOrder = () => {
     return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
   };
 
-  const handleAddInvoice = () => {
-    navigate(`/project/${ pId }/order/${id}/invoice/add`);
-  }
-
-  const renderAddInvoiceButton = () => permissions.canCreateOrd && (paid.amount < order.amount) && (order.status < 2000600003) && (
-    <div className="d-flex flex-row-reverse p-2">
-      <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
-          <span className="bi bi-plus"></span>
-      </button>
-    </div>
-  );
-
   const onClickBack = () => {
-    if ( (!permissions.canCreateOrd && currentTab == 2) || currentTab === 1 ) {
+    if ( /*(!permissions.canCreateOrd && currentTab == 2) ||*/ currentTab === 1 ) {
       navigate(`/project/${ pId }/edit`)
     } else {
       dispatch(setCurrentOrdTab(currentTab - 1));
@@ -380,7 +368,6 @@ export const DetailOrder = () => {
         </>
       )}
       { renderTabs() }
-      { (currentTab === 2 && id ) ? renderAddInvoiceButton() : null }
       {
         currentTab === 1 ? renderDetail() : ( currentTab === 2 
           ? <TableInvoices projectId={pId} orderId={id} /> 
