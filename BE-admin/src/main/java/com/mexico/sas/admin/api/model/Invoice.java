@@ -3,6 +3,7 @@ package com.mexico.sas.admin.api.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @DynamicInsert
+@FieldNameConstants
 @ToString
 public class Invoice {
 

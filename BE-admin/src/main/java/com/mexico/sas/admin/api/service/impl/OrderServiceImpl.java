@@ -135,7 +135,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Override
     public Page<OrderPaggeableDto> findAll(String filter, Pageable pageable) {
         log.debug("Finding all Orders");
-            Page<Order> orders = findByFilter(filter, null, null, null, null, null, pageable);
+        Page<Order> orders = findByFilter(filter, null, null, null, null, null, pageable);
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {

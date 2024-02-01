@@ -22,10 +22,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -123,7 +129,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     @Override
     public Page<InvoiceFindDto> findAll(String filter, Pageable pageable) {
         log.debug("Finding all Invoices");
-        List<Invoice> invoices = repository.findAll();
+        Page<Invoice> invoices = findByFilter(filter, null, null, null, null, null, null, pageable);
         List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
         invoices.forEach( invoice -> {
             try {
@@ -142,8 +148,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 //        } catch (CustomException e) {
 //            log.error("Impossible add invoice total, error: {}", e.getMessage());
 //        }
-        log.debug("Invoices find {}", invoiceFindDtos.size());
-        return new PageImpl<>(invoiceFindDtos, pageable, repository.count());
+        return new PageImpl<>(invoiceFindDtos, pageable, invoices.getTotalElements());
     }
 
     private InvoiceDto parseFromEntity(Invoice invoice) throws CustomException {
@@ -204,5 +209,52 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         }
         invoice.setOrder(new Order(invoiceDto.getOrderId()));
         invoice.setCreatedBy(getCurrentUser().getUserId());
+    }
+
+    private Page<Invoice> findByFilter(String filter, Order order, Long createdBy,
+                                     Long status, Boolean active, Date issuedDate, Date paymentDate,
+                                     Pageable pageable) {
+        log.debug("Find by filter: {}", filter);
+        return repository.findAll((Specification<Invoice>) (root, query, criteriaBuilder) ->
+                getPredicateDinamycFilter(filter, order, createdBy, status, active,
+                        issuedDate, paymentDate, criteriaBuilder, root), pageable);
+    }
+
+    private Predicate getPredicateDinamycFilter(String filter, Order order, Long createdBy,
+                                                Long status, Boolean active, Date issuedDate, Date paymentDate,
+                                                CriteriaBuilder builder, Root<Invoice> root) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pInvoiceNum = builder.like(builder.lower(root.get(Invoice.Fields.invoiceNum)), patternFilter);
+            predicates.add(builder.or(pInvoiceNum));
+        }
+
+        if(order != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.order), order));
+        }
+
+        if(createdBy != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.createdBy), createdBy));
+        }
+
+        if(status != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.status), status));
+        }
+
+        if(active != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.active), active));
+        }
+
+        if(issuedDate != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.issuedDate), issuedDate));
+        }
+
+        if(paymentDate != null) {
+            predicates.add(builder.equal(root.get(Invoice.Fields.paymentDate), paymentDate));
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }

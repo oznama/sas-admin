@@ -3,6 +3,7 @@ package com.mexico.sas.admin.api.repository;
 import com.mexico.sas.admin.api.model.Invoice;
 import com.mexico.sas.admin.api.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
+public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
 
     Optional<Invoice> findByInvoiceNum(String invoiceNum);
     List<Invoice> findByOrderOrderByInvoiceNumAscIssuedDateAsc(Order order);
