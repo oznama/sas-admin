@@ -59,6 +59,14 @@ export const DetailOrder = () => {
     });
   }
   
+  const fetchProject = id => {
+    getProjectById(id).then( response => {
+      dispatch(setProject(response));
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
 
   const fetchOrder = () => {
     getOrderById(id).then( response => {
@@ -87,6 +95,9 @@ export const DetailOrder = () => {
     fetchSelects();
     if( projectId === '0' ) {
       fetProjects();
+    }
+    if( !(project && project.id) && projectId !== '0' ) {
+      fetchProject(projectId);
     }
     if( id ) {
       fetchOrder();
@@ -142,12 +153,7 @@ export const DetailOrder = () => {
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangePId = ({ target }) => {
     setPId(target.value);
-    getProjectById(target.value).then( response => {
-      dispatch(setProject(response));
-    }).catch( error => {
-        console.log(error);
-        displayNotification(dispatch, genericErrorMsg, alertType.error);
-    });
+    fetchProject(target.value);
   }
 
   const onSubmit = event => {
