@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteLogic, getOrders, getOrdersByProjectId } from "../../../services/OrderService";
 import { displayNotification, genericErrorMsg, styleInput, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
-import { setCurrentOrdTab, setPaid } from "../../../../store/project/projectSlice";
+import { setCurrentOrdTab, setCurrentTab, setPaid, setProject } from "../../../../store/project/projectSlice";
 import { Pagination } from "../../custom/pagination/page/Pagination";
 
 const pageSize = 10;
@@ -28,7 +28,7 @@ export const TableOrders = ({
 
     const [currentPage, setCurrentPage] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
-    const [filter, setFilter] = useState(order ? order.orderNum : '');
+    const [filter, setFilter] = useState(order && order.orderNum ? order.orderNum : '');
 
     const onChangeFilter = ({ target }) => {
         setFilter(target.value);
@@ -81,11 +81,17 @@ export const TableOrders = ({
 
     useEffect(() => {
         loadOrders();
+        if( !projectId ) {
+            dispatch(setProject({}));
+        }
     }, []);
 
-    const handledSelect = (projectId, id) => {
+    const handledSelect = (projectIdParam, id) => {
+        if( !projectId ) {
+            dispatch(setCurrentTab(3));
+        }
         dispatch(setCurrentOrdTab(1));
-        const urlRedirect = `/project/${ projectId }/order/${ id }/edit`;
+        const urlRedirect = `/project/${ projectIdParam }/order/${ id }/edit`;
         navigate(urlRedirect);
     }
 
@@ -102,11 +108,20 @@ export const TableOrders = ({
         </div>
     );
 
+    const cleanSearcher = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchOrders(0, '');
+    }
+
     const renderSearcher = () => !projectId && (
         <div className="input-group w-25 py-1">
             <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
+            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
+                <i className="bi bi-x-lg"></i>
+            </span>
             {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchProjects(currentPage) }>
                 <i className="bi bi-search"></i>
             </button> */}
@@ -238,6 +253,11 @@ export const TableOrders = ({
             </div>
         </div>
     );
+
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchOrders(page, filter);
+    }
 
     const tablePaged = () => (
         <div className='px-5'>

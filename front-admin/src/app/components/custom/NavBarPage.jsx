@@ -2,15 +2,33 @@ import './custom.main.css';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const NavBarPage = () => {
 
   const dispatch = useDispatch();
+  const refAdminTab = useRef();
 
   const navigate = useNavigate();
   const { user, permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(0);
+  const [showTabAdmin, setShowTabAdmin] = useState(false);
+
+  useEffect(() => {
+    
+    const handleAdminTabOnBlur = event => {
+      if( refAdminTab.current && !refAdminTab.current.contains(event.target) ) {
+        setShowTabAdmin(false);
+      }
+    }
+
+    document.addEventListener('click', handleAdminTabOnBlur);
+  
+    return () => {
+      document.removeEventListener('click', handleAdminTabOnBlur)
+    }
+  }, [refAdminTab])
+  
 
   const onLogout = () => {
     localStorage.removeItem('token');
@@ -36,41 +54,25 @@ export const NavBarPage = () => {
     </li>
   );
 
-  const renderTablCatalogs = () => permissions.canAdminCat && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(4) } to="catalog">
-        Cat&aacute;logos
-      </NavLink>
-    </li>
-  );
-
-  const renderTabApplications = () => permissions.canAdminApp && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 5) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(5) } to="application">
-        Aplicaciones
-      </NavLink>
-    </li>
-  );
-
-  const renderTabCompany = () => permissions.canGetComp && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 6) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(6) } to="company">
-        Empresa
-      </NavLink>
-    </li>
-  );
-
-  const renderTabEmployee = () => permissions.canGetEmp && (
-    <li className="nav-item">
-      <NavLink className={ `nav-item nav-link ${ (currentTab === 7) ? 'active' : '' }` }
-        onClick={ () => setCurrentTab(7) } to="employee">
-        Empleados
-      </NavLink>
-    </li>
-  );
+  const gotoAdminOption = urlRedirect => {
+    setShowTabAdmin(!showTabAdmin);
+    navigate(`/${urlRedirect}`, { replace: true })
+  }
+  
+  const renderTabAdmin = () => (
+    <li className={ `nav-item dropdown ${ showTabAdmin ? 'show' : '' }` } ref={ refAdminTab }>
+        <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabAdmin } onClick={ () => setShowTabAdmin(!showTabAdmin) }>
+          Administraci&oacute;n
+        </a>
+        <div className={ `dropdown-menu bg-primary ${ showTabAdmin ? 'show' : '' }` } aria-labelledby="navbarDropdown">
+          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('catalog') }>Cat&aacute;logos</a>) }
+          { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
+          <div className="dropdown-divider"></div>
+          { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }
+          { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
+        </div>
+      </li>
+  )
 
   return (
     <nav className="navbar navbar-expand-lg bg-primary" style={{ padding: '0'}} data-bs-theme="dark">
@@ -88,10 +90,7 @@ export const NavBarPage = () => {
             </li>
             { renderTabOrders() }
             { renderTabInvoices() }
-            { renderTablCatalogs() }
-            { renderTabApplications() }
-            { renderTabCompany() }
-            { renderTabEmployee() }
+            { renderTabAdmin() }
           </ul>
         </div>
 
