@@ -4,7 +4,7 @@ import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { save, update } from '../../../services/OrderService';
-import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, formatter } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
@@ -240,8 +240,8 @@ export const DetailOrder = () => {
       <div className='text-start'>
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ project.amount - paid.amount }</span></p></li>
-            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
+            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ formatter.format(amount) }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
       </div>
@@ -320,27 +320,32 @@ export const DetailOrder = () => {
     </div>
   )
 
-  const titleWithOrder = currentTab !== 1 ? `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}` : '';
-  const title = pId !== '' ? `${project.key} ${project.description} > Orden ${ titleWithOrder }` : 'Orden nueva';
+  const titleWithOrder = `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
+  const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Orden nueva';
  
   return (
     <div className='px-5'>
-      <span className='fs-6 card-title fw-bold mb-4'>{ title }</span>
+      <h4 className="card-title fw-bold">{ title }</h4>
       { pId !== '' && currentTab === 1 && (
         <>
-          <p className="h6">
+          <p className="h4">
             {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
-            Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
+            Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          <p className="h6">
-            Monto pendiente: <span className='text-danger'>{ project.amount - paid.amount }</span>
+          <p className="h4">
+            Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span>
           </p>
         </>
       )}
       { pId !== '' && currentTab === 2 && (
-        <p className="h6">
-          Costo de la orden: <span className='text-primary'>{ order.amount }</span> Iva: <span className='text-primary'>{ order.tax }</span> Total: <span className='text-primary'>{ order.total }</span>
-        </p>
+        <>
+          <p className="h4">
+            Costo de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span>
+          </p>
+          <p className="h4">
+            Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span>
+          </p>
+        </>
       )}
       { renderTabs() }
       { (currentTab === 2 && id ) ? renderAddInvoiceButton() : null }

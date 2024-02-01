@@ -4,7 +4,7 @@ import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentAppTab, setCurrentTab } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
-import { numberToString } from '../../helpers/utils';
+import { formatter, numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
 
 export const ProjectPage = () => {
@@ -70,15 +70,15 @@ export const ProjectPage = () => {
 
   return (
     <div className='px-5'>
-      <h3 className="fs-4 card-title fw-bold">{ title }</h3>
+      <h4 className="card-title fw-bold">{ title }</h4>
       { project && project.key && currentTab === 3 && (
         <>
           <p className="h4">
             {/* Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span> */}
-            Costo del proyecto: <span className='text-primary'>{ project.amount }</span>
+            Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          <p className="h5">
-            Monto pendiente: <span className='text-danger'>{ project.amount - paid.amount }</span>
+          <p className="h4">
+            Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span>
           </p>
         </>
       )}

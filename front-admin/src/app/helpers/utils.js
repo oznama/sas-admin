@@ -92,3 +92,9 @@ export const getPaymentDate = (currentDate, holyDates) => {
     }
     return currentDate;
 }
+
+export const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+});
