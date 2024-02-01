@@ -76,10 +76,10 @@ export const TableEmployee = ({
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
-            { permissions.isAdminRoot && (<select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
+            <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
                 <option value=''>Seleccionar...</option>
                 { companies && companies.map( option  => ( <option key={ option.id } value={ option.id }>{ option.value }</option> )) }
-            </select>)}
+            </select>
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchEmployees(currentPage); } } />

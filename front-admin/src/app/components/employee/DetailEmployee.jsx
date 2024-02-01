@@ -189,15 +189,11 @@ export const DetailEmployee = () => {
   const renderDetail = () => {
     return (<div className='d-grid gap-2 col-6 mx-auto'>
               <form className="needs-validation" onSubmit={ onSubmit }>
-                { permissions.isAdminRoot ? (<div className="row text-start">
+                <div className="row text-start">
                   <div className='col-6'>
                     <Select name="companyId" label="Empresa" options={ companies } disabled={ isModeEdit } value={ company } required onChange={ onChangeCompany } />
                   </div>
-                </div>) : (<div className="row text-start" hidden>
-                  <div className='col-6'>
-                    <Select name="companyId" label="Empresa" readOnly options={ companies } disabled={ isModeEdit } value={ company } required onChange={ onChangeCompany } />
-                  </div>
-                </div>)}
+                </div>
                 <div className="row text-start">
                   <div className='col-6'>
                     <InputText name='email' label='Correo' placeholder='Ingresa correo' disabled={ isModeEdit } value={ email } required onChange={ onChangeEmail } maxLength={ 50 } />

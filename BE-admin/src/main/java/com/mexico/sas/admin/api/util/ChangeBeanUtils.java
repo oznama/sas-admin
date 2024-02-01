@@ -392,6 +392,12 @@ public class ChangeBeanUtils extends Utils {
             company.setName(companyUpdateDto.getName());
         }
 
+        if( validateStringNoRequiredUpdate(company.getAlias(), companyUpdateDto.getAlias()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.alias,
+                    company.getAlias(), companyUpdateDto.getAlias())).append(GeneralKeys.JUMP_LINE);
+            company.setAlias(companyUpdateDto.getAlias());
+        }
+
         if( validateStringNoRequiredUpdate(company.getRfc(), companyUpdateDto.getRfc()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.rfc,
                     company.getRfc(), companyUpdateDto.getRfc())).append(GeneralKeys.JUMP_LINE);
@@ -404,10 +410,40 @@ public class ChangeBeanUtils extends Utils {
             company.setAddress(companyUpdateDto.getAddress());
         }
 
+        if( validateStringNoRequiredUpdate(company.getCp(), companyUpdateDto.getCp()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.cp,
+                    company.getCp(), companyUpdateDto.getCp())).append(GeneralKeys.JUMP_LINE);
+            company.setCp(companyUpdateDto.getCp());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getCity(), companyUpdateDto.getCity()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.city,
+                    company.getCity(), companyUpdateDto.getCity())).append(GeneralKeys.JUMP_LINE);
+            company.setCity(companyUpdateDto.getCity());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getState(), companyUpdateDto.getState()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.state,
+                    company.getState(), companyUpdateDto.getState())).append(GeneralKeys.JUMP_LINE);
+            company.setState(companyUpdateDto.getState());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getCountry(), companyUpdateDto.getCountry()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.country,
+                    company.getCountry(), companyUpdateDto.getCountry())).append(GeneralKeys.JUMP_LINE);
+            company.setCountry(companyUpdateDto.getCountry());
+        }
+
         if( validateStringNoRequiredUpdate(company.getPhone(), companyUpdateDto.getPhone()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.phone,
                     company.getPhone(), companyUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
             company.setPhone(companyUpdateDto.getPhone());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getExt(), companyUpdateDto.getExt()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.ext,
+                    company.getExt(), companyUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
+            company.setExt(companyUpdateDto.getExt());
         }
 
         if( ( company.getType() == null && companyUpdateDto.getType() != null )

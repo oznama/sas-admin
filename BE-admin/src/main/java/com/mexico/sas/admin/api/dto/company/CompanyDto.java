@@ -14,9 +14,15 @@ public class CompanyDto implements Serializable {
     private static final long serialVersionUID = -2345797168231866946L;
 
     private String name;
+    private String alias;
     private String rfc;
     private String address;
+    private String cp;
+    private String city;
+    private String state;
+    private String country;
     private String phone;
+    private String ext;
     private String emailDomain;
     private Long type;
 }
