@@ -239,6 +239,11 @@ export const TableOrders = ({
         </div>
     );
 
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchOrders(page, filter);
+    }
+
     const tablePaged = () => (
         <div className='px-5'>
             <div className="d-flex justify-content-center">

@@ -25,8 +25,9 @@ export const TableProject = ({
     const [filter, setFilter] = useState( project ? project.key : '');
 
     const onChangeFilter = ({ target }) => {
+        setCurrentPage(0)
         setFilter(target.value);
-        fetchProjects(currentPage, target.value);
+        fetchProjects(0, target.value);
     };
 
     const fetchProjects = (page, filter) => {
@@ -59,13 +60,12 @@ export const TableProject = ({
       }
 
     useEffect(() => {
-        setCurrentPage(0);
-        fetchProjects(0, filter);
+        fetchProjects(currentPage, filter);
     }, [currentPage]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchProjects(currentPage, filter);
+        fetchProjects(page, filter);
     }
 
     const handleAddProject = () => {
