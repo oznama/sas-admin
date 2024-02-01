@@ -4,7 +4,7 @@ import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { save, update } from '../../../services/OrderService';
-import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, formatter } from '../../../helpers/utils';
+import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
@@ -94,13 +94,33 @@ export const DetailOrder = () => {
   }, []);
 
   const onChangeAmount = ({ target }) => {
-    const amount = Number(target.value);
-    if( amount >= 0 && amount <= mountMax ) {
-      const tax = amount * taxRate;
-      const total = amount + tax;
-      setAmount(amount);
-      setTax(tax.toFixed(2));
-      setTotal(total.toFixed(2));
+    if( target.value === '' ) {
+      setAmount('');
+      setTax('');
+      setTotal('');
+    } else if( isNumDec(target.value) ) {
+      const amount = Number(target.value);
+      if( amount >= 0 && amount <= mountMax ) {
+        const tax = amount * taxRate;
+        const total = amount + tax;
+        setAmount(target.value);
+        setTax(tax.toFixed(2));
+        setTotal(total.toFixed(2));
+      }
+    }
+  }
+  const onFocusAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(removeCurrencyFormat(amount));
+      setTax(removeCurrencyFormat(tax));
+      setTotal(removeCurrencyFormat(total));
+    }
+  }
+  const onBlurAmount = () => {
+    if( amount && amount !== '' ) {
+      setAmount(formatter.format(amount));
+      setTax(formatter.format(tax));
+      setTotal(formatter.format(total));
     }
   }
   const onChangeStatus = ({target }) => {
@@ -133,7 +153,12 @@ export const DetailOrder = () => {
   const onSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.target);
-    const request = Object.fromEntries(data.entries());
+    const requestObj = Object.fromEntries(data.entries());
+    const request = { ...requestObj, 
+      amount: removeCurrencyFormat(amount),
+      tax: removeCurrencyFormat(tax),
+      total: removeCurrencyFormat(total)
+    };
     if ( Number(amount) !== (project.amount - paid.amount) ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
@@ -294,14 +319,15 @@ export const DetailOrder = () => {
             </div>
             <div className="row text-start">
               <div className='col-4'>
-                <InputText name="amount" label='Monto' type='number' placeholder='Ingresa monto' 
-                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required onChange={ onChangeAmount } />
+                <InputText name="amount" label='Monto' placeholder='Ingresa monto' 
+                  disabled = { !permissions.canEditOrd } value={ `${amount}` } required 
+                  onChange={ onChangeAmount } onFocus={ onFocusAmount } onBlur={ onBlurAmount } />
               </div>
               <div className='col-4'>
-                <InputText name="tax" label='Iva' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
+                <InputText name="tax" label='Iva' readOnly disabled = { !permissions.canEditOrd } value={ `${tax}` } />
               </div>
               <div className='col-4'>
-                <InputText name="total" label='Total' type='text' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
+                <InputText name="total" label='Total' readOnly disabled = { !permissions.canEditOrd } value={ `${total}` } />
               </div>
             </div>
             <div className="row text-start">
