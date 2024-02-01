@@ -22,9 +22,15 @@ public class Company {
     @Column(updatable = false, nullable = false)
     private Long id;
     private String name;
+    private String alias;
     private String rfc;
     private String address;
+    private String cp;
+    private String city;
+    private String state;
+    private String country;
     private String phone;
+    private String ext;
     private String emailDomain;
     private Long type;
     @Column(columnDefinition = "boolean default true")

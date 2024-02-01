@@ -58,7 +58,7 @@ export const NavBarPage = () => {
     <li className="nav-item">
       <NavLink className={ `nav-item nav-link ${ (currentTab === 6) ? 'active' : '' }` }
         onClick={ () => setCurrentTab(6) } to="company">
-        Compa&ntilde;ias
+        Empresa
       </NavLink>
     </li>
   );
