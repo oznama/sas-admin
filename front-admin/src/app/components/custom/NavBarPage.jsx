@@ -1,4 +1,3 @@
-import './custom.main.css';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';

@@ -40,8 +40,6 @@ export const DetailOrder = () => {
 
   const [catStatus, setCatStatus] = useState([]);
 
-  const [request, setRequest] = useState();
-
   const fetchSelects = () => {
     getCatalogChilds(1000000006).then( response => {
       setCatStatus(response.filter( cat => cat.status === 2000100001 ));
@@ -50,7 +48,7 @@ export const DetailOrder = () => {
     });
   };
 
-  const fetProjects = () => {
+  const fetchProjects = () => {
     getProjectSelect().then( response => {
       setProjects(response);
     }).catch( error => {
@@ -73,9 +71,9 @@ export const DetailOrder = () => {
       if( response.code ) {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
-        setAmount(numberToString(response.amount, ''));
-        setTax(numberToString(response.tax, ''))
-        setTotal(numberToString(response.total, ''))
+        setAmount(formatter.format(response.amount));
+        setTax(formatter.format(response.tax));
+        setTotal(formatter.format(response.total));
         setOrderNum(response.orderNum ? response.orderNum : '');
         setOrderDate(handleDateStr(response.orderDate));
         setStatus(numberToString(response.status, ''));
@@ -94,7 +92,7 @@ export const DetailOrder = () => {
   useEffect(() => {
     fetchSelects();
     if( projectId === '0' ) {
-      fetProjects();
+      fetchProjects();
     }
     if( !(project && project.id) && projectId !== '0' ) {
       fetchProject(projectId);
@@ -165,7 +163,7 @@ export const DetailOrder = () => {
       tax: removeCurrencyFormat(tax),
       total: removeCurrencyFormat(total)
     };
-    if ( Number(amount) !== (project.amount - paid.amount) ) {
+    if ( Number(removeCurrencyFormat(amount)) !== (project.amount - paid.amount) ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
       persistOrder(request);
@@ -260,7 +258,7 @@ export const DetailOrder = () => {
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
             <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
-            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ formatter.format(amount) }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
       </div>

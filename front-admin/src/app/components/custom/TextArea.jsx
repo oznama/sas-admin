@@ -12,7 +12,7 @@ export const TextArea = ({
   return (
     <>
         <label className="form-label">{ label }</label>
-        <textarea className="form-control text-area-100"
+        <textarea className="form-control"
             name={ name }
             type="textarea"
             placeholder={ placeholder } 

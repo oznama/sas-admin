@@ -62,3 +62,13 @@ export const getOrders = async(page=0, size=10, sort='id,asc', filter='') => {
     const orders = await response.json();
     return orders;
 };
+
+export const getOrderSelect = async() => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlOrders = `${context}/select`;
+    const response = await api( urlOrders, request );
+    const orders = await response.json();
+    return orders;
+};

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { deleteLogic, getOrders, getOrdersByProjectId } from "../../../services/OrderService";
-import { displayNotification, genericErrorMsg, styleInput, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
+import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
 import { setCurrentOrdTab, setCurrentTab, setPaid, setProject } from "../../../../store/project/projectSlice";
 import { Pagination } from "../../custom/pagination/page/Pagination";
@@ -122,7 +122,7 @@ export const TableOrders = ({
 
     const renderSearcher = () => !projectId && (
         <div className="input-group w-50 py-1">
-            <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
+            <input name="filter" type="text" className="form-control input-padding-sm" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
             <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>

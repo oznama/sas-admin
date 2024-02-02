@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { alertType } from "../../custom/alerts/types/types";
 import { deleteLogic, getInvoices, getInvoicesByOrderId } from "../../../services/InvoiceService";
 import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from "../../../../store/project/projectSlice";
-import { displayNotification, genericErrorMsg, styleInput, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
+import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { Pagination } from "../../custom/pagination/page/Pagination";
 
 const pageSize = 10;
@@ -99,6 +99,7 @@ export const TableInvoices = ({
         if( !projectId || !orderId ) {
             dispatch(setProject({}));
             dispatch(setOrder({}));
+            dispatch(setPaid({}));
         }
     }, []);
 
@@ -115,9 +116,8 @@ export const TableInvoices = ({
 
     const handleAddInvoice = () => {
         navigate(`/project/${ projectId ? projectId : 0 }/order/${ orderId ? orderId : 0 }/invoice/add`);
-      }
+    }
 
-      console.log(projectId, orderId);
     const renderAddInvoiceButton = () => permissions.canCreateOrd && (( !projectId || !orderId) || ((paid.amount < order.amount) && (order.status < 2000600003))) && (
         <div className="d-flex flex-row-reverse p-2">
           <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
@@ -133,7 +133,7 @@ export const TableInvoices = ({
 
     const renderSearcher = () => !orderId && (
         <div className="input-group w-50 py-1">
-            <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
+            <input name="filter" type="text" className="form-control input-padding-sm" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
             <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
@@ -240,20 +240,22 @@ export const TableInvoices = ({
                     <tbody>
                         { renderRows() }
                     </tbody>
-                    <tfoot className="thead-dark">
-                        <tr>
-                            <th className="text-center fs-6" scope="col">TOTAL</th>
-                            <th></th>
-                            <th></th>
-                            { orderId && (<th className="text-center fs-6" scope="col">{ totapP }</th>) }
-                            <td className="text-center fs-6" scope="col">{ renderStatus(totalStatus) }</td>
-                            <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
-                            <th className="text-end fs-6" scope="col">{ totalTaxStr }</th>
-                            <th className="text-end fs-6" scope="col">{ totalTStr }</th>
-                            <th></th>
-                            { permissions.canDelOrd && (<th></th>) }
-                        </tr>
-                    </tfoot>
+                    { projectId && (
+                        <tfoot className="thead-dark">
+                            <tr>
+                                <th className="text-center fs-6" scope="col">TOTAL</th>
+                                <th></th>
+                                <th></th>
+                                { orderId && (<th className="text-center fs-6" scope="col">{ totapP }</th>) }
+                                <td className="text-center fs-6" scope="col">{ renderStatus(totalStatus) }</td>
+                                <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
+                                <th className="text-end fs-6" scope="col">{ totalTaxStr }</th>
+                                <th className="text-end fs-6" scope="col">{ totalTStr }</th>
+                                <th></th>
+                                { permissions.canDelOrd && (<th></th>) }
+                            </tr>
+                        </tfoot>
+                    )}
                 </table>
             </div>
         </div>

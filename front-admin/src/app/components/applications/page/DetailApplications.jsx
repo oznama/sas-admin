@@ -60,7 +60,7 @@ export const DetailApplications = () => {
         setDesignDate(handleDateStr(response.designDate));
         setDevelopmentDate(handleDateStr(response.developmentDate));
         setActive(response.active);
-        setObservations(response.observations);
+        setObservations(response.observations ? response.observations : '');
       }
     }).catch( error => {
         console.log(error);

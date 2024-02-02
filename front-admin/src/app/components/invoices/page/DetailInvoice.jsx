@@ -13,7 +13,7 @@ import { TextArea } from '../../custom/TextArea';
 import { setModalChild } from '../../../../store/modal/modalSlice';
 import { setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
 import { getProjectById } from '../../../services/ProjectService';
-import { getOrderById } from '../../../services/OrderService';
+import { getOrderById, getOrderSelect } from '../../../services/OrderService';
 
 export const DetailInvoice = () => {
 
@@ -36,6 +36,9 @@ export const DetailInvoice = () => {
   const [observations, setObservations] = useState('');
   const [status, setStatus] = useState('2000800001');
   const [catStatus, setCatStatus] = useState([]);
+  const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
+  const [oId, setOId] = useState(orderId === '0' ? '' : orderId);
+  const [orders, setOrders] = useState([]);
 
   const fetchSelects = () => {
     getCatalogChilds(1000000008).then( response => {
@@ -53,6 +56,15 @@ export const DetailInvoice = () => {
       console.log(error);
     });
   };
+
+  const fetchOrders = () => {
+    getOrderSelect().then( response => {
+      setOrders(response);
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
 
   const fetchProject = id => {
     getProjectById(id).then( response => {
@@ -81,10 +93,10 @@ export const DetailInvoice = () => {
       if( response.code ) {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
-        setAmount(numberToString(response.amount, ''));
+        setAmount(formatter.format(response.amount));
         setAmountInDb(response.amount);
-        setTax(numberToString(response.tax, ''))
-        setTotal(numberToString(response.total, ''))
+        setTax(formatter.format(response.tax));
+        setTotal(formatter.format(response.total));
         setInvoiceNum(response.invoiceNum ? response.invoiceNum : '');
         setIssuedDate(handleDateStr(response.issuedDate));
         setPaymentDate(handleDateStr(response.paymentDate));
@@ -100,12 +112,15 @@ export const DetailInvoice = () => {
 
   useEffect(() => {
     fetchSelects();
+    if( orderId === '0' ) {
+      fetchOrders();
+    }
+    if( !(order && order.id) && orderId !== '0' ) {
+      fetchProject(pId);
+      fetchOrder(oId);
+    }
     if( id ) {
       fetchInvoice();
-    }
-    if( (!(project && project.id) && projectId !== '0') || !(order && order.id) && orderId !== '0' ) {
-      fetchProject(projectId);
-      fetchOrder(orderId);
     }
   }, []);
 
@@ -166,6 +181,19 @@ export const DetailInvoice = () => {
     calculateAmounts(order.amount * porcDec);
   };
   const onChangeObservations = ({ target }) => setObservations(target.value);
+  const onChangeOId = ({ target }) => {
+    setOId(target.value);
+    if( target.value === '' ) {
+      setPId(target.value);
+      dispatch(setProject({}));
+      dispatch(setOrder({}));
+    } else {
+      const parentId = orders.find( o => o.id === Number(target.value) ).parentId;
+      setPId(parentId);
+      fetchProject(parentId);
+      fetchOrder(target.value);
+    }
+  }
 
   const onSubmit = event => {
     event.preventDefault();
@@ -175,18 +203,11 @@ export const DetailInvoice = () => {
       dispatch(setModalChild(renderModal()));
     } else {
       const data = new FormData(event.target);
-      const requestObj = Object.fromEntries(data.entries());
-      const request = { ...requestObj, 
-        amount: removeCurrencyFormat(amount),
-        tax: removeCurrencyFormat(tax),
-        total: removeCurrencyFormat(total)
-      };
-      if ( id && permissions.canEditOrd ) {
-        updateInvoice(request);
-      } else if ( permissions.canCreateOrd ) {
-        request.orderId = orderId;
-        saveInvoice(request);
-      }    
+      const request = Object.fromEntries(data.entries());
+      request.amount = removeCurrencyFormat(amount);
+      request.tax = removeCurrencyFormat(tax);
+      request.total = removeCurrencyFormat(total);
+      persistInvoice(request);   
     }
 
   }
@@ -197,7 +218,11 @@ export const DetailInvoice = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, 'Factura agregada correctamente!', alertType.success);
-        navigate(`/project/${projectId}/order/${orderId}/edit`, { replace: true });
+        if( orderId === '0' ) {
+          navigate('/invoices');
+        } else {
+          navigate(`/project/${pId}/order/${oId}/edit`, { replace: true });
+        }
       }
     }).catch(error => {
       console.log(error);
@@ -214,12 +239,24 @@ export const DetailInvoice = () => {
         if( request.requisition ) {
           setHasRequisition(true);
         }
-        navigate(`/project/${projectId}/order/${orderId}/edit`, { replace: true });
+        navigate(`/project/${pId}/order/${oId}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error);
       displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
+  }
+
+  const persistInvoice = request => {
+    if ( id && permissions.canEditOrd ) {
+      // updateInvoice(request);
+      console.log('update', request);
+    } else if ( permissions.canCreateOrd ) {
+      request.projectId = pId;
+      request.orderId = oId;
+      saveInvoice(request);
+    }
+    dispatch( setModalChild(null) );
   }
 
   const renderSaveButton = () => {
@@ -229,7 +266,7 @@ export const DetailInvoice = () => {
 
   const onClickBack = () => {
     if ( currentTab === 1 ) {
-      navigate(`/project/${ projectId }/order/${orderId}/edit`)
+      navigate(`/project/${ pId }/order/${ oId }/edit`)
     } else {
       setCurrentTab(currentTab - 1);
     }
@@ -266,19 +303,28 @@ export const DetailInvoice = () => {
 
   const renderDetail = () => (
     <div className='d-grid gap-2 col-6 mx-auto'>
-      <p className="h5">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>
-      <p className="h5">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>
+      { order.id && (<p className="h5">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
+      { order.id && (<p className="h5">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>) }
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
+              { orderId === '0' && (
+                <div className="row text-start">
+                  <div className='col-12'>
+                    <Select name="orderId" label="Orden" options={ orders } disabled={ !permissions.canEditOrd } value={ oId } required onChange={ onChangeOId } />
+                  </div>
+                </div>
+              )}
               <div className="row text-start">
                   <div className='col-4'>
                       <InputText name='invoiceNum' label='No. de factura' placeholder='Ingresa no. de factura' disabled = { !permissions.canEditOrd } value={ invoiceNum } onChange={ onChangeNumOrder } maxLength={ 8 } />
                   </div>
                   <div className='col-4'>
-                      <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' disabled = { !permissions.canEditOrd } value={ `${percentage}` } required onChange={ onChangePercentage } />
+                      <InputText name="percentage" label='Porcentaje' type='number' placeholder='Ingresa porcentaje' 
+                        disabled = { !permissions.canEditOrd } value={ `${percentage}` } required 
+                        onChange={ onChangePercentage } onBlur={ onBlurAmount } />
                   </div>
                   <div className='col-4'>
-                      <Select name = "status" label="Status" options={ catStatus } disabled={ !permissions.canEditOr || (Number(status) === 2000800003 && paid.amount >= order.amount) } value={ status } onChange={ onChangeStatus } />
+                      <Select name = "status" label="Status" options={ catStatus } disabled={ !permissions.canEditOrd || (Number(status) === 2000800003 && paid.amount && paid.amount >= order.amount) } value={ status } onChange={ onChangeStatus } />
                   </div>
               </div>
               <div className="row text-start">
@@ -311,16 +357,19 @@ export const DetailInvoice = () => {
           <div className="pt-3 d-flex flex-row-reverse">
               { renderSaveButton() }
               &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/order/${orderId}/edit`) }>Cancelar</button>
+              <button type="button" className="btn btn-danger" onClick={ () => navigate(  orderId !== '0' ? `/project/${ projectId }/order/${ orderId }/edit` : '/invoices') }>Cancelar</button>
           </div>
       </form>
     </div>
   )
+
+  const titleWithOrder = `${ oId !== '' ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
+  const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Factura nueva';
  
   return (
     <div className='px-5'>
       <div className='d-flex justify-content-between'>
-      <h4 className="card-title fw-bold mb-4">{ `${project.key} ${project.description} > Orden${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`}</h4>
+      <h4 className="card-title fw-bold mb-4">{ title }</h4>
       { id && renderTabs() }
       </div>
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getProjectById, getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentTab, setProject } from '../../../store/project/projectSlice';
+import { setCurrentTab, setOrder, setPaid, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
 import { displayNotification, styleInput, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
@@ -22,7 +22,7 @@ export const TableProject = ({
     const [currentPage, setCurrentPage] = useState(0);
     const [projects, setProjects] = useState([]);
     const [totalProjects, setTotalProjects] = useState(0);
-    const [filter, setFilter] = useState( project ? project.key : '');
+    const [filter, setFilter] = useState( project &&  project.key ? project.key : '');
 
     const onChangeFilter = ({ target }) => {
         setCurrentPage(0)
@@ -71,6 +71,8 @@ export const TableProject = ({
     const handleAddProject = () => {
         dispatch(setCurrentTab(1));
         dispatch(setProject({}));
+        dispatch(setOrder({}));
+        dispatch(setPaid({}));
         navigate(`/project/add`);
     }
 
