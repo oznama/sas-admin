@@ -106,4 +106,16 @@ public class InvoiceController {
     return ResponseEntity.ok(service.findAll(filter, pageable));
   }
 
+  @GetMapping("/{orderId}/paid")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar total de facturas pagadas de orden",
+          nickname = "/getAmountPaid")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = InvoiceFindDto.class)
+  })
+  public ResponseEntity<InvoiceFindDto> getAmountPaid(@PathVariable("orderId") Long orderId) throws CustomException {
+    log.info("Finding total invoices paid by order");
+    return ResponseEntity.ok(service.getAmountPaid(orderId));
+  }
+
 }

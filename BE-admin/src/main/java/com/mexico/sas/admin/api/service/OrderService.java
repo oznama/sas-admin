@@ -22,4 +22,6 @@ public interface OrderService {
     List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException;
     Page<OrderPaggeableDto> findAll(String filter, Pageable pageable);
     List<SelectDto> getForSelect();
+
+    OrderPaggeableDto getAmountPaid(Long projectId) throws CustomException;
 }

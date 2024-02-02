@@ -120,7 +120,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
-                ordersFindDto.add(getOrderFindDto(order));
+                ordersFindDto.add(getOrderPaggeableDto(order));
             } catch (CustomException e) {
                 log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
             }
@@ -140,7 +140,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
-                ordersFindDto.add(getOrderFindDto(order));
+                ordersFindDto.add(getOrderPaggeableDto(order));
             } catch (CustomException e) {
                 log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
             }
@@ -153,6 +153,13 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         return getSelect(repository.findByActiveIsTrueAndEliminateIsFalse());
     }
 
+    @Override
+    public OrderPaggeableDto getAmountPaid(Long projectId) throws CustomException {
+        Project project = projectService.findEntityById(projectId);
+        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
+        return getTotal(orders, project);
+    }
+
     private OrderFindDto parseFromEntity(Order order) throws CustomException {
         OrderFindDto orderDto = from_M_To_N(order, OrderFindDto.class);
         orderDto.setProjectId(order.getProject().getId());
@@ -161,7 +168,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         return orderDto;
     }
 
-    private OrderPaggeableDto getOrderFindDto(Order order) throws CustomException {
+    private OrderPaggeableDto getOrderPaggeableDto(Order order) throws CustomException {
         log.debug("Parsing order to orderFindDto");
         OrderPaggeableDto orderPaggeableDto = from_M_To_N(order, OrderPaggeableDto.class);
         orderPaggeableDto.setProjectId(order.getProject().getId());

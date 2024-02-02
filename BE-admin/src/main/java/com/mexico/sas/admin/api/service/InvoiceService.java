@@ -20,4 +20,6 @@ public interface InvoiceService {
     List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException;
     Page<InvoiceFindDto> findAll(String filter, Pageable pageable);
 
+    InvoiceFindDto getAmountPaid(Long orderId) throws CustomException;
+
 }

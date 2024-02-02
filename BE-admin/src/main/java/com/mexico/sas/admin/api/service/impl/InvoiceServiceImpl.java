@@ -151,6 +151,13 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         return new PageImpl<>(invoiceFindDtos, pageable, invoices.getTotalElements());
     }
 
+    @Override
+    public InvoiceFindDto getAmountPaid(Long orderId) throws CustomException {
+        Order order = orderService.findEntityById(orderId);
+        List<Invoice> invoices = repository.findByOrderOrderByInvoiceNumAscIssuedDateAsc(order);
+        return getTotal(invoices, order);
+    }
+
     private InvoiceDto parseFromEntity(Invoice invoice) throws CustomException {
         InvoiceDto invoiceDto = from_M_To_N(invoice, InvoiceDto.class);
         invoiceDto.setOrderId(invoice.getOrder().getId());

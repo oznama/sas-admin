@@ -117,4 +117,16 @@ public class OrderController {
     return ResponseEntity.ok(service.getForSelect());
   }
 
+  @GetMapping("/{projectId}/paid")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar total de ordenes pagadas de proyecto",
+          nickname = "/getAmountPaid")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = OrderPaggeableDto.class)
+  })
+  public ResponseEntity<OrderPaggeableDto> getAmountPaid(@PathVariable("projectId") Long projectId) throws CustomException {
+    log.info("Finding total orders paid by project");
+    return ResponseEntity.ok(service.getAmountPaid(projectId));
+  }
+
 }
