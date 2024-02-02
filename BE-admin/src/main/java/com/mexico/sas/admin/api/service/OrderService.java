@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
 import com.mexico.sas.admin.api.dto.order.OrderPaggeableDto;
@@ -20,5 +21,5 @@ public interface OrderService {
     OrderFindDto findByOrderNum(String orderNum) throws CustomException;
     List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException;
     Page<OrderPaggeableDto> findAll(String filter, Pageable pageable);
-
+    List<SelectDto> getForSelect();
 }

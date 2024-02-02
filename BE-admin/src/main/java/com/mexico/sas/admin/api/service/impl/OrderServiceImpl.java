@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.invoice.InvoiceFindDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
@@ -147,6 +148,11 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         return new PageImpl<>(ordersFindDto, pageable, orders.getTotalElements());
     }
 
+    @Override
+    public List<SelectDto> getForSelect() {
+        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalse());
+    }
+
     private OrderFindDto parseFromEntity(Order order) throws CustomException {
         OrderFindDto orderDto = from_M_To_N(order, OrderFindDto.class);
         orderDto.setProjectId(order.getProject().getId());
@@ -248,6 +254,21 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             update(order.getId(), orderUpdateDto);
         }
         return amounts;
+    }
+
+    private List<SelectDto> getSelect(List<Order> orders) {
+        List<SelectDto> selectDtos = new ArrayList<>();
+        orders.forEach( order -> {
+            try {
+                SelectDto selectDto = from_M_To_N(order, SelectDto.class);
+                selectDto.setName(String.format( "%s (%s - %s)", order.getOrderNum(), order.getProject().getKey(), order.getProject().getDescription()));
+                selectDto.setParentId(order.getProject().getId());
+                selectDtos.add(selectDto);
+            } catch (CustomException e) {
+                log.error("Impossible add order {}", order.getId());
+            }
+        });
+        return selectDtos;
     }
 
     private void validateSave(OrderDto orderDto, Order order) throws CustomException {

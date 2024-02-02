@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.order.OrderFindDto;
 import com.mexico.sas.admin.api.dto.order.OrderPaggeableDto;
@@ -105,6 +106,15 @@ public class OrderController {
   public ResponseEntity<Page<OrderPaggeableDto>> findAll(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
     log.info("Finding all orders");
     return ResponseEntity.ok(service.findAll(filter, pageable));
+  }
+
+  @GetMapping("/select")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar ordenes para select", nickname = "/select")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> select() throws CustomException {
+    log.info("Getting catalog order");
+    return ResponseEntity.ok(service.getForSelect());
   }
 
 }
