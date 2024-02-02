@@ -137,13 +137,13 @@ export const TableInvoices = ({
             <input name="filter" type="text" className="form-control input-padding-sm" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ onChangeFilter } />
-            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
+            <span className="input-group-text" id="basic-addon2" onClick={ () => onClean() }>
                 <i className="bi bi-x-lg"></i>
             </span>
         </div>   
     );
 
-    const cleanSearcher = () => {
+    const onClean = () => {
         setFilter('');
         setCurrentPage(0);
         fetchInvoices(0, '');
@@ -219,7 +219,7 @@ export const TableInvoices = ({
     const tableByOrder = () => (
         <div>
             <div className={`d-flex ${ projectId ? 'flex-row-reverse' : 'justify-content-between align-items-center' }`}>
-                { !orderId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
+                { !orderId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
                 { renderAddInvoiceButton() }
             </div>
             <div className='table-responsive text-nowrap'>

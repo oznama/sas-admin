@@ -6,7 +6,7 @@ export const InputSearcher = ({
     value,
     maxLength,
     onChange,
-    cleanSearcher
+    onClean
 }) => {
 
     return (
@@ -14,7 +14,7 @@ export const InputSearcher = ({
             <input name={ name } type="text" className="form-control padding-short" placeholder={ placeholder }
                 maxLength={ maxLength } autoComplete='off'
                 value={ value } onChange={ onChange }></input>
-            <span className="input-group-text" id="basic-addon2" onClick={ cleanSearcher }>
+            <span className="input-group-text" onClick={ onClean }>
                 <i className="bi bi-x-lg"></i>
             </span>
         </div>   
@@ -26,8 +26,8 @@ InputSearcher.propTypes = {
     placeholder: PropTypes.string,
     value: PropTypes.string.isRequired,
     maxLength: PropTypes.number,
-    updateValue: PropTypes.func,
-    cleanValue: PropTypes.func,
+    onChange: PropTypes.func,
+    onClean: PropTypes.func,
 }
 
 InputSearcher.defaultProps = {

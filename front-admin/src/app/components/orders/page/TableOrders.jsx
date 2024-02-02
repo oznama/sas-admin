@@ -115,7 +115,7 @@ export const TableOrders = ({
         fetchOrders(page, filter);
     }
 
-    const cleanSearcher = () => {
+    const onClean = () => {
         setFilter('');
         setCurrentPage(0);
         fetchOrders(0, '');
@@ -200,7 +200,7 @@ export const TableOrders = ({
     const tableByProject = () => (
         <div>
             <div className={`d-flex ${ projectId ? 'flex-row-reverse' : 'justify-content-between align-items-center' }`}>
-                { !projectId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
+                { !projectId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
                 { renderAddOrderButton() }
             </div>
             <div className='table-responsive text-nowrap'>

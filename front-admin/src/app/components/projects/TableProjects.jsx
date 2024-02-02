@@ -85,7 +85,7 @@ export const TableProject = ({
         </div>
     );
 
-    const cleanSearcher = () => {
+    const onClean = () => {
         setFilter('');
         setCurrentPage(0);
         fetchProjects(0, '');
@@ -174,7 +174,7 @@ export const TableProject = ({
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center">
-                { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
+                { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
                 { renderAddButton() }
             </div>
             <div className='table-responsive text-nowrap'>

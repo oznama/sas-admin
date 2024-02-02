@@ -15,6 +15,7 @@ import { setCurrentOrdTab, setOrder, setPaid, setProject } from '../../../../sto
 import { TextArea } from '../../custom/TextArea';
 import { getProjectById, getProjectSelect } from '../../../services/ProjectService';
 import { setModalChild } from '../../../../store/modal/modalSlice';
+import { SelectSearcher } from '../../custom/SelectSearcher';
 
 export const DetailOrder = () => {
 
@@ -37,6 +38,7 @@ export const DetailOrder = () => {
   const [observations, setObservations] = useState('');
   const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
   const [projects, setProjects] = useState([]);
+  const [pFilter, setPFilter] = useState('');
 
   const [catStatus, setCatStatus] = useState([]);
 
@@ -160,8 +162,21 @@ export const DetailOrder = () => {
   const onChangeRequisitionStatus = ({target }) => setRequisitionStatus(target.value);
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangePId = ({ target }) => {
-    setPId(target.value);
-    fetchProject(target.value);
+    setPFilter(target.value);
+    const project = projects.find( p => p.value === target.value );
+    if( project ) {
+      setPId(project.id);
+      fetchProject(project.id);
+    } else {
+      setPId('');
+      dispatch(setProject({}));
+    }
+  }
+
+  const onClean = () => {
+    setPFilter('');
+    setPId('');
+    dispatch(setProject({}));
   }
 
   const onSubmit = event => {
@@ -284,12 +299,11 @@ export const DetailOrder = () => {
     <div className='d-grid gap-2 col-6 mx-auto'>
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
-            { 
-              // TODO: https://getbootstrap.com/docs/5.0/forms/form-control/#datalists
-              projectId === '0' && (
+            { projectId === '0' && (
               <div className="row text-start">
                 <div className='col-12'>
-                  <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pId } required onChange={ onChangePId } />
+                  <SelectSearcher label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pFilter } required 
+                    onChange={ onChangePId } onClean={ onClean } />
                 </div>
               </div>
             )}
