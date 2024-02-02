@@ -170,6 +170,7 @@ export const DetailOrder = () => {
     } else {
       setPId('');
       dispatch(setProject({}));
+      dispatch(setPaid({}));
     }
   }
 
@@ -177,6 +178,7 @@ export const DetailOrder = () => {
     setPFilter('');
     setPId('');
     dispatch(setProject({}));
+    dispatch(setPaid({}));
   }
 
   const onSubmit = event => {

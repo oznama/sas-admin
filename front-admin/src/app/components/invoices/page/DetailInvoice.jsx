@@ -14,6 +14,7 @@ import { setModalChild } from '../../../../store/modal/modalSlice';
 import { setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
 import { getProjectById } from '../../../services/ProjectService';
 import { getOrderById, getOrderSelect } from '../../../services/OrderService';
+import { SelectSearcher } from '../../custom/SelectSearcher';
 
 export const DetailInvoice = () => {
 
@@ -39,6 +40,7 @@ export const DetailInvoice = () => {
   const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
   const [oId, setOId] = useState(orderId === '0' ? '' : orderId);
   const [orders, setOrders] = useState([]);
+  const [pFilter, setPFilter] = useState('');
 
   const fetchSelects = () => {
     getCatalogChilds(1000000008).then( response => {
@@ -66,10 +68,10 @@ export const DetailInvoice = () => {
     });
   }
 
-  const fetchProject = projectId => {
+  const fetchProject = (projectId, orderId) => {
     getProjectById(projectId).then( response => {
       dispatch(setProject(response));
-      fetchOrder(oId);
+      fetchOrder(orderId);
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -127,7 +129,7 @@ export const DetailInvoice = () => {
       fetchOrders();
     }
     if( !(order && order.id) && orderId !== '0' ) {
-      fetchProject(pId);
+      fetchProject(pId, oId);
     }
     if( id ) {
       fetchInvoice();
@@ -192,17 +194,26 @@ export const DetailInvoice = () => {
   };
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangeOId = ({ target }) => {
-    setOId(target.value);
-    if( target.value === '' ) {
-      setPId(target.value);
+    setPFilter(target.value);
+    const order = orders.find( o => o.value === target.value );
+    if( order ) {
+      setOId(order.id);
+      const parentId = orders.find( o => o.id === order.id ).parentId;
+      setPId(parentId);
+      fetchProject(parentId, order.id);
+    } else {
+      setPId('');
       dispatch(setProject({}));
       dispatch(setOrder({}));
-    } else {
-      const parentId = orders.find( o => o.id === Number(target.value) ).parentId;
-      setPId(parentId);
-      fetchProject(parentId);
-      fetchOrder(target.value);
+      dispatch(setPaid({}));
     }
+  }
+
+  const onClean = () => {
+    setPFilter('');
+    setPId('');
+    dispatch(setProject({}));
+    dispatch(setPaid({}));
   }
 
   const onSubmit = event => {
@@ -317,12 +328,11 @@ export const DetailInvoice = () => {
       { order.id && (<p className="h5">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>) }
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
-              {
-                // TODO: https://getbootstrap.com/docs/5.0/forms/form-control/#datalists
-                orderId === '0' && (
+              { orderId === '0' && (
                 <div className="row text-start">
                   <div className='col-12'>
-                    <Select name="orderId" label="Orden" options={ orders } disabled={ !permissions.canEditOrd } value={ oId } required onChange={ onChangeOId } />
+                    <SelectSearcher label="Orden" options={ orders } disabled={ !permissions.canEditOrd } value={ pFilter } required 
+                      onChange={ onChangeOId } onClean={ onClean } />
                   </div>
                 </div>
               )}
