@@ -8,6 +8,7 @@ import { Pagination } from '../custom/pagination/page/Pagination';
 //import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
 import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
 import { setModalChild } from '../../../store/modal/modalSlice';
+import { InputText } from '../custom/InputText';
 
 export const TableApplication = ({
     pageSize = 10,
@@ -21,21 +22,34 @@ export const TableApplication = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    const [value, setValue] = useState('');
-    const onChangeValue = ({ target }) => setValue(target.value);
+
+    const [cValue, setCValue] = useState('');
+    const onChangeCValue = ({ target }) => {
+        console.log('Por aqui pasa el nombre: '+target.value)
+        setCValue(target.value);
+    }
     const [description, setDescription] = useState('');
     const onChangeDescription = ({ target }) => setDescription(target.value);
-    const [status, setStatus] = useState('');
+    
     const [filter, setFilter] = useState('')
 
     const showModal = () => dispatch( setModalChild(renderModal()) );
 
     const onSubmit = event => {
-        console.log('Call submit function', event);
-        dispatch( setModalChild(null) );
+        event.preventDefault()
+        const data = new FormData(event.target)
+        const request = Object.fromEntries(data.entries())
+        if (id){
+            updateChild(request);
+        }else{
+            saveChild(request);
+        }
+        dispatch( setModalChild(null) )
     }
 
-    const renderModal = () => (
+    const renderModal = () => {
+        console.log('Value: '+cValue+' Description: '+description)
+        return(
         <div className='p-5 bg-white rounded-3'>
 
             {/* TODO Formulario */}
@@ -43,30 +57,24 @@ export const TableApplication = ({
                 <form className="needs-validation" onSubmit={ onSubmit }>
                     
                     <div className="row text-start">
-                    <div className='col-6'>
-                        <label>Nombre</label>  
-                    </div>
-                    <div className='col-6'>
-                        <input type='text' onChange={ onChangeValue } value = {value} placeholder='Escribe el nombre'></input>
-                    </div>
+                        <div className='col-12'>
+                            <InputText name='value' label='Nombre:*' placeholder='Escribe el nombre' value={ cValue } required onChange={ onChangeCValue } maxLength={ 250 } />
+                        </div>
                     </div>
                     <div className="row text-start">
-                    <div className='col-6'>
-                        <label>Descripcion</label>  
-                    </div>
-                    <div className='col-6'>
-                        <input type='text' onChange={ onChangeDescription } value={description} placeholder='Escribe la descripcion'></input>
-                    </div>
+                        <div className='col-12'>
+                            <InputText name='description' label='Descripcion:' placeholder='Escribe la descripcion' value={ description } required onChange={ onChangeDescription } maxLength={ 250 } />
+                        </div>
                     </div>
                     <div className="pt-3 d-flex flex-row-reverse">
-                        <button type="submit" className="btn btn-primary" >Guardar</button>
+                        <button type="submit" className="btn btn-primary">Guardar</button>
                         <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cancelar</button>
                     </div>
                 </form>
             </div>
             {/* TODO Forumulario */}
         </div>
-    )
+    )}
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
@@ -95,10 +103,20 @@ export const TableApplication = ({
     // }
     
 
+    // useEffect(() => {
+    //     // fetchSelects();
+    //     fetchChilds(currentPage);
+    // }, [currentPage]);
+    
     useEffect(() => {
-        // fetchSelects();
-        fetchChilds(currentPage);
-    }, [currentPage]);
+        fetchChilds();
+        if (id) {
+            const catSelected = catalogChilds.find(cat => cat.id === id);
+            setCValue(catSelected.value);
+            setDescription(catSelected.description ?? '');
+            showModal();
+        }
+    }, [id]);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
@@ -107,10 +125,12 @@ export const TableApplication = ({
 
     const handleAddCompany = () => {
         // navigate(`/company/add`);
+        setCValue('');
+        setDescription('');
         showModal();
     }
 
-    const renderAddButton = () => permissions.canCreateEmp && (
+    const renderAddButton = () => permissions.canCreateCat && (
         <div className="d-flex flex-row-reverse pb-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddCompany }>
                 <span className="bi bi-plus"></span>
@@ -119,7 +139,7 @@ export const TableApplication = ({
     );
 
     const renderSearcher = () => (
-        <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
+        <div className={`input-group w-${ permissions.canCreateCat ? '25' : '50' } py-3`}>
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } />
@@ -143,14 +163,11 @@ export const TableApplication = ({
     )
 
     const handledSelect = id => {
-        // dispatch(setCurrentTab(2));
-        // navigate(`/company/${id}/edit`);
-        if ( permissions.canEditCat ) {
-            setId(id);
-            const catSelected = catalogChilds.find( cat => cat.id === id );
-            setValue(catSelected.value);
-            setDescription(catSelected.description ?? '');
-        }
+        setId(id);
+        const catSelected = catalogChilds.find( cat => cat.id === id );
+        console.log(catSelected);
+        setCValue(catSelected.value);
+        setDescription(catSelected.description ?? '');
         showModal();
     }
 
@@ -215,11 +232,11 @@ export const TableApplication = ({
             <td className="text-start">{ description }</td>
             <td className="text-center">{ renderStatus(status) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status && permissions.canEditComp ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ status && permissions.canEditComp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
-            { permissions.canDelComp && (
+            { permissions.canDelCat && (
             <td className="text-center">
                 <button type="button" className={`btn btn-${ status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(id, status) }>
                     <span><i className={`bi bi-${ status ? 'trash' : 'folder-symlink'}`}></i></span>
@@ -245,8 +262,8 @@ export const TableApplication = ({
                             <th className="text-center fs-6" scope="col">Nombre</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
-                            <th className="text-center fs-6" scope="col">{permissions.canEditEmp ? 'Editar' : 'Ver'}</th>
-                            { permissions.canDelEmp && (<th className="text-center fs-6" scope="col">Borrar</th>)}
+                            <th className="text-center fs-6" scope="col">{permissions.canEditCat ? 'Editar' : 'Ver'}</th>
+                            { permissions.canDelCat && (<th className="text-center fs-6" scope="col">Borrar</th>)}
                         </tr>
                     </thead>
                     <tbody>

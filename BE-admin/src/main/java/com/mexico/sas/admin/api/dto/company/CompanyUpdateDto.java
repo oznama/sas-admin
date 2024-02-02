@@ -20,7 +20,10 @@ public class CompanyUpdateDto implements Serializable {
     private String alias;
     private String rfc;
     private String address;
+    private String interior;
+    private String exterior;
     private String cp;
+    private String locality;
     private String city;
     private String state;
     private String country;

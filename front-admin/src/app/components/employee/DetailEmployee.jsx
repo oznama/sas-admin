@@ -31,13 +31,11 @@ export const DetailEmployee = () => {
   const onChangeSecondSurname = ({ target }) => setSecondSurname(target.value);
   const [phone, setPhone] = useState('');
   const onChangePhone = ({ target }) => setPhone(target.value);
-  const [company, setCompany] = useState( permissions.isAdminRoot ? '' : user.companyId);
+  const [company, setCompany] = useState('');
   
-  const [companyDesc, setCompanyDesc] = useState(!permissions.isAdminRoot ? user.company : '');
+  const [companyDesc, setCompanyDesc] = useState('');
   const onChangeCompany = ({ target }) => {
-    if (permissions.isAdminRoot) {
-      fetchLeaders(target.value);
-    }
+    fetchLeaders(target.value);
     setCompany(target.value);
     const companySelected = companies.find( c => { //Cuando selecciona una compañia
       const isFind = c.id === Number(target.value)
@@ -177,10 +175,6 @@ export const DetailEmployee = () => {
   useEffect(() => {
     //console.log('Aqui pasa cuando agrega un usuario')
     fetchSelects()
-    if (!permissions.isAdminRoot) { //aqui coloca el valor de lideres
-      fetchLeaders(user.companyId);
-      setEmailDomain(user.emailDomain);
-    }
     if(id){
       fetchEmployee();
     }
