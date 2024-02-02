@@ -6,6 +6,7 @@ import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn }
 import { alertType } from "../../custom/alerts/types/types";
 import { setCurrentOrdTab, setCurrentTab, setPaid, setProject } from "../../../../store/project/projectSlice";
 import { Pagination } from "../../custom/pagination/page/Pagination";
+import { InputSearcher } from "../../custom/InputSearcher";
 
 const pageSize = 10;
 const sort = 'orderDate,desc';
@@ -120,17 +121,6 @@ export const TableOrders = ({
         fetchOrders(0, '');
     }
 
-    const renderSearcher = () => !projectId && (
-        <div className="input-group w-50 py-1">
-            <input name="filter" type="text" className="form-control input-padding-sm" placeholder="Escribe para filtrar..."
-                maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ onChangeFilter } />
-            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
-                <i className="bi bi-x-lg"></i>
-            </span>
-        </div>   
-    );
-
     const deleteOrder = (id, amount, active) => {
         if( !active && (amount > (project.amount - paid.amountPaid) ) ) {
             displayNotification(dispatch, 'La orden no se puede reactivar ya que supera el monto pendiente', alertType.error);
@@ -210,7 +200,7 @@ export const TableOrders = ({
     const tableByProject = () => (
         <div>
             <div className={`d-flex ${ projectId ? 'flex-row-reverse' : 'justify-content-between align-items-center' }`}>
-                { renderSearcher() }
+                { !projectId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
                 { renderAddOrderButton() }
             </div>
             <div className='table-responsive text-nowrap'>

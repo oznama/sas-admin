@@ -72,3 +72,13 @@ export const getOrderSelect = async() => {
     const orders = await response.json();
     return orders;
 };
+
+export const getOrderPaid = async(projectId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlOrders = `${context}/${projectId}/paid`;
+    const response = await api( urlOrders, request );
+    const totalPaid = await response.json();
+    return totalPaid;
+};

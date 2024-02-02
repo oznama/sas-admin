@@ -7,7 +7,7 @@ import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, disp
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
-import { getInvoiceById, save, update } from '../../../services/InvoiceService';
+import { getInvoiceById, getInvoicePaid, save, update } from '../../../services/InvoiceService';
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { TextArea } from '../../custom/TextArea';
 import { setModalChild } from '../../../../store/modal/modalSlice';
@@ -66,9 +66,10 @@ export const DetailInvoice = () => {
     });
   }
 
-  const fetchProject = id => {
-    getProjectById(id).then( response => {
+  const fetchProject = projectId => {
+    getProjectById(projectId).then( response => {
       dispatch(setProject(response));
+      fetchOrder(oId);
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -81,10 +82,20 @@ export const DetailInvoice = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         dispatch( setOrder(response) );
+        fetchPaid(id);
       }
     }).catch( error => {
       console.log(error);
       displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
+
+  const fetchPaid = orderId => {
+    getInvoicePaid(orderId).then( response => {
+      dispatch(setPaid(response));
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
     });
   }
 
@@ -117,7 +128,6 @@ export const DetailInvoice = () => {
     }
     if( !(order && order.id) && orderId !== '0' ) {
       fetchProject(pId);
-      fetchOrder(oId);
     }
     if( id ) {
       fetchInvoice();
@@ -249,7 +259,7 @@ export const DetailInvoice = () => {
 
   const persistInvoice = request => {
     if ( id && permissions.canEditOrd ) {
-      // updateInvoice(request);
+      updateInvoice(request);
       console.log('update', request);
     } else if ( permissions.canCreateOrd ) {
       request.projectId = pId;
@@ -307,7 +317,9 @@ export const DetailInvoice = () => {
       { order.id && (<p className="h5">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>) }
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
-              { orderId === '0' && (
+              {
+                // TODO: https://getbootstrap.com/docs/5.0/forms/form-control/#datalists
+                orderId === '0' && (
                 <div className="row text-start">
                   <div className='col-12'>
                     <Select name="orderId" label="Orden" options={ orders } disabled={ !permissions.canEditOrd } value={ oId } required onChange={ onChangeOId } />

@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { styleInput } from '../../helpers/utils';
 
 export const InputText = ({
     name,
@@ -20,8 +19,7 @@ export const InputText = ({
     <div className='mb-3'>
       <label className="form-label">{ label }</label>
       <div className="input-group has-validation">
-        <input className="form-control"
-          style={ styleInput }
+        <input className="form-control padding-short"
           name={ name }
           type={ type }
           placeholder={ placeholder }
@@ -53,7 +51,6 @@ InputText.propTypes = {
     value: PropTypes.string.isRequired,
     require: PropTypes.bool,
     maxLength: PropTypes.number,
-    max: PropTypes.number,
     disabled: PropTypes.bool,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,

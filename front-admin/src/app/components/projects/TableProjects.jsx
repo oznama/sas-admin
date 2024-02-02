@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentTab, setOrder, setPaid, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
-import { displayNotification, styleInput, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
+import { displayNotification, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
+import { InputSearcher } from '../custom/InputSearcher';
 
 export const TableProject = ({
     pageSize = 10,
@@ -89,17 +90,6 @@ export const TableProject = ({
         setCurrentPage(0);
         fetchProjects(0, '');
     }
-
-    const renderSearcher = () => (
-        <div className="input-group w-50 py-1">
-            <input name="filter" type="text" className="form-control" style={ styleInput } placeholder="Escribe para filtrar..."
-                maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ onChangeFilter }></input>
-            <span className="input-group-text" id="basic-addon2" onClick={ () => cleanSearcher() }>
-                <i className="bi bi-x-lg"></i>
-            </span>
-        </div>   
-    )
 
     // const addNewElement = newElement => {
     //     Manera 1 para agregar un nuevo elemento al estado
@@ -184,7 +174,7 @@ export const TableProject = ({
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center">
-                { renderSearcher() }
+                { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
                 { renderAddButton() }
             </div>
             <div className='table-responsive text-nowrap'>

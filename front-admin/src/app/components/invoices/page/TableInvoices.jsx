@@ -6,6 +6,7 @@ import { deleteLogic, getInvoices, getInvoicesByOrderId } from "../../../service
 import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from "../../../../store/project/projectSlice";
 import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { Pagination } from "../../custom/pagination/page/Pagination";
+import { InputSearcher } from "../../custom/InputSearcher";
 
 const pageSize = 10;
 const sort = 'invoiceNum,desc';
@@ -218,7 +219,7 @@ export const TableInvoices = ({
     const tableByOrder = () => (
         <div>
             <div className={`d-flex ${ projectId ? 'flex-row-reverse' : 'justify-content-between align-items-center' }`}>
-                { renderSearcher() }
+                { !orderId && <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } cleanSearcher={ cleanSearcher } /> }
                 { renderAddInvoiceButton() }
             </div>
             <div className='table-responsive text-nowrap'>

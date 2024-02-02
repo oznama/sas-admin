@@ -3,7 +3,7 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { save, update } from '../../../services/OrderService';
+import { getOrderPaid, save, update } from '../../../services/OrderService';
 import { handleDateStr, numberToString, mountMax, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../../custom/alerts/types/types';
@@ -57,9 +57,19 @@ export const DetailOrder = () => {
     });
   }
   
-  const fetchProject = id => {
-    getProjectById(id).then( response => {
+  const fetchProject = projectId => {
+    getProjectById(projectId).then( response => {
       dispatch(setProject(response));
+      fetchPaid(projectId);
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
+
+  const fetchPaid = projectId => {
+    getOrderPaid(projectId).then( response => {
+      dispatch(setPaid(response));
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -274,7 +284,9 @@ export const DetailOrder = () => {
     <div className='d-grid gap-2 col-6 mx-auto'>
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
-            { projectId === '0' && (
+            { 
+              // TODO: https://getbootstrap.com/docs/5.0/forms/form-control/#datalists
+              projectId === '0' && (
               <div className="row text-start">
                 <div className='col-12'>
                   <Select name="companyId" label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pId } required onChange={ onChangePId } />

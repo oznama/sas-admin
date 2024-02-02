@@ -57,8 +57,18 @@ export const getInvoices = async(page=0, size=10, sort='id,asc', filter='') => {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlOrders = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
-    const response = await api( urlOrders, request );
+    const urlInvoices = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const response = await api( urlInvoices, request );
     const invoices = await response.json();
     return invoices;
+};
+
+export const getInvoicePaid = async(orderId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const urlInvoices = `${context}/${orderId}/paid`;
+    const response = await api( urlInvoices, request );
+    const totalPaid = await response.json();
+    return totalPaid;
 };
