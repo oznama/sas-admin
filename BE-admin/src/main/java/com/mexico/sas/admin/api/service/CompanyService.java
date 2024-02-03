@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.service;
 
 import com.mexico.sas.admin.api.dto.company.*;
+import com.mexico.sas.admin.api.dto.project.ProjectFindDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Company;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ public interface CompanyService {
     void delete(Long id) throws CustomException;
     Page<CompanyPaggeableDto> findAll(String filter, Long type, Pageable pageable);
 
+    CompanyFindDto findByRfc(String rfc) throws CustomException;
     CompanyFindDto findById(Long id) throws CustomException;
     Company findEntityById(Long id) throws CustomException;
     List<CompanyFindSelectDto> getForSelect();

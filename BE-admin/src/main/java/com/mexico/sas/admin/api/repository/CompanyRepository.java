@@ -10,10 +10,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long>, JpaSpecificationExecutor<Company> {
     List<Company> findByActiveIsTrueAndEliminateIsFalse();
+
+    Optional<Company> findByRfc(String rfc);
 
     @Transactional
     @Modifying
