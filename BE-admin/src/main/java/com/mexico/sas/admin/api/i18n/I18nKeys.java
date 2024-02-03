@@ -51,7 +51,8 @@ public interface I18nKeys {
     String LABEL_DATE_PARAM = "label.date.param";
 
     String COMPANY_NOT_FOUND = "company.not.found";
-    String COMPANY_RFC_DUPLICATED = "company.key.duplicated";
+    String COMPANY_RFC_DUPLICATED = "company.rfc.duplicated";
+    String COMPANY_BYRFC_NOT_FOUND = "company.byrfc.not.found";
     String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
     String PROJECT_NOT_FOUND = "project.not.found";
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
