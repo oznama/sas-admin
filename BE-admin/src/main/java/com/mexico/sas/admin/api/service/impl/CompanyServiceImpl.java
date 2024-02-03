@@ -44,8 +44,8 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     @Override
     public CompanyFindDto save(CompanyDto companyDto) throws CustomException {
         Company company = from_M_To_N(companyDto, Company.class);
-        repository.save(company);
         validationSave(companyDto, company);
+        repository.save(company);
         save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_INSERT,
                 I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         CompanyFindDto companyFindDto = from_M_To_N(companyDto, CompanyFindDto.class);
@@ -104,7 +104,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
 
     @Override
     public CompanyFindDto findByRfc(String rfc) throws CustomException {
-        System.out.println("Aqui va a buscar el rfc: "+rfc);
+        log.debug("Findinf company by RFC: {}", rfc);
         return from_M_To_N(repository.findByRfc(rfc)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.COMPANY_NOT_FOUND, rfc))),
                 CompanyFindDto.class);
@@ -152,7 +152,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     }
 
     private void validationSave(CompanyDto companyDto, Company company) throws CustomException {
-        System.out.println("Aqui se esta llamando el validationSave: "+companyDto.getRfc());
+        log.debug("Aqui se esta llamando el validationSave {}", companyDto.getRfc());
         validateRfc(companyDto.getRfc());
         // TODO: Agregar validaciones que se necesiten
         company.setCreatedBy(getCurrentUser().getUserId());
@@ -160,11 +160,12 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
 
     private void validateRfc(String rfc) throws CustomException {
         try {
-            System.out.println("Aqui esta en el validateRFC: "+rfc);
-            findByRfc(rfc);
+            log.debug("Aqui esta en el validateRFC: {}", rfc);
+            CompanyFindDto companyDto = findByRfc(rfc);
+            log.debug("RFC {} already exist for company {} {}", rfc, companyDto.getId(), companyDto.getName());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.COMPANY_RFC_DUPLICATED, rfc), null);
         } catch (CustomException e) {
-            System.out.println("Aqui cacho una exception: "+e);
+            log.error("Validating RFC Exception: {}", e.getMessage());
             if ( e instanceof BadRequestException)
                 throw e;
         }
