@@ -121,7 +121,7 @@ export const DetailProject = () => {
                 <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ projectId && !project.active }
                     value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ projectId && !project.active }
-                    value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
+                    value={ description } required onChange={ onChangeDesc } maxLength={ 255 } />
                 <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ projectId && !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 { renderCreatedBy() }
