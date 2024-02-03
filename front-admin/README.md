@@ -9,9 +9,10 @@ Currently, two official plugins are available:
 
 React Date Picker is used in this project
 
-## Install React Date Picker
+## Install Dependencys
 ```bash
 yarn add react-datepicker
+yarn add libphonenumber-js
 ```
 
 

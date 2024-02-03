@@ -1,20 +1,17 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-//import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
-import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
+import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
 import { setModalChild } from '../../../store/modal/modalSlice';
-import { InputText } from '../custom/InputText';
+import { FormApplication } from '../applications/page/FormApplication';
 
 export const TableApplication = ({
     pageSize = 10,
     catalogId,
 }) => {
-    console.log(catalogId);
     const dispatch = useDispatch();
 
     const { permissions, user } = useSelector( state => state.auth );
@@ -22,59 +19,8 @@ export const TableApplication = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-
-    const [cValue, setCValue] = useState('');
-    const onChangeCValue = ({ target }) => {
-        console.log('Por aqui pasa el nombre: '+target.value)
-        setCValue(target.value);
-    }
-    const [description, setDescription] = useState('');
-    const onChangeDescription = ({ target }) => setDescription(target.value);
     
     const [filter, setFilter] = useState('')
-
-    const showModal = () => dispatch( setModalChild(renderModal()) );
-
-    const onSubmit = event => {
-        event.preventDefault()
-        const data = new FormData(event.target)
-        const request = Object.fromEntries(data.entries())
-        if (id){
-            updateChild(request);
-        }else{
-            saveChild(request);
-        }
-        dispatch( setModalChild(null) )
-    }
-
-    const renderModal = () => {
-        console.log('Value: '+cValue+' Description: '+description)
-        return(
-        <div className='p-5 bg-white rounded-3'>
-
-            {/* TODO Formulario */}
-            <div className='d-grid gap-2 col-6 mx-auto'>
-                <form className="needs-validation" onSubmit={ onSubmit }>
-                    
-                    <div className="row text-start">
-                        <div className='col-12'>
-                            <InputText name='value' label='Nombre:*' placeholder='Escribe el nombre' value={ cValue } required onChange={ onChangeCValue } maxLength={ 250 } />
-                        </div>
-                    </div>
-                    <div className="row text-start">
-                        <div className='col-12'>
-                            <InputText name='description' label='Descripcion:' placeholder='Escribe la descripcion' value={ description } required onChange={ onChangeDescription } maxLength={ 250 } />
-                        </div>
-                    </div>
-                    <div className="pt-3 d-flex flex-row-reverse">
-                        <button type="submit" className="btn btn-primary">Guardar</button>
-                        <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cancelar</button>
-                    </div>
-                </form>
-            </div>
-            {/* TODO Forumulario */}
-        </div>
-    )}
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
@@ -92,42 +38,23 @@ export const TableApplication = ({
             });
     }
     
-
-    // const fetchSelects = () => {
-        
-    //     getCompanySelect().then( response => {
-    //         setCompanies(response);
-    //     }).catch( error => {
-    //         console.log(error);
-    //     });
-    // }
-    
-
-    // useEffect(() => {
-    //     // fetchSelects();
-    //     fetchChilds(currentPage);
-    // }, [currentPage]);
-    
     useEffect(() => {
         fetchChilds();
-        if (id) {
-            const catSelected = catalogChilds.find(cat => cat.id === id);
-            setCValue(catSelected.value);
-            setDescription(catSelected.description ?? '');
-            showModal();
-        }
-    }, [id]);  
+    }, []);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
         fetchChilds(currentPage);
     }
 
+    const onCancelModal = () => {
+        dispatch( setModalChild(null) );
+        fetchChilds();
+    }
+    const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
+
     const handleAddCompany = () => {
-        // navigate(`/company/add`);
-        setCValue('');
-        setDescription('');
-        showModal();
+        showModal(null);
     }
 
     const renderAddButton = () => permissions.canCreateCat && (
@@ -164,47 +91,14 @@ export const TableApplication = ({
 
     const handledSelect = id => {
         setId(id);
-        const catSelected = catalogChilds.find( cat => cat.id === id );
-        console.log(catSelected);
-        setCValue(catSelected.value);
-        setDescription(catSelected.description ?? '');
-        showModal();
+        const catalogChild = catalogChilds.find( cat => cat.id === id );
+        showModal(catalogChild);
     }
 
     const renderStatus = (status) => {
         const backColor = status === 2000100003 ? 'bg-danger' : ( status === 2000100001 ? 'bg-success' : ( status === 2000100002 ? 'bg-warning' : '') );
         const statusDesc = status === 2000100003 ? 'Eliminado' : ( status === 2000100002 ? 'Inactivo' : ( status === 2000100001 ? 'Activo' : '') );
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white `}>{ statusDesc }</span>);
-    }
-
-    const saveChild = request => {
-        save(request).then( response => {
-            if(response.code && response.code !== 201) {
-            displayNotification(dispatch, response.message, alertType.error);
-            } else {
-            displayNotification(dispatch, '¡El registro se ha creado correctamente!', success);
-            setCatalogChilds([...catalogChilds, response]);
-            cleanForm();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
-    }
-
-    const updateChild = request => {
-        update(id, request).then( response => {
-            if(response.code && response.code !== 201) {
-            displayNotification(dispatch, response.message, alertType.error);
-            } else {
-            displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
-            fetchChilds();
-            cleanForm();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
     }
 
     const deleteChild = catalogId => {
