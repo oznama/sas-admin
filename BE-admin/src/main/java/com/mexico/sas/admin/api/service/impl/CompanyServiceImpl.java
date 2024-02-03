@@ -4,11 +4,14 @@ import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.company.*;
+import com.mexico.sas.admin.api.dto.project.ProjectDto;
+import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Company;
+import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.CompanyRepository;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
@@ -42,10 +45,11 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     public CompanyFindDto save(CompanyDto companyDto) throws CustomException {
         Company company = from_M_To_N(companyDto, Company.class);
         repository.save(company);
-        CompanyFindDto companyFindDto = from_M_To_N(companyDto, CompanyFindDto.class);
-        companyFindDto.setId(company.getId());
+        validationSave(companyDto, company);
         save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_INSERT,
                 I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+        CompanyFindDto companyFindDto = from_M_To_N(companyDto, CompanyFindDto.class);
+        companyFindDto.setId(company.getId());
         return companyFindDto;
     }
 
@@ -56,6 +60,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         String message = ChangeBeanUtils.checkCompany(company, companyUpdateDto);
 
         if(!message.isEmpty()) {
+            validateRfc(company.getRfc());
             repository.save(company);
             save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
@@ -94,6 +99,15 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
             }
         } );
         return new PageImpl<>(companyPaggeableDtos, pageable, companies.getTotalElements());
+    }
+
+
+    @Override
+    public CompanyFindDto findByRfc(String rfc) throws CustomException {
+        System.out.println("Aqui va a buscar el rfc: "+rfc);
+        return from_M_To_N(repository.findByRfc(rfc)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.COMPANY_NOT_FOUND, rfc))),
+                CompanyFindDto.class);
     }
 
     @Override
@@ -135,6 +149,25 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
 
 
         return companiesSelect;
+    }
+
+    private void validationSave(CompanyDto companyDto, Company company) throws CustomException {
+        System.out.println("Aqui se esta llamando el validationSave: "+companyDto.getRfc());
+        validateRfc(companyDto.getRfc());
+        // TODO: Agregar validaciones que se necesiten
+        company.setCreatedBy(getCurrentUser().getUserId());
+    }
+
+    private void validateRfc(String rfc) throws CustomException {
+        try {
+            System.out.println("Aqui esta en el validateRFC: "+rfc);
+            findByRfc(rfc);
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.COMPANY_RFC_DUPLICATED, rfc), null);
+        } catch (CustomException e) {
+            System.out.println("Aqui cacho una exception: "+e);
+            if ( e instanceof BadRequestException)
+                throw e;
+        }
     }
 
     private CompanyFindSelectDto getSelectSingle(Company company, List<SelectDto> employees) throws CustomException {
