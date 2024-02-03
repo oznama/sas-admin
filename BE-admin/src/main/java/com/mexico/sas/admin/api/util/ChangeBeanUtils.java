@@ -410,10 +410,28 @@ public class ChangeBeanUtils extends Utils {
             company.setAddress(companyUpdateDto.getAddress());
         }
 
+        if( validateStringNoRequiredUpdate(company.getInterior(), companyUpdateDto.getInterior()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.interior,
+                    company.getInterior(), companyUpdateDto.getInterior())).append(GeneralKeys.JUMP_LINE);
+            company.setInterior(companyUpdateDto.getInterior());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getExterior(), companyUpdateDto.getExterior()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.exterior,
+                    company.getExterior(), companyUpdateDto.getExterior())).append(GeneralKeys.JUMP_LINE);
+            company.setExterior(companyUpdateDto.getExterior());
+        }
+
         if( validateStringNoRequiredUpdate(company.getCp(), companyUpdateDto.getCp()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.cp,
                     company.getCp(), companyUpdateDto.getCp())).append(GeneralKeys.JUMP_LINE);
             company.setCp(companyUpdateDto.getCp());
+        }
+
+        if( validateStringNoRequiredUpdate(company.getLocality(), companyUpdateDto.getLocality()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.locality,
+                    company.getLocality(), companyUpdateDto.getLocality())).append(GeneralKeys.JUMP_LINE);
+            company.setLocality(companyUpdateDto.getLocality());
         }
 
         if( validateStringNoRequiredUpdate(company.getCity(), companyUpdateDto.getCity()) ) {

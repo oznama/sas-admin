@@ -6,7 +6,10 @@ CREATE TABLE companies (
     alias varchar(50),
     rfc varchar(15),
     address varchar(255),
+    interior varchar(10),
+    exterior varchar(10),
     cp varchar(7),
+    locality varchar(255),--colonia
     city varchar(255),
     state varchar(255),
     country varchar(255),

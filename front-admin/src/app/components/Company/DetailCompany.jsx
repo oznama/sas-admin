@@ -8,6 +8,7 @@ import { Select } from "../custom/Select";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
+import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
 export const DetailCompany = () => {
 
@@ -42,7 +43,7 @@ export const DetailCompany = () => {
     const onChangeName = ({ target }) => {
         setErrorName(null);
         if (!namePattern.test(target.value)) {
-            setErrorName('Raz&oacute;n Social de la empresa inválido.');
+            setErrorName('Razón Social de la empresa inválido.');
         }
         setName(target.value);
     }
@@ -60,7 +61,7 @@ export const DetailCompany = () => {
     const onChangeAddress = ({ target }) => setAddress(target.value);
     const [cp, setCp] = useState('');
     const [errorCp, setErrorCp] = useState('');
-    const cpPattern = /^[0-1]{4,7}$/;
+    const cpPattern = /^[0-9]{4,7}$/;
     const onChangeCp = ({ target }) => {
         setErrorCp(null);
         if (!cpPattern.test(target.value)) {
@@ -99,7 +100,37 @@ export const DetailCompany = () => {
         setCountry(target.value);
     }
     const [phone, setPhone] = useState('');
-    const onChangePhone = ({ target }) => setPhone(target.value);
+    const [errorPhone, setErrorPhone] = useState('');
+    const onChangePhone = ({ target }) => {
+        const phoneNumber = parsePhoneNumberFromString(target.value) // 'MX' es el indicativo de país para México
+        setErrorPhone('')
+        if (phoneNumber) {
+            if (phoneNumber.isPossible() &&  phoneNumber.isValid()) {
+                setErrorPhone('')
+                setPhone(target.value)
+                setFormattedPhone(phoneNumber.formatNational())
+            }else{  
+                setPhone(target.value)
+                setFormattedPhone('')
+                setErrorPhone("Teléfono invalido.")
+            }
+        } else {
+            setErrorPhone("Teléfono no válido, ingrese lada.");
+            setPhone(target.value)
+            setFormattedPhone('')
+        }
+    } 
+    const [formattedPhone, setFormattedPhone] = useState('');
+
+    const [interior, setInterior] = useState('');
+    const onChangeInterior = ({ target }) => setInterior(target.value);
+
+    const [exterior, setExterior] = useState('');
+    const onChangeExterior = ({ target }) => setExterior(target.value);
+
+    const [locality, setLocality] = useState('');
+    const onChangeLocality = ({ target }) => setLocality(target.value);
+
     const [ext, setExt] = useState('');
     const onChangeExt = ({ target }) => setExt(target.value);
 
@@ -110,7 +141,7 @@ export const DetailCompany = () => {
     const isModeEdit = ( id && !permissions.canEditComp );
 
     const onSubmit = event => {
-        if( errorRfc ) {
+        if( errorRfc && errorAlias && errorPhone ) {
             displayNotification(dispatch, 'corrige los errores', alertType.error);
         } else {
             event.preventDefault()
@@ -146,11 +177,15 @@ export const DetailCompany = () => {
             setAlias(response.alias);
             setEmailDomain(response.emailDomain);
             setAddress(response.address);
+            setInterior(response.interior);
+            setExterior(response.exterior);
             setCp(response.cp);
+            setLocality(response.locality);
             setCity(response.city);
             setState(response.state);
             setCountry(response.country);
             setPhone(response.phone);
+            setExt(response.ext);
             setType(response.type);
         }
     }).catch( error => {
@@ -206,7 +241,7 @@ export const DetailCompany = () => {
     
     const fetchSelects = () => {
     getCatalogChilds(1000000009).then( response => {
-        setTypes(response.filter( cat => cat.status === 2000100001 ));
+        setTypes(response.filter( cat => cat.id !== 2000900001 && cat.status === 2000100001 ));
     }).catch( error => {
         console.log(error);
     });
@@ -225,52 +260,63 @@ export const DetailCompany = () => {
     return (<div className='d-grid gap-2 col-6 mx-auto'>
                 <form className="needs-validation" onSubmit={ onSubmit }>
                 <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='rfc' label='RFC' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 12 } error={ errorRfc } />
+                    <div className='col-4'>
+                        <InputText name='rfc' label='RFC:*' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 12 } error={ errorRfc } />
                     </div>
-                    <div className='col-6'>
-                        <InputText name='name' label='Raz&oacute;n Social' placeholder='Escribe la raz&oacute;n social' disabled={isModeEdit} value={name} required onChange={onChangeName} maxLength={50} error={errorName} />
+                    <div className='col-4'>
+                        <InputText name='name' label='Raz&oacute;n Social:*' placeholder='Escribe la raz&oacute;n social' disabled={isModeEdit} value={name} required onChange={onChangeName} maxLength={50} error={errorName} />
                     </div>
-                </div>
-                <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='alias' label='Alias' placeholder='Escribe el alias' disabled={isModeEdit} value={alias} onChange={onChangeAlias} maxLength={50} error={errorAlias} />
-                    </div>
-                    <div className='col-6'>
-                        <InputText name='emailDomain' label='Dominio de correo' placeholder='Escribe el dominio de correo' disabled={ isModeEdit } value={ emailDomain } onChange={ onChangeEmailDomain } maxLength={ 50 } error={ errorEmailDomain } />
+                    <div className='col-4'>
+                        <InputText name='alias' label='Alias:' placeholder='Escribe el alias' disabled={isModeEdit} value={alias} onChange={onChangeAlias} maxLength={50} error={errorAlias} />
                     </div>
                 </div>
                 <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='address' label='Direcci&oacute;n' placeholder='Escribe la direcci&oacute;n' disabled={ isModeEdit } value={ address } onChange={ onChangeAddress } maxLength={ 50 } />
+                    <div className='col-4'>
+                        <InputText name='emailDomain' label='Dominio de correo:' placeholder='Escribe el dominio de correo' disabled={ isModeEdit } value={ emailDomain } onChange={ onChangeEmailDomain } maxLength={ 50 } error={ errorEmailDomain } />
                     </div>
-                    <div className='col-6'>
-                        <InputText name='cp' label='Codigo Postal' placeholder='Escribe el codigo postal' disabled={ isModeEdit } value={ cp } onChange={ onChangeCp } maxLength={ 7 } error={errorCp} />
+                    <div className='col-4'>
+                        <InputText name='address' label='Calle:' placeholder='Escribe la calle' disabled={ isModeEdit } value={ address } onChange={ onChangeAddress } maxLength={ 50 } />
                     </div>
-                </div>
-                <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='city' label='Ciudad' placeholder='Escribe la ciudad' disabled={ isModeEdit } value={ city } onChange={ onChangeCity } maxLength={ 50 } error={errorCity}/>
-                    </div>
-                    <div className='col-6'>
-                        <InputText name='state' label='Estado' placeholder='Escribe el estado' disabled={ isModeEdit } value={ state } onChange={ onChangeState } maxLength={ 50 } error={errorState}/>
+                    <div className='col-4'>
+                        <InputText name='exterior' label='# Exterior:' placeholder='Escribe el numero exterior' disabled={ isModeEdit } value={ exterior } onChange={ onChangeExterior } />
                     </div>
                 </div>
                 <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='country' label='Pais' placeholder='Escribe el pais' disabled={ isModeEdit } value={ country } onChange={ onChangeCountry } maxLength={ 50 } error={errorCountry}/>
+                    <div className='col-4'>
+                        <InputText name='interior' label='# Interior:' placeholder='Escribe el numero interior' disabled={ isModeEdit } value={ interior } onChange={ onChangeInterior } />
                     </div>
-                    <div className='col-6'>
-                        <InputText name='phone' label='Telefono' placeholder='Escribe telefono' disabled={ isModeEdit } value={ phone } onChange={ onChangePhone } maxLength={ 10 } />
+                    <div className='col-4'>
+                        <InputText name='cp' label='Codigo Postal:' placeholder='Escribe el codigo postal' disabled={ isModeEdit } value={ cp } onChange={ onChangeCp } maxLength={ 7 } error={errorCp} />
+                    </div>
+                    <div className='col-4'>
+                        <InputText name='locality' label='Localidad/Colonia:' placeholder='Escribe la colonia' disabled={ isModeEdit } value={ locality } onChange={ onChangeLocality } maxLength={50}/>
                     </div>
                 </div>
                 <div className="row text-start">
-                    <div className='col-6'>
-                        <InputText name='ext' label='Extencion' placeholder='Escribe extencion' disabled={ isModeEdit } value={ ext } onChange={ onChangeExt } maxLength={ 5 } />
+                    <div className='col-4'>
+                        <InputText name='city' label='Ciudad:' placeholder='Escribe la ciudad' disabled={ isModeEdit } value={ city } onChange={ onChangeCity } maxLength={ 50 } error={errorCity}/>
                     </div>
-                    <div className='col-6'>
-                        <Select name="type" label="Clasificaci&oacute;n" options={ types } disabled={ isModeEdit } value={ type } onChange={ onChangeType } />
+                    <div className='col-4'>
+                        <InputText name='state' label='Estado:' placeholder='Escribe el estado' disabled={ isModeEdit } value={ state } onChange={ onChangeState } maxLength={ 50 } error={errorState}/>
                     </div>
+                    <div className='col-4'>
+                        <InputText name='country' label='Pais:' placeholder='Escribe el pais' disabled={ isModeEdit } value={ country } onChange={ onChangeCountry } maxLength={ 50 } error={errorCountry}/>
+                    </div>
+                </div>
+                <div className="row text-start">
+                    
+                    <div className='col-4'>
+                    <InputText name='phone' label='Teléfono:' placeholder='Escribe teléfono' disabled={isModeEdit} value={phone} onChange={onChangePhone} maxLength={15} error={errorPhone} />
+                    </div>
+                    <div className='col-4'>
+                        <InputText name='ext' label='Extension:' placeholder='Escribe extension' disabled={ isModeEdit } value={ ext } onChange={ onChangeExt } maxLength={ 5 } />
+                    </div>
+                    <div className='col-4'>
+                        <Select name="type" label="Clasificaci&oacute;n:" options={ types } disabled={ isModeEdit } value={ type } onChange={ onChangeType } />
+                    </div>
+                </div>
+                <div className="row text-start">
+                    
                 </div>
                     <div className="pt-3 d-flex flex-row-reverse">
                         {permissions.canEditComp && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
