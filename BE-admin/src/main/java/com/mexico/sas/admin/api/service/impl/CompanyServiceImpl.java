@@ -104,9 +104,9 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
 
     @Override
     public CompanyFindDto findByRfc(String rfc) throws CustomException {
-        log.debug("Findinf company by RFC: {}", rfc);
+        log.debug("Findind company by RFC: {}", rfc);
         return from_M_To_N(repository.findByRfc(rfc)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.COMPANY_NOT_FOUND, rfc))),
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.COMPANY_BYRFC_NOT_FOUND, rfc))),
                 CompanyFindDto.class);
     }
 
