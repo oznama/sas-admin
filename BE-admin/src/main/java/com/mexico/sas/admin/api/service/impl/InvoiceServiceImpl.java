@@ -13,6 +13,7 @@ import com.mexico.sas.admin.api.model.Invoice;
 import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.InvoiceRepository;
+import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.InvoiceService;
 import com.mexico.sas.admin.api.service.OrderService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
@@ -45,6 +46,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private CatalogService catalogService;
+
     @Override
     public void save(InvoiceDto invoiceDto) throws CustomException {
         Invoice invoice = from_M_To_N(invoiceDto, Invoice.class);
@@ -67,7 +71,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     @Override
     public void update(Long invoiceId, InvoiceDto invoiceDto) throws CustomException {
         Invoice invoice = findEntityById(invoiceId);
-        String message = ChangeBeanUtils.checkInvoice(invoice, invoiceDto);
+        String message = ChangeBeanUtils.checkInvoice(invoice, invoiceDto, catalogService);
         log.debug("Updating invoice {} with {}, changes: {}", invoice, invoiceDto, message);
         if(!message.isEmpty()) {
             repository.save(invoice);

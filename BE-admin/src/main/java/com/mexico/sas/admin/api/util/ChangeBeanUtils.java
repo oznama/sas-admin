@@ -194,15 +194,15 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkOrder(Order order, OrderDto orderDto) {
+    public static String checkOrder(Order order, OrderDto orderDto, CatalogService catalogService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
         double currentAmount = doubleScale(order.getAmount().doubleValue());
         double newAmount = doubleScale(orderDto.getAmount().doubleValue());
         if( orderDto.getAmount() != null ) {
             if( currentAmount != newAmount ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.amount,
-                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Monto",
+                        formatCurrency(currentAmount), formatCurrency(newAmount))).append(GeneralKeys.JUMP_LINE);
                 order.setAmount(orderDto.getAmount());
                 order.setTax(orderDto.getTax());
                 order.setTotal(orderDto.getTotal());
@@ -211,7 +211,7 @@ public class ChangeBeanUtils extends Utils {
         try {
             currentDate = dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( currentDate == null || !currentDate.equals(orderDto.getOrderDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.orderDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de orden",
                         currentDate, orderDto.getOrderDate())).append(GeneralKeys.JUMP_LINE);
                 order.setOrderDate(stringToDate(orderDto.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -220,14 +220,14 @@ public class ChangeBeanUtils extends Utils {
         }
 
         if( !order.getRequisition().equals(orderDto.getRequisition())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisition,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Requisición",
                     order.getRequisition(), orderDto.getRequisition())).append(GeneralKeys.JUMP_LINE);
             order.setRequisition(orderDto.getRequisition());
         }
         try {
             currentDate = dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( !currentDate.equals(orderDto.getRequisitionDate())) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisitionDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de requisición",
                         currentDate, orderDto.getRequisitionDate())).append(GeneralKeys.JUMP_LINE);
                 order.setRequisitionDate(stringToDate(orderDto.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -240,8 +240,10 @@ public class ChangeBeanUtils extends Utils {
         }
         if( (order.getStatus() == null && orderDto.getStatus() != null)
                 || ( order.getStatus() != null && orderDto.getStatus() != null && !order.getStatus().equals(orderDto.getStatus())) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.status,
-                    order.getStatus(), orderDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de la orden",
+                    catalogService.findById(order.getStatus()).getValue(),
+                    catalogService.findById(orderDto.getStatus()).getValue())
+            ).append(GeneralKeys.JUMP_LINE);
             order.setStatus(orderDto.getStatus());
             if( orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) || orderDto.getStatus().equals(CatalogKeys.ORDER_STATUS_EXPIRED) ) {
                 order.setActive(false);
@@ -253,43 +255,50 @@ public class ChangeBeanUtils extends Utils {
         }
         if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
                 || ( order.getRequisitionStatus() != null && orderDto.getRequisitionStatus() != null && !order.getRequisitionStatus().equals(orderDto.getRequisitionStatus())) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, OrderDto.Fields.requisitionStatus,
-                    order.getRequisitionStatus(), orderDto.getRequisitionStatus())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de requisición",
+                    catalogService.findById(order.getRequisitionStatus()).getValue(),
+                    catalogService.findById(orderDto.getRequisitionStatus()).getValue())
+            ).append(GeneralKeys.JUMP_LINE);
             order.setRequisitionStatus(orderDto.getRequisitionStatus());
         }
         return sb.toString().trim();
     }
 
-    public static String checkInvoice(Invoice invoice, InvoiceDto invoiceDto) {
+    public static String checkInvoice(Invoice invoice, InvoiceDto invoiceDto, CatalogService catalogService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
         if( invoiceDto.getAmount() != null ) {
             double currentAmount = doubleScale(invoice.getAmount().doubleValue());
             double newAmount = doubleScale(invoiceDto.getAmount().doubleValue());
             if( currentAmount != newAmount ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.amount,
-                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Monto",
+                        formatCurrency(currentAmount), formatCurrency(newAmount))).append(GeneralKeys.JUMP_LINE);
                 invoice.setAmount(invoiceDto.getAmount());
             }
             currentAmount = doubleScale(invoice.getTax().doubleValue());
             newAmount = doubleScale(invoiceDto.getTax().doubleValue());
             if( currentAmount != newAmount ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.tax,
-                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Iva",
+                        formatCurrency(currentAmount), formatCurrency(newAmount))).append(GeneralKeys.JUMP_LINE);
                 invoice.setTax(invoiceDto.getTax());
             }
             currentAmount = doubleScale(invoice.getTotal().doubleValue());
             newAmount = doubleScale(invoiceDto.getTotal().doubleValue());
             if( currentAmount != newAmount ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.total,
-                        currentAmount, newAmount)).append(GeneralKeys.JUMP_LINE);
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Total",
+                        formatCurrency(currentAmount), formatCurrency(newAmount))).append(GeneralKeys.JUMP_LINE);
                 invoice.setTotal(invoiceDto.getTotal());
+            }
+            if( !invoice.getPercentage().equals(invoiceDto.getPercentage()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Porcentaje",
+                        invoice.getPercentage(), invoiceDto.getPercentage())).append(GeneralKeys.JUMP_LINE);
+                invoice.setPercentage(invoiceDto.getPercentage());
             }
         }
         try {
             currentDate = dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( currentDate == null || !currentDate.equals(invoiceDto.getIssuedDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.issuedDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de emisión",
                         currentDate, invoiceDto.getIssuedDate())).append(GeneralKeys.JUMP_LINE);
                 invoice.setIssuedDate(stringToDate(invoiceDto.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -299,7 +308,7 @@ public class ChangeBeanUtils extends Utils {
         try {
             currentDate = dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
             if( currentDate == null || !currentDate.equals(invoiceDto.getPaymentDate()) ) {
-                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.paymentDate,
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de pago",
                         currentDate, invoiceDto.getPaymentDate())).append(GeneralKeys.JUMP_LINE);
                 invoice.setPaymentDate(stringToDate(invoiceDto.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY));
             }
@@ -312,8 +321,10 @@ public class ChangeBeanUtils extends Utils {
         }
         if( (invoice.getStatus() == null && invoiceDto.getStatus() != null)
                 || ( invoice.getStatus() != null && invoiceDto.getStatus() != null && !invoice.getStatus().equals(invoiceDto.getStatus()) ) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, InvoiceDto.Fields.status,
-                    invoice.getStatus(), invoiceDto.getStatus())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus",
+                    catalogService.findById(invoice.getStatus()).getValue(),
+                    catalogService.findById(invoiceDto.getStatus()).getValue())
+            ).append(GeneralKeys.JUMP_LINE);
             invoice.setStatus(invoiceDto.getStatus());
             if( invoiceDto.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED) ) {
                 invoice.setActive(false);

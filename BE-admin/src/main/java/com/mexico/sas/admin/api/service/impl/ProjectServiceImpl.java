@@ -162,7 +162,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     @Override
     public List<SelectDto> getForSelect() {
-        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalse());
+        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalseOrderByKeyAscDescriptionAsc());
     }
 
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
