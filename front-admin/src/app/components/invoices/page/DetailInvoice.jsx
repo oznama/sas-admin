@@ -20,7 +20,7 @@ export const DetailInvoice = () => {
 
   const dispatch = useDispatch();
   const { project, order, paid } = useSelector( state => state.projectReducer );
-  const [totalPaid, setTotalPaid] = useState(paid.amount);
+  const [totalPaid, setTotalPaid] = useState(paid.amount ? paid.amount : 0);
   const { permissions } = useSelector( state => state.auth );
   const { projectId, orderId, id } = useParams();
 
@@ -32,7 +32,7 @@ export const DetailInvoice = () => {
   const [percentage, setPercentage] = useState(0);
   const [currentTab, setCurrentTab] = useState(1);
   const [amount, setAmount] = useState('');
-  const [amountInDb, setAmountInDb] = useState();
+  const [amountInDb, setAmountInDb] = useState(0);
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
   const [observations, setObservations] = useState('');
@@ -109,7 +109,7 @@ export const DetailInvoice = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAmount(formatter.format(response.amount));
-        setAmountInDb(response.amount);
+        setAmountInDb(response.amount ? response.amount : 0);
         setTax(formatter.format(response.tax));
         setTotal(formatter.format(response.total));
         setInvoiceNum(response.invoiceNum ? response.invoiceNum : '');
@@ -398,7 +398,7 @@ export const DetailInvoice = () => {
 
   const titleWithOrder = `${ oId !== '' ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Factura nueva';
- 
+
   return (
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
