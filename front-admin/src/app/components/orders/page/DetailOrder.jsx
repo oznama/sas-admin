@@ -192,7 +192,9 @@ export const DetailOrder = () => {
       tax: removeCurrencyFormat(tax),
       total: removeCurrencyFormat(total)
     };
-    if ( (project.amount - paid.amount !== 0) && Number(removeCurrencyFormat(amount)) !== (project.amount - paid.amount) ) {
+    const isAmountPending = (project.amount - paid.amount) !== 0;
+    const isAmountDiff = removeCurrencyFormat(amount) !== (project.amount - paid.amount);
+    if ( isAmountPending && isAmountDiff ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
       persistOrder(request);
@@ -285,7 +287,7 @@ export const DetailOrder = () => {
       <div className='text-start'>
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
-            <li key={ 1 }><p className="h3">Valor del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span></p></li>
+            {/* <li key={ 1 }><p className="h3">Monto pagado: <span className='text-primary'>{ formatter.format(paid.amount) }</span></p></li> */}
             <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
             <li key={ 2 }><p className="h3">Monto capturado: <span className='text-success'>{ amount }</span></p></li>
           </ul>
