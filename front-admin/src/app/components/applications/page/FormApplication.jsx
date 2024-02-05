@@ -24,7 +24,7 @@ export const FormApplication = ({
         const data = new FormData(event.target)
         const request = Object.fromEntries(data.entries());
         request.catalogParent = 1000000004;
-        if (catalogChild.id){
+        if (catalogChild){
             updateChild(request);
         }else{
             saveChild(request);
