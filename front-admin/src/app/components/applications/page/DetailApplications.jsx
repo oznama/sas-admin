@@ -84,7 +84,7 @@ export const DetailApplications = () => {
     //     console.log(error);
     //   });
     
-    getEmployess(true)
+    getEmployess()
       .then( response => {
         setCatEmployees(response);
       }).catch( error => {

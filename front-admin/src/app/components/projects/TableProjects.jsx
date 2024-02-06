@@ -147,7 +147,7 @@ export const TableProject = ({
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             { permissions.isAdminRoot && (<td className="text-start" style={ styleTableRow }>{ createdBy }</td>) }
             { permissions.isAdminRoot && (<td className="text-center" style={ styleTableRow }>{ creationDate }</td>) }
-            { permissions.isAdminRoot && (<th className="text-start" style={ styleTableRow }>{ company }</th>) }
+            { permissions.isAdminSas && (<th className="text-start" style={ styleTableRow }>{ company }</th>) }
             <td className="text-start" style={ styleTableRow }>{ projectManager }</td>
             <td className="text-center" style={ styleTableRow }>{ installationDate }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ amount }</td>
@@ -188,7 +188,7 @@ export const TableProject = ({
                             {/* <th className="text-center fs-6" scope="col">Status</th> */}
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Creado por</th>) }
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>) }
-                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Cliente</th>) }
+                            { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Empresa</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
