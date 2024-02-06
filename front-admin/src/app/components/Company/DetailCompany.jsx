@@ -120,7 +120,28 @@ export const DetailCompany = () => {
             setFormattedPhone('')
         }
     } 
-    const [formattedPhone, setFormattedPhone] = useState('');
+    const [cellphone, setCellphone] = useState('');
+    const [errorCellphone, setErrorCellphone] = useState('');
+    const onChangeCellphone = ({ target }) => {
+        const cellphoneNumber = parsePhoneNumberFromString(target.value) // 'MX' es el indicativo de país para México
+        setErrorCellphone('')
+        if (cellphoneNumber) {
+            if (cellphoneNumber.isPossible() &&  cellphoneNumber.isValid()) {
+                setErrorCellphone('')
+                setCellphone(target.value)
+                setFormattedCellphone(cellphoneNumber.formatNational())
+            }else{  
+                setCellphone(target.value)
+                setFormattedCellphone('')
+                setErrorCellphone("Teléfono celular invalido.")
+            }
+        } else {
+            setErrorCellphone("Teléfono celular no válido, ingrese lada.");
+            setCellphone(target.value)
+            setFormattedCellphone('')
+        }
+    }
+    const [formattedCellphone, setFormattedCellphone] = useState('');
 
     const [interior, setInterior] = useState('');
     const onChangeInterior = ({ target }) => setInterior(target.value);
@@ -185,6 +206,7 @@ export const DetailCompany = () => {
             setState(response.state);
             setCountry(response.country);
             setPhone(response.phone);
+            setCellphone(response.cellphone);
             setExt(response.ext);
             setType(response.type);
         }
@@ -306,11 +328,16 @@ export const DetailCompany = () => {
                 <div className="row text-start">
                     
                     <div className='col-4'>
-                    <InputText name='phone' label='Teléfono:' placeholder='Escribe teléfono' disabled={isModeEdit} value={phone} onChange={onChangePhone} maxLength={15} error={errorPhone} />
+                        <InputText name='phone' label='Teléfono:' placeholder='Escribe teléfono' disabled={isModeEdit} value={phone} onChange={onChangePhone} maxLength={15} error={errorPhone} />
                     </div>
                     <div className='col-4'>
                         <InputText name='ext' label='Extension:' placeholder='Escribe extension' disabled={ isModeEdit } value={ ext } onChange={ onChangeExt } maxLength={ 5 } />
                     </div>
+                    <div className='col-4'>
+                    <InputText name='cellphone' label='Teléfono celular:' placeholder='Escribe teléfono celular' disabled={isModeEdit} value={cellphone} onChange={onChangeCellphone} maxLength={20} error={errorCellphone} />
+                    </div>
+                </div>
+                <div className="row text-start">
                     <div className='col-4'>
                         <Select name="type" label="Clasificaci&oacute;n:" options={ types } disabled={ isModeEdit } value={ type } onChange={ onChangeType } />
                     </div>

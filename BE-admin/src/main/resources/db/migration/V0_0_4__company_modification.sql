@@ -1,0 +1,1 @@
+ALTER TABLE companies ADD cellphone varchar(20);
