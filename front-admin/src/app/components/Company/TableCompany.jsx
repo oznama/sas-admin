@@ -137,6 +137,7 @@ export const TableCompany = ({
         state,
         // country,
         phone,
+        cellphone,
         ext,
         active
     }) => (
@@ -150,7 +151,7 @@ export const TableCompany = ({
             <td className="text-start">{ city }</td>*/}
             <td className="text-start">{ state }</td>
             {/*<td className="text-start">{ country }</td> */}
-            <td className="text-start">{ phone }</td>
+            <td className="text-start">{ phone ? phone : cellphone  }</td>
             <td className="text-start">{ ext }</td>
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">

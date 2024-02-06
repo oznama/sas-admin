@@ -469,6 +469,12 @@ public class ChangeBeanUtils extends Utils {
             company.setPhone(companyUpdateDto.getPhone());
         }
 
+        if( validateStringNoRequiredUpdate(company.getCellphone(), companyUpdateDto.getCellphone()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.cellphone,
+                    company.getCellphone(), companyUpdateDto.getCellphone())).append(GeneralKeys.JUMP_LINE);
+            company.setCellphone(companyUpdateDto.getCellphone());
+        }
+
         if( validateStringNoRequiredUpdate(company.getExt(), companyUpdateDto.getExt()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.ext,
                     company.getExt(), companyUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);

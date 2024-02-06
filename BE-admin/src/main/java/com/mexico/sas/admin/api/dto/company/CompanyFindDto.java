@@ -24,6 +24,7 @@ public class CompanyFindDto implements Serializable {
     private String state;
     private String country;
     private String phone;
+    private String cellphone;
     private String ext;
     private String emailDomain;
     private Long type;
