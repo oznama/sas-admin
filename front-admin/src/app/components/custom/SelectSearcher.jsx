@@ -27,7 +27,7 @@ export const SelectSearcher = ({
                     required={ required }
                     onChange={ onChange }
                     placeholder={ placeholder }
-                    autocomplete="off" />
+                    autoComplete="off" />
                 <datalist id="datalistOptions">
                     { renderOptions() }
                 </datalist>

@@ -2,11 +2,11 @@ import { api, getHeaders } from '../api/Api';
 
 const context = 'employees';
 
-export const getEmployess = async(withDevelopers) => {
+export const getEmployess = async() => {
     const request = {
         headers: getHeaders()
     }
-    const url = `${context}/select${ withDevelopers ? '/developers' : '' }`;
+    const url = `${context}/select`;
     const response = await api( url, request );
     return await response.json();
 };
@@ -16,6 +16,15 @@ export const getEmployessByCompanyId = async(companyId) => {
         headers: getHeaders()
     }
     const url = `${context}/select/${ companyId }`;
+    const response = await api( url, request );
+    return await response.json();
+};
+
+export const getEmployessByCompanyIdAndPosition = async(companyId, positionId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const url = `${context}/select/${ companyId }/${ positionId }`;
     const response = await api( url, request );
     return await response.json();
 };

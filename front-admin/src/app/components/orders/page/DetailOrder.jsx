@@ -11,7 +11,7 @@ import { TableLog } from '../../custom/TableLog';
 import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
 import { getCatalogChilds } from '../../../services/CatalogService';
-import { setCurrentOrdTab, setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
+import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
 import { getProjectById, getProjectSelect } from '../../../services/ProjectService';
 import { setModalChild } from '../../../../store/modal/modalSlice';
@@ -115,18 +115,20 @@ export const DetailOrder = () => {
   }, []);
 
   const onChangeAmount = ({ target }) => {
-    if( target.value === '' ) {
+    const amount = target.value;
+    if( amount === '' ) {
       setAmount('');
       setTax('');
       setTotal('');
-    } else if( isNumDec(target.value) ) {
-      const amount = Number(target.value);
+      dispatch( setPaid( { ...paid, amount: 0 } ) )
+    } else if( isNumDec(amount) ) {
       if( amount >= 0 && amount <= mountMax ) {
-        const tax = amount * taxRate;
-        const total = amount + tax;
-        setAmount(target.value);
+        const tax = Number(amount) * taxRate;
+        const total = Number(amount) + tax;
+        setAmount(amount);
         setTax(tax.toFixed(2));
         setTotal(total.toFixed(2));
+        dispatch( setPaid( { ...paid, amount: amount } ) )
       }
     }
   }
@@ -190,7 +192,9 @@ export const DetailOrder = () => {
       tax: removeCurrencyFormat(tax),
       total: removeCurrencyFormat(total)
     };
-    if ( Number(removeCurrencyFormat(amount)) !== (project.amount - paid.amount) ) {
+    const isAmountPending = (project.amount - paid.amount) !== 0;
+    const isAmountDiff = removeCurrencyFormat(amount) !== (project.amount - paid.amount);
+    if ( isAmountPending && isAmountDiff ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
       persistOrder(request);
@@ -203,11 +207,7 @@ export const DetailOrder = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Orden agregada correctamente!', alertType.success);
-        if( projectId === '0' ) {
-          navigate('/orders');
-        } else {
-          navigate(`/project/${pId}/edit`, { replace: true });
-        }
+        navigate(`/project/${pId}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error);
@@ -237,10 +237,13 @@ export const DetailOrder = () => {
       saveOrder(request);
     }
     dispatch( setModalChild(null) );
+    if( projectId === '0' ) {
+      dispatch( setCurrentTab(3) );
+    }
   }
 
   const renderSaveButton = () => {
-    const saveButton = (<button type="submit" className="btn btn-primary">Guardar</button>);
+    const saveButton = (<button type="submit" className="btn btn-primary" disabled={ pId === '' }>Guardar</button>);
     return ( ( id && permissions.canEditOrd ) || permissions.canCreateOrd ) ? saveButton : null;
   };
 
@@ -284,8 +287,9 @@ export const DetailOrder = () => {
       <div className='text-start'>
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-primary'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
-            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-primary'>{ amount }</span></p></li>
+            {/* <li key={ 1 }><p className="h3">Monto pagado: <span className='text-primary'>{ formatter.format(paid.amount) }</span></p></li> */}
+            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
+            <li key={ 2 }><p className="h3">Monto capturado: <span className='text-success'>{ amount }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
       </div>
@@ -358,7 +362,7 @@ export const DetailOrder = () => {
             </div>
           </div>
           <div className="pt-3 d-flex flex-row-reverse">
-              { (!id || (id && order.active)) && renderSaveButton() }
+              { ( !id || (id && order.active) ) && renderSaveButton() }
               &nbsp;
               <button type="button" className="btn btn-danger" onClick={ () => navigate( projectId !== '0' ? `/project/${ projectId }/edit` : '/orders') }>Cancelar</button>
           </div>
