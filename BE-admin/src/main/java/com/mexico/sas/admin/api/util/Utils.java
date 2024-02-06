@@ -310,15 +310,11 @@ public class Utils {
         return input;
     }
 
-    protected List<Long> bossesPositions() {
-        return Arrays.asList(
-                CatalogKeys.EMPLOYEE_POSITION_DR,
-                CatalogKeys.EMPLOYEE_POSITION_SD,
-                CatalogKeys.EMPLOYEE_POSITION_GR);
-    }
-
     protected List<Long> bossesAndPmPositions() {
-        return Arrays.asList(CatalogKeys.EMPLOYEE_POSITION_PM);
+        return Arrays.asList(CatalogKeys.EMPLOYEE_POSITION_DR,
+                CatalogKeys.EMPLOYEE_POSITION_SD,
+                CatalogKeys.EMPLOYEE_POSITION_GR,
+                CatalogKeys.EMPLOYEE_POSITION_PM);
     }
 
     protected List<Long> catalogsNotIn() {

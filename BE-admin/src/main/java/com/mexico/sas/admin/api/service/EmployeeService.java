@@ -22,8 +22,8 @@ public interface EmployeeService {
 
     EmployeeFindDto findByCompanyAndId(Long companyId, Long id) throws CustomException;
 
-    List<SelectDto> getForSelect(Boolean developers);
-    List<SelectDto> getForSelect(Long companyId, Boolean developer, List<Long> positionIds);
-    List<SelectDto> getForSelect(Long companyId, Boolean developer, Long positionId);
+    List<SelectDto> getForSelect();
+    List<SelectDto> getForSelect(Long companyId, List<Long> positionIds);
+    List<SelectDto> getForSelect(Long companyId, Long positionId);
     List<SelectDto> getForSelect(Long companyId);
 }

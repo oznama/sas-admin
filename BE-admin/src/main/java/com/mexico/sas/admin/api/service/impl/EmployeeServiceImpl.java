@@ -130,20 +130,17 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public List<SelectDto> getForSelect(Boolean developers) {
-        return getForSelect(getCurrentUser().getCompanyId(), developers, bossesAndPmPositions());
+    public List<SelectDto> getForSelect() {
+        return getForSelect(getCurrentUser().getCompanyId(), bossesAndPmPositions());
     }
 
     @Override
-    public List<SelectDto> getForSelect(Long companyId, Boolean developers, List<Long> positionIds) {
-        List<Employee> employees = getCurrentUser().getRoleId().equals(GeneralKeys.ROOT_USER_ID)
-                || (companyId.equals(CatalogKeys.COMPANY_SAS) && !developers) ? repository.findAll()
-                : repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds);
-        return getSelect(employees);
+    public List<SelectDto> getForSelect(Long companyId, List<Long> positionIds) {
+        return getSelect(repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds));
     }
 
     @Override
-    public List<SelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
+    public List<SelectDto> getForSelect(Long companyId, Long positionId) {
         return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
     }
 

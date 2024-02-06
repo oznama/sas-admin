@@ -47,17 +47,17 @@ public class ChangeBeanUtils extends Utils {
         StringBuilder sb = new StringBuilder();
 
         if( validateStringRequiredUpdate(catalog.getValue(), catalogUpdateDto.getValue()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CatalogUpdateDto.Fields.value,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Valor",
                     catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
         }
         if( validateStringRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.description,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), "Descripción",
                     catalog.getDescription(), catalogUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             catalog.setDescription(catalogUpdateDto.getDescription());
         }
         if( validateLongNoRequiredUpdate(catalog.getStatus(), catalogUpdateDto.getStatus()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), CatalogUpdateDto.Fields.status,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), "Estatus",
                     catalog.getStatus(), catalogUpdateDto.getStatus())).append(GeneralKeys.JUMP_LINE);
             catalog.setStatus(catalogUpdateDto.getStatus());
         }

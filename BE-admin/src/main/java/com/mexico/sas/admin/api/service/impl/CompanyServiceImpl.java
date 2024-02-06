@@ -123,25 +123,31 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
 
     @Override
     public List<CompanyFindSelectDto> getForSelect() {
+        log.debug("Getting Select Company");
         List<Company> companies = repository.findByActiveIsTrueAndEliminateIsFalse();
         List<CompanyFindSelectDto> companiesSelect = new ArrayList<>();
 
         if( getCurrentUser().getCompanyId().equals(CatalogKeys.COMPANY_SAS) ) {
+            log.debug("The current user is SAS");
             companies.forEach( company -> {
+                log.debug("Setting users for {} {}", company.getId(), company.getName());
                 try {
                     if( company.getId().equals(CatalogKeys.COMPANY_SAS) ) {
-                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, bossesPositions())));
+                        log.debug("Getting employees without bosses for SAS");
+                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId()/*, bossesPositions()*/)));
                     } else {
-                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM)));
+                        log.debug("Getting employees for {} {}", company.getId(), company.getName());
+                        companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), CatalogKeys.EMPLOYEE_POSITION_PM)));
                     }
                 } catch (CustomException e) {
                     log.error("Impossible add company {}", company.getId());
                 }
             });
         } else {
+            log.debug("The current user is NOT SAS");
             try {
                 Company company = findEntityById(getCurrentUser().getCompanyId());
-                companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), false, CatalogKeys.EMPLOYEE_POSITION_PM)));
+                companiesSelect.add(getSelectSingle(company, employeeService.getForSelect(company.getId(), CatalogKeys.EMPLOYEE_POSITION_PM)));
             } catch (CustomException e) {
                 log.error("Impossible add company, {}", e.getMessage());
             }

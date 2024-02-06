@@ -213,7 +213,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         if( projectDto.getInstallationDate() != null && !projectDto.getInstallationDate().isEmpty() )
             project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
         validateKey(projectDto.getKey());
-        project.setCompany(new Company(getCurrentUser().getCompanyId()));
+        project.setCompany(new Company( projectDto.getCompanyId() == null ? getCurrentUser().getCompanyId() : projectDto.getCompanyId()));
         project.setProjectManager(employeeService.findEntityById(projectDto.getProjectManagerId()));
         project.setCreatedBy(getCurrentUser().getUserId());
     }
