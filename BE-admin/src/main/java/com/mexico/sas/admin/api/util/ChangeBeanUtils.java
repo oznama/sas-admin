@@ -4,7 +4,6 @@ import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.dto.company.CompanyUpdateDto;
-import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
 import com.mexico.sas.admin.api.dto.invoice.InvoiceDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
@@ -18,8 +17,6 @@ import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 @Slf4j
 public class ChangeBeanUtils extends Utils {
