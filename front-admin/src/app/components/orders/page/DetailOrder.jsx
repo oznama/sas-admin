@@ -31,14 +31,16 @@ export const DetailOrder = () => {
   const [status, setStatus] = useState('2000600001');
   const [requisition, setRequisition] = useState('');
   const [requisitionDate, setRequisitionDate] = useState(new Date());
-  const [requisitionStatus, setRequisitionStatus] = useState('2000600001')
+  const [requisitionStatus, setRequisitionStatus] = useState('2000600001');
   const [amount, setAmount] = useState('');
+  const [amountInDb, setAmountInDb] = useState(0);
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
   const [observations, setObservations] = useState('');
   const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
   const [projects, setProjects] = useState([]);
   const [pFilter, setPFilter] = useState('');
+  const [currentPaid, setCurrentPaid] = useState(paid.amount ? paid.amount : 0);
 
   const [catStatus, setCatStatus] = useState([]);
 
@@ -84,6 +86,7 @@ export const DetailOrder = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         setAmount(formatter.format(response.amount));
+        setAmountInDb( response.amount );
         setTax(formatter.format(response.tax));
         setTotal(formatter.format(response.total));
         setOrderNum(response.orderNum ? response.orderNum : '');
@@ -115,20 +118,22 @@ export const DetailOrder = () => {
   }, []);
 
   const onChangeAmount = ({ target }) => {
-    const amount = target.value;
-    if( amount === '' ) {
+    const inputAmount = target.value;
+    if( inputAmount === '' ) {
       setAmount('');
       setTax('');
       setTotal('');
-      dispatch( setPaid( { ...paid, amount: 0 } ) )
-    } else if( isNumDec(amount) ) {
-      if( amount >= 0 && amount <= mountMax ) {
-        const tax = Number(amount) * taxRate;
-        const total = Number(amount) + tax;
-        setAmount(amount);
+      const newPaid = id ? currentPaid - amountInDb : currentPaid;
+      dispatch( setPaid( { ...paid, amount: newPaid } ) )
+    } else if( isNumDec(inputAmount) ) {
+      if( inputAmount >= 0 && inputAmount <= mountMax ) {
+        const tax = Number(inputAmount) * taxRate;
+        const total = Number(inputAmount) + tax;
+        setAmount(inputAmount);
         setTax(tax.toFixed(2));
         setTotal(total.toFixed(2));
-        dispatch( setPaid( { ...paid, amount: amount } ) )
+        const newPaid = id ? ((currentPaid - amountInDb) + Number(inputAmount)) : currentPaid + Number(inputAmount);
+        dispatch( setPaid( { ...paid, amount: newPaid } ) )
       }
     }
   }
@@ -373,8 +378,8 @@ export const DetailOrder = () => {
   const titleWithOrder = `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Orden nueva';
 
-  const renderPendingAmount = ( cost, paid ) => {
-    const pendingAmount = cost - paid;
+  const renderPendingAmount = ( cost ) => {
+    const pendingAmount = cost - paid.amount;
     const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
     const cssText = pendingAmount > 0 ? 'danger' : 'success';
     return (
@@ -393,7 +398,7 @@ export const DetailOrder = () => {
             {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
             Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          { renderPendingAmount(project.amount, paid.amount) }
+          { renderPendingAmount( project.amount ) }
         </>
       )}
       { pId !== '' && currentTab === 2 && (
@@ -401,7 +406,7 @@ export const DetailOrder = () => {
           <p className="h4">
             Costo de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span>
           </p>
-          { renderPendingAmount(order.amount, paid.amount) }
+          { renderPendingAmount( order.amount ) }
         </>
       )}
       { renderTabs() }
