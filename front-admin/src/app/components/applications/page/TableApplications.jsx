@@ -6,6 +6,7 @@ import { alertType } from '../../custom/alerts/types/types';
 import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
 import { useEffect, useState } from 'react';
 import { setCurrentAppTab } from '../../../../store/project/projectSlice';
+import { changeLoading } from '../../../../store/loading/loadingSlice';
 
 export const TableApplications = ({ projectId }) => {
 
@@ -19,6 +20,7 @@ export const TableApplications = ({ projectId }) => {
     const [totalT, setTotalT] = useState(0);
 
     const fetchApplications = () => {
+        dispatch( changeLoading(true) );
         getApplicationsByProjectId(projectId).then( response => {
             if( response.code ) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -29,9 +31,11 @@ export const TableApplications = ({ projectId }) => {
                 setTotalTax( tax ) ;
                 setTotalT( total );
             }
+            dispatch( changeLoading(false) );
         }).catch( error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
+            dispatch( changeLoading(false) );
         });
     }
 

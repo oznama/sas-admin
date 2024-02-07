@@ -2,10 +2,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DetailProject } from './DetailProject';
 import { TableApplications } from '../applications/page/TableApplications';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentAppTab, setCurrentTab } from '../../../store/project/projectSlice';
+import { setCurrentAppTab, setCurrentTab, setProject } from '../../../store/project/projectSlice';
 import { TableLog } from '../custom/TableLog';
-import { formatter, numberToString } from '../../helpers/utils';
+import { displayNotification, formatter, numberToString } from '../../helpers/utils';
 import { TableOrders } from '../orders/page/TableOrders';
+import { getProjectById } from '../../services/ProjectService';
+import { alertType } from '../custom/alerts/types/types';
+import { useEffect } from 'react';
 
 export const ProjectPage = () => {
 
@@ -14,6 +17,25 @@ export const ProjectPage = () => {
   const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
   const {currentTab, project, paid} = useSelector( state => state.projectReducer );
+
+  const fetchProject = id => {
+    getProjectById(id).then( response => {
+        if( response.code ) {
+            displayNotification(dispatch, response.message, alertType.error);
+        } else {
+            dispatch(setProject(response));
+        }
+    }).catch( error => {
+        console.log(error);
+        displayNotification(dispatch, genericErrorMsg, alertType.error);
+    });
+  }
+
+  useEffect(() => {
+    if( id ) {
+      fetchProject(id);
+    }
+  });
   
   const handleAddApplication = () => {
     dispatch(setCurrentAppTab(1));

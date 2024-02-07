@@ -372,6 +372,17 @@ export const DetailOrder = () => {
 
   const titleWithOrder = `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Orden nueva';
+
+  const renderPendingAmount = ( cost, paid ) => {
+    const pendingAmount = cost - paid;
+    const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
+    const cssText = pendingAmount > 0 ? 'danger' : 'success';
+    return (
+      <p className="h4">
+        { labelText } <span className={ `text-${cssText}` } >{ formatter.format( Math.abs(pendingAmount) ) }</span>
+      </p>
+    )
+  }
  
   return (
     <div className='px-5'>
@@ -382,9 +393,7 @@ export const DetailOrder = () => {
             {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
             Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          <p className="h4">
-            Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span>
-          </p>
+          { renderPendingAmount(project.amount, paid.amount) }
         </>
       )}
       { pId !== '' && currentTab === 2 && (
@@ -392,9 +401,7 @@ export const DetailOrder = () => {
           <p className="h4">
             Costo de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span>
           </p>
-          <p className="h4">
-            Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span>
-          </p>
+          { renderPendingAmount(order.amount, paid.amount) }
         </>
       )}
       { renderTabs() }

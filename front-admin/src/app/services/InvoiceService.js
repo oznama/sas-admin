@@ -52,12 +52,12 @@ export const getInvoiceById = async(id) => {
     return jsonResponse;
 };
 
-export const getInvoices = async(page=0, size=10, sort='id,asc', filter='') => {
+export const getInvoices = async(page=0, size=10, filter='') => {
     const request = {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlInvoices = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const urlInvoices = `${context}?page=${page}&size=${size}&sort=invoiceNum,asc&sort=issuedDate,asc${ filterParam }`;
     const response = await api( urlInvoices, request );
     const invoices = await response.json();
     return invoices;
