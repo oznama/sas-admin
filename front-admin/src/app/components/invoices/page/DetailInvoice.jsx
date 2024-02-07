@@ -205,7 +205,7 @@ export const DetailInvoice = () => {
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangeOId = ({ target }) => {
     setPFilter(target.value);
-    const order = orders.find( o => o.value === target.value );
+    const order = orders.find( o => o.value.include(target.value) );
     if( order ) {
       setOId(order.id);
       const parentId = orders.find( o => o.id === order.id ).parentId;

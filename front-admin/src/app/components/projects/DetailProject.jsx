@@ -7,7 +7,6 @@ import { save, update } from '../../services/ProjectService';
 import { displayNotification, genericErrorMsg, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../custom/alerts/types/types';
-import { getEmployessByCompanyIdAndPosition } from '../../services/EmployeeService';
 import { TextArea } from '../custom/TextArea';
 import { getCompanySelect } from '../../services/CompanyService';
 
@@ -29,7 +28,7 @@ export const DetailProject = () => {
     const [observations, setObservations] = useState(project.observations ? project.observations : '');
     const [pms, setPms] = useState([]);
 
-    const [companyId, setCompanyId] = useState(user.companyId);
+    const [companyId, setCompanyId] = useState(project.companyId ? project.companyId : 2);
     const [companies, setCompanies] = useState([]);
 
     const fetchCatalogCompanies = () => {

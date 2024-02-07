@@ -11,7 +11,7 @@ import { InputSearcher } from '../custom/InputSearcher';
 
 export const TableProject = ({
     pageSize = 10,
-    sort = 'id,asc',
+    sort = 'key,asc',
 }) => {
 
     const dispatch = useDispatch();
