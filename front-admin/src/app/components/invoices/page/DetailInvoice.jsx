@@ -399,12 +399,23 @@ export const DetailInvoice = () => {
   const titleWithOrder = `${ oId !== '' ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Factura nueva';
 
+  const renderPendingAmount = () => {
+    const pendingAmount = order.amount - paid.amount;
+    const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
+    const cssText = pendingAmount > 0 ? 'danger' : 'success';
+    return (
+      <p className="h4">
+        { labelText } <span className={ `text-${cssText}` } >{ formatter.format( Math.abs(pendingAmount) ) }</span>
+      </p>
+    )
+  }
+
   return (
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
       { order.id && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
       { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(paid.amount) }</span></p>) }
-      { order.id && (<p className="h4">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>) }
+      { order.id && renderPendingAmount() }
       { id && renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>
