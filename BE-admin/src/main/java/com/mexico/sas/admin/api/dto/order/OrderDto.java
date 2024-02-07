@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @ToString
-@FieldNameConstants
 public class OrderDto implements Serializable {
 
     private static final long serialVersionUID = -7955591922799938614L;

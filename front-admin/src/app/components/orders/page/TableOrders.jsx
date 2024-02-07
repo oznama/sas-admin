@@ -7,9 +7,9 @@ import { alertType } from "../../custom/alerts/types/types";
 import { setCurrentOrdTab, setCurrentTab, setPaid, setProject } from "../../../../store/project/projectSlice";
 import { Pagination } from "../../custom/pagination/page/Pagination";
 import { InputSearcher } from "../../custom/InputSearcher";
+import { changeLoading } from "../../../../store/loading/loadingSlice";
 
 const pageSize = 10;
-const sort = 'orderDate,desc';
 
 export const TableOrders = ({
     projectId
@@ -38,20 +38,24 @@ export const TableOrders = ({
     };
 
     const fetchOrders = (page, filter) => {
-        getOrders(page, pageSize, sort, filter).then( response => {
+        dispatch( changeLoading(true) );
+        getOrders(page, pageSize, filter).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 setOrders(response.content);
                 setTotalOrders(response.totalElements);
             }
+            dispatch( changeLoading(false) );
         }).catch( error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
+            dispatch( changeLoading(false) );
         });
     }
 
     const fetchOrdersByProject = () => {
+        dispatch( changeLoading(true) );
         getOrdersByProjectId(projectId).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -67,9 +71,11 @@ export const TableOrders = ({
                 setTotalAmountPaidStr( amountPaidStr );
                 setTotalStatus( status );
             }
+            dispatch( changeLoading(false) );
         }).catch( error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
+            dispatch( changeLoading(false) );
         });
     }
 

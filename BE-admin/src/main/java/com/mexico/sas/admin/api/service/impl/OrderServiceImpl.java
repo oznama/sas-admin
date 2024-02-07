@@ -15,6 +15,7 @@ import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Order;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.OrderRepository;
+import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.InvoiceService;
 import com.mexico.sas.admin.api.service.OrderService;
 import com.mexico.sas.admin.api.service.ProjectService;
@@ -51,6 +52,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private CatalogService catalogService;
+
     @Override
     public OrderFindDto save(OrderDto orderDto) throws CustomException {
         Order order = from_M_To_N(orderDto, Order.class);
@@ -74,7 +78,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Override
     public void update(Long orderId, OrderDto orderDto) throws CustomException {
         Order order = findEntityById(orderId);
-        String message = ChangeBeanUtils.checkOrder(order, orderDto);
+        String message = ChangeBeanUtils.checkOrder(order, orderDto, catalogService);
 
         if(!message.isEmpty()) {
 
@@ -150,7 +154,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     @Override
     public List<SelectDto> getForSelect() {
-        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalse());
+        return getSelect(repository.findByActiveIsTrueAndEliminateIsFalseOrderByOrderNumAsc());
     }
 
     @Override
@@ -240,7 +244,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private List<BigDecimal> setAmountPaid(Order order) throws CustomException {
         List<BigDecimal> amounts = new ArrayList<>();
         List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId()).stream()
-                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL) && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL))
+                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
+                        && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
+                        && !i.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED))
                 .collect(Collectors.toList());
         BigDecimal amountPaid = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalRealPaid = invoices.stream().filter(i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))

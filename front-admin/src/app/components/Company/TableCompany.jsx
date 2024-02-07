@@ -127,27 +127,31 @@ export const TableCompany = ({
     const renderRows = () => company && company.map(({
         id,
         name,
-        alias,
+        // alias,
         rfc,
         address,
-        cp,
-        city,
+        interior,
+        exterior,
+        // cp,
+        // city,
         state,
-        country,
+        // country,
         phone,
+        cellphone,
         ext,
         active
     }) => (
         <tr key={ id } onClick={ () => console.log('Click en row') }>
             <th className="text-center" scope="row">{ rfc }</th>
             <td className="text-start">{ name }</td>
-            <td className="text-start">{ alias }</td>
-            <td className="text-start">{ address }</td>
-            <td className="text-start">{ cp }</td>
-            <td className="text-start">{ city }</td>
+            {/* <td className="text-start">{ alias }</td> */}
+            {/* <td className="text-start">{ address }</td> */}
+            <td className="text-start">{interior ? address+' '+interior : address+' '+exterior }</td>
+            {/* <td className="text-start">{ cp }</td>
+            <td className="text-start">{ city }</td>*/}
             <td className="text-start">{ state }</td>
-            <td className="text-start">{ country }</td>
-            <td className="text-start">{ phone }</td>
+            {/*<td className="text-start">{ country }</td> */}
+            <td className="text-start">{ phone ? phone : cellphone  }</td>
             <td className="text-start">{ ext }</td>
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
@@ -180,12 +184,12 @@ export const TableCompany = ({
                         <tr>
                             <th className="text-center fs-6" scope="col">RFC</th>
                             <th className="text-center fs-6" scope="col">Raz&oacute;n Social</th>
-                            <th className="text-center fs-6" scope="col">Alias</th>
+                            {/* <th className="text-center fs-6" scope="col">Alias</th> */}
                             <th className="text-center fs-6" scope="col">Direcci&oacute;n</th>
-                            <th className="text-center fs-6" scope="col">C&oacute;digo Postal</th>
-                            <th className="text-center fs-6" scope="col">Ciudad</th>
+                            {/* <th className="text-center fs-6" scope="col">C&oacute;digo Postal</th>
+                            <th className="text-center fs-6" scope="col">Ciudad</th> */}
                             <th className="text-center fs-6" scope="col">Estado</th>
-                            <th className="text-center fs-6" scope="col">Pais</th>
+                            {/* <th className="text-center fs-6" scope="col">Pais</th> */}
                             <th className="text-center fs-6" scope="col">Telefono</th>
                             <th className="text-center fs-6" scope="col">Extencion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>

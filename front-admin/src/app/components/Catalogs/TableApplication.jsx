@@ -1,19 +1,17 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-//import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
-import { deleteLogic, getCatalogChilds, save, update } from '../../services/CatalogService';
+import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
 import { setModalChild } from '../../../store/modal/modalSlice';
+import { FormApplication } from '../applications/page/FormApplication';
 
 export const TableApplication = ({
     pageSize = 10,
     catalogId,
 }) => {
-    console.log(catalogId);
     const dispatch = useDispatch();
 
     const { permissions, user } = useSelector( state => state.auth );
@@ -21,52 +19,8 @@ export const TableApplication = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    const [value, setValue] = useState('');
-    const onChangeValue = ({ target }) => setValue(target.value);
-    const [description, setDescription] = useState('');
-    const onChangeDescription = ({ target }) => setDescription(target.value);
-    const [status, setStatus] = useState('');
+    
     const [filter, setFilter] = useState('')
-
-    const showModal = () => dispatch( setModalChild(renderModal()) );
-
-    const onSubmit = event => {
-        console.log('Call submit function', event);
-        dispatch( setModalChild(null) );
-    }
-
-    const renderModal = () => (
-        <div className='p-5 bg-white rounded-3'>
-
-            {/* TODO Formulario */}
-            <div className='d-grid gap-2 col-6 mx-auto'>
-                <form className="needs-validation" onSubmit={ onSubmit }>
-                    
-                    <div className="row text-start">
-                    <div className='col-6'>
-                        <label>Nombre</label>  
-                    </div>
-                    <div className='col-6'>
-                        <input type='text' onChange={ onChangeValue } value = {value} placeholder='Escribe el nombre'></input>
-                    </div>
-                    </div>
-                    <div className="row text-start">
-                    <div className='col-6'>
-                        <label>Descripcion</label>  
-                    </div>
-                    <div className='col-6'>
-                        <input type='text' onChange={ onChangeDescription } value={description} placeholder='Escribe la descripcion'></input>
-                    </div>
-                    </div>
-                    <div className="pt-3 d-flex flex-row-reverse">
-                        <button type="submit" className="btn btn-primary" >Guardar</button>
-                        <button type="button" className="btn btn-danger" onClick={ () => dispatch( setModalChild(null) ) }>Cancelar</button>
-                    </div>
-                </form>
-            </div>
-            {/* TODO Forumulario */}
-        </div>
-    )
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
@@ -84,33 +38,26 @@ export const TableApplication = ({
             });
     }
     
-
-    // const fetchSelects = () => {
-        
-    //     getCompanySelect().then( response => {
-    //         setCompanies(response);
-    //     }).catch( error => {
-    //         console.log(error);
-    //     });
-    // }
-    
-
     useEffect(() => {
-        // fetchSelects();
-        fetchChilds(currentPage);
-    }, [currentPage]);
+        fetchChilds();
+    }, []);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
         fetchChilds(currentPage);
     }
 
+    const onCancelModal = () => {
+        dispatch( setModalChild(null) );
+        fetchChilds();
+    }
+    const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
+
     const handleAddCompany = () => {
-        // navigate(`/company/add`);
-        showModal();
+        showModal(null);
     }
 
-    const renderAddButton = () => permissions.canCreateEmp && (
+    const renderAddButton = () => permissions.canCreateCat && (
         <div className="d-flex flex-row-reverse pb-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddCompany }>
                 <span className="bi bi-plus"></span>
@@ -119,7 +66,7 @@ export const TableApplication = ({
     );
 
     const renderSearcher = () => (
-        <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
+        <div className={`input-group w-${ permissions.canCreateCat ? '25' : '50' } py-3`}>
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } />
@@ -143,51 +90,15 @@ export const TableApplication = ({
     )
 
     const handledSelect = id => {
-        // dispatch(setCurrentTab(2));
-        // navigate(`/company/${id}/edit`);
-        if ( permissions.canEditCat ) {
-            setId(id);
-            const catSelected = catalogChilds.find( cat => cat.id === id );
-            setValue(catSelected.value);
-            setDescription(catSelected.description ?? '');
-        }
-        showModal();
+        setId(id);
+        const catalogChild = catalogChilds.find( cat => cat.id === id );
+        showModal(catalogChild);
     }
 
     const renderStatus = (status) => {
         const backColor = status === 2000100003 ? 'bg-danger' : ( status === 2000100001 ? 'bg-success' : ( status === 2000100002 ? 'bg-warning' : '') );
         const statusDesc = status === 2000100003 ? 'Eliminado' : ( status === 2000100002 ? 'Inactivo' : ( status === 2000100001 ? 'Activo' : '') );
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white `}>{ statusDesc }</span>);
-    }
-
-    const saveChild = request => {
-        save(request).then( response => {
-            if(response.code && response.code !== 201) {
-            displayNotification(dispatch, response.message, alertType.error);
-            } else {
-            displayNotification(dispatch, '¡El registro se ha creado correctamente!', success);
-            setCatalogChilds([...catalogChilds, response]);
-            cleanForm();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
-    }
-
-    const updateChild = request => {
-        update(id, request).then( response => {
-            if(response.code && response.code !== 201) {
-            displayNotification(dispatch, response.message, alertType.error);
-            } else {
-            displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
-            fetchChilds();
-            cleanForm();
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
     }
 
     const deleteChild = catalogId => {
@@ -215,11 +126,11 @@ export const TableApplication = ({
             <td className="text-start">{ description }</td>
             <td className="text-center">{ renderStatus(status) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status && permissions.canEditComp ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ status && permissions.canEditComp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
-            { permissions.canDelComp && (
+            { permissions.canDelCat && (
             <td className="text-center">
                 <button type="button" className={`btn btn-${ status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(id, status) }>
                     <span><i className={`bi bi-${ status ? 'trash' : 'folder-symlink'}`}></i></span>
@@ -245,8 +156,8 @@ export const TableApplication = ({
                             <th className="text-center fs-6" scope="col">Nombre</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
-                            <th className="text-center fs-6" scope="col">{permissions.canEditEmp ? 'Editar' : 'Ver'}</th>
-                            { permissions.canDelEmp && (<th className="text-center fs-6" scope="col">Borrar</th>)}
+                            <th className="text-center fs-6" scope="col">{permissions.canEditCat ? 'Editar' : 'Ver'}</th>
+                            { permissions.canDelCat && (<th className="text-center fs-6" scope="col">Borrar</th>)}
                         </tr>
                     </thead>
                     <tbody>

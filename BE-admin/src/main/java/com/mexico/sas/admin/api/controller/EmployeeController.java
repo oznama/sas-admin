@@ -84,16 +84,7 @@ public class EmployeeController {
           @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
   public ResponseEntity<List<SelectDto>> select() throws CustomException {
     log.info("Getting catalog employee");
-    return ResponseEntity.ok(service.getForSelect(false));
-  }
-
-  @GetMapping("/select/developers")
-  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar desarrolladores para select", nickname = "/select")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
-  public ResponseEntity<List<SelectDto>> selectDevelopers() throws CustomException {
-    log.info("Getting catalog employee");
-    return ResponseEntity.ok(service.getForSelect(true));
+    return ResponseEntity.ok(service.getForSelect());
   }
 
   @GetMapping("/select/{companyId}")
@@ -101,8 +92,17 @@ public class EmployeeController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
   public ResponseEntity<List<SelectDto>> selectByCompanyId(@PathVariable("companyId") Long companyId) throws CustomException {
-    log.info("Getting catalog employee");
+    log.info("Getting catalog employees by company");
     return ResponseEntity.ok(service.getForSelect(companyId));
+  }
+
+  @GetMapping("/select/{companyId}/{positionId}")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar empleados por compania por puesto para select", nickname = "/selectByCompanyIdAndPosition")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> selectByCompanyIdAndPosition(@PathVariable("companyId") Long companyId, @PathVariable("positionId") Long positionId) throws CustomException {
+    log.info("Getting catalog employee by company and position");
+    return ResponseEntity.ok(service.getForSelect(companyId, positionId));
   }
 
 }

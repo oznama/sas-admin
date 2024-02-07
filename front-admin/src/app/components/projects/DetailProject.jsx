@@ -7,18 +7,19 @@ import { save, update } from '../../services/ProjectService';
 import { displayNotification, genericErrorMsg, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../custom/alerts/types/types';
-import { getEmployess } from '../../services/EmployeeService';
 import { TextArea } from '../custom/TextArea';
+import { getCompanySelect } from '../../services/CompanyService';
 
 export const DetailProject = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { permissions } = useSelector( state => state.auth );
+    const { user, permissions } = useSelector( state => state.auth );
     const { project } = useSelector( state => state.projectReducer );
 
     const [projectId, setProjectId] = useState(project.id);
     const [pKey, setPKey] = useState(project.key ? project.key : '');
+    const [keyError, setKeyError] = useState('');
     const [description, setDescription] = useState(project.description ? project.description : '');
     const [createdBy, setCreatedBy] = useState(project.createdBy);
     const [dateCreated, setDateCreated] = useState(handleDateStr(project.creationDate));
@@ -27,27 +28,51 @@ export const DetailProject = () => {
     const [observations, setObservations] = useState(project.observations ? project.observations : '');
     const [pms, setPms] = useState([]);
 
-    const fetchCatalogEmployee = () => {
-        getEmployess()
-            .then( response => {
-                setPms( response );
-            }).catch( error => {
-                console.log(error);
-            });
-    };
+    const [companyId, setCompanyId] = useState(project.companyId ? project.companyId : 2);
+    const [companies, setCompanies] = useState([]);
+
+    const fetchCatalogCompanies = () => {
+        getCompanySelect().then( response => {
+            setCompanies(response);
+            fetchCatEmployees(response, companyId);
+        }).catch( error => {
+            console.log(error);
+        });
+    }
+
+    const fetchCatEmployees = ( companies, companyId ) => {
+        const companySelected = companies.find( c => c.id === companyId );
+        if( companySelected ) {
+            setPms( companySelected.employess );
+        }
+    }
 
     useEffect(() => {
-        fetchCatalogEmployee();
+        fetchCatalogCompanies();
     }, []);
 
+    const onChangeCompany = ({ target }) => {
+        setCompanyId(target.value);
+        fetchCatEmployees(companies, Number(target.value));
+    };
     const onChangePKey = ({ target }) => {
         setPKey(handleText(target).toUpperCase())
+    };
+    const onBlurPKey = ({ target }) => {
+        if( !validateKey(target.value) ) {
+            setKeyError('Formato de clave incorrecta');
+        }
     };
     const onChangeDesc = ({ target }) => setDescription(target.value);
     const onChangeCreatedDate = (date) => setDateCreated(date);
     const onChangeInstallationDate = (date) => setInstallationDate(date);
     const onChangePm = ({ target }) => setPm(target.value);
     const onChangeObservations = ({ target }) => setObservations(target.value);
+
+    const validateKey = value => {
+        const regex = /^[A-Z]{1}-\d{2}-\d{4}-\d{2}$/;
+        return regex.test(value);
+    }
     
     const onSubmit = event => {
         event.preventDefault();
@@ -56,8 +81,7 @@ export const DetailProject = () => {
         if ( projectId ) {
             updateProject(request);
         } else {
-            const regex = /^[A-Z]{1}-\d{2}-\d{4}-\d{2}$/;
-            if( regex.test(request.key) ) {
+            if( validateKey(request.key) ) {
                 saveProject(request);
             } else {
                 displayNotification(dispatch, '¡Clave invalida!', alertType.warning);
@@ -117,11 +141,12 @@ export const DetailProject = () => {
     return (
         <div className='d-grid gap-2 col-6 mx-auto'>
             <form className="needs-validation" onSubmit={ onSubmit }>
-                
+                <Select name="companyId" label="Empresa" options={ companies } disabled={ projectId && !project.active } value={ companyId } required onChange={ onChangeCompany } />
                 <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ projectId && !project.active }
-                    value={ pKey } required onChange={ onChangePKey } maxLength={ 12 } />
+                    value={ pKey } error={ keyError } required maxLength={ 12 } 
+                    onChange={ onChangePKey } onFocus={ () => setKeyError('') } onBlur={ onBlurPKey } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ projectId && !project.active }
-                    value={ description } required onChange={ onChangeDesc } maxLength={ 70 } />
+                    value={ description } required onChange={ onChangeDesc } maxLength={ 255 } />
                 <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ projectId && !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
                 { renderCreatedBy() }

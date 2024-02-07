@@ -130,26 +130,23 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     @Override
-    public List<SelectDto> getForSelect(Boolean developers) {
-        return getForSelect(getCurrentUser().getCompanyId(), developers, bossesAndPmPositions());
+    public List<SelectDto> getForSelect() {
+        return getForSelect(getCurrentUser().getCompanyId(), bossesAndPmPositions());
     }
 
     @Override
-    public List<SelectDto> getForSelect(Long companyId, Boolean developers, List<Long> positionIds) {
-        List<Employee> employees = getCurrentUser().getRoleId().equals(GeneralKeys.ROOT_USER_ID)
-                || (companyId.equals(CatalogKeys.COMPANY_SAS) && !developers) ? repository.findAll()
-                : repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds);
-        return getSelect(employees);
+    public List<SelectDto> getForSelect(Long companyId, List<Long> positionIds) {
+        return getSelect(repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, positionIds));
     }
 
     @Override
-    public List<SelectDto> getForSelect(Long companyId, Boolean developers, Long positionId) {
-        return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
+    public List<SelectDto> getForSelect(Long companyId, Long positionId) {
+        return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, positionId));
     }
 
     @Override
     public List<SelectDto> getForSelect(Long companyId) {
-        return getSelect(repository.findByCompanyIdAndIdNotIn(companyId, employessNotIn()));
+        return getSelect(repository.findByCompanyIdAndIdNotInOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, employessNotIn()));
     }
 
     private EmployeeFindDto parseEmployeeFindDto(Employee employee) throws CustomException {

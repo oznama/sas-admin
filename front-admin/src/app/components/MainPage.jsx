@@ -14,7 +14,7 @@ export const MainPage = () => {
 
   return (
     <>
-        {/* <Loading /> */}
+        <Loading />
         <ModalContainer />
         <NavBarPage />
         <div className={ classNameDivMain } >

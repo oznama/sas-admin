@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
-    List<Order> findByActiveIsTrueAndEliminateIsFalse();
+    List<Order> findByActiveIsTrueAndEliminateIsFalseOrderByOrderNumAsc();
 
     Optional<Order> findByOrderNum(String orderNum);
     List<Order> findByProjectOrderByOrderDateDesc(Project project);

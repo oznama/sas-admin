@@ -19,7 +19,7 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
 
-    List<Project> findByActiveIsTrueAndEliminateIsFalse();
+    List<Project> findByActiveIsTrueAndEliminateIsFalseOrderByKeyAscDescriptionAsc();
 
     //    Long countByCompany(Company company);
 //    Long countByCompanyAndCreatedBy(Company company, Long createdBy);
