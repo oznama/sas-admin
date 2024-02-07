@@ -244,7 +244,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private List<BigDecimal> setAmountPaid(Order order) throws CustomException {
         List<BigDecimal> amounts = new ArrayList<>();
         List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId()).stream()
-                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL) && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL))
+                .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
+                        && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
+                        && !i.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED))
                 .collect(Collectors.toList());
         BigDecimal amountPaid = invoices.stream().map(pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalRealPaid = invoices.stream().filter(i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID))
