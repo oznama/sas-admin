@@ -9,7 +9,6 @@ import { Pagination } from "../../custom/pagination/page/Pagination";
 import { InputSearcher } from "../../custom/InputSearcher";
 
 const pageSize = 10;
-const sort = 'orderDate,desc';
 
 export const TableOrders = ({
     projectId
@@ -38,7 +37,7 @@ export const TableOrders = ({
     };
 
     const fetchOrders = (page, filter) => {
-        getOrders(page, pageSize, sort, filter).then( response => {
+        getOrders(page, pageSize, filter).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {

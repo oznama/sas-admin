@@ -51,7 +51,7 @@ export const TableProject = ({
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 dispatch(setProject(response));
-                dispatch(setCurrentTab( permissions.canEditEmp ? 1 : 2));
+                dispatch(setCurrentTab( permissions.canEditProj ? 1 : 2));
                 navigate(`/project/${id}/edit`);
             }
         }).catch( error => {
@@ -155,8 +155,8 @@ export const TableProject = ({
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center" style={ styleTableRow }>
-                <button type="button" className={`btn btn-${ active && permissions.canEditEmp ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ active && permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditProj ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditProj ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelEmp && 
