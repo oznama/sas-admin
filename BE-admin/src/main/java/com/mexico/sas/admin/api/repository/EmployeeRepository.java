@@ -22,9 +22,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
     Optional<Employee> findByEmailIgnoreCaseAndActiveIsTrueAndEliminateIsFalse(String email);
     Optional<Employee> findByCompanyIdAndIdAndActiveIsTrueAndEliminateIsFalse(Long companyId, Long id);
     List<Employee> findByPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(List<Long> positionIds);
-    List<Employee> findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(Long companyId, List<Long> positionIds);
-    List<Employee> findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(Long companyId, Long positionId);
-    List<Employee> findByCompanyIdAndIdNotIn(Long companyId, List<Long> ids);
+    List<Employee> findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(Long companyId, List<Long> positionIds);
+    List<Employee> findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(Long companyId, Long positionId);
+    List<Employee> findByCompanyIdAndIdNotInOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(Long companyId, List<Long> ids);
 
     @Transactional
     @Modifying

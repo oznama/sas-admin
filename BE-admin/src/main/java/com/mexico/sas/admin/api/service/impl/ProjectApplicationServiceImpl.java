@@ -114,7 +114,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
 
     @Override
     public List<ProjectApplicationPaggeableDto> findByProjectId(Long projectId) {
-        List<ProjectApplication> projectApplications = repository.findByProject(new Project(projectId));
+        List<ProjectApplication> projectApplications = repository.findByProjectOrderByIdAsc(new Project(projectId));
         List<ProjectApplicationPaggeableDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {
