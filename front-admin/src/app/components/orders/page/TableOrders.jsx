@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteLogic, getOrders, getOrdersByProjectId } from "../../../services/OrderService";
 import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { alertType } from "../../custom/alerts/types/types";
-import { setCurrentOrdTab, setCurrentTab, setPaid, setProject } from "../../../../store/project/projectSlice";
+import { setCurrentOrdTab, setCurrentTab, setProject, setProjectPaid } from "../../../../store/project/projectSlice";
 import { Pagination } from "../../custom/pagination/page/Pagination";
 import { InputSearcher } from "../../custom/InputSearcher";
 import { changeLoading } from "../../../../store/loading/loadingSlice";
@@ -17,16 +17,8 @@ export const TableOrders = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const { project, order, paid } = useSelector( state => state.projectReducer );
-
+    const { project, order, projectPaid } = useSelector( state => state.projectReducer );
     const [orders, setOrders] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [totalAmountStr, setTotalAmountStr] = useState(0);
-    const [totalTaxStr, setTotalTaxStr] = useState(0);
-    const [totalTStr, setTotalTStr] = useState(0);
-    const [totalAmountPaidStr, setTotalAmountPaidStr] = useState(0);
-    const [totalStatus, setTotalStatus] = useState();
-
     const [currentPage, setCurrentPage] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [filter, setFilter] = useState(''); //order && order.orderNum ? order.orderNum : '');
@@ -62,14 +54,7 @@ export const TableOrders = ({
             } else {
                 setOrders(response.filter( r => r.orderNum !== 'total' ));
                 const orderTotal = response.find( r => r.orderNum === 'total' );
-                dispatch(setPaid(orderTotal));
-                const { amount, amountStr, taxStr, totalStr, amountPaidStr, status } = orderTotal;
-                setTotalAmount( amount );
-                setTotalAmountStr( amountStr );
-                setTotalTaxStr( taxStr ) ;
-                setTotalTStr( totalStr );
-                setTotalAmountPaidStr( amountPaidStr );
-                setTotalStatus( status );
+                dispatch(setProjectPaid(orderTotal));
             }
             dispatch( changeLoading(false) );
         }).catch( error => {
@@ -128,7 +113,7 @@ export const TableOrders = ({
     }
 
     const deleteOrder = (id, amount, active) => {
-        if( !active && (amount > (project.amount - paid.amountPaid) ) ) {
+        if( !active && (amount > (project.amount - projectPaid.amountPaid) ) ) {
             displayNotification(dispatch, 'La orden no se puede reactivar ya que supera el monto pendiente', alertType.error);
         } else {
             deleteLogic(id).then( response => {
@@ -193,7 +178,7 @@ export const TableOrders = ({
                         <button type="button"
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
-                            disabled={ status === 2000600002 || ( (status === 2000600003 || status === 2000600004) && paid.amountPaid >= project.amount ) }
+                            disabled={ status === 2000600002 || ( (status === 2000600003 || status === 2000600004) && projectPaid.amountPaid >= project.amount ) }
                             onClick={ () => deleteOrder(id, amount, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
@@ -235,14 +220,14 @@ export const TableOrders = ({
                             <tr>
                                 <th className="text-center fs-6" scope="col">TOTALES</th>
                                 <th></th>
-                                <th className="text-center fs-6" scope="col">{ renderStatus(totalStatus, '') }</th>
+                                <th className="text-center fs-6" scope="col">{ renderStatus(projectPaid.status, '') }</th>
                                 <th></th>
                                 <th></th>
                                 <th></th>
-                                <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
-                                { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalTaxStr }</th>) }
-                                { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ totalTStr }</th>) }
-                                <th className="text-end fs-6" scope="col">{ totalAmountPaidStr }</th>
+                                <th className="text-end fs-6" scope="col">{ projectPaid.amountStr }</th>
+                                { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ projectPaid.taxStr }</th>) }
+                                { permissions.isAdminRoot && (<th className="text-end fs-6" scope="col">{ projectPaid.totalStr }</th>) }
+                                <th className="text-end fs-6" scope="col">{ projectPaid.amountPaidStr }</th>
                                 { permissions.canEditOrd && (<th></th>) }
                                 { permissions.canDelOrd && (<th></th>) }
                             </tr>

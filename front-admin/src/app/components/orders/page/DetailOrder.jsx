@@ -11,16 +11,16 @@ import { TableLog } from '../../custom/TableLog';
 import { getOrderById } from '../../../services/OrderService';
 import { TableInvoices } from '../../invoices/page/TableInvoices';
 import { getCatalogChilds } from '../../../services/CatalogService';
-import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
+import { setCurrentOrdTab, setCurrentTab, setOrder, setProjectPaid, setProject } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
 import { getProjectById, getProjectSelect } from '../../../services/ProjectService';
 import { setModalChild } from '../../../../store/modal/modalSlice';
 import { SelectSearcher } from '../../custom/SelectSearcher';
 
 export const DetailOrder = () => {
-
+  
   const dispatch = useDispatch();
-  const { project, order, paid } = useSelector( state => state.projectReducer );
+  const { project, order, projectPaid, orderPaid } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
   const {currentOrdTab: currentTab} = useSelector( state => state.projectReducer );
   const { projectId, id } = useParams();
@@ -40,7 +40,7 @@ export const DetailOrder = () => {
   const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
   const [projects, setProjects] = useState([]);
   const [pFilter, setPFilter] = useState('');
-  const [currentPaid, setCurrentPaid] = useState(paid.amount ? paid.amount : 0);
+  const [currentPaid, setCurrentPaid] = useState(projectPaid.amount ? projectPaid.amount : 0);
 
   const [catStatus, setCatStatus] = useState([]);
 
@@ -73,7 +73,7 @@ export const DetailOrder = () => {
 
   const fetchPaid = projectId => {
     getOrderPaid(projectId).then( response => {
-      dispatch(setPaid(response));
+      dispatch(setProjectPaid(response));
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -124,7 +124,7 @@ export const DetailOrder = () => {
       setTax('');
       setTotal('');
       const newPaid = id ? currentPaid - amountInDb : currentPaid;
-      dispatch( setPaid( { ...paid, amount: newPaid } ) )
+      dispatch( setProjectPaid( { ...projectPaid, amount: newPaid } ) )
     } else if( isNumDec(inputAmount) ) {
       if( inputAmount >= 0 && inputAmount <= mountMax ) {
         const tax = Number(inputAmount) * taxRate;
@@ -133,7 +133,7 @@ export const DetailOrder = () => {
         setTax(tax.toFixed(2));
         setTotal(total.toFixed(2));
         const newPaid = id ? ((currentPaid - amountInDb) + Number(inputAmount)) : currentPaid + Number(inputAmount);
-        dispatch( setPaid( { ...paid, amount: newPaid } ) )
+        dispatch( setProjectPaid( { ...projectPaid, amount: newPaid } ) )
       }
     }
   }
@@ -153,8 +153,8 @@ export const DetailOrder = () => {
   }
   const onChangeStatus = ({target }) => {
     if( status !== '2000600003' && target.value === '2000600003' && status !== '2000600004' && target.value === '2000600004' ) {
-      const newAmount = paid.amount - amount;
-      dispatch( setPaid( { ...paid, amount: newAmount } ) );
+      const newAmount = projectPaid.amount - amount;
+      dispatch( setProjectPaid( { ...projectPaid, amount: newAmount } ) );
     }
     setStatus(target.value);
     setRequisitionStatus(target.value);
@@ -177,7 +177,7 @@ export const DetailOrder = () => {
     } else {
       setPId('');
       dispatch(setProject({}));
-      dispatch(setPaid({}));
+      dispatch(setProjectPaid({}));
     }
   }
 
@@ -185,7 +185,7 @@ export const DetailOrder = () => {
     setPFilter('');
     setPId('');
     dispatch(setProject({}));
-    dispatch(setPaid({}));
+    dispatch(setProjectPaid({}));
   }
 
   const onSubmit = event => {
@@ -197,8 +197,8 @@ export const DetailOrder = () => {
       tax: removeCurrencyFormat(tax),
       total: removeCurrencyFormat(total)
     };
-    const isAmountPending = (project.amount - paid.amount) !== 0;
-    const isAmountDiff = removeCurrencyFormat(amount) !== (project.amount - paid.amount);
+    const isAmountPending = (project.amount - projectPaid.amount) !== 0;
+    const isAmountDiff = removeCurrencyFormat(amount) !== (project.amount - projectPaid.amount);
     if ( isAmountPending && isAmountDiff ) {
       dispatch( setModalChild( renderModal(request) ) )
     } else {
@@ -293,7 +293,7 @@ export const DetailOrder = () => {
           <p className="h2">¡El monto capturado es diferente al monto pendiente!</p>
           <ul style={ { marginBottom: '0' } }>
             {/* <li key={ 1 }><p className="h3">Monto pagado: <span className='text-primary'>{ formatter.format(paid.amount) }</span></p></li> */}
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span></p></li>
+            <li key={ 1 }>{ renderPendingAmount("h3") }</li>
             <li key={ 2 }><p className="h3">Monto capturado: <span className='text-success'>{ amount }</span></p></li>
           </ul>
           <p className="h4">Puede continuar, pero es necesario que verifique los montos</p>
@@ -329,7 +329,7 @@ export const DetailOrder = () => {
               </div>
               <div className='col-4'>
                 <Select name = "status" label="Status" required options={ catStatus } value={ status } onChange={ onChangeStatus } 
-                  disabled = { !permissions.canEditOrd || ((order.status === 2000600003 || order.status === 2000600004) && paid.amount >= order.amount) }  />
+                  disabled = { !permissions.canEditOrd || ((order.status === 2000600003 || order.status === 2000600004) && projectPaid.amount >= order.amount) }  />
               </div>
             </div>
             <div className='row text-start'>
@@ -378,12 +378,13 @@ export const DetailOrder = () => {
   const titleWithOrder = `${order.orderNum ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Orden nueva';
 
-  const renderPendingAmount = ( cost ) => {
-    const pendingAmount = cost - paid.amount;
+  const renderPendingAmount = classP => {
+    // const pendingAmount = currentTab === 1 ? project.amount - currentPaid : order.amount - paid.amount;
+    const pendingAmount = currentTab === 1 ? project.amount - projectPaid.amount : order.amount - orderPaid.amount;
     const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
     const cssText = pendingAmount > 0 ? 'danger' : 'success';
     return (
-      <p className="h4">
+      <p className={ classP }>
         { labelText } <span className={ `text-${cssText}` } >{ formatter.format( Math.abs(pendingAmount) ) }</span>
       </p>
     )
@@ -398,7 +399,7 @@ export const DetailOrder = () => {
             {/* Iva: <span className='text-primary'>{ project.tax - paid.taxPaid }</span> Total: <span className='text-primary'>{ project.total - paid.totalPaid }</span> */}
             Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          { renderPendingAmount( project.amount ) }
+          { renderPendingAmount("h4") }
         </>
       )}
       { pId !== '' && currentTab === 2 && (
@@ -406,7 +407,7 @@ export const DetailOrder = () => {
           <p className="h4">
             Costo de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span>
           </p>
-          { renderPendingAmount( order.amount ) }
+          { renderPendingAmount("h4") }
         </>
       )}
       { renderTabs() }
