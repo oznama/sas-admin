@@ -12,12 +12,12 @@ export const getProjectSelect = async() => {
     return projects;
 };
 
-export const getProjects = async(page=0, size=10, sort='id,asc', filter='') => {
+export const getProjects = async(page=0, size=10, filter='') => {
     const request = {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlProjects = `${context}?page=${page}&size=${size}&sort=${sort}${ filterParam }`;
+    const urlProjects = `${context}?page=${page}&size=${size}&sort=key,asc&sort=description,asc${ filterParam }`;
     const response = await api( urlProjects, request );
     const projects = await response.json();
     return projects;

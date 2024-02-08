@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { deleteLogic, getProjectById, getProjects } from '../../services/ProjectService';
+import { deleteLogic, getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentTab, setOrder, setPaid, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,7 @@ import { displayNotification, styleTableRow, styleTableRowBtn } from '../../help
 import { InputSearcher } from '../custom/InputSearcher';
 
 export const TableProject = ({
-    pageSize = 10,
-    sort = 'id,asc',
+    pageSize = 10
 }) => {
 
     const dispatch = useDispatch();
@@ -32,7 +31,7 @@ export const TableProject = ({
     };
 
     const fetchProjects = (page, filter) => {
-        getProjects(page, pageSize, sort, filter)
+        getProjects(page, pageSize, filter)
             .then( response => {
                 if( response.code && response.code === 401 ) {
                     displayNotification(dispatch, response.message, alertType.error);
@@ -44,21 +43,6 @@ export const TableProject = ({
                 displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
     }
-
-    const fetchProject = id => {
-        getProjectById(id).then( response => {
-            if( response.code ) {
-                displayNotification(dispatch, response.message, alertType.error);
-            } else {
-                dispatch(setProject(response));
-                dispatch(setCurrentTab( permissions.canEditEmp ? 1 : 2));
-                navigate(`/project/${id}/edit`);
-            }
-        }).catch( error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
-      }
 
     useEffect(() => {
         fetchProjects(currentPage, filter);
@@ -102,7 +86,8 @@ export const TableProject = ({
     // }
 
     const handledSelect = id => {
-        fetchProject(id);
+        dispatch(setCurrentTab( permissions.canEditProj ? 1 : 2));
+        navigate(`/project/${id}/edit`);
     }
 
     const renderStatus = status => {
@@ -155,8 +140,8 @@ export const TableProject = ({
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center" style={ styleTableRow }>
-                <button type="button" className={`btn btn-${ active && permissions.canEditEmp ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ active && permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditProj ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditProj ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelEmp && 

@@ -9,7 +9,6 @@ import { Pagination } from "../../custom/pagination/page/Pagination";
 import { InputSearcher } from "../../custom/InputSearcher";
 
 const pageSize = 10;
-const sort = 'invoiceNum,desc';
 
 export const TableInvoices = ({
     projectId,
@@ -41,7 +40,7 @@ export const TableInvoices = ({
     };
 
     const fetchInvoices = (page, filter) => {
-        getInvoices(page, pageSize, sort, filter).then( response => {
+        getInvoices(page, pageSize, filter).then( response => {
             if( (response.status && response.status !== 200 ) || (response.code && response.code !== 200)  ) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {

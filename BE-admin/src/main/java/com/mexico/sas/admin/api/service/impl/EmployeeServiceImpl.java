@@ -136,17 +136,17 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
 
     @Override
     public List<SelectDto> getForSelect(Long companyId, List<Long> positionIds) {
-        return getSelect(repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalse(companyId, positionIds));
+        return getSelect(repository.findByCompanyIdAndPositionIdNotInAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, positionIds));
     }
 
     @Override
     public List<SelectDto> getForSelect(Long companyId, Long positionId) {
-        return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalse(companyId, positionId));
+        return getSelect(repository.findByCompanyIdAndPositionIdAndActiveIsTrueAndEliminateIsFalseOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, positionId));
     }
 
     @Override
     public List<SelectDto> getForSelect(Long companyId) {
-        return getSelect(repository.findByCompanyIdAndIdNotIn(companyId, employessNotIn()));
+        return getSelect(repository.findByCompanyIdAndIdNotInOrderByNameAscSecondNameAscSurnameAscSecondSurnameAsc(companyId, employessNotIn()));
     }
 
     private EmployeeFindDto parseEmployeeFindDto(Employee employee) throws CustomException {

@@ -183,7 +183,7 @@ export const DetailInvoice = () => {
   }
   const onChangeStatus = ({target }) => {
     if( status !== '2000800003' && target.value === '2000800003' ) {
-      const newAmount = paid.amount - amount;
+      const newAmount = paid.amount - removeCurrencyFormat(amount);
       dispatch( setPaid( { ...paid, amount: newAmount } ) );
     }
     setStatus(target.value)
@@ -205,7 +205,7 @@ export const DetailInvoice = () => {
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangeOId = ({ target }) => {
     setPFilter(target.value);
-    const order = orders.find( o => o.value === target.value );
+    const order = orders.find( o => o.value.include(target.value) );
     if( order ) {
       setOId(order.id);
       const parentId = orders.find( o => o.id === order.id ).parentId;
@@ -325,7 +325,7 @@ export const DetailInvoice = () => {
           <h3>¡El monto de la factura no puede ser mayor al monto pendiente!</h3>
           <ul style={ { marginBottom: '0' } }>
             {/* <li key={ 1 }><p className="h3">Monto pagado: <span className='text-primary'>{ formatter.format(paid.amount) }</span></p></li> */}
-            <li key={ 1 }><p className="h3">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p></li>
+            <li key={ 1 }>{ renderPendingAmount('h3') }</li>
             <li key={ 2 }><p className="h3">Monto capturado: <span className='text-success'>{ amount }</span></p></li>
           </ul>
       </div>
@@ -399,12 +399,23 @@ export const DetailInvoice = () => {
   const titleWithOrder = `${ oId !== '' ? ': ' + order.orderNum : '' }${order.requisition ? ' > Requisición: ' + order.requisition : ''}`;
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Factura nueva';
 
+  const renderPendingAmount = classP => {
+    const pendingAmount = order.amount - paid.amount;
+    const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
+    const cssText = pendingAmount > 0 ? 'danger' : 'success';
+    return (
+      <p className={ classP }>
+        { labelText } <span className={ `text-${cssText}` } >{ formatter.format( Math.abs(pendingAmount) ) }</span>
+      </p>
+    )
+  }
+
   return (
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
       { order.id && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
       { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(paid.amount) }</span></p>) }
-      { order.id && (<p className="h4">Monto pendiente: <span className='text-danger'>{ formatter.format(order.amount - paid.amount) }</span></p>) }
+      { order.id && renderPendingAmount('h4') }
       { id && renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>
