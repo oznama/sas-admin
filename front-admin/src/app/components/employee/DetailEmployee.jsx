@@ -9,9 +9,11 @@ import { getEmployeeById, getEmployessByCompanyId, save, update } from "../../se
 import { displayNotification, genericErrorMsg, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
+import { setEmployeeS } from '../../../store/company/companySlice';
 
 export const DetailEmployee = () => {
 
+  const { companyS } = useSelector( state => state.companyReducer );
   const { permissions, user } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(1);
   const {id} = useParams();
@@ -31,7 +33,7 @@ export const DetailEmployee = () => {
   const onChangeSecondSurname = ({ target }) => setSecondSurname(target.value);
   const [phone, setPhone] = useState('');
   const onChangePhone = ({ target }) => setPhone(target.value);
-  const [company, setCompany] = useState('');
+  const [company, setCompany] = useState(companyS ? companyS : '');
   
   const [companyDesc, setCompanyDesc] = useState('');
   const onChangeCompany = ({ target }) => {
@@ -51,16 +53,17 @@ export const DetailEmployee = () => {
   const [companies, setCompanies] = useState([]);
   const [catEmployees, setCatEmployees] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [active, setActive] = useState('');
   const [leader, setLeader] = useState('');
   const onChangeLeader = ({ target }) => setLeader(target.value);
 
-  const isModeEdit = ( id && !permissions.canEditEmp );
+  const isModeEdit = ( id && !permissions.canEditEmp && active );
 
   const onSubmit = event => {
     event.preventDefault()
     const data = new FormData(event.target)
     const request = Object.fromEntries(data.entries())
-	  request['email'] = email + (user.companyDomain ? user.companyDomain : '@sas-mexico.com')
+	request['email'] = email + (user.companyDomain ? user.companyDomain : '@sas-mexico.com')
     if (id){
       updateEmployee(request);
     }else{
@@ -68,8 +71,19 @@ export const DetailEmployee = () => {
     }
   }
   
+  const onClickBack = () => {
+    if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
+      navigate('/employee')
+    } else {
+      setCurrentTab(currentTab - 1);
+    }
+  }
+
   const renderTabs = () => (//Esto controla los tabs
     <ul className="nav nav-tabs">
+      <li>
+        <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
+      </li>
       <li className="nav-item" onClick={ () => setCurrentTab(1) }>
         <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
       </li>
@@ -95,9 +109,11 @@ export const DetailEmployee = () => {
             if( response.companyId ) {
               fetchLeaders(response.companyId);
             }
-            setCompany(numberToString(user.companyId, ''));
+            setCompany(numberToString(response.companyId, ''));
             setPosition(numberToString(response.positionId, ''));
             setLeader(numberToString(response.bossId, ''));
+            setActive(response.active);
+            dispatch(setEmployeeS(response));
         }
     }).catch( error => {
         console.log(error);
@@ -219,16 +235,16 @@ export const DetailEmployee = () => {
                 </div>
                 <div className="row text-start">
                   <div className='col-6'>
-                    <Select name="bossId" label="L&iacute;der" options={ catEmployees } disabled={ isModeEdit } value={ leader } onChange={ onChangeLeader } />
+                    <Select name="positionId" label="Puesto" options={ positions } disabled={ isModeEdit } value={ position } onChange={ onChangePosition } />
                   </div>
                   <div className='col-6'>
-                    <Select name="positionId" label="Puesto" options={ positions } disabled={ isModeEdit } value={ position } onChange={ onChangePosition } />
+                  <Select name="bossId" label="L&iacute;der" options={ catEmployees } disabled={ isModeEdit } value={ leader } onChange={ onChangeLeader } />
                   </div>
                 </div>
                   <div className="pt-3 d-flex flex-row-reverse">
-                      {permissions.canEditEmp && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
+                      {permissions.canEditEmp && active && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
                       &nbsp;
-                      <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>{permissions.canEditEmp ? 'Cancelar' : 'Regresar'}</button>
+                      <button type="button" className="btn btn-danger" onClick={ () => navigate(`/employee`) }>{permissions.canEditEmp && active ? 'Cancelar' : 'Regresar'}</button>
                   </div>
               </form>
           </div>)

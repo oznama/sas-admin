@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const projectSlice = createSlice({
-    name: 'projectReducer',
+    name: 'companyReducer',
     initialState: {
         currentTab: 1,
         currentAppTab: 1,

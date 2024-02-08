@@ -60,7 +60,6 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         String message = ChangeBeanUtils.checkCompany(company, companyUpdateDto);
 
         if(!message.isEmpty()) {
-            validateRfc(company.getRfc());
             repository.save(company);
             save(Company.class.getSimpleName(), company.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }

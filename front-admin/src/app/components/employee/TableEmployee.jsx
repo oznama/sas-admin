@@ -7,6 +7,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { getCompanySelect } from '../../services/CompanyService';
+import { setCompanyS, setEmployeeS} from '../../../store/company/companySlice';
 
 export const TableEmployee = ({
     pageSize = 10,
@@ -16,16 +17,22 @@ export const TableEmployee = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const { companyS } = useSelector( state => state.companyReducer );
+    const { employeeS } = useSelector( state => state.companyReducer );
+
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
-    const [filter, setFilter] = useState('')
-    const [companyId, setCompanyId] = useState( permissions.isAdminRoot ? '' : user.companyId) ;
+    const [filter, setFilter] = useState(employeeS.name ? employeeS.name : ''); 
+    const [companyId, setCompanyId] = useState(companyS) ;
     const [companies, setCompanies] = useState([]);
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
-    const onChangeCompany = ({ target }) => setCompanyId(target.value);
+    const onChangeCompany = ({ target }) => {
+        setCompanyId(target.value);
+        dispatch(setCompanyS(target.value));
+    };
 
     const fetchEmployees = (page) => {
         getEmployees(page, pageSize, sort, filter, companyId)
@@ -40,6 +47,7 @@ export const TableEmployee = ({
                 displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
     }
+    console.log('Valor del reducer: '+companyS);
 
     const fetchSelects = () => {
         
@@ -62,7 +70,7 @@ export const TableEmployee = ({
     }
 
     const handleAddEmployee = () => {
-        // dispatch(setCurrentTab(1));
+        dispatch(setEmployeeS(''));
         navigate(`/employee/add`);
     }
 
@@ -151,14 +159,14 @@ export const TableEmployee = ({
             { permissions.isAdminRoot && (<td className="text-center">{ creationDate }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
-                <button type="button" className="btn btn-success btn-sm" onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditComp ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditComp ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelEmp && (
             <td className="text-center">
-                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteEmployee(id) }>
-                    <span><i className="bi bi-trash"></i></span>
+                <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteEmployee(id) }>
+                    <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}

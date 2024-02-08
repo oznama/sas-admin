@@ -9,6 +9,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import { setCompanyName } from "../../../store/company/companySlice";
 
 export const DetailCompany = () => {
 
@@ -20,10 +21,12 @@ export const DetailCompany = () => {
     const [rfc, setRfc] = useState('');
     const [errorRfc, setErrorRfc] = useState();
     const rfcPattern = /^[A-Z]{3}\d{6}[A-Z0-9]{3}$/;
+    const rfcPatternP = /^[A-Z]{4}\d{6}[A-Z0-9]{3}$/;
     const onChangeRfc = ({ target }) => {
+        setRfc(rfc.toUpperCase());
         setErrorRfc(null);
-        if (!rfcPattern.test(target.value)) {
-            setErrorRfc('RFC inválido. Debe tener el formato XXX000000XXX');
+        if (rfcPattern.test(target.value) || rfcPatternP.test(target.value)) {}else{
+            setErrorRfc('RFC inválido.');
         }
         setRfc(target.value);
     }
@@ -92,57 +95,67 @@ export const DetailCompany = () => {
     const [country, setCountry] = useState('');
     const [errorCountry, setErrorCountry] = useState('');
     const countryPattern = /^[a-zA-ZÀ-ÿ\s]{2,100}$/;
-    const onChangeCountry = ({ target }) => {
-        setErrorCountry(null);
-        if (!countryPattern.test(target.value)) {
-            setErrorCountry('Pais de la empresa inválido.');
-        }
-        setCountry(target.value);
-    }
+    
+    const countriesList = [
+        { id: 'MX', name: 'México' },
+        { id: 'US', name: 'Estados Unidos' },
+        // Agrega más países según tus necesidades
+    ];
+
+    // const [countries, setCountries] = useState([
+    //     { id: 'MX', name: 'México' },
+    //     { id: 'US', name: 'Estados Unidos' }
+    //     // Add more countries as needed
+    // ]);
+
+    const countries = countriesList.map(country => ({
+        value: country.id,
+        label: country.name
+    }));
+
+    const onChangeCountry = ({target}) => {
+        setSelectedCountry(target.value);
+    };
+
+    const [selectedCountry, setSelectedCountry] = useState(null);//Pais seleccionado
+
     const [phone, setPhone] = useState('');
     const [errorPhone, setErrorPhone] = useState('');
     const onChangePhone = ({ target }) => {
-        const phoneNumber = parsePhoneNumberFromString(target.value) // 'MX' es el indicativo de país para México
-        setErrorPhone('')
+        const phoneNumber = parsePhoneNumberFromString(target.value, selectedCountry) // 'MX' es el indicativo de país para México
+        setErrorPhone('');
         if (phoneNumber) {
             if (phoneNumber.isPossible() &&  phoneNumber.isValid()) {
                 setErrorPhone('')
                 setPhone(target.value)
-                setFormattedPhone(phoneNumber.formatNational())
+                phoneNumber.formatNational()
             }else{  
                 setPhone(target.value)
-                setFormattedPhone('')
                 setErrorPhone("Teléfono invalido.")
             }
         } else {
             setErrorPhone("Teléfono no válido, ingrese lada.");
             setPhone(target.value)
-            setFormattedPhone('')
         }
     } 
     const [cellphone, setCellphone] = useState('');
     const [errorCellphone, setErrorCellphone] = useState('');
     const onChangeCellphone = ({ target }) => {
-        const cellphoneNumber = parsePhoneNumberFromString(target.value) // 'MX' es el indicativo de país para México
+        const cellphoneNumber = parsePhoneNumberFromString(target.value, selectedCountry) // 'MX' es el indicativo de país para México
         setErrorCellphone('')
         if (cellphoneNumber) {
             if (cellphoneNumber.isPossible() &&  cellphoneNumber.isValid()) {
                 setErrorCellphone('')
                 setCellphone(target.value)
-                setFormattedCellphone(cellphoneNumber.formatNational())
             }else{  
                 setCellphone(target.value)
-                setFormattedCellphone('')
                 setErrorCellphone("Teléfono celular invalido.")
             }
         } else {
             setErrorCellphone("Teléfono celular no válido, ingrese lada.");
             setCellphone(target.value)
-            setFormattedCellphone('')
         }
     }
-    const [formattedCellphone, setFormattedCellphone] = useState('');
-
     const [interior, setInterior] = useState('');
     const onChangeInterior = ({ target }) => setInterior(target.value);
 
@@ -159,8 +172,8 @@ export const DetailCompany = () => {
     const onChangeType = ({ target }) => setType(target.value);
     const [types, setTypes] = useState([]);
 
-    const isModeEdit = ( id && !permissions.canEditComp );
-
+    const isModeEdit = ( id && !permissions.canEditComp && active);
+    const [active, setActive] = useState('');
     const onSubmit = event => {
         if( errorRfc && errorAlias && errorPhone ) {
             displayNotification(dispatch, 'corrige los errores', alertType.error);
@@ -175,9 +188,20 @@ export const DetailCompany = () => {
             }
         }
     }
+
+    const onClickBack = () => {
+        if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
+            navigate('/company')
+        } else {
+            setCurrentTab(currentTab - 1);
+        }
+    }
     
     const renderTabs = () => (//Esto controla los tabs
     <ul className="nav nav-tabs">
+        <li>
+            <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
+        </li>
         <li className="nav-item" onClick={ () => setCurrentTab(1) }>
             <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
         </li>
@@ -204,11 +228,13 @@ export const DetailCompany = () => {
             setLocality(response.locality);
             setCity(response.city);
             setState(response.state);
-            setCountry(response.country);
+            setSelectedCountry(response.country);
             setPhone(response.phone);
             setCellphone(response.cellphone);
             setExt(response.ext);
             setType(response.type);
+            setActive(response.active);
+            dispatch(setCompanyName(response.name));
         }
     }).catch( error => {
         console.log(error);
@@ -262,28 +288,34 @@ export const DetailCompany = () => {
     };
     
     const fetchSelects = () => {
-    getCatalogChilds(1000000009).then( response => {
-        setTypes(response.filter( cat => cat.id !== 2000900001 && cat.status === 2000100001 ));
-    }).catch( error => {
-        console.log(error);
-    });
-    
+        getCatalogChilds(1000000009).then((response) => {
+            setTypes(response.filter((cat) => cat.id !== 2000900001 && cat.status === 2000100001));
+        }).catch((error) => {
+            console.log(error);
+        });
     };
+    
+    // useEffect(() => {
+    //     setRfc(rfc.toUpperCase());
+    // }, [rfc]);
 
     useEffect(() => {
-    //console.log('Aqui pasa cuando agrega un usuario')
-    fetchSelects()
-    if(id){
-        fetchEmployee();
-    }
-    }, [])
+        fetchSelects();
+        if (id) {
+            fetchEmployee();
+        }
+        if (!id) {
+            const defaultCountry = countriesList.find(country => country.id === 'MX'); // o el país que desees seleccionar por defecto
+            setSelectedCountry(defaultCountry);
+        }
+    }, []);
 
     const renderDetail = () => {
     return (<div className='d-grid gap-2 col-6 mx-auto'>
                 <form className="needs-validation" onSubmit={ onSubmit }>
                 <div className="row text-start">
                     <div className='col-4'>
-                        <InputText name='rfc' label='RFC:*' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 12 } error={ errorRfc } />
+                        <InputText name='rfc' label='RFC:*' placeholder='Ingresa RFC' disabled={ isModeEdit } value={ rfc } required onChange={ onChangeRfc } maxLength={ 13 } error={ errorRfc } />
                     </div>
                     <div className='col-4'>
                         <InputText name='name' label='Raz&oacute;n Social:*' placeholder='Escribe la raz&oacute;n social' disabled={isModeEdit} value={name} required onChange={onChangeName} maxLength={50} error={errorName} />
@@ -322,7 +354,8 @@ export const DetailCompany = () => {
                         <InputText name='state' label='Estado:' placeholder='Escribe el estado' disabled={ isModeEdit } value={ state } onChange={ onChangeState } maxLength={ 50 } error={errorState}/>
                     </div>
                     <div className='col-4'>
-                        <InputText name='country' label='Pais:' placeholder='Escribe el pais' disabled={ isModeEdit } value={ country } onChange={ onChangeCountry } maxLength={ 50 } error={errorCountry}/>
+                        {/* <InputText name='country' label='Pais:' placeholder='Escribe el pais' disabled={ isModeEdit } value={ country } onChange={ onChangeCountry } maxLength={ 50 } error={errorCountry}/> */}
+                        <Select name="country" label="País:" options={countries} disabled={isModeEdit} value={selectedCountry} onChange={onChangeCountry} />
                     </div>
                 </div>
                 <div className="row text-start">
@@ -346,9 +379,9 @@ export const DetailCompany = () => {
                     
                 </div>
                     <div className="pt-3 d-flex flex-row-reverse">
-                        {permissions.canEditComp && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
+                        {permissions.canEditComp && active && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
                         &nbsp;
-                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/company`) }>{permissions.canEditComp ? 'Cancelar' : 'Regresar'}</button>
+                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/company`) }>{permissions.canEditComp && active ? 'Cancelar' : 'Regresar'}</button>
                     </div>
                 </form>
             </div>)
