@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { alertType } from "../../custom/alerts/types/types";
 import { deleteLogic, getInvoices, getInvoicesByOrderId } from "../../../services/InvoiceService";
-import { setCurrentOrdTab, setCurrentTab, setOrder, setPaid, setProject } from "../../../../store/project/projectSlice";
+import { setCurrentOrdTab, setCurrentTab, setOrder, setProject, setOrderPaid } from "../../../../store/project/projectSlice";
 import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from "../../../helpers/utils";
 import { Pagination } from "../../custom/pagination/page/Pagination";
 import { InputSearcher } from "../../custom/InputSearcher";
@@ -17,18 +17,9 @@ export const TableInvoices = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { permissions } = useSelector( state => state.auth );
-    const { project, order, paid } = useSelector( state => state.projectReducer );
+    const { project, order, orderPaid } = useSelector( state => state.projectReducer );
 
     const [invoices, setInvoices] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [totalTax, setTotalTax] = useState(0);
-    const [totalT, setTotalT] = useState(0);
-    const [totapP, setTotapP] = useState(0);
-    const [totalAmountStr, setTotalAmountStr] = useState(0);
-    const [totalTaxStr, setTotalTaxStr] = useState(0);
-    const [totalTStr, setTotalTStr] = useState(0);
-    const [totalStatus, setTotalStatus] = useState();
-
     const [currentPage, setCurrentPage] = useState(0);
     const [totalInvoices, setTotalInvoices] = useState(0);
     const [filter, setFilter] = useState('');
@@ -46,15 +37,6 @@ export const TableInvoices = ({
             } else {
                 setInvoices(response.content);
                 setTotalInvoices(response.totalElements);
-                const { amount, tax, total, amountStr, taxStr, totalStr, percentage, status } = response.content;
-                setTotalAmount( amount );
-                setTotalTax( tax ) ;
-                setTotalT( total );
-                setTotalAmountStr( amountStr );
-                setTotalTaxStr( taxStr ) ;
-                setTotalTStr( totalStr );
-                setTotapP( percentage );
-                setTotalStatus( status );
             }
         }).catch( error => {
             console.log(error);
@@ -69,16 +51,7 @@ export const TableInvoices = ({
             } else {                
                 setInvoices(response.filter( r => r.invoiceNum !== 'total' ));
                 const invoiceTotal = response.find( r => r.invoiceNum === 'total' );
-                dispatch(setPaid(invoiceTotal));
-                const { amount, tax, total, amountStr, taxStr, totalStr, percentage, status } = invoiceTotal;
-                setTotalAmount( amount );
-                setTotalTax( tax ) ;
-                setTotalT( total );
-                setTotalAmountStr( amountStr );
-                setTotalTaxStr( taxStr ) ;
-                setTotalTStr( totalStr );
-                setTotapP( percentage );
-                setTotalStatus( status );
+                dispatch(setOrderPaid(invoiceTotal));
             }
         }).catch( error => {
             console.log(error);
@@ -99,7 +72,7 @@ export const TableInvoices = ({
         if( !projectId || !orderId ) {
             dispatch(setProject({}));
             dispatch(setOrder({}));
-            dispatch(setPaid({}));
+            dispatch(setOrderPaid({}));
         }
     }, []);
 
@@ -118,7 +91,7 @@ export const TableInvoices = ({
         navigate(`/project/${ projectId ? projectId : 0 }/order/${ orderId ? orderId : 0 }/invoice/add`);
     }
 
-    const renderAddInvoiceButton = () => permissions.canCreateOrd && (( !projectId || !orderId) || ((paid.amount < order.amount) && (order.status < 2000600003))) && (
+    const renderAddInvoiceButton = () => permissions.canCreateOrd && (( !projectId || !orderId) || ((orderPaid.amount < order.amount) && (order.status < 2000600003))) && (
         <div className="d-flex flex-row-reverse p-2">
           <button type="button" className="btn btn-primary" onClick={ handleAddInvoice }>
               <span className="bi bi-plus"></span>
@@ -205,7 +178,7 @@ export const TableInvoices = ({
                         <button type="button"
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
-                            disabled={ status === 2000800002 || ( status === 2000800003 && paid.amount >= order.amount ) }
+                            disabled={ status === 2000800002 || ( status === 2000800003 && orderPaid.amount >= order.amount ) }
                             onClick={ () => deleteInvoice(id, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
@@ -246,11 +219,11 @@ export const TableInvoices = ({
                                 <th className="text-center fs-6" scope="col">TOTAL</th>
                                 <th></th>
                                 <th></th>
-                                { orderId && (<th className="text-center fs-6" scope="col">{ totapP }</th>) }
-                                <td className="text-center fs-6" scope="col">{ renderStatus(totalStatus) }</td>
-                                <th className="text-end fs-6" scope="col">{ totalAmountStr }</th>
-                                <th className="text-end fs-6" scope="col">{ totalTaxStr }</th>
-                                <th className="text-end fs-6" scope="col">{ totalTStr }</th>
+                                { orderId && (<th className="text-center fs-6" scope="col">{ orderPaid.percentage }</th>) }
+                                <td className="text-center fs-6" scope="col">{ renderStatus(orderPaid.status) }</td>
+                                <th className="text-end fs-6" scope="col">{ orderPaid.amountStr }</th>
+                                <th className="text-end fs-6" scope="col">{ orderPaid.taxStr }</th>
+                                <th className="text-end fs-6" scope="col">{ orderPaid.totalStr }</th>
                                 <th></th>
                                 { permissions.canDelOrd && (<th></th>) }
                             </tr>

@@ -11,7 +11,7 @@ import { getInvoiceById, getInvoicePaid, save, update } from '../../../services/
 import { getCatalogChilds } from '../../../services/CatalogService';
 import { TextArea } from '../../custom/TextArea';
 import { setModalChild } from '../../../../store/modal/modalSlice';
-import { setOrder, setPaid, setProject } from '../../../../store/project/projectSlice';
+import { setOrder, setProject, setOrderPaid } from '../../../../store/project/projectSlice';
 import { getProjectById } from '../../../services/ProjectService';
 import { getOrderById, getOrderSelect } from '../../../services/OrderService';
 import { SelectSearcher } from '../../custom/SelectSearcher';
@@ -19,8 +19,8 @@ import { SelectSearcher } from '../../custom/SelectSearcher';
 export const DetailInvoice = () => {
 
   const dispatch = useDispatch();
-  const { project, order, paid } = useSelector( state => state.projectReducer );
-  const [totalPaid, setTotalPaid] = useState(paid.amount ? paid.amount : 0);
+  const { project, order, orderPaid } = useSelector( state => state.projectReducer );
+  const [totalPaid, setTotalPaid] = useState(orderPaid.amount ? orderPaid.amount : 0);
   const { permissions } = useSelector( state => state.auth );
   const { projectId, orderId, id } = useParams();
 
@@ -96,7 +96,7 @@ export const DetailInvoice = () => {
 
   const fetchPaid = orderId => {
     getInvoicePaid(orderId).then( response => {
-      dispatch(setPaid(response));
+      dispatch(setOrderPaid(response));
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -150,7 +150,7 @@ export const DetailInvoice = () => {
       setAmount(newAmount);
       setTax(tax.toFixed(2));
       setTotal(total.toFixed(2));
-      dispatch( setPaid( { ...paid, amount: nA === amountInDb ? totalPaid : amountDiff } ) );
+      dispatch( setOrderPaid( { ...orderPaid, amount: nA === amountInDb ? totalPaid : amountDiff } ) );
 
       const porc = Math.round((nA * 100)/order.amount);
       setPercentage(porc);
@@ -162,7 +162,7 @@ export const DetailInvoice = () => {
       setAmount('');
       setTax('');
       setTotal('');
-      dispatch( setPaid( { ...paid, amount: 0 } ) )
+      dispatch( setOrderPaid( { ...orderPaid, amount: 0 } ) )
     } else if( isNumDec(target.value) ) {
       calculateAmounts(target.value);
     }
@@ -183,8 +183,8 @@ export const DetailInvoice = () => {
   }
   const onChangeStatus = ({target }) => {
     if( status !== '2000800003' && target.value === '2000800003' ) {
-      const newAmount = paid.amount - removeCurrencyFormat(amount);
-      dispatch( setPaid( { ...paid, amount: newAmount } ) );
+      const newAmount = orderPaid.amount - removeCurrencyFormat(amount);
+      dispatch( setOrderPaid( { ...orderPaid, amount: newAmount } ) );
     }
     setStatus(target.value)
   };
@@ -199,7 +199,7 @@ export const DetailInvoice = () => {
     const porcDec = Number(target.value) / 100;
     calculateAmounts(order.amount * porcDec);
     if( target.value === '' ) {
-      dispatch( setPaid( { ...paid, amount: 0 } ) );
+      dispatch( setOrderPaid( { ...orderPaid, amount: 0 } ) );
     }
   };
   const onChangeObservations = ({ target }) => setObservations(target.value);
@@ -215,7 +215,7 @@ export const DetailInvoice = () => {
       setPId('');
       dispatch(setProject({}));
       dispatch(setOrder({}));
-      dispatch(setPaid({}));
+      dispatch(setOrderPaid({}));
     }
   }
 
@@ -223,7 +223,7 @@ export const DetailInvoice = () => {
     setPFilter('');
     setPId('');
     dispatch(setProject({}));
-    dispatch(setPaid({}));
+    dispatch(setOrderPaid({}));
   }
 
   const onSubmit = event => {
@@ -232,7 +232,7 @@ export const DetailInvoice = () => {
       displayNotification(dispatch, 'El monto de la factura es requerido!', alertType.warning);
     } else {
       const oA = order.amount.toFixed(2);
-      const pA = paid.amount.toFixed(2);
+      const pA = orderPaid.amount.toFixed(2);
       const isAmountDiffZero = (oA - pA) !== 0;
       const isAmountPending = (oA - pA) < 0;
       if( isAmountDiffZero && isAmountPending ) {
@@ -357,7 +357,7 @@ export const DetailInvoice = () => {
                         onChange={ onChangePercentage } onBlur={ onBlurAmount } />
                   </div>
                   <div className='col-4'>
-                      <Select name = "status" label="Status" options={ catStatus } disabled={ !permissions.canEditOrd || (Number(status) === 2000800003 && paid.amount && paid.amount >= order.amount) } value={ status } onChange={ onChangeStatus } />
+                      <Select name = "status" label="Status" options={ catStatus } disabled={ !permissions.canEditOrd || (Number(status) === 2000800003 && orderPaid.amount && orderPaid.amount >= order.amount) } value={ status } onChange={ onChangeStatus } />
                   </div>
               </div>
               <div className="row text-start">
@@ -400,7 +400,7 @@ export const DetailInvoice = () => {
   const title = pId !== '' ? `${project.key} ${project.description} > Orden${ titleWithOrder }` : 'Factura nueva';
 
   const renderPendingAmount = classP => {
-    const pendingAmount = order.amount - paid.amount;
+    const pendingAmount = order.amount - orderPaid.amount;
     const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
     const cssText = pendingAmount > 0 ? 'danger' : 'success';
     return (
@@ -414,7 +414,7 @@ export const DetailInvoice = () => {
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
       { order.id && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
-      { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(paid.amount) }</span></p>) }
+      { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(orderPaid.amount) }</span></p>) }
       { order.id && renderPendingAmount('h4') }
       { id && renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }

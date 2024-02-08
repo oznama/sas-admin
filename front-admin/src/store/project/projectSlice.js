@@ -8,7 +8,12 @@ export const projectSlice = createSlice({
         currentOrdTab: 1,
         project: {},
         order: {},
-        paid: {
+        projectPaid: {
+            amount: 0,
+            tax: 0,
+            total: 0
+        },
+        orderPaid: {
             amount: 0,
             tax: 0,
             total: 0
@@ -30,8 +35,11 @@ export const projectSlice = createSlice({
         setOrder: (state, action) => {
             state.order = action.payload;
         },
-        setPaid: (state, action) => {
-            state.paid = action.payload
+        setProjectPaid: (state, action) => {
+            state.projectPaid = action.payload
+        },
+        setOrderPaid: (state, action) => {
+            state.orderPaid = action.payload
         }
     }
 })
@@ -42,5 +50,6 @@ export const {
     setCurrentOrdTab,
     setProject,
     setOrder,
-    setPaid
+    setProjectPaid,
+    setOrderPaid
 } = projectSlice.actions;
