@@ -16,26 +16,26 @@ export const ProjectPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { permissions } = useSelector( state => state.auth );
-  const {currentTab, project, paid} = useSelector( state => state.projectReducer );
+  const {currentTab, project, projectPaid} = useSelector( state => state.projectReducer );
 
-  const fetchProject = id => {
-    getProjectById(id).then( response => {
-        if( response.code ) {
-            displayNotification(dispatch, response.message, alertType.error);
-        } else {
-            dispatch(setProject(response));
-        }
-    }).catch( error => {
-        console.log(error);
-        displayNotification(dispatch, genericErrorMsg, alertType.error);
-    });
+  const fetchProject = () => {
+    if( id ) {
+      getProjectById(id).then( response => {
+          if( response.code ) {
+              displayNotification(dispatch, response.message, alertType.error);
+          } else {
+              dispatch(setProject(response));
+          }
+      }).catch( error => {
+          console.log(error);
+          displayNotification(dispatch, genericErrorMsg, alertType.error);
+      });
+    }
   }
 
   useEffect(() => {
-    if( id ) {
-      fetchProject(id);
-    }
-  });
+    fetchProject();
+  }, []);
   
   const handleAddApplication = () => {
     dispatch(setCurrentAppTab(1));
@@ -54,8 +54,13 @@ export const ProjectPage = () => {
     if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
       navigate('/home')
     } else {
-      dispatch(setCurrentTab(currentTab - 1));
+      onClickTab(currentTab - 1);
     }
+  }
+
+  const onClickTab = tagId => {
+    fetchProject();
+    dispatch(setCurrentTab(tagId));
   }
 
   const renderTabs = () => id && (
@@ -66,17 +71,17 @@ export const ProjectPage = () => {
         </li>
         {
           permissions.canEditEmp && (
-            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(1)) }>
+            <li className="nav-item" onClick={ () => onClickTab(1) }>
               <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` } aria-current="page">Detalle</a>
             </li>
           )
         }
-        <li className="nav-item" onClick={ () => dispatch(setCurrentTab(2)) }>
+        <li className="nav-item" onClick={ () => onClickTab(2) }>
           <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Aplicaciones</a>
         </li>
         {
           permissions.canAdminOrd && (
-            <li className="nav-item" onClick={ () => dispatch(setCurrentTab(3)) }>
+            <li className="nav-item" onClick={ () => onClickTab(3) }>
               <a className={ `nav-link ${ (currentTab === 3) ? 'active' : '' }` }>Ordenes</a>
             </li>
           )
@@ -89,6 +94,17 @@ export const ProjectPage = () => {
   )
 
   const title = project && project.key ? `${project.key} ${project.description}` : 'Proyecto nuevo';
+  
+  const renderPendingAmount = () => {
+    const pendingAmount = project.amount - projectPaid.amount;
+    const labelText = pendingAmount >= 0 ? 'Monto pendiente:' : 'Saldo a favor';
+    const cssText = pendingAmount > 0 ? 'danger' : 'success';
+    return (
+      <p className="h4">
+        { labelText } <span className={ `text-${cssText}` } >{ formatter.format( Math.abs(pendingAmount) ) }</span>
+      </p>
+    )
+  }
 
   return (
     <div className='px-5'>
@@ -99,9 +115,7 @@ export const ProjectPage = () => {
             {/* Iva: <span className='text-primary'>{ project.tax }</span> Total: <span className='text-primary'>{ project.total }</span> */}
             Costo del proyecto: <span className='text-primary'>{ formatter.format(project.amount) }</span>
           </p>
-          <p className="h4">
-            Monto pendiente: <span className='text-danger'>{ formatter.format(project.amount - paid.amount) }</span>
-          </p>
+          { renderPendingAmount() }
         </>
       )}
       { renderTabs() }

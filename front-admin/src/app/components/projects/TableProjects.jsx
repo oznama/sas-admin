@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getProjects } from '../../services/ProjectService';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentTab, setOrder, setPaid, setProject } from '../../../store/project/projectSlice';
+import { setCurrentTab, setOrder, setProjectPaid, setProject } from '../../../store/project/projectSlice';
 import { useNavigate } from 'react-router-dom';
 import { alertType } from '../custom/alerts/types/types';
 import { displayNotification, styleTableRow, styleTableRowBtn } from '../../helpers/utils';
@@ -57,7 +57,7 @@ export const TableProject = ({
         dispatch(setCurrentTab(1));
         dispatch(setProject({}));
         dispatch(setOrder({}));
-        dispatch(setPaid({}));
+        dispatch(setProjectPaid({}));
         navigate(`/project/add`);
     }
 
