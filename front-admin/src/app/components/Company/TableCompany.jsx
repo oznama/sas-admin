@@ -6,7 +6,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
-import { setCompanyName, setCompanyS } from '../../../store/company/companySlice';
+import { setCompanyName } from '../../../store/company/companySlice';
 
 export const TableCompany = ({
     pageSize = 10,

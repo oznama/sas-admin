@@ -16,6 +16,7 @@ import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.service.impl.EmployeeServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -334,7 +335,8 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkEmployee(Employee employee, EmployeeUpdateDto employeeUpdateDto, CatalogService catalogService) {
+    public static String checkEmployee(Employee employee, EmployeeUpdateDto employeeUpdateDto,
+                                       CatalogService catalogService, EmployeeServiceImpl employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         if(employeeUpdateDto.getEmail() != null && !employeeUpdateDto.getEmail().equalsIgnoreCase(employee.getEmail())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Correo",
@@ -367,10 +369,13 @@ public class ChangeBeanUtils extends Utils {
                     employee.getCompanyId(), employeeUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
             employee.setCompanyId(employeeUpdateDto.getCompanyId());
         }
+        //Se actualiza la posicion
         if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null)
                 || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
-                    employee.getPositionId(), employeeUpdateDto.getPositionId())).append(GeneralKeys.JUMP_LINE);
+                    catalogService.findById(employee.getPositionId()).getValue(),
+                    catalogService.findById(employeeUpdateDto.getPositionId()).getValue()
+            )).append(GeneralKeys.JUMP_LINE);
             employee.setPositionId(employeeUpdateDto.getPositionId());
         }
         if( validateStringNoRequiredUpdate(employee.getPhone(), employeeUpdateDto.getPhone()) ) {
@@ -378,10 +383,33 @@ public class ChangeBeanUtils extends Utils {
                     employee.getPhone(), employeeUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
             employee.setPhone(employeeUpdateDto.getPhone());
         }
+        if( validateStringNoRequiredUpdate(employee.getCellphone(), employeeUpdateDto.getCellphone()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Celular",
+                    employee.getCellphone(), employeeUpdateDto.getCellphone())).append(GeneralKeys.JUMP_LINE);
+            employee.setCellphone(employeeUpdateDto.getCellphone());
+        }
+        if( validateStringNoRequiredUpdate(employee.getCountry(), employeeUpdateDto.getCountry()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Pais",
+                    employee.getCountry(), employeeUpdateDto.getCountry())).append(GeneralKeys.JUMP_LINE);
+            employee.setCountry(employeeUpdateDto.getCountry());
+        }
+        if( validateStringNoRequiredUpdate(employee.getCity(), employeeUpdateDto.getCity()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Ciudad",
+                    employee.getCity(), employeeUpdateDto.getCity())).append(GeneralKeys.JUMP_LINE);
+            employee.setCity(employeeUpdateDto.getCity());
+        }
+        if( validateStringNoRequiredUpdate(employee.getExt(), employeeUpdateDto.getExt()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Extencion",
+                    employee.getExt(), employeeUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
+            employee.setExt(employeeUpdateDto.getExt());
+        }
+        // Se cambia el jefe
         if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
                 || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
-                    employee.getBossId(), employeeUpdateDto.getBossId())).append(GeneralKeys.JUMP_LINE);
+                    getFullname(employeeService.findEntityById(employee.getBossId())),
+                    getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId()))
+            )).append(GeneralKeys.JUMP_LINE);
             employee.setBossId(employeeUpdateDto.getBossId());
         }
         if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
@@ -392,7 +420,7 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkCompany(Company company, CompanyUpdateDto companyUpdateDto) {
+    public static String checkCompany(Company company, CompanyUpdateDto companyUpdateDto, CatalogService catalogService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         if( validateStringNoRequiredUpdate(company.getName(), companyUpdateDto.getName()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Razón social",
@@ -480,13 +508,15 @@ public class ChangeBeanUtils extends Utils {
 
         if( ( company.getType() == null && companyUpdateDto.getType() != null )
                 || ( company.getType() != null && companyUpdateDto.getType() != null && !company.getType().equals(companyUpdateDto.getType()) ) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.type,
-                    company.getType(), companyUpdateDto.getType())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Tipo",
+                    catalogService.findById(company.getType()).getValue(),
+                    catalogService.findById(companyUpdateDto.getType()).getValue()
+            )).append(GeneralKeys.JUMP_LINE);
             company.setType(companyUpdateDto.getType());
         }
 
         if( validateStringNoRequiredUpdate(company.getEmailDomain(), companyUpdateDto.getEmailDomain()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.emailDomain,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Dominio de correo",
                     company.getEmailDomain(), companyUpdateDto.getEmailDomain())).append(GeneralKeys.JUMP_LINE);
             company.setEmailDomain(companyUpdateDto.getEmailDomain());
         }

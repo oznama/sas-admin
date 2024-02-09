@@ -41,6 +41,11 @@ public class Employee {
     private Long createdBy;
     private Long companyId;
     private Long bossId;
+    private String cellphone;
+    private String country;
+    private String city;
+    private String ext;
+
 
     public Employee(Long id) {
         this.id = id;

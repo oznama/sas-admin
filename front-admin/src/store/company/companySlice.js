@@ -3,11 +3,15 @@ import { createSlice } from "@reduxjs/toolkit";
 export const companySlice = createSlice({
     name: 'companyReducer',
     initialState: {
+        companyObj: {},
         companyS: '',
         companyName: '',
         employeeS: {}
     },
     reducers: {
+        setCompanyObj(state, action) {
+            state.companyObj = action.payload;
+        },
         setCompanyS: (state, action) => {
             // console.log('Action payload: '+action.payload)
             state.companyS = action.payload;
@@ -23,6 +27,7 @@ export const companySlice = createSlice({
 })
 
 export const { 
+    setCompanyObj,
     setCompanyS,
     setEmployeeS,
     setCompanyName

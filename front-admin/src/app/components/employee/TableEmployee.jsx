@@ -6,8 +6,8 @@ import { getEmployees, deleteLogic } from "../../services/EmployeeService";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { getCompanySelect } from '../../services/CompanyService';
-import { setCompanyS, setEmployeeS} from '../../../store/company/companySlice';
+import { getCompanyById, getCompanySelect } from '../../services/CompanyService';
+import { setCompanyS, setEmployeeS, setCompanyObj} from '../../../store/company/companySlice';
 
 export const TableEmployee = ({
     pageSize = 10,
@@ -32,6 +32,14 @@ export const TableEmployee = ({
     const onChangeCompany = ({ target }) => {
         setCompanyId(target.value);
         dispatch(setCompanyS(target.value));
+        const companyIds = parseInt(target.value, 10);
+        setCompanyId(companyIds);
+        // console.log('Lista de compañías:', companies);
+        const selectedCompany = companies.find(company => company.id === companyIds);
+        if (selectedCompany) {
+            dispatch(setCompanyObj(selectedCompany));
+            // console.log('El dominio de correo de la compañía seleccionada es:', companyDomain);
+        }
     };
 
     const fetchEmployees = (page) => {
@@ -50,9 +58,9 @@ export const TableEmployee = ({
     console.log('Valor del reducer: '+companyS);
 
     const fetchSelects = () => {
-        
         getCompanySelect().then( response => {
             setCompanies(response);
+            console.log('Valor de companies: '+JSON.stringify(response, null, 2));
         }).catch( error => {
             console.log(error);
         });
@@ -140,7 +148,6 @@ export const TableEmployee = ({
     const renderRows = () => employees && employees.map(({
         id,
         email,
-        phone,
         fullName,
         company,
         position,

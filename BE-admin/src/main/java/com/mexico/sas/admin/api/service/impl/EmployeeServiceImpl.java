@@ -11,6 +11,7 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Employee;
+import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.EmployeeRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
@@ -48,6 +49,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     @Override
     public EmployeeFindDto save(EmployeeDto employeeDto) throws CustomException {
         Employee employee = from_M_To_N(employeeDto, Employee.class);
+        validationSave(employeeDto, employee);
         repository.save(employee);
         EmployeeFindDto employeeFindDto = from_M_To_N(employeeDto, EmployeeFindDto.class);
         employeeFindDto.setId(employee.getId());
@@ -60,7 +62,7 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     public EmployeeUpdateDto update(Long id, EmployeeUpdateDto employeeDto) throws CustomException {
         Employee employee = findEntityById(id);
         employeeDto.setId(id);
-        String message = ChangeBeanUtils.checkEmployee(employee, employeeDto, catalogService);
+        String message = ChangeBeanUtils.checkEmployee(employee, employeeDto, catalogService, this);
 
         if(!message.isEmpty()) {
             repository.save(employee);
@@ -74,8 +76,9 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
         log.debug("Delete logic: {}", id);
         Employee employee = findEntityById(id);
         repository.deleteLogic(id, !employee.getEliminate(), employee.getEliminate());
-        save(Employee.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
-                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        save(Project.class.getSimpleName(), id,
+                !employee.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!employee.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
@@ -184,7 +187,6 @@ public class EmployeeServiceImpl extends LogMovementUtils implements EmployeeSer
     }
 
     private void validationSave(EmployeeDto employeeDto, Employee employee) throws CustomException {
-
         // Valiadacion de correo
         try {
             findEntityByEmail(employeeDto.getEmail());

@@ -9,7 +9,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
-import { setCompanyName } from "../../../store/company/companySlice";
+import { setCompanyName, setEmployeeS } from "../../../store/company/companySlice";
 
 export const DetailCompany = () => {
 
@@ -23,16 +23,18 @@ export const DetailCompany = () => {
     const rfcPattern = /^[A-Z]{3}\d{6}[A-Z0-9]{3}$/;
     const rfcPatternP = /^[A-Z]{4}\d{6}[A-Z0-9]{3}$/;
     const onChangeRfc = ({ target }) => {
-        setRfc(rfc.toUpperCase());
+        // setRfc(rfc.toUpperCase());
         setErrorRfc(null);
         if (rfcPattern.test(target.value) || rfcPatternP.test(target.value)) {}else{
             setErrorRfc('RFC inválido.');
         }
-        setRfc(target.value);
+        setRfc(target.value.toUpperCase());
+        // console.log(rfc);
     }
     const [emailDomain, setEmailDomain] = useState('');
     const [errorEmailDomain, setErrorEmailDomain] = useState();
     const emailDomainPattern = /^[a-zA-Z0-9]+([-.][a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$/;
+
     const onChangeEmailDomain = ({ target }) => {
         setErrorEmailDomain(null);
         if (!emailDomainPattern.test(target.value)) {
@@ -40,6 +42,7 @@ export const DetailCompany = () => {
         }
         setEmailDomain(target.value);
     }
+    
     const [name, setName] = useState('');
     const [errorName, setErrorName] = useState('');
     const namePattern = /^[a-zA-ZÀ-ÿ\s]{2,100}$/;
@@ -92,9 +95,6 @@ export const DetailCompany = () => {
         }
         setState(target.value);
     }
-    const [country, setCountry] = useState('');
-    const [errorCountry, setErrorCountry] = useState('');
-    const countryPattern = /^[a-zA-ZÀ-ÿ\s]{2,100}$/;
     
     const countriesList = [
         { id: 'MX', name: 'México' },
@@ -198,16 +198,17 @@ export const DetailCompany = () => {
     }
     
     const renderTabs = () => (//Esto controla los tabs
-    <ul className="nav nav-tabs">
-        <li>
-            <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
-        </li>
+    <ul className="nav nav-tabs d-flex flex-row-reverse">
+        {id && (<li className="nav-item" onClick={ () => setCurrentTab(2) }>
+            <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+        </li>)}
         <li className="nav-item" onClick={ () => setCurrentTab(1) }>
             <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
         </li>
-        <li className="nav-item" onClick={ () => setCurrentTab(2) }>
-            <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
+        <li>
+            <button type="button" className="btn btn-link" onClick={ () => onClickBack() }>&lt;&lt; Regresar</button>
         </li>
+        
     </ul>
     )
 
@@ -256,6 +257,7 @@ export const DetailCompany = () => {
             }
         } else {
             displayNotification(dispatch, '¡Empresa creado correctamente!', alertType.success);
+            dispatch(setCompanyName(request.name));
             navigate('/company', { replace: true });
         }
     }).catch(error => {
@@ -379,9 +381,9 @@ export const DetailCompany = () => {
                     
                 </div>
                     <div className="pt-3 d-flex flex-row-reverse">
-                        {permissions.canEditComp && active && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
+                        {permissions.canEditComp && (<button type="submit" className="btn btn-primary" >Guardar</button>)}
                         &nbsp;
-                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/company`) }>{permissions.canEditComp && active ? 'Cancelar' : 'Regresar'}</button>
+                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/company`) }>{permissions.canEditComp ? 'Cancelar' : 'Regresar'}</button>
                     </div>
                 </form>
             </div>)
@@ -392,7 +394,7 @@ export const DetailCompany = () => {
         <div className="d-flex d-flex justify-content-center">
             <h3 className="fs-4 card-title fw-bold mb-4">{`Empresa ${name ? ' > Detalles de ' + name  : ''}`}</h3>
         </div>
-        { id && renderTabs() }
+        { renderTabs() }
         { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Company' recordId={ id } />) }
     </>
     )

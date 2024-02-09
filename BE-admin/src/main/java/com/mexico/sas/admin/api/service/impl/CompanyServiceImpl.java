@@ -13,6 +13,7 @@ import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Company;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.CompanyRepository;
+import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
@@ -40,6 +41,8 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     private CompanyRepository repository;
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private CatalogService catalogService;
 
     @Override
     public CompanyFindDto save(CompanyDto companyDto) throws CustomException {
@@ -57,7 +60,7 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
     public CompanyUpdateDto update(Long id, CompanyUpdateDto companyUpdateDto) throws CustomException {
         Company company = findEntityById(id);
         companyUpdateDto.setId(id);
-        String message = ChangeBeanUtils.checkCompany(company, companyUpdateDto);
+        String message = ChangeBeanUtils.checkCompany(company, companyUpdateDto, catalogService);
 
         if(!message.isEmpty()) {
             repository.save(company);
@@ -71,8 +74,9 @@ public class CompanyServiceImpl extends LogMovementUtils implements CompanyServi
         log.debug("Delete logic: {}", id);
         Company company = findEntityById(id);
         repository.deleteLogic(id, !company.getEliminate(), company.getEliminate());
-        save(Company.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC,
-                I18nResolver.getMessage(I18nKeys.LOG_GENERAL_DELETE));
+        save(Project.class.getSimpleName(), id,
+                !company.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!company.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
