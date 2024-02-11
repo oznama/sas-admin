@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../custom/alerts/types/types';
 import { TextArea } from '../custom/TextArea';
 import { getCompanySelect } from '../../services/CompanyService';
+import { setProject } from '../../../store/project/projectSlice';
 
 export const DetailProject = () => {
 
@@ -41,7 +42,7 @@ export const DetailProject = () => {
     }
 
     const fetchCatEmployees = ( companies, companyId ) => {
-        const companySelected = companies.find( c => c.id === companyId );
+        const companySelected = companies.find( c => c.id === Number(companyId) );
         if( companySelected ) {
             setPms( companySelected.employess );
         }
@@ -101,6 +102,7 @@ export const DetailProject = () => {
                     displayNotification(dispatch, 'No se ha podido crear el proyecto', alertType.error);
                 }
             } else {
+                dispatch(setProject(request));
                 displayNotification(dispatch, '¡Proyecto creado correctamente!', alertType.success);
                 navigate('/', { replace: true });
             }
