@@ -14,15 +14,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
+public interface InvoiceRepository extends JpaRepository<Invoice, String>, JpaSpecificationExecutor<Invoice> {
 
     Optional<Invoice> findByInvoiceNum(String invoiceNum);
     List<Invoice> findByOrderOrderByInvoiceNumAscIssuedDateAsc(Order order);
 
     @Transactional
     @Modifying
-    @Query("update Invoice i set i.eliminate = :eliminate, i.active = :active, i.status = :status where i.id = :id")
-    void deleteLogic(@Param(value = "id") Long id, @Param(value = "status") Long status,
+    @Query("update Invoice i set i.eliminate = :eliminate, i.active = :active, i.status = :status where i.invoiceNum = :invoiceNum")
+    void deleteLogic(@Param(value = "invoiceNum") String invoiceNum, @Param(value = "status") Long status,
                      @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 
 }

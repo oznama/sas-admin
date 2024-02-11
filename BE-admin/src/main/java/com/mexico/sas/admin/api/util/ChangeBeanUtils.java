@@ -111,15 +111,14 @@ public class ChangeBeanUtils extends Utils {
     }
 
     public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto,
-                                                 CatalogService catalogService, EmployeeService employeeService) throws CustomException {
+                                                 EmployeeService employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
+        if( validateStringRequiredUpdate(projectApplication.getApplication().getName(), projectApplicationUpdateDto.getApplication()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Aplicación",
-                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
-                    catalogService.findById(projectApplicationUpdateDto.getApplicationId()).getValue()))
+                            projectApplication.getApplication().getName(), projectApplicationUpdateDto.getApplication()))
                     .append(GeneralKeys.JUMP_LINE);
-            projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
+            projectApplication.setApplication(new Application(projectApplicationUpdateDto.getApplication()));
         }
         double currentAmount = doubleScale(projectApplication.getAmount().doubleValue());
         double newAmount = doubleScale(projectApplicationUpdateDto.getAmount().doubleValue());

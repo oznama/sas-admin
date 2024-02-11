@@ -15,8 +15,8 @@ public class ProjectApplicationDto implements Serializable {
     private static final long serialVersionUID = 3848139802518781042L;
 
     private Long id;
-    private Long projectId;
-    private Long applicationId;
+    private String projectKey;
+    private String application;
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;

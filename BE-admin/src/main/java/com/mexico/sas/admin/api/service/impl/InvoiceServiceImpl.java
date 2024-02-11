@@ -11,7 +11,6 @@ import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Invoice;
 import com.mexico.sas.admin.api.model.Order;
-import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.repository.InvoiceRepository;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.InvoiceService;
@@ -55,12 +54,11 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         validateSave(invoiceDto, invoice);
         try {
             log.debug("Invoice {} for order id {} to save",
-                    invoiceDto.getInvoiceNum(), invoiceDto.getOrderId());
+                    invoiceDto.getInvoiceNum(), invoiceDto.getOrderNum());
             repository.save(invoice);
-            save(Invoice.class.getSimpleName(), invoice.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
-            invoiceDto.setId(invoice.getId());
-            log.debug("Invoice with id {} created", invoice.getId());
+//            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_INSERT,
+//                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            log.debug("Invoice {} created", invoice.getInvoiceNum());
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.INVOICE_NOT_CREATED, invoiceDto.getInvoiceNum());
             log.error(msgError, e.getMessage());
@@ -69,56 +67,50 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     @Override
-    public void update(Long invoiceId, InvoiceDto invoiceDto) throws CustomException {
-        Invoice invoice = findEntityById(invoiceId);
+    public void update(String invoiceNum, InvoiceDto invoiceDto) throws CustomException {
+        Invoice invoice = findEntityByInvoiceNum(invoiceNum);
         String message = ChangeBeanUtils.checkInvoice(invoice, invoiceDto, catalogService);
         log.debug("Updating invoice {} with {}, changes: {}", invoice, invoiceDto, message);
         if(!message.isEmpty()) {
             repository.save(invoice);
-            save(Invoice.class.getSimpleName(), invoice.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+//            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
             log.debug("Invoice updated!");
         }
     }
 
     @Override
-    public void deleteLogic(Long id) throws CustomException {
-        log.debug("Delete logic: {}", id);
-        Invoice invoice = findEntityById(id);
-        repository.deleteLogic(id, !invoice.getEliminate() ? CatalogKeys.INVOICE_STATUS_CANCELED : CatalogKeys.INVOICE_STATUS_IN_PROCESS,
+    public void deleteLogic(String invoiceNum) throws CustomException {
+        log.debug("Delete logic: {}", invoiceNum);
+        Invoice invoice = findEntityByInvoiceNum(invoiceNum);
+        repository.deleteLogic(invoiceNum, !invoice.getEliminate() ? CatalogKeys.INVOICE_STATUS_CANCELED : CatalogKeys.INVOICE_STATUS_IN_PROCESS,
                 !invoice.getEliminate(), invoice.getEliminate());
-        save(Invoice.class.getSimpleName(), id,
-                !invoice.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
-                I18nResolver.getMessage(!invoice.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
-    }
-
-    @Override
-    public InvoiceDto findById(Long id) throws CustomException {
-        return parseFromEntity(findEntityById(id));
-    }
-
-    @Override
-    public Invoice findEntityById(Long id) throws CustomException {
-        return repository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.INVOICE_NOT_FOUND, id)));
+//        save(Invoice.class.getSimpleName(), invoiceNum,
+//                !invoice.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+//                I18nResolver.getMessage(!invoice.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
     public InvoiceDto findByInvoiceNum(String invoiceNum) throws CustomException {
-        return parseFromEntity(repository.findByInvoiceNum(invoiceNum)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.INVOICE_NUMBER_NOT_FOUND, invoiceNum))));
+        return parseFromEntity(findEntityByInvoiceNum(invoiceNum));
     }
 
     @Override
-    public List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException {
-        log.debug("Finding invoices by order {}", orderId);
-        Order order = orderService.findEntityById(orderId);
+    public Invoice findEntityByInvoiceNum(String invoiceNum) throws CustomException {
+        return repository.findById(invoiceNum)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.INVOICE_NOT_FOUND, invoiceNum)));
+    }
+
+    @Override
+    public List<InvoiceFindDto> findByOrderNum(String orderNum) throws CustomException {
+        log.debug("Finding invoices by order {}", orderNum);
+        Order order = orderService.findEntityByOrderNum(orderNum);
         List<Invoice> invoices = repository.findByOrderOrderByInvoiceNumAscIssuedDateAsc(order);
         List<InvoiceFindDto> invoiceFindDtos = new ArrayList<>();
         invoices.forEach( invoice -> {
             try {
                 invoiceFindDtos.add(getInvoiceFindDto(invoice));
             } catch (CustomException e) {
-                log.error("Impossible add invoice {}, error: {}", invoice.getId(), e.getMessage());
+                log.error("Impossible add invoice {}, error: {}", invoice.getInvoiceNum(), e.getMessage());
             }
         });
         try {
@@ -139,7 +131,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             try {
                 invoiceFindDtos.add(getInvoiceFindDto(invoice));
             } catch (CustomException e) {
-                log.error("Impossible add invoice {}, error: {}", invoice.getId(), e.getMessage());
+                log.error("Impossible add invoice {}, error: {}", invoice.getInvoiceNum(), e.getMessage());
             }
         });
 //        try {
@@ -156,15 +148,15 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
     }
 
     @Override
-    public InvoiceFindDto getAmountPaid(Long orderId) throws CustomException {
-        Order order = orderService.findEntityById(orderId);
+    public InvoiceFindDto getAmountPaid(String orderNum) throws CustomException {
+        Order order = orderService.findEntityByOrderNum(orderNum);
         List<Invoice> invoices = repository.findByOrderOrderByInvoiceNumAscIssuedDateAsc(order);
         return getTotal(invoices, order);
     }
 
     private InvoiceDto parseFromEntity(Invoice invoice) throws CustomException {
         InvoiceDto invoiceDto = from_M_To_N(invoice, InvoiceDto.class);
-        invoiceDto.setOrderId(invoice.getOrder().getId());
+        invoiceDto.setOrderNum(invoice.getOrder().getOrderNum());
         invoiceDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return invoiceDto;
@@ -172,8 +164,8 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
 
     private InvoiceFindDto getInvoiceFindDto(Invoice invoice) throws CustomException {
         InvoiceFindDto invoiceFindDto = from_M_To_N(invoice, InvoiceFindDto.class);
-        invoiceFindDto.setOrderId(invoice.getOrder().getId());
-        invoiceFindDto.setProjectId(invoice.getOrder().getProject().getId());
+        invoiceFindDto.setOrderNum(invoice.getOrder().getOrderNum());
+        invoiceFindDto.setProjectKey(invoice.getOrder().getProject().getKey());
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setAmountStr(formatCurrency(invoice.getAmount().doubleValue()));
@@ -218,7 +210,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             if(e instanceof BadRequestException)
                 throw e;
         }
-        invoice.setOrder(new Order(invoiceDto.getOrderId()));
+        invoice.setOrder(new Order(invoiceDto.getOrderNum()));
         invoice.setCreatedBy(getCurrentUser().getUserId());
     }
 

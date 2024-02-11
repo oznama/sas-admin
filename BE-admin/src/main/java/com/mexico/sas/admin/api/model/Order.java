@@ -6,6 +6,7 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -15,12 +16,12 @@ import java.util.Date;
 @NoArgsConstructor
 @FieldNameConstants
 @DynamicInsert
-public class Order {
+public class Order implements Serializable {
+
+    private static final long serialVersionUID = -7097931328362020896L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    private Long id;
     private String orderNum;
     private Date orderDate;
     private Long status;
@@ -41,10 +42,10 @@ public class Order {
     private Long createdBy;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "p_key")
     private Project project;
 
-    public Order(Long id) {
-        this.id = id;
+    public Order(String orderNum) {
+        this.orderNum = orderNum;
     }
 }

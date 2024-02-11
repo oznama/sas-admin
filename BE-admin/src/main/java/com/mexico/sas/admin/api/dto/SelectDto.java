@@ -15,5 +15,5 @@ public class SelectDto implements Serializable {
     private Long id;
     @JsonProperty("value")
     private String name;
-    private Long parentId;
+    private String parentId;
 }

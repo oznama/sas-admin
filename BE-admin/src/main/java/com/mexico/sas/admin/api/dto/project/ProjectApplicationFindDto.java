@@ -11,6 +11,7 @@ public class ProjectApplicationFindDto implements Serializable {
     private static final long serialVersionUID = 2997336432117891262L;
 
     private Long id;
+    private String projectKey;
     private String application;
     private String amount;
     private String tax;

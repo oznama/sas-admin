@@ -43,17 +43,17 @@ public class ProjectController {
     return ResponseEntity.status(HttpStatus.CREATED).body(projectDto);
   }
 
-  @PutMapping(path = "/{id}", headers = "Accept=application/json")
+  @PutMapping(path = "/{key}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
       value = "Servicio para actualizar proyecto",
-      nickname = "/update/{id}")
+      nickname = "/update/{key}")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectUpdateDto.class)
   })
-  public ResponseEntity<ProjectUpdateDto> update(@PathVariable("id") Long id, @Valid @RequestBody ProjectUpdateDto projectUpdateDto) throws CustomException {
+  public ResponseEntity<ProjectUpdateDto> update(@PathVariable("key") String key, @Valid @RequestBody ProjectUpdateDto projectUpdateDto) throws CustomException {
     log.info("Updating project");
-    service.update(id, projectUpdateDto);
+    service.update(key, projectUpdateDto);
     return ResponseEntity.ok().body(projectUpdateDto);
   }
 
@@ -67,29 +67,29 @@ public class ProjectController {
 //    return ResponseEntity.ok().body(service.setActive(id, userEnaDisDto.getLock()));
 //  }
 
-  @DeleteMapping(path = "/{id}")
+  @DeleteMapping(path = "/{key}")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar proyecto", nickname = "delete")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })
-  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<ResponseDto> delete(@PathVariable("key") String key) throws CustomException {
     log.info("Delete project");
-    service.deleteLogic(id);
+    service.deleteLogic(key);
     return ResponseEntity.ok(
             new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{key}")
   @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar proyecto por id",
+          value = "Servicio para recuperar proyecto por clave",
           nickname = "/findById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectFindDto.class)
   })
-  public ResponseEntity<ProjectFindDto> findById(@PathVariable("id") Long id) throws CustomException {
-    log.info("Finding project by id");
-    return ResponseEntity.ok(service.findById(id));
+  public ResponseEntity<ProjectFindDto> findById(@PathVariable("key") String key) throws CustomException {
+    log.info("Finding project by key");
+    return ResponseEntity.ok(service.findByKey(key));
   }
 
   @GetMapping

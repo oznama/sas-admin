@@ -12,12 +12,11 @@ import java.math.BigDecimal;
 @ToString
 public class InvoiceFindDto implements Serializable {
 
-    private static final long serialVersionUID = 6662468293567833135L;
+    private static final long serialVersionUID = -6836948041262787205L;
 
-    private Long id;
-    private Long orderId;
-    private Long projectId;
     private String invoiceNum;
+    private String orderNum;
+    private String projectKey;
     private String issuedDate;
     private String paymentDate;
     private Integer percentage;

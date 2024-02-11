@@ -60,13 +60,12 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         Order order = from_M_To_N(orderDto, Order.class);
         validateSave(orderDto, order);
         try {
-            log.debug("Order {} for project id {} to save",
-                    orderDto.getOrderNum(), orderDto.getProjectId());
+            log.debug("Order {} for project {} to save",
+                    orderDto.getOrderNum(), orderDto.getProjectKey());
             repository.save(order);
-            save(Order.class.getSimpleName(), order.getId(), CatalogKeys.LOG_DETAIL_INSERT,
-                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
-            orderDto.setId(order.getId());
-            log.debug("Order with id {} created", order.getId());
+//            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_INSERT,
+//                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            log.debug("Order {} created", order.getOrderNum());
             return parseFromEntity(order);
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.ORDER_NOT_CREATED, orderDto.getOrderNum());
@@ -76,57 +75,51 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public void update(Long orderId, OrderDto orderDto) throws CustomException {
-        Order order = findEntityById(orderId);
+    public void update(String orderNum, OrderDto orderDto) throws CustomException {
+        Order order = findEntityByOrderNum(orderNum);
         String message = ChangeBeanUtils.checkOrder(order, orderDto, catalogService);
 
         if(!message.isEmpty()) {
 
             repository.save(order);
-            save(Order.class.getSimpleName(), order.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+//            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
             log.debug("Order updated!");
         }
     }
 
     @Override
-    public void deleteLogic(Long id) throws CustomException {
-        log.debug("Delete logic: {}", id);
-        Order order = findEntityById(id);
-        repository.deleteLogic(id, !order.getEliminate() ? CatalogKeys.ORDER_STATUS_CANCELED : CatalogKeys.ORDER_STATUS_IN_PROCESS,
+    public void deleteLogic(String orderNum) throws CustomException {
+        log.debug("Delete logic: {}", orderNum);
+        Order order = findEntityByOrderNum(orderNum);
+        repository.deleteLogic(orderNum, !order.getEliminate() ? CatalogKeys.ORDER_STATUS_CANCELED : CatalogKeys.ORDER_STATUS_IN_PROCESS,
                 !order.getEliminate(), order.getEliminate());
-        save(Order.class.getSimpleName(), id,
-                !order.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
-                I18nResolver.getMessage(!order.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
-    }
-
-    @Override
-    public OrderFindDto findById(Long id) throws CustomException {
-        return parseFromEntity(findEntityById(id));
-    }
-
-    @Override
-    public Order findEntityById(Long id) throws CustomException {
-        return repository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.ORDER_NOT_FOUND, id)));
+//        save(Order.class.getSimpleName(), orderNum,
+//                !order.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+//                I18nResolver.getMessage(!order.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
     public OrderFindDto findByOrderNum(String orderNum) throws CustomException {
-        return parseFromEntity(repository.findByOrderNum(orderNum)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.ORDER_NUMBER_NOT_FOUND, orderNum))));
+        return parseFromEntity(findEntityByOrderNum(orderNum));
     }
 
     @Override
-    public List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException {
-        log.debug("Finding Orders by proyect {}", projectId);
-        Project project = projectService.findEntityById(projectId);
+    public Order findEntityByOrderNum(String orderNum) throws CustomException {
+        return repository.findById(orderNum)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.ORDER_NOT_FOUND, orderNum)));
+    }
+
+    @Override
+    public List<OrderPaggeableDto> findByProjectKey(String projectKey) throws CustomException {
+        log.debug("Finding Orders by proyect {}", projectKey);
+        Project project = projectService.findEntityByKey(projectKey);
         List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
                 ordersFindDto.add(getOrderPaggeableDto(order));
             } catch (CustomException e) {
-                log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
+                log.error("Impossible add order {}, error: {}", order.getOrderNum(), e.getMessage());
             }
         });
         try {
@@ -146,7 +139,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             try {
                 ordersFindDto.add(getOrderPaggeableDto(order));
             } catch (CustomException e) {
-                log.error("Impossible add order {}, error: {}", order.getId(), e.getMessage());
+                log.error("Impossible add order {}, error: {}", order.getOrderNum(), e.getMessage());
             }
         });
         return new PageImpl<>(ordersFindDto, pageable, orders.getTotalElements());
@@ -158,15 +151,15 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     }
 
     @Override
-    public OrderPaggeableDto getAmountPaid(Long projectId) throws CustomException {
-        Project project = projectService.findEntityById(projectId);
+    public OrderPaggeableDto getAmountPaid(String projectKey) throws CustomException {
+        Project project = projectService.findEntityByKey(projectKey);
         List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
         return getTotal(orders, project);
     }
 
     private OrderFindDto parseFromEntity(Order order) throws CustomException {
         OrderFindDto orderDto = from_M_To_N(order, OrderFindDto.class);
-        orderDto.setProjectId(order.getProject().getId());
+        orderDto.setProjectKey(order.getProject().getKey());
         orderDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         return orderDto;
@@ -175,7 +168,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     private OrderPaggeableDto getOrderPaggeableDto(Order order) throws CustomException {
         log.debug("Parsing order to orderFindDto");
         OrderPaggeableDto orderPaggeableDto = from_M_To_N(order, OrderPaggeableDto.class);
-        orderPaggeableDto.setProjectId(order.getProject().getId());
+        orderPaggeableDto.setProjectKey(order.getProject().getKey());
         orderPaggeableDto.setOrderDate(dateToString(order.getOrderDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderPaggeableDto.setRequisitionDate(dateToString(order.getRequisitionDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         orderPaggeableDto.setAmount(order.getAmount());
@@ -243,7 +236,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
 
     private List<BigDecimal> setAmountPaid(Order order) throws CustomException {
         List<BigDecimal> amounts = new ArrayList<>();
-        List<InvoiceFindDto> invoices = invoiceService.findByOrderId(order.getId()).stream()
+        List<InvoiceFindDto> invoices = invoiceService.findByOrderNum(order.getOrderNum()).stream()
                 .filter( i -> !i.getInvoiceNum().equals(GeneralKeys.ROW_TOTAL)
                         && !i.getInvoiceNum().equals(GeneralKeys.FOOTER_TOTAL)
                         && !i.getStatus().equals(CatalogKeys.INVOICE_STATUS_CANCELED))
@@ -260,11 +253,11 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         if( !order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && order.getAmount().equals(totalRealPaid) ) {
             orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_PAID);
             orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_PAID);
-            update(order.getId(), orderUpdateDto);
+            update(order.getOrderNum(), orderUpdateDto);
         } else if ( order.getStatus().equals(CatalogKeys.ORDER_STATUS_PAID) && !order.getAmount().equals(totalRealPaid) ) {
             orderUpdateDto.setStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
             orderUpdateDto.setRequisitionStatus(CatalogKeys.ORDER_STATUS_IN_PROCESS);
-            update(order.getId(), orderUpdateDto);
+            update(order.getOrderNum(), orderUpdateDto);
         }
         return amounts;
     }
@@ -275,10 +268,10 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             try {
                 SelectDto selectDto = from_M_To_N(order, SelectDto.class);
                 selectDto.setName(String.format( "%s (%s - %s)", order.getOrderNum(), order.getProject().getKey(), order.getProject().getDescription()));
-                selectDto.setParentId(order.getProject().getId());
+                selectDto.setParentId(order.getProject().getKey());
                 selectDtos.add(selectDto);
             } catch (CustomException e) {
-                log.error("Impossible add order {}", order.getId());
+                log.error("Impossible add order {}", order.getOrderNum());
             }
         });
         return selectDtos;
@@ -294,7 +287,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             if(e instanceof BadRequestException)
                 throw e;
         }
-        order.setProject(new Project(orderDto.getProjectId()));
+        order.setProject(new Project(orderDto.getProjectKey()));
         order.setCreatedBy(getCurrentUser().getUserId());
     }
 
