@@ -6,6 +6,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
+import { setCompanyName } from '../../../store/company/companySlice';
 
 export const TableCompany = ({
     pageSize = 10,
@@ -17,11 +18,13 @@ export const TableCompany = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const { companyName } = useSelector( state => state.companyReducer );
+
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
     const [company, setCompany] = useState([]);
     const [totalCompanies, setTotalCompanies] = useState(0);
-    const [filter, setFilter] = useState('')
+    const [filter, setFilter] = useState(companyName)
     const [companies, setCompanies] = useState([]);
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
@@ -62,6 +65,7 @@ export const TableCompany = ({
     }
 
     const handleAddEmployee = () => {
+        dispatch(setCompanyName(''));
         navigate(`/company/add`);
     }
 

@@ -27,4 +27,8 @@ public class EmployeePaggeableDto implements Serializable {
     private String company;
     private String position;
     private String boss;
+    private String cellphone;
+    private String country;
+    private String city;
+    private String ext;
 }
