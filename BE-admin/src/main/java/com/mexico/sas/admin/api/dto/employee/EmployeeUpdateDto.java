@@ -46,4 +46,8 @@ public class EmployeeUpdateDto implements Serializable {
     private Long positionId;
     private Long bossId;
     private Boolean active;
+    private String cellphone;
+    private String country;
+    private String city;
+    private String ext;
 }
