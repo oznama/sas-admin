@@ -174,16 +174,16 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orderPaggeableDto.setAmount(order.getAmount());
         orderPaggeableDto.setTax(order.getTax());
         orderPaggeableDto.setTotal(order.getTotal());
-        orderPaggeableDto.setAmountStr(formatCurrency(order.getAmount().doubleValue()));
-        orderPaggeableDto.setTaxStr(formatCurrency(order.getTax().doubleValue()));
-        orderPaggeableDto.setTotalStr(formatCurrency(order.getTotal().doubleValue()));
+        orderPaggeableDto.setAmountStr(formatCurrency(order.getAmount()));
+        orderPaggeableDto.setTaxStr(formatCurrency(order.getTax()));
+        orderPaggeableDto.setTotalStr(formatCurrency(order.getTotal()));
         List<BigDecimal> amounts = setAmountPaid(order);
         orderPaggeableDto.setAmountPaid(amounts.get(0));
         orderPaggeableDto.setTaxPaid(amounts.get(1));
         orderPaggeableDto.setTotalPaid(amounts.get(2));
-        orderPaggeableDto.setAmountPaidStr(formatCurrency(amounts.get(0).doubleValue()));
-        orderPaggeableDto.setTaxPaidStr(formatCurrency(amounts.get(1).doubleValue()));
-        orderPaggeableDto.setTotalPaidStr(formatCurrency(amounts.get(2).doubleValue()));
+        orderPaggeableDto.setAmountPaidStr(formatCurrency(amounts.get(0)));
+        orderPaggeableDto.setTaxPaidStr(formatCurrency(amounts.get(1)));
+        orderPaggeableDto.setTotalPaidStr(formatCurrency(amounts.get(2)));
         return orderPaggeableDto;
     }
 
@@ -219,15 +219,15 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orderPaggeableDto.setAmount(totalAmount);
         orderPaggeableDto.setTax(totalTax);
         orderPaggeableDto.setTotal(totalT);
-        orderPaggeableDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
-        orderPaggeableDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
-        orderPaggeableDto.setTotalStr(formatCurrency(totalT.doubleValue()));
+        orderPaggeableDto.setAmountStr(formatCurrency(totalAmount));
+        orderPaggeableDto.setTaxStr(formatCurrency(totalTax));
+        orderPaggeableDto.setTotalStr(formatCurrency(totalT));
         orderPaggeableDto.setAmountPaid(totalAmountPaid);
         orderPaggeableDto.setTaxPaid(totalTaxPaid);
         orderPaggeableDto.setTotalPaid(totalTPaid);
-        orderPaggeableDto.setAmountPaidStr(formatCurrency(totalAmountPaid.doubleValue()));
-        orderPaggeableDto.setTaxPaidStr(formatCurrency(totalTaxPaid.doubleValue()));
-        orderPaggeableDto.setTotalPaidStr(formatCurrency(totalTPaid.doubleValue()));
+        orderPaggeableDto.setAmountPaidStr(formatCurrency(totalAmountPaid));
+        orderPaggeableDto.setTaxPaidStr(formatCurrency(totalTaxPaid));
+        orderPaggeableDto.setTotalPaidStr(formatCurrency(totalTPaid));
         orderPaggeableDto.setStatus( totalRealPaid.equals(project.getAmount()) ? CatalogKeys.ORDER_STATUS_PAID
                 : ( !orders.isEmpty() && canceled == orders.size() ? CatalogKeys.ORDER_STATUS_CANCELED
                 : ( !orders.isEmpty() ? CatalogKeys.ORDER_STATUS_IN_PROCESS : 0l ) ) );

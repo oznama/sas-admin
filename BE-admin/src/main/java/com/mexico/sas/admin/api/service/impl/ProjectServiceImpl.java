@@ -167,9 +167,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectFindDto.setAmountStr(formatCurrency(project.getAmount().doubleValue()));
-        projectFindDto.setTaxStr(formatCurrency(project.getTax().doubleValue()));
-        projectFindDto.setTotalStr(formatCurrency(project.getTotal().doubleValue()));
+        projectFindDto.setAmountStr(formatCurrency(project.getAmount()));
+        projectFindDto.setTaxStr(formatCurrency(project.getTax()));
+        projectFindDto.setTotalStr(formatCurrency(project.getTotal()));
         return projectFindDto;
     }
 
@@ -182,9 +182,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectPageableDto.setAmount(formatCurrency(project.getAmount().doubleValue()));
-        projectPageableDto.setTax(formatCurrency(project.getTax().doubleValue()));
-        projectPageableDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
+        projectPageableDto.setAmount(formatCurrency(project.getAmount()));
+        projectPageableDto.setTax(formatCurrency(project.getTax()));
+        projectPageableDto.setTotal(formatCurrency(project.getTotal()));
         return projectPageableDto;
     }
 

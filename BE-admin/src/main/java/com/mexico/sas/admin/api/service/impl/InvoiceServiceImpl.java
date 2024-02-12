@@ -168,9 +168,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         invoiceFindDto.setProjectKey(invoice.getOrder().getProject().getKey());
         invoiceFindDto.setIssuedDate(dateToString(invoice.getIssuedDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         invoiceFindDto.setPaymentDate(dateToString(invoice.getPaymentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        invoiceFindDto.setAmountStr(formatCurrency(invoice.getAmount().doubleValue()));
-        invoiceFindDto.setTaxStr(formatCurrency(invoice.getTax().doubleValue()));
-        invoiceFindDto.setTotalStr(formatCurrency(invoice.getTotal().doubleValue()));
+        invoiceFindDto.setAmountStr(formatCurrency(invoice.getAmount()));
+        invoiceFindDto.setTaxStr(formatCurrency(invoice.getTax()));
+        invoiceFindDto.setTotalStr(formatCurrency(invoice.getTotal()));
         return invoiceFindDto;
     }
 
@@ -187,9 +187,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         invoiceFindDto.setAmount(totalAmount);
         invoiceFindDto.setTax(totalTax);
         invoiceFindDto.setTotal(totalT);
-        invoiceFindDto.setAmountStr(formatCurrency(totalAmount.doubleValue()));
-        invoiceFindDto.setTaxStr(formatCurrency(totalTax.doubleValue()));
-        invoiceFindDto.setTotalStr(formatCurrency(totalT.doubleValue()));
+        invoiceFindDto.setAmountStr(formatCurrency(totalAmount));
+        invoiceFindDto.setTaxStr(formatCurrency(totalTax));
+        invoiceFindDto.setTotalStr(formatCurrency(totalT));
         invoiceFindDto.setPercentage(totalP);
         BigDecimal totalPaid = invWithoutCanceleds.stream()
                 .filter( i -> i.getStatus().equals(CatalogKeys.INVOICE_STATUS_PAID) )

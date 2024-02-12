@@ -159,9 +159,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationFindDto.setApplication(projectApplication.getApplication().getName());
         projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
         projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationFindDto.setTax(formatCurrency(projectApplication.getTax().doubleValue()));
-        projectApplicationFindDto.setTotal(formatCurrency(projectApplication.getTotal().doubleValue()));
+        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount()));
+        projectApplicationFindDto.setTax(formatCurrency(projectApplication.getTax()));
+        projectApplicationFindDto.setTotal(formatCurrency(projectApplication.getTotal()));
         projectApplicationFindDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -175,9 +175,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationPaggeableDto.setApplication(projectApplication.getApplication().getName());
         projectApplicationPaggeableDto.setLeader(buildFullname(projectApplication.getLeader()));
         projectApplicationPaggeableDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationPaggeableDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationPaggeableDto.setTax(formatCurrency(projectApplication.getTax().doubleValue()));
-        projectApplicationPaggeableDto.setTotal(formatCurrency(projectApplication.getTotal().doubleValue()));
+        projectApplicationPaggeableDto.setAmount(formatCurrency(projectApplication.getAmount()));
+        projectApplicationPaggeableDto.setTax(formatCurrency(projectApplication.getTax()));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(projectApplication.getTotal()));
         projectApplicationPaggeableDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -191,9 +191,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         BigDecimal totalT = projectApplications.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         ProjectApplicationPaggeableDto projectApplicationPaggeableDto = new ProjectApplicationPaggeableDto();
         projectApplicationPaggeableDto.setApplication(GeneralKeys.FOOTER_TOTAL);
-        projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        projectApplicationPaggeableDto.setTax(formatCurrency(totalTax.doubleValue()));
-        projectApplicationPaggeableDto.setTotal(formatCurrency(totalT.doubleValue()));
+        projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount));
+        projectApplicationPaggeableDto.setTax(formatCurrency(totalTax));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(totalT));
         return projectApplicationPaggeableDto;
     }
 
