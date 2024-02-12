@@ -6,7 +6,7 @@ import { OrderRouter } from "../orders/OrderRouter";
 export const ProjectRouter = () => (
     <Routes>
         <Route path="/add" element={ <ProjectPage /> } />
-        <Route path="/:id/edit" element={ <ProjectPage /> } />
+        <Route path="/:key/edit" element={ <ProjectPage /> } />
         <Route path="/:projectId/application/*" element={ <ApplicationRouter /> } />
         <Route path="/:projectId/order/*" element={ <OrderRouter /> } />
     </Routes>
