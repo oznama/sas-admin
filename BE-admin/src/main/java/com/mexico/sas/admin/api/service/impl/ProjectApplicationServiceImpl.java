@@ -186,9 +186,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     private ProjectApplicationPaggeableDto getTotal(List<ProjectApplication> projectApplications) throws CustomException {
-        BigDecimal totalAmount = projectApplications.stream().map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalTax = projectApplications.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalT = projectApplications.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAmount = projectApplications.stream().filter( pa -> pa.getAmount() != null ).map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = projectApplications.stream().filter( pa -> pa.getTax() != null ).map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = projectApplications.stream().filter( pa -> pa.getTotal() != null ).map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         ProjectApplicationPaggeableDto projectApplicationPaggeableDto = new ProjectApplicationPaggeableDto();
         projectApplicationPaggeableDto.setApplication(GeneralKeys.FOOTER_TOTAL);
         projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount));
