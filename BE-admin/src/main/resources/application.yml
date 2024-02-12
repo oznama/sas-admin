@@ -20,7 +20,7 @@ spring:
       max-file-size: "1000MB"
       max-request-size: "1000MB"
   flyway:
-    enabled: true # Change to false for test unit
+    enabled: false
 
   datasource:
     url: "${DB_URL}"

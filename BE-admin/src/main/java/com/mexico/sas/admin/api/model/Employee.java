@@ -25,7 +25,7 @@ public class Employee {
     @Column(nullable = false)
     private String name;
     private String secondName;
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String surname;
     private String secondSurname;
     private String phone;
