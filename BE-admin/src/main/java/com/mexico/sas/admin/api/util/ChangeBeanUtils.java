@@ -407,7 +407,7 @@ public class ChangeBeanUtils extends Utils {
         if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
                 || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
-                    getFullname(employeeService.findEntityById(employee.getBossId())),
+                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
                     getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId()))
             )).append(GeneralKeys.JUMP_LINE);
             employee.setBossId(employeeUpdateDto.getBossId());
