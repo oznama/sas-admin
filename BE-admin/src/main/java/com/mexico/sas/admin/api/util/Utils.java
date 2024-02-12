@@ -161,7 +161,9 @@ public class Utils {
         return new DecimalFormat(format).format(d);
     }
 
-    public static String formatCurrency(double d) {
+    public static String formatCurrency(Double d) {
+        if( d == null)
+            return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(0);
         return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(d);
     }
 

@@ -30,7 +30,7 @@ CREATE TABLE employees (
     email varchar(255) not null unique,
     name varchar(50) not null,
     second_name varchar(50),
-    surname varchar(50) not null,
+    last_name varchar(50) not null,
     second_surname varchar(50),
     city varchar(255),
     country varchar(255),
