@@ -53,6 +53,8 @@ public interface I18nKeys {
     String COMPANY_NOT_FOUND = "company.not.found";
     String COMPANY_RFC_DUPLICATED = "company.rfc.duplicated";
     String COMPANY_BYRFC_NOT_FOUND = "company.byrfc.not.found";
+    String APPLICATION_BYNAME_NOT_FOUND ="application.byname.not.found";
+    String APPLICATION_NAME_DUPLICATED ="application.name.duplicated";
     String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
     String PROJECT_NOT_FOUND = "project.not.found";
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
@@ -76,5 +78,6 @@ public interface I18nKeys {
     String INVOICE_NUMBER_NOT_FOUND = "invoice.number.not.found";
     String INVOICE_NUMBER_DUPLICATED = "invoice.number.duplicated";
     String INVOICE_NOT_CREATED = "invoice.not.created";
+    String APPLICATION_NOT_CREATED = "application.not.created";
     String INVOICE_NOT_FOUND = "invoice.not.found";
 }

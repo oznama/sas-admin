@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.application.ApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.dto.company.CompanyUpdateDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
@@ -372,11 +373,21 @@ public class ChangeBeanUtils extends Utils {
         if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null)
                 || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
-                    catalogService.findById(employee.getPositionId()).getValue(),
-                    catalogService.findById(employeeUpdateDto.getPositionId()).getValue()
+                    employee.getPositionId() != null ? catalogService.findById(employee.getPositionId()).getValue() : "Sin puesto asignado",
+                    employeeUpdateDto.getPositionId() != null ? catalogService.findById(employeeUpdateDto.getPositionId()).getValue() : "Sin puesto"
             )).append(GeneralKeys.JUMP_LINE);
             employee.setPositionId(employeeUpdateDto.getPositionId());
         }
+        // Se cambia el jefe
+        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
+                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
+                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
+                    employeeUpdateDto.getBossId() != null ? getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId())) : "Sin jefe"
+            )).append(GeneralKeys.JUMP_LINE);
+            employee.setBossId(employeeUpdateDto.getBossId());
+        }
+
         if( validateStringNoRequiredUpdate(employee.getPhone(), employeeUpdateDto.getPhone()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono",
                     employee.getPhone(), employeeUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
@@ -402,15 +413,7 @@ public class ChangeBeanUtils extends Utils {
                     employee.getExt(), employeeUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
             employee.setExt(employeeUpdateDto.getExt());
         }
-        // Se cambia el jefe
-        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
-                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
-                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
-                    getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId()))
-            )).append(GeneralKeys.JUMP_LINE);
-            employee.setBossId(employeeUpdateDto.getBossId());
-        }
+
         if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
                     employee.getActive(), employeeUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
@@ -524,6 +527,39 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.active,
                     company.getActive(), companyUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
             company.setActive(companyUpdateDto.getActive());
+        }
+
+        return sb.toString().trim();
+    }
+
+    public static String checkApplication(Application application, ApplicationUpdateDto applicationUpdateDto, CompanyService companyService) throws CustomException {
+        StringBuilder sb = new StringBuilder();
+
+        if( validateStringNoRequiredUpdate(application.getName(), applicationUpdateDto.getName()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Valor",
+                    application.getName(), applicationUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
+            application.setName(applicationUpdateDto.getName());
+        }
+
+        if( validateStringNoRequiredUpdate(application.getDescription(), applicationUpdateDto.getDescription()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripcion",
+                    application.getDescription(), applicationUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
+            application.setDescription(applicationUpdateDto.getDescription());
+        }
+
+        if(applicationUpdateDto.getActive() != null && !applicationUpdateDto.getActive().equals(application.getActive())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
+                    application.getActive(), applicationUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
+            application.setActive(applicationUpdateDto.getActive());
+        }
+
+        if((application.getCompany() == null && applicationUpdateDto.getCompany() != null)
+                || (application.getCompany() != null && applicationUpdateDto.getCompany() != null && !applicationUpdateDto.getCompany().equals(application.getCompany()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
+                    companyService.findById(application.getCompany().getId()).getName(),
+                    companyService.findById(applicationUpdateDto.getCompany().getId()).getName()
+            )).append(GeneralKeys.JUMP_LINE);
+            application.setCompany(applicationUpdateDto.getCompany());
         }
 
         return sb.toString().trim();
