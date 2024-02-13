@@ -250,11 +250,11 @@ public class ChangeBeanUtils extends Utils {
                 order.setEliminate(false);
             }
         }
-        if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
-                || ( order.getRequisitionStatus() != null && orderDto.getRequisitionStatus() != null && !order.getRequisitionStatus().equals(orderDto.getRequisitionStatus())) ) {
+        if( validateLongNoRequiredUpdate(order.getRequisitionStatus(), orderDto.getRequisitionStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de requisición",
-                    catalogService.findById(order.getRequisitionStatus()).getValue(),
-                    catalogService.findById(orderDto.getRequisitionStatus()).getValue())
+                    order.getRequisitionStatus() != null ? catalogService.findById(order.getRequisitionStatus()).getValue() : "Sin estatus",
+                    orderDto.getRequisitionStatus() != null ? catalogService.findById(orderDto.getRequisitionStatus()).getValue() : "Sin estatus"
+                    )
             ).append(GeneralKeys.JUMP_LINE);
             order.setRequisitionStatus(orderDto.getRequisitionStatus());
         }
