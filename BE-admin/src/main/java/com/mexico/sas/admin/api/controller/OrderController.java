@@ -42,10 +42,10 @@ public class OrderController {
   public ResponseEntity<OrderFindDto> saveOrder(@Valid @RequestBody OrderDto orderDto) throws CustomException {
     log.info("Saving order");
     service.save(orderDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(service.findById(orderDto.getId()));
+    return ResponseEntity.status(HttpStatus.CREATED).body(service.findByOrderNum(orderDto.getOrderNum()));
   }
 
-  @PutMapping(path = "/{id}", headers = "Accept=application/json")
+  @PutMapping(path = "/{orderNum}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar ordenes de pago",
@@ -53,47 +53,47 @@ public class OrderController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = OrderDto.class)
   })
-  public ResponseEntity<OrderDto> updateOrder(@PathVariable("id") Long id, @Valid @RequestBody OrderDto orderDto) throws CustomException {
+  public ResponseEntity<OrderDto> updateOrder(@PathVariable("orderNum") String orderNum, @Valid @RequestBody OrderDto orderDto) throws CustomException {
     log.info("Updating order");
-    service.update(id, orderDto);
+    service.update(orderNum, orderDto);
     return ResponseEntity.ok().body(orderDto);
   }
 
-  @DeleteMapping(path = "/{id}")
+  @DeleteMapping(path = "/{orderNum}")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar desactivar orden", nickname = "delete")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })
-  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<ResponseDto> delete(@PathVariable("orderNum") String orderNum) throws CustomException {
     log.info("Delete order");
-    service.deleteLogic(id);
+    service.deleteLogic(orderNum);
     return ResponseEntity.ok(
             new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
-  @GetMapping("/byProject/{projectId}")
+  @GetMapping("/byProject/{projectKey}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar ordenes de proyecto",
           nickname = "/byProject")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = OrderPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<OrderPaggeableDto>> findByProjectId(@PathVariable("projectId") Long projectId) throws CustomException {
+  public ResponseEntity<List<OrderPaggeableDto>> findByProjectKey(@PathVariable("projectKey") String projectKey) throws CustomException {
     log.info("Finding orders by project");
-    return ResponseEntity.ok(service.findByProjectId(projectId));
+    return ResponseEntity.ok(service.findByProjectKey(projectKey));
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{orderNum}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar orden de pago",
           nickname = "/findById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = OrderFindDto.class)
   })
-  public ResponseEntity<OrderFindDto> findById(@PathVariable("id") Long id) throws CustomException {
-    log.info("Finding project by id");
-    return ResponseEntity.ok(service.findById(id));
+  public ResponseEntity<OrderFindDto> findByOrderNum(@PathVariable("orderNum") String orderNum) throws CustomException {
+    log.info("Finding project by orderNum");
+    return ResponseEntity.ok(service.findByOrderNum(orderNum));
   }
 
   @GetMapping
@@ -117,16 +117,16 @@ public class OrderController {
     return ResponseEntity.ok(service.getForSelect());
   }
 
-  @GetMapping("/{projectId}/paid")
+  @GetMapping("/{projectKey}/paid")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar total de ordenes pagadas de proyecto",
           nickname = "/getAmountPaid")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = OrderPaggeableDto.class)
   })
-  public ResponseEntity<OrderPaggeableDto> getAmountPaid(@PathVariable("projectId") Long projectId) throws CustomException {
+  public ResponseEntity<OrderPaggeableDto> getAmountPaid(@PathVariable("projectKey") String projectKey) throws CustomException {
     log.info("Finding total orders paid by project");
-    return ResponseEntity.ok(service.getAmountPaid(projectId));
+    return ResponseEntity.ok(service.getAmountPaid(projectKey));
   }
 
 }

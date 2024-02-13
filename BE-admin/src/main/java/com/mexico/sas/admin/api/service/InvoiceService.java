@@ -12,14 +12,13 @@ import java.util.List;
 public interface InvoiceService {
 
     void save(InvoiceDto invoiceDto) throws CustomException;
-    void update(Long invoiceId, InvoiceDto invoiceDto) throws CustomException;
-    void deleteLogic(Long id) throws CustomException;
-    InvoiceDto findById(Long id) throws CustomException;
-    Invoice findEntityById(Long id) throws CustomException;
+    void update(String invoiceNum, InvoiceDto invoiceDto) throws CustomException;
+    void deleteLogic(String invoiceNum) throws CustomException;
     InvoiceDto findByInvoiceNum(String invoiceNum) throws CustomException;
-    List<InvoiceFindDto> findByOrderId(Long orderId) throws CustomException;
+    Invoice findEntityByInvoiceNum(String invoiceNum) throws CustomException;
+    List<InvoiceFindDto> findByOrderNum(String orderNum) throws CustomException;
     Page<InvoiceFindDto> findAll(String filter, Pageable pageable);
 
-    InvoiceFindDto getAmountPaid(Long orderId) throws CustomException;
+    InvoiceFindDto getAmountPaid(String orderNum) throws CustomException;
 
 }

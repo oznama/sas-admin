@@ -161,8 +161,17 @@ public class Utils {
         return new DecimalFormat(format).format(d);
     }
 
-    public static String formatCurrency(double d) {
+    // TODO Refactor this function to BigDecimal
+    public static String formatCurrency(Double d) {
+        if( d == null)
+            return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(0);
         return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(d);
+    }
+
+    public static String formatCurrency(BigDecimal d) {
+        if( d == null)
+            return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(0);
+        return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(d.doubleValue());
     }
 
     protected String formatPercent(double d) {

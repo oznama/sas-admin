@@ -11,6 +11,7 @@ public class ProjectApplicationPaggeableDto implements Serializable {
 
     private static final long serialVersionUID = 4095265061471563075L;
     private Long id;
+    private String projectKey;
     private String application;
     private String amount;
     private String tax;

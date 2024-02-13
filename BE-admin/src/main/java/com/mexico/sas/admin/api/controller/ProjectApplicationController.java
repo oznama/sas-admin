@@ -67,29 +67,29 @@ public class ProjectApplicationController {
             new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
-  @GetMapping("/{projectId}")
+  @GetMapping("/{projectKey}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar aplicaciones de proyecto por id",
           nickname = "/findApplicationById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<ProjectApplicationPaggeableDto>> findByProjectId(@PathVariable("projectId") Long projectId) throws CustomException {
+  public ResponseEntity<List<ProjectApplicationPaggeableDto>> findByProjectId(@PathVariable("projectKey") String projectKey) throws CustomException {
     log.info("Finding project by id");
-    return ResponseEntity.ok(service.findByProjectId(projectId));
+    return ResponseEntity.ok(service.findByProjectKey(projectKey));
   }
 
-  @GetMapping("/{projectId}/{id}")
+  @GetMapping("/{projectKey}/{id}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar aplicacion de proyecto por id",
           nickname = "/findApplicationById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationDto.class)
   })
-  public ResponseEntity<ProjectApplicationDto> findByApplicationId(@PathVariable("projectId") Long projectId,
+  public ResponseEntity<ProjectApplicationDto> findByApplicationId(@PathVariable("projectKey") String projectKey,
                                                         @PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
-    return ResponseEntity.ok(service.findByProjectAndId(projectId, id));
+    return ResponseEntity.ok(service.findByProjectKeyAndId(projectKey, id));
   }
 
 }

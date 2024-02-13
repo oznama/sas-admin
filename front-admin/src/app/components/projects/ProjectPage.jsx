@@ -14,13 +14,13 @@ export const ProjectPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { key } = useParams();
   const { permissions } = useSelector( state => state.auth );
   const {currentTab, project, projectPaid} = useSelector( state => state.projectReducer );
 
   const fetchProject = () => {
-    if( id ) {
-      getProjectById(id).then( response => {
+    if( key ) {
+      getProjectById(key).then( response => {
           if( response.code ) {
               displayNotification(dispatch, response.message, alertType.error);
           } else {
@@ -39,7 +39,7 @@ export const ProjectPage = () => {
   
   const handleAddApplication = () => {
     dispatch(setCurrentAppTab(1));
-    navigate(`/project/${ id }/application/add`);
+    navigate(`/project/${ key }/application/add`);
   }
 
   const renderAddButton = () => permissions.canCreateProjApp && (
@@ -63,7 +63,7 @@ export const ProjectPage = () => {
     dispatch(setCurrentTab(tagId));
   }
 
-  const renderTabs = () => id && (
+  const renderTabs = () => key && (
     <div className="d-flex flex-row-reverse">
       <ul className="nav nav-tabs">
         <li>
@@ -119,11 +119,11 @@ export const ProjectPage = () => {
         </>
       )}
       { renderTabs() }
-      { (currentTab === 2 && id ) && renderAddButton() }
+      { (currentTab === 2 && key ) && renderAddButton() }
       { 
-        currentTab === 2 ? ( <TableApplications projectId = { id } /> ) : ( 
-          currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(id, '') } />) : (
-          currentTab === 3 ? (<TableOrders projectId={ id } />) : (<DetailProject />)
+        currentTab === 2 ? ( <TableApplications projectId = { key } /> ) : ( 
+          currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(key, '') } />) : (
+          currentTab === 3 ? (<TableOrders projectId={ key } />) : (<DetailProject />)
           ) 
         )
       }

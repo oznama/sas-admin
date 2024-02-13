@@ -13,10 +13,9 @@ import java.math.BigDecimal;
 @ToString
 public class InvoiceDto implements Serializable {
 
-    private static final long serialVersionUID = 3696339715156418125L;
+    private static final long serialVersionUID = 4327559323501927316L;
 
-    private Long id;
-    private Long orderId;
+    private String orderNum;
     private String invoiceNum;
     private String issuedDate;
     private String paymentDate;

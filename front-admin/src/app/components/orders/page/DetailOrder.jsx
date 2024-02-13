@@ -23,7 +23,7 @@ export const DetailOrder = () => {
   const { project, order, projectPaid, orderPaid } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
   const {currentOrdTab: currentTab} = useSelector( state => state.projectReducer );
-  const { projectId, id } = useParams();
+  const { projectKey, id } = useParams();
 
   const navigate = useNavigate();
   const [orderNum, setOrderNum] = useState('');
@@ -37,7 +37,7 @@ export const DetailOrder = () => {
   const [tax, setTax] = useState('');
   const [total, setTotal] = useState('');
   const [observations, setObservations] = useState('');
-  const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
+  const [pId, setPId] = useState(projectKey === '0' ? '' : projectKey);
   const [projects, setProjects] = useState([]);
   const [pFilter, setPFilter] = useState('');
   const [currentPaid, setCurrentPaid] = useState(projectPaid.amount ? projectPaid.amount : 0);
@@ -106,11 +106,11 @@ export const DetailOrder = () => {
 
   useEffect(() => {
     fetchSelects();
-    if( projectId === '0' ) {
+    if( projectKey === '0' ) {
       fetchProjects();
     }
-    if( !(project && project.id) && projectId !== '0' ) {
-      fetchProject(projectId);
+    if( !(project && project.id) && projectKey !== '0' ) {
+      fetchProject(projectKey);
     }
     if( id ) {
       fetchOrder();
@@ -242,7 +242,7 @@ export const DetailOrder = () => {
       saveOrder(request);
     }
     dispatch( setModalChild(null) );
-    if( projectId === '0' ) {
+    if( projectKey === '0' ) {
       dispatch( setCurrentTab(3) );
     }
   }
@@ -310,7 +310,7 @@ export const DetailOrder = () => {
     <div className='d-grid gap-2 col-6 mx-auto'>
       <form onSubmit={ onSubmit }>
           <div className='text-center'>
-            { projectId === '0' && (
+            { projectKey === '0' && (
               <div className="row text-start">
                 <div className='col-12'>
                   <SelectSearcher label="Proyecto" options={ projects } disabled={ !permissions.canEditOrd } value={ pFilter } required 
@@ -369,7 +369,7 @@ export const DetailOrder = () => {
           <div className="pt-3 d-flex flex-row-reverse">
               { ( !id || (id && order.active) ) && renderSaveButton() }
               &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate( projectId !== '0' ? `/project/${ projectId }/edit` : '/orders') }>Cancelar</button>
+              <button type="button" className="btn btn-danger" onClick={ () => navigate( projectKey !== '0' ? `/project/${ projectKey }/edit` : '/orders') }>Cancelar</button>
           </div>
       </form>
     </div>

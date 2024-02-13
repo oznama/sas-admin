@@ -137,7 +137,6 @@ export const TableOrders = ({
     }
 
     const renderRows = () => orders && orders.map(({
-        id,
         orderNum,
         orderDate,
         amount,
@@ -150,10 +149,10 @@ export const TableOrders = ({
         requisition,
         requisitionDate,
         requisitionStatus,
-        projectId,
+        projectKey,
         active
-    }) => (
-        <tr key={ id }>
+    }, index) => (
+        <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ orderNum }</th>
             <td className="text-center" style={ styleTableRow }>{ orderDate }</td>
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status, '') }</td>
@@ -168,7 +167,7 @@ export const TableOrders = ({
                 <button type="button"
                     className={`btn btn-${ active && permissions.canEditOrd ? 'success' : 'primary' } btn-sm`}
                     style={ styleTableRowBtn }
-                    onClick={ () => handledSelect(projectId, id) }>
+                    onClick={ () => handledSelect(projectKey, orderNum) }>
                     <span><i className={`bi bi-${ active && permissions.canEditOrd ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
