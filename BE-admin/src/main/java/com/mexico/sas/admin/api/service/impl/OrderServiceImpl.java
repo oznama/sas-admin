@@ -208,9 +208,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
                 totalTax = totalTax.add(amounts.get(1));
                 totalT = totalT.add(amounts.get(2));
             } else {
-                totalAmount = totalAmount.add(order.getAmount());
-                totalTax = totalTax.add(order.getTax());
-                totalT = totalT.add(order.getTotal());
+                totalAmount = totalAmount.add(order.getAmount() != null ? order.getAmount() : BigDecimal.ZERO);
+                totalTax = totalTax.add(order.getTax() != null ? order.getTax() : BigDecimal.ZERO);
+                totalT = totalT.add(order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO);
             }
         }
         long canceled = orders.stream().filter( o -> o.getStatus().equals(CatalogKeys.ORDER_STATUS_CANCELED) ).count();
