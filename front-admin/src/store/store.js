@@ -5,6 +5,7 @@ import { modalSlice } from "./modal/modalSlice";
 import { authSlice } from "./auth/authSlice";
 import { projectSlice } from "./project/projectSlice";
 import { companySlice } from "./company/companySlice";
+import { catalogSlice } from "./catalog/catalogSlice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         auth: authSlice.reducer,
         projectReducer: projectSlice.reducer,
         companyReducer: companySlice.reducer,
+        catalogRedycer: catalogSlice.reducer
     }
 });
 

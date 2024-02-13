@@ -129,6 +129,7 @@ export const DetailEmployee = () => {
     const data = new FormData(event.target)
     const request = Object.fromEntries(data.entries())
 	  request['email'] = email +'@'+ emailDomain
+    dispatch(setEmployeeS(request));
     if (id){
       updateEmployee(request);
     }else{
@@ -165,7 +166,7 @@ export const DetailEmployee = () => {
             displayNotification(dispatch, response.message, alertType.error);
         } else {
             setEmail((response.email+'').substring(0, (response.email+'').indexOf('@')));
-            setEmailDomain((response.email+'').substring((response.email+'').indexOf('@'), (response.email+'').length));
+            setEmailDomain((response.email+'').substring((response.email+'').indexOf('@')+1, (response.email+'').length));
             setName(response.name);
             setSecondName(response.secondName);
             setSurname(response.surname);
@@ -179,10 +180,10 @@ export const DetailEmployee = () => {
             setLeader(numberToString(response.bossId, ''));
             setActive(response.active);
             setCountry(response.country);
-            setCellphone(response.cellPhone);
-            setExt(response.Ext);
+            setCellphone(response.cellphone);
+            setExt(response.ext);
             setCity(response.city);
-            dispatch(setEmployeeS(response));
+            console.log('Valor de employee: '+JSON.stringify(response, null, 2));
         }
     }).catch( error => {
         console.log(error);
@@ -251,7 +252,7 @@ export const DetailEmployee = () => {
 
   const fetchLeaders = companyId => {
     getEmployessByCompanyId(companyId).then( response => {
-      setCatEmployees(response);console.log('Empleados sin ordenar:', JSON.stringify(response, null, 2));
+      setCatEmployees(response);//console.log('Empleados sin ordenar:', JSON.stringify(response, null, 2));
       // const sortedEmployees = response.sort((a, b) => a.name.localeCompare(b.name));console.log('Empleados ordenados:', JSON.stringify(response, null, 2));
       // setCatEmployees(sortedEmployees);
     }).catch( error => {

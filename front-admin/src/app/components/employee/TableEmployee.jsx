@@ -39,6 +39,8 @@ export const TableEmployee = ({
         if (selectedCompany) {
             dispatch(setCompanyObj(selectedCompany));
             // console.log('El dominio de correo de la compañía seleccionada es:', companyDomain);
+        }else{
+            dispatch(setCompanyObj({}));
         }
     };
 
@@ -60,7 +62,7 @@ export const TableEmployee = ({
     const fetchSelects = () => {
         getCompanySelect().then( response => {
             setCompanies(response);
-            console.log('Valor de companies: '+JSON.stringify(response, null, 2));
+            // console.log('Valor de companies: '+JSON.stringify(response, null, 2));
         }).catch( error => {
             console.log(error);
         });

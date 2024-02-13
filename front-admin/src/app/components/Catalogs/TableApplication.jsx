@@ -19,37 +19,45 @@ export const TableApplication = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    
     const [filter, setFilter] = useState('')
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
-
-    const fetchChilds = () => {
+    const onChangeFilter = async ({ target }) => {
+        const value = target.value;
+        setFilter(value);
+        await fetchChilds(value); // Esperamos a que se actualice el estado antes de llamar fetchChilds
+    };
+    
+    const fetchChilds = (filterText = '') => {
+        console.log("Fetching childrens for catalog: ", catalogId);
         getCatalogChilds(catalogId)
-        .then( response => {
-            if( response.code && response.code === 401 ) {
+        .then(response => {
+            if (response.code && response.code === 401) {
                 displayNotification(dispatch, response.message, alertType.error);
             }
-            setCatalogChilds(response);
-            setTotalCatalogChilds(response.totalElements);
-        }).catch( error => {
+            let filteredChilds = response.filter(child =>
+                child.description.toLowerCase().includes(String(filterText).toLowerCase()) ||
+                child.value.toLowerCase().includes(String(filterText).toLowerCase())
+            );
+            setCatalogChilds(filteredChilds);
+            setTotalCatalogChilds(filteredChilds.length);
+        }).catch(error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
-            });
+        });
     }
-    
+
     useEffect(() => {
-        fetchChilds();
-    }, []);  
+        fetchChilds(filter); // Ahora se ejecutará cada vez que filter cambie
+    }, [filter]); 
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchChilds(currentPage);
+        fetchChilds(filter); // Actualizado
     }
 
     const onCancelModal = () => {
         dispatch( setModalChild(null) );
-        fetchChilds();
+        fetchChilds(filter);
     }
     const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
 
@@ -67,10 +75,11 @@ export const TableApplication = ({
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateCat ? '25' : '50' } py-3`}>
-            <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
+            {/* <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } />
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(currentPage) }>
+                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(filter); } } /> */}
+                <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..." maxLength={ 100 } autoComplete='off' value={ filter } required onChange={ onChangeFilter }/>
+            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(filter) }>
                 <i className="bi bi-search"></i>
             </button>
         </div>
@@ -119,11 +128,15 @@ export const TableApplication = ({
         id,
         description,
         value,
+        createdBy,
+        creationDate,
         status
     }) => (
         <tr key={ id } onClick={ () => console.log('Click en row') }>
             <th className="text-center" scope="row">{ value }</th>
             <td className="text-start">{ description }</td>
+            { permissions.isAdminRoot && (<td className="text-start">{ createdBy }</td>) }
+            { permissions.isAdminRoot && (<td className="text-center">{ creationDate }</td>) }
             <td className="text-center">{ renderStatus(status) }</td>
             <td className="text-center">
                 <button type="button" className={`btn btn-${ status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
@@ -155,6 +168,8 @@ export const TableApplication = ({
                         <tr>
                             <th className="text-center fs-6" scope="col">Nombre</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Creado por</th>) }
+                            { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Fecha creaci&oacute;n</th>) }
                             <th className="text-center fs-6" scope="col">Estatus</th>
                             <th className="text-center fs-6" scope="col">{permissions.canEditCat ? 'Editar' : 'Ver'}</th>
                             { permissions.canDelCat && (<th className="text-center fs-6" scope="col">Borrar</th>)}

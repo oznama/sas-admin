@@ -9,7 +9,7 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
-import { setCompanyName, setEmployeeS } from "../../../store/company/companySlice";
+import { setCompanyName } from "../../../store/company/companySlice";
 
 export const DetailCompany = () => {
 
@@ -172,8 +172,9 @@ export const DetailCompany = () => {
     const onChangeType = ({ target }) => setType(target.value);
     const [types, setTypes] = useState([]);
 
-    const isModeEdit = ( id && !permissions.canEditComp && active);
+    
     const [active, setActive] = useState('');
+    const isModeEdit =( (id && !permissions.canEditComp) || (id && !active ));
     const onSubmit = event => {
         if( errorRfc && errorAlias && errorPhone ) {
             displayNotification(dispatch, 'corrige los errores', alertType.error);
