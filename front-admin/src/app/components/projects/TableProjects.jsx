@@ -123,11 +123,11 @@ export const TableProject = ({
         tax,
         total,
         active
-    }) => (
-        <tr key={ key }>
+    }, index) => (
+        <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ key }</th>
             {/* <td className="text-start">{ name }</td> */}
-            <td className="text-start" style={ styleTableRow }>{ description.substring(0,70) }</td>
+            <td className="text-start" style={ styleTableRow }>{ description }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             { permissions.isAdminRoot && (<td className="text-start" style={ styleTableRow }>{ createdBy }</td>) }
             { permissions.isAdminRoot && (<td className="text-center" style={ styleTableRow }>{ creationDate }</td>) }
