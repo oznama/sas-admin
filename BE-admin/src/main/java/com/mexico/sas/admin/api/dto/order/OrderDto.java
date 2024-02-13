@@ -13,11 +13,10 @@ import java.math.BigDecimal;
 @ToString
 public class OrderDto implements Serializable {
 
-    private static final long serialVersionUID = -7955591922799938614L;
+    private static final long serialVersionUID = -8677175988409906686L;
 
-    private Long id;
-    private Long projectId;
     private String orderNum;
+    private String projectKey;
     private String orderDate;
     private Long status;
     private BigDecimal amount;

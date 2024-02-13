@@ -17,8 +17,8 @@ public interface ProjectApplicationService {
     void delete(Long id) throws CustomException;
     ProjectApplicationFindDto findByApplicationId(Long id) throws CustomException;
     ProjectApplication findEntityByApplicationId(Long id) throws CustomException;
-    List<ProjectApplicationPaggeableDto> findByProjectId(Long projectId) throws CustomException;
-    ProjectApplicationDto findByProjectAndId(Long projectId, Long id) throws CustomException;
-    ProjectApplicationDto findByProjectAndApplicationId(Long projectId, Long applicationId) throws CustomException;
+    List<ProjectApplicationPaggeableDto> findByProjectKey(String projectKey) throws CustomException;
+    ProjectApplicationDto findByProjectKeyAndId(String projectKey, Long id) throws CustomException;
+    ProjectApplicationDto findByProjectAndApplication(String projectKey, String application) throws CustomException;
 
 }

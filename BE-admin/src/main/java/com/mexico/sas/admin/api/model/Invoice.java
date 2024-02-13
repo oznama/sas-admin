@@ -7,6 +7,7 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -17,12 +18,12 @@ import java.util.Date;
 @DynamicInsert
 @FieldNameConstants
 @ToString
-public class Invoice {
+public class Invoice implements Serializable {
+
+    private static final long serialVersionUID = -1754201312242853067L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    private Long id;
     private String invoiceNum;
     private Date issuedDate;
     private Date paymentDate;
@@ -42,10 +43,10 @@ public class Invoice {
     private Long createdBy;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "order_num")
     private Order order;
 
-    public Invoice(Long id) {
-        this.id = id;
+    public Invoice(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
     }
 }

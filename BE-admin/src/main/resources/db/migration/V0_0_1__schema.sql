@@ -13,6 +13,7 @@ CREATE TABLE companies (
     city varchar(255),
     state varchar(255),
     country varchar(255),
+    cellphone varchar(20),
     phone varchar(15),
     ext varchar(5),
     email_domain varchar(50),
@@ -29,9 +30,13 @@ CREATE TABLE employees (
     email varchar(255) not null unique,
     name varchar(50) not null,
     second_name varchar(50),
-    surname varchar(50) not null,
+    last_name varchar(50) not null,
     second_surname varchar(50),
+    city varchar(255),
+    country varchar(255),
+    cellphone varchar(20),
     phone varchar(255),
+    ext varchar(5),
     image varchar(255),
     active boolean default true,
     eliminate boolean default false,
@@ -98,32 +103,46 @@ create table sso_roles_permissions (
     primary key (id)
 );
 
-CREATE TABLE projects (
-    id bigserial not null,
-    p_key varchar(15) not null unique,
+CREATE TABLE applications (
+    app_name varchar(50) not null,
     description varchar(255) not null,
-    status int8 not null default 2000200001,
-    company_id int8 not null,
-    project_manager_id int8 not null,
-    installation_date timestamp,
-    amount decimal(15,2) not null,
-    tax decimal(15,2) not null,
-    total decimal(15,2) not null,
-    observations text,
     active boolean default true,
     eliminate boolean default false,
     created_by int8 default 1,
     creation_date timestamp default current_timestamp,
-    primary key(id)
+    company_id int8 not null,
+    primary key(app_name)
+);
+
+CREATE TABLE projects (
+    p_key varchar(15) not null,
+    description text not null,
+    status int8 not null default 2000200001,
+    company_id int8 not null,
+    project_manager_id int8 not null,
+    installation_date timestamp,
+    amount decimal(15,2),
+    tax decimal(15,2),
+    total decimal(15,2),
+    observations text,
+    qa_start_date timestamp,
+    qa_end_date timestamp,
+    delivery_date timestamp,
+    follow_code varchar(2),
+    active boolean default true,
+    eliminate boolean default false,
+    created_by int8 default 1,
+    creation_date timestamp default current_timestamp,
+    primary key(p_key)
 );
 
 CREATE TABLE project_applications (
     id bigserial not null,
-    project_id int8 not null,
-    application_id int8 not null,
+    p_key varchar(15) not null,
+    app_name varchar(50) not null,
     amount decimal(15,2) not null,
-    tax decimal(15,2) not null,
-    total decimal(15,2) not null,
+    tax decimal(15,2),
+    total decimal(15,2),
     leader_id int8 not null,
     developer_id int8 not null,
     hours int,
@@ -140,14 +159,12 @@ CREATE TABLE project_applications (
 );
 
 CREATE TABLE orders (
-    id bigserial not null,
-    project_id int8 not null,
     order_num varchar(15) not null,
     order_date timestamp,
     status int8,
     amount decimal(15,2) not null,
-    tax decimal(15,2) not null,
-    total decimal(15,2) not null,
+    tax decimal(15,2),
+    total decimal(15,2),
     requisition varchar(15) unique,
     requisition_date timestamp,
     requisition_status int8,
@@ -156,12 +173,11 @@ CREATE TABLE orders (
     eliminate boolean default false,
     created_by int8 default 1,
     creation_date timestamp default current_timestamp,
-    primary key(id)
+    p_key varchar(15) not null,
+    primary key(order_num)
 );
 
 CREATE TABLE invoices (
-    id bigserial not null,
-    order_id int8 not null,
     invoice_num varchar(15) not null,
     issued_date timestamp not null,
     payment_date timestamp,
@@ -175,7 +191,8 @@ CREATE TABLE invoices (
     eliminate boolean default false,
     created_by int8 default 1,
     creation_date timestamp default current_timestamp,
-    primary key(id)
+    order_num varchar(15) not null,
+    primary key(invoice_num)
 );
 
 CREATE TABLE log_movement (
@@ -186,7 +203,7 @@ CREATE TABLE log_movement (
     user_fullname varchar(255) not null,
     creation_date timestamp default current_timestamp,
     event_id int8 not null,
-    description varchar,
+    description text,
     primary key (id)
 );
 
@@ -214,12 +231,14 @@ alter table projects add constraint fk_project_company foreign key (company_id) 
 
 alter table projects add constraint fk_project_pm foreign key (project_manager_id) references employees;
 
-alter table project_applications add constraint fk_proj_app_project foreign key (project_id) references projects;
+alter table project_applications add constraint fk_proj_app_project foreign key (p_key) references projects;
+
+alter table project_applications add constraint fk_proj_app_application foreign key (app_name) references applications;
 
 alter table project_applications add constraint fk_proj_app_leader foreign key (leader_id) references employees;
 
 alter table project_applications add constraint fk_proj_app_developer foreign key (developer_id) references employees;
 
-alter table orders add constraint fk_order_project foreign key (project_id) references projects;
+alter table orders add constraint fk_order_project foreign key (p_key) references projects;
 
-alter table invoices add constraint fk_invoice_order foreign key (order_id) references orders;
+alter table invoices add constraint fk_invoice_order foreign key (order_num) references orders;

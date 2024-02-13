@@ -16,9 +16,8 @@ public class OrderFindDto implements Serializable {
 
     private static final long serialVersionUID = -5976540867156573928L;
 
-    private Long id;
-    private Long projectId;
     private String orderNum;
+    private String projectKey;
     private String orderDate;
     private Long status;
     private BigDecimal amount;

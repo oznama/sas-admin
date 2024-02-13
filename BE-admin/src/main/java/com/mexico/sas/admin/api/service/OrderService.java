@@ -14,14 +14,13 @@ import java.util.List;
 public interface OrderService {
 
     OrderFindDto save(OrderDto orderDto) throws CustomException;
-    void update(Long orderId, OrderDto orderDto) throws CustomException;
-    void deleteLogic(Long id) throws CustomException;
-    OrderFindDto findById(Long id) throws CustomException;
-    Order findEntityById(Long id) throws CustomException;
+    void update(String orderNum, OrderDto orderDto) throws CustomException;
+    void deleteLogic(String orderNum) throws CustomException;
     OrderFindDto findByOrderNum(String orderNum) throws CustomException;
-    List<OrderPaggeableDto> findByProjectId(Long projectId) throws CustomException;
+    Order findEntityByOrderNum(String orderNum) throws CustomException;
+    List<OrderPaggeableDto> findByProjectKey(String projectKey) throws CustomException;
     Page<OrderPaggeableDto> findAll(String filter, Pageable pageable);
     List<SelectDto> getForSelect();
 
-    OrderPaggeableDto getAmountPaid(Long projectId) throws CustomException;
+    OrderPaggeableDto getAmountPaid(String projectKey) throws CustomException;
 }

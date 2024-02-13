@@ -165,7 +165,7 @@ export const DetailEmployee = () => {
             displayNotification(dispatch, response.message, alertType.error);
         } else {
             setEmail((response.email+'').substring(0, (response.email+'').indexOf('@')));
-            setEmailDomain((response.email+'').substring((response.email+'').indexOf('@'), (response.email+'').length));
+            setEmailDomain((response.email+'').substring((response.email+'').indexOf('@')+1, (response.email+'').length));
             setName(response.name);
             setSecondName(response.secondName);
             setSurname(response.surname);

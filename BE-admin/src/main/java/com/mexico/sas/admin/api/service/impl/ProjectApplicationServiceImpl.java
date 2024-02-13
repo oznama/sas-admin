@@ -8,6 +8,7 @@ import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.model.Application;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.ProjectApplication;
 import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
@@ -30,12 +31,6 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     private ProjectApplicationRepository repository;
 
     @Autowired
-    private CatalogService catalogService;
-
-    @Autowired
-    private CompanyService companyService;
-
-    @Autowired
     private EmployeeService employeeService;
 
     @Autowired
@@ -49,8 +44,8 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         ProjectApplication projectApplication = from_M_To_N(projectApplicationDto, ProjectApplication.class);
         validationSave(projectApplicationDto, projectApplication);
         try {
-            log.debug("Application {} for project id {} to save",
-                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
+            log.debug("Application {} for project {} to save",
+                    projectApplicationDto.getApplication(), projectApplicationDto.getProjectKey());
             log.debug("Entity ::: {}", projectApplication);
             repository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_INSERT,
@@ -60,7 +55,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
             updateProjectAmount(projectApplication.getProject());
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_CREATED,
-                    projectApplicationDto.getApplicationId(), projectApplicationDto.getProjectId());
+                    projectApplicationDto.getApplication(), projectApplicationDto.getProjectKey());
             log.error(msgError, e.getMessage());
             throw new CustomException(msgError);
         }
@@ -69,7 +64,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     @Override
     public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, catalogService, employeeService);
+        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService);
         if(!message.isEmpty()) {
             repository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -113,8 +108,8 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public List<ProjectApplicationPaggeableDto> findByProjectId(Long projectId) {
-        List<ProjectApplication> projectApplications = repository.findByProjectOrderByIdAsc(new Project(projectId));
+    public List<ProjectApplicationPaggeableDto> findByProjectKey(String projectKey) {
+        List<ProjectApplication> projectApplications = repository.findByProjectOrderByIdAsc(new Project(projectKey));
         List<ProjectApplicationPaggeableDto> applications = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {
@@ -132,22 +127,23 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public ProjectApplicationDto findByProjectAndId(Long projectId, Long id) throws CustomException {
-        log.debug("Finding project application with projectId: {} and id: {}", projectId, id);
-        return parseFromEntity(repository.findByProjectAndId(new Project(projectId), id)
+    public ProjectApplicationDto findByProjectKeyAndId(String projectKey, Long id) throws CustomException {
+        log.debug("Finding project application with projectKey: {} and id: {}", projectKey, id);
+        return parseFromEntity(repository.findByProjectAndId(new Project(projectKey), id)
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, id))));
     }
 
     @Override
-    public ProjectApplicationDto findByProjectAndApplicationId(Long projectId, Long applicationId) throws CustomException {
-        log.debug("Finding project application with projectId: {} and applicationId: {}", projectId, applicationId);
-        return parseFromEntity(repository.findByProjectAndApplicationIdAndActiveIsTrueAndEliminateIsFalse(new Project(projectId), applicationId)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, applicationId))));
+    public ProjectApplicationDto findByProjectAndApplication(String projectKey, String application) throws CustomException {
+        log.debug("Finding project application with projectKey: {} and application: {}", projectKey, application);
+        return parseFromEntity(repository.findByProjectAndApplicationAndActiveIsTrueAndEliminateIsFalse(new Project(projectKey), new Application(application))
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, application))));
     }
 
     private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
-        projectApplicationDto.setProjectId(projectApplication.getProject().getId());
+        projectApplicationDto.setProjectKey(projectApplication.getProject().getKey());
+        projectApplicationDto.setApplication(projectApplication.getApplication().getName());
         projectApplicationDto.setLeaderId(projectApplication.getLeader().getId());
         projectApplicationDto.setDeveloperId(projectApplication.getDeveloper().getId());
         projectApplicationDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -159,12 +155,13 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
 
     private ProjectApplicationFindDto getProjectApplicationFindDto(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationFindDto projectApplicationFindDto = from_M_To_N(projectApplication, ProjectApplicationFindDto.class);
-        projectApplicationFindDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
+        projectApplicationFindDto.setProjectKey(projectApplication.getProject().getKey());
+        projectApplicationFindDto.setApplication(projectApplication.getApplication().getName());
         projectApplicationFindDto.setLeader(buildFullname(projectApplication.getLeader()));
         projectApplicationFindDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationFindDto.setTax(formatCurrency(projectApplication.getTax().doubleValue()));
-        projectApplicationFindDto.setTotal(formatCurrency(projectApplication.getTotal().doubleValue()));
+        projectApplicationFindDto.setAmount(formatCurrency(projectApplication.getAmount()));
+        projectApplicationFindDto.setTax(formatCurrency(projectApplication.getTax()));
+        projectApplicationFindDto.setTotal(formatCurrency(projectApplication.getTotal()));
         projectApplicationFindDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationFindDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -174,12 +171,13 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
 
     private ProjectApplicationPaggeableDto getProjectApplicationPaggeableDto(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationPaggeableDto projectApplicationPaggeableDto = from_M_To_N(projectApplication, ProjectApplicationPaggeableDto.class);
-        projectApplicationPaggeableDto.setApplication(catalogService.findById(projectApplication.getApplicationId()).getValue());
+        projectApplicationPaggeableDto.setProjectKey(projectApplication.getProject().getKey());
+        projectApplicationPaggeableDto.setApplication(projectApplication.getApplication().getName());
         projectApplicationPaggeableDto.setLeader(buildFullname(projectApplication.getLeader()));
         projectApplicationPaggeableDto.setDeveloper(buildFullname(projectApplication.getDeveloper()));
-        projectApplicationPaggeableDto.setAmount(formatCurrency(projectApplication.getAmount().doubleValue()));
-        projectApplicationPaggeableDto.setTax(formatCurrency(projectApplication.getTax().doubleValue()));
-        projectApplicationPaggeableDto.setTotal(formatCurrency(projectApplication.getTotal().doubleValue()));
+        projectApplicationPaggeableDto.setAmount(formatCurrency(projectApplication.getAmount()));
+        projectApplicationPaggeableDto.setTax(formatCurrency(projectApplication.getTax()));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(projectApplication.getTotal()));
         projectApplicationPaggeableDto.setStartDate(dateToString(projectApplication.getStartDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
@@ -188,14 +186,14 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     private ProjectApplicationPaggeableDto getTotal(List<ProjectApplication> projectApplications) throws CustomException {
-        BigDecimal totalAmount = projectApplications.stream().map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalTax = projectApplications.stream().map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalT = projectApplications.stream().map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAmount = projectApplications.stream().filter( pa -> pa.getAmount() != null ).map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalTax = projectApplications.stream().filter( pa -> pa.getTax() != null ).map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalT = projectApplications.stream().filter( pa -> pa.getTotal() != null ).map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         ProjectApplicationPaggeableDto projectApplicationPaggeableDto = new ProjectApplicationPaggeableDto();
         projectApplicationPaggeableDto.setApplication(GeneralKeys.FOOTER_TOTAL);
-        projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount.doubleValue()));
-        projectApplicationPaggeableDto.setTax(formatCurrency(totalTax.doubleValue()));
-        projectApplicationPaggeableDto.setTotal(formatCurrency(totalT.doubleValue()));
+        projectApplicationPaggeableDto.setAmount(formatCurrency(totalAmount));
+        projectApplicationPaggeableDto.setTax(formatCurrency(totalTax));
+        projectApplicationPaggeableDto.setTotal(formatCurrency(totalT));
         return projectApplicationPaggeableDto;
     }
 
@@ -205,23 +203,23 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplication.setDevelopmentDate(stringToDate(projectApplicationDto.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY));
         projectApplication.setEndDate(stringToDate(projectApplicationDto.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY));
         try {
-            findByProjectAndApplicationId(projectApplicationDto.getProjectId(), projectApplicationDto.getApplicationId());
+            findByProjectAndApplication(projectApplicationDto.getProjectKey(), projectApplicationDto.getApplication());
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
-                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
-                    projectApplicationDto.getProjectId()), null);
+                    projectApplicationDto.getApplication(), projectApplicationDto.getProjectKey()), null);
         } catch (CustomException e) {
             if(e instanceof BadRequestException)
                 throw e;
         }
-
-        projectApplication.setProject(new Project(projectApplicationDto.getProjectId()));
+        // TODO Validate application exist in application catalog
+        projectApplication.setProject(new Project(projectApplicationDto.getProjectKey()));
+        projectApplication.setApplication(new Application(projectApplicationDto.getApplication()));
         projectApplication.setLeader(employeeService.findEntityById(projectApplicationDto.getLeaderId()));
         projectApplication.setDeveloper(employeeService.findEntityById(projectApplicationDto.getDeveloperId()));
         projectApplication.setCreatedBy(getCurrentUser().getUserId());
     }
 
     private void updateProjectAmount(Project project) {
-        log.debug(" :::::: UPDATE PROJECT AMOUNT {} :::::::", project.getId());
+        log.debug(" :::::: UPDATE PROJECT AMOUNT {} :::::::", project.getKey());
         List<ProjectApplication> projectApplications = repository.findByProjectAndActiveIsTrueAndEliminateIsFalse(project);
         log.debug(" :::::: APPLICATIONS: {} :::::::", projectApplications.size());
         BigDecimal amount = projectApplications.stream()
@@ -231,6 +229,6 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         BigDecimal total = projectApplications.stream()
                 .map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         log.debug(" :::::: Update project totals, AMOUNT: {} :::::: ", amount);
-        projectService.updateAmounts(project.getId(), amount, tax, total);
+        projectService.updateAmounts(project.getKey(), amount, tax, total);
     }
 }
