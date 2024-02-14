@@ -9,10 +9,9 @@ import java.util.List;
 
 public interface ApplicationService {
     ApplicationFindDto save(ApplicationDto applicationDto) throws CustomException;
-    void update(String name, ApplicationUpdateDto applicationUpdateDto) throws CustomException;
+    ApplicationUpdateDto update(String name, ApplicationUpdateDto applicationUpdateDto) throws CustomException;
     void deleteLogic(String name) throws CustomException;
-    Page<ApplicationPaggeableDto> findAll(String filter, Long type, Pageable pageable);
 
+    Page<ApplicationPaggeableDto> findAll(String filter, Long type, Pageable pageable);
     ApplicationFindDto findByName(String name) throws CustomException;
-    List<ApplicationFindSelectDto> getForSelect();
 }

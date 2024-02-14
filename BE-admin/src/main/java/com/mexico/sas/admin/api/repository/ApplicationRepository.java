@@ -14,10 +14,10 @@ import java.util.Optional;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, String>, JpaSpecificationExecutor<Application> {
-    /*Optional<Catalog> findByName(String id);
+    Optional<Catalog> findByName(String name);
     @Transactional
     @Modifying
-    @Query("update Applications c set c.eliminate = :eliminate, c.active = :active where c.id = :id")
-    void deleteLogic(String name, @Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);*/
+    @Query("update Application c set c.eliminate = :eliminate, c.active = :active where c.name = :name")
+    void deleteLogic(@Param(value = "name") String name, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 
 }

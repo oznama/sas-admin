@@ -38,33 +38,33 @@ public class ApplicationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(applicationDto));
     }
 
-    @PutMapping(path = "/{app_name}", headers = "Accept=application/json")
+    @PutMapping(path = "/{appName}", headers = "Accept=application/json")
     @ResponseStatus(code = HttpStatus.OK)
     @ApiOperation(httpMethod = "PUT", value = "Servicio para actualizar aplicacion", nickname = "update")
     public ResponseEntity<ApplicationUpdateDto> update(
-            @PathVariable("app_name") String appName, @Valid @RequestBody ApplicationUpdateDto applicationUpdateDto) throws CustomException {
+            @PathVariable("appName") String appName, @Valid @RequestBody ApplicationUpdateDto applicationUpdateDto) throws CustomException {
         log.info("Updating application");
         service.update(appName, applicationUpdateDto);
         return ResponseEntity.ok().body(applicationUpdateDto);
     }
 
-    @DeleteMapping(path = "/{app_name}")
+    @DeleteMapping(path = "/{appName}")
     @ResponseStatus(code = HttpStatus.OK)
     @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar aplicacion", nickname = "delete")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
     })
-    public ResponseEntity<ResponseDto> delete(@PathVariable("app_name") String name) throws CustomException {
+    public ResponseEntity<ResponseDto> delete(@PathVariable("appName") String name) throws CustomException {
         log.info("Delete application");
         service.deleteLogic(name);
         return ResponseEntity.ok(
                 new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
     }
 
-    @GetMapping("/{app_name}")
+    @GetMapping("/{appName}")
     @ResponseStatus(code = HttpStatus.OK)
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar aplicacion por nombre", nickname = "update")
-    public ResponseEntity<ApplicationFindDto> findByName(@PathVariable("app_name") String name) throws CustomException{
+    public ResponseEntity<ApplicationFindDto> findByName(@PathVariable("appName") String name) throws CustomException{
         log.info("Finding application by name");
         return ResponseEntity.ok(service.findByName(name));
     }
