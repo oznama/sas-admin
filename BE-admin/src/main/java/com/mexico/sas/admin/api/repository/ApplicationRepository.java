@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, String>, JpaSpecificationExecutor<Application> {
-    Optional<Catalog> findByName(String name);
+    Optional<Application> findByName(String name);
     @Transactional
     @Modifying
     @Query("update Application c set c.eliminate = :eliminate, c.active = :active where c.name = :name")

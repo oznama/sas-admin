@@ -535,31 +535,18 @@ public class ChangeBeanUtils extends Utils {
     public static String checkApplication(Application application, ApplicationUpdateDto applicationUpdateDto, CompanyService companyService) throws CustomException {
         StringBuilder sb = new StringBuilder();
 
-        if( validateStringNoRequiredUpdate(application.getName(), applicationUpdateDto.getName()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Valor",
-                    application.getName(), applicationUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
-            application.setName(applicationUpdateDto.getName());
-        }
-
         if( validateStringNoRequiredUpdate(application.getDescription(), applicationUpdateDto.getDescription()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripcion",
                     application.getDescription(), applicationUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             application.setDescription(applicationUpdateDto.getDescription());
         }
 
-        if(applicationUpdateDto.getActive() != null && !applicationUpdateDto.getActive().equals(application.getActive())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
-                    application.getActive(), applicationUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
-            application.setActive(applicationUpdateDto.getActive());
-        }
-
-        if((application.getCompany() == null && applicationUpdateDto.getCompany() != null)
-                || (application.getCompany() != null && applicationUpdateDto.getCompany() != null && !applicationUpdateDto.getCompany().equals(application.getCompany()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
-                    companyService.findById(application.getCompany().getId()).getName(),
-                    companyService.findById(applicationUpdateDto.getCompany().getId()).getName()
+        if( validateLongRequiredUpdate(application.getCompany().getId(), applicationUpdateDto.getCompanyId())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Empresa",
+                    application.getCompany().getName(),
+                    companyService.findById(applicationUpdateDto.getCompanyId()).getName()
             )).append(GeneralKeys.JUMP_LINE);
-            application.setCompany(applicationUpdateDto.getCompany());
+            application.setCompany(new Company(applicationUpdateDto.getCompanyId()));
         }
 
         return sb.toString().trim();

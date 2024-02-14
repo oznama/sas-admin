@@ -4,6 +4,7 @@ import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.application.*;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Application;
@@ -26,6 +27,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 @Service
 public class ApplicationServiceImpl extends LogMovementUtils implements ApplicationService {
@@ -51,23 +53,14 @@ public class ApplicationServiceImpl extends LogMovementUtils implements Applicat
 
     private ApplicationFindDto parseFromEntity(Application application) throws CustomException {
         ApplicationFindDto applicationFindDto = from_M_To_N(application, ApplicationFindDto.class);
-        applicationFindDto.setName(application.getName());
-        applicationFindDto.setDescription(application.getDescription());
-        applicationFindDto.setCompany(application.getCompany());
-        return applicationFindDto;
-    }
-
-    private Application parseFromEntity(ApplicationFindDto application) throws CustomException {
-        Application applicationFindDto = from_M_To_N(application, Application.class);
-        applicationFindDto.setName(application.getName());
-        applicationFindDto.setDescription(application.getDescription());
-        applicationFindDto.setCompany(application.getCompany());
+        applicationFindDto.setCompanyId(application.getCompany().getId());
+        applicationFindDto.setCompanyName(application.getCompany().getName());
         return applicationFindDto;
     }
 
     @Override
     public ApplicationUpdateDto update(String name, ApplicationUpdateDto applicationUpdateDto) throws CustomException {
-        Application application = parseFromEntity(findByName(name));
+        Application application = findEntityByName(name);
         String message = ChangeBeanUtils.checkApplication(application, applicationUpdateDto, companyService);
         if (!message.isEmpty()){
             repository.save(application);
@@ -79,7 +72,7 @@ public class ApplicationServiceImpl extends LogMovementUtils implements Applicat
     @Override
     public void deleteLogic(String name) throws CustomException {
         log.debug("Delete logic: {}", name);
-        Application application = parseFromEntity(findByName(name));
+        Application application = findEntityByName(name);
         repository.deleteLogic(name, !application.getEliminate(), application.getEliminate());
     }
 
@@ -99,11 +92,8 @@ public class ApplicationServiceImpl extends LogMovementUtils implements Applicat
 
     private ApplicationPaggeableDto parseApplicationPaggeableDto(Application application) throws CustomException {
         ApplicationPaggeableDto applicationFindDto = from_M_To_N(application, ApplicationPaggeableDto.class);
-        applicationFindDto.setName(application.getName());
-        applicationFindDto.setDescription(application.getDescription());
-        applicationFindDto.setCompany(application.getCompany());
-        applicationFindDto.setCreatedBy(application.getCreatedBy());
-        applicationFindDto.setCreationDate(application.getCreationDate());
+        applicationFindDto.setCompanyId(application.getCompany().getId());
+        applicationFindDto.setCompanyName(application.getCompany().getName());
         return applicationFindDto;
     }
 
@@ -115,27 +105,31 @@ public class ApplicationServiceImpl extends LogMovementUtils implements Applicat
 
     @Override
     public ApplicationFindDto findByName(String name) throws CustomException {
-        return from_M_To_N(findByName(name), ApplicationFindDto.class);
+        return from_M_To_N(findEntityByName(name), ApplicationFindDto.class);
+    }
+
+    @Override
+    public Application findEntityByName(String name) throws CustomException {
+        return repository.findByName(name).orElseThrow( () ->
+                new NoContentException(I18nResolver.getMessage(I18nKeys.APPLICATION_NOT_FOUND, name)));
     }
 
     private void validationSave(ApplicationDto applicationDto, Application application) throws CustomException {
         log.debug("Aqui se esta llamando el validationSave {}", applicationDto.getName());
-        validateName(applicationDto.getName());
-        // TODO: Agregar validaciones que se necesiten
-        application.setCreatedBy(getCurrentUser().getUserId());
-    }
-
-    private void validateName(String name) throws CustomException {
         try {
-            log.debug("Aqui esta en el validateRFC: {}", name);
-            ApplicationFindDto applicationFindDto = findByName(name);
-            log.debug("RFC {} already exist for company {} {}", name, applicationFindDto.getName(), applicationFindDto.getName());
-            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.APPLICATION_NAME_DUPLICATED, name), null);
+            findByName(applicationDto.getName());
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.APPLICATION_NAME_DUPLICATED, applicationDto.getName()), null);
         } catch (CustomException e) {
-            log.error("Validating RFC Exception: {}", e.getMessage());
             if ( e instanceof BadRequestException)
                 throw e;
         }
+        try {
+            application.setCompany(companyService.findEntityById(applicationDto.getCompanyId()));
+        } catch (CustomException e) {
+            if ( e instanceof NoContentException)
+                throw e;
+        }
+        application.setCreatedBy(getCurrentUser().getUserId());
     }
 
     private Predicate getPredicateDinamycFilter(String filter, Long companyId, Long createdBy, Boolean active,

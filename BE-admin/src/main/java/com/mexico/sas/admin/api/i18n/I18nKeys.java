@@ -80,4 +80,5 @@ public interface I18nKeys {
     String INVOICE_NOT_CREATED = "invoice.not.created";
     String APPLICATION_NOT_CREATED = "application.not.created";
     String INVOICE_NOT_FOUND = "invoice.not.found";
+    String APPLICATION_NOT_FOUND = "application.not.found";
 }

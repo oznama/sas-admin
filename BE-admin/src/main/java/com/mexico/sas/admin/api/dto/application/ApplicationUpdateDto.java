@@ -10,12 +10,6 @@ import java.util.Date;
 @Setter
 @ToString
 public class ApplicationUpdateDto {
-
-    private String name;
     private String description;
-    private Boolean active;
-    private Boolean eliminate;
-    private Date creationDate;
-    private Long createdBy;
-    private Company company;
+    private Long companyId;
 }

@@ -15,5 +15,6 @@ public class ApplicationFindDto {
     private Boolean eliminate;
     private Date creationDate;
     private Long createdBy;
-    private Company company;
+    private Long companyId;
+    private String companyName;
 }

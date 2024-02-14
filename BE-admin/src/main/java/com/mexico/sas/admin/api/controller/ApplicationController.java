@@ -33,7 +33,7 @@ public class ApplicationController {
     @PostMapping(headers = "Accept=application/json")
     @ResponseStatus(code = HttpStatus.CREATED)
     @ApiOperation(httpMethod = "POST", value = "Servicio para crear aplicacion", nickname = "save")
-    public ResponseEntity<ApplicationFindDto> save (@Valid @RequestBody ApplicationDto applicationDto)throws CustomException {
+    public ResponseEntity<ApplicationFindDto> save(@Valid @RequestBody ApplicationDto applicationDto)throws CustomException {
         log.info("Saving application");
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(applicationDto));
     }
