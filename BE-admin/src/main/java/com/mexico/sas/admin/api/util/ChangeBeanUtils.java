@@ -369,24 +369,6 @@ public class ChangeBeanUtils extends Utils {
                     employee.getCompanyId(), employeeUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
             employee.setCompanyId(employeeUpdateDto.getCompanyId());
         }
-        //Se actualiza la posicion
-        if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null)
-                || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
-                    employee.getPositionId() != null ? catalogService.findById(employee.getPositionId()).getValue() : "Sin puesto asignado",
-                    employeeUpdateDto.getPositionId() != null ? catalogService.findById(employeeUpdateDto.getPositionId()).getValue() : "Sin puesto"
-            )).append(GeneralKeys.JUMP_LINE);
-            employee.setPositionId(employeeUpdateDto.getPositionId());
-        }
-        // Se cambia el jefe
-        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
-                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
-                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
-                    employeeUpdateDto.getBossId() != null ? getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId())) : "Sin jefe"
-            )).append(GeneralKeys.JUMP_LINE);
-            employee.setBossId(employeeUpdateDto.getBossId());
-        }
 
         if( validateStringNoRequiredUpdate(employee.getPhone(), employeeUpdateDto.getPhone()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono",
@@ -412,6 +394,24 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Extencion",
                     employee.getExt(), employeeUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
             employee.setExt(employeeUpdateDto.getExt());
+        }
+        // Se cambia el jefe
+        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null) || (employee.getBossId() != null && employeeUpdateDto.getBossId() == null)
+                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
+                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
+                    employeeUpdateDto.getBossId() != null ? getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId())) : "Sin jefe"
+            )).append(GeneralKeys.JUMP_LINE);
+            employee.setBossId(employeeUpdateDto.getBossId() != null ? employeeUpdateDto.getBossId() : null);
+        }
+        //Se actualiza la posicion
+        if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null) || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() == null)
+                || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
+                    employee.getPositionId() != null ? catalogService.findById(employee.getPositionId()).getValue() : "Sin puesto asignado",
+                    employeeUpdateDto.getPositionId() != null ? catalogService.findById(employeeUpdateDto.getPositionId()).getValue() : "Sin puesto"
+            )).append(GeneralKeys.JUMP_LINE);
+            employee.setPositionId(employeeUpdateDto.getPositionId() != null ? employeeUpdateDto.getPositionId(): null);
         }
 
         if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
