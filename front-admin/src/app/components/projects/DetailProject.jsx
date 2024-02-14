@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { InputText } from '../custom/InputText';
 import { Select } from '../custom/Select';
 import { DatePicker } from '../custom/DatePicker';
-import { useNavigate } from 'react-router-dom';
-import { save, update } from '../../services/ProjectService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getProjectById, save, update } from '../../services/ProjectService';
 import { displayNotification, genericErrorMsg, handleDateStr, handleText, numberToString } from '../../helpers/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { alertType } from '../custom/alerts/types/types';
@@ -15,10 +15,12 @@ export const DetailProject = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { key } = useParams();
     const { user, permissions } = useSelector( state => state.auth );
     const { project } = useSelector( state => state.projectReducer );
 
-    const [projectId, setProjectId] = useState(project.id);
+    // TODO Replace all projectId by pKey
+    // const [projectId, setProjectId] = useState(project.id);
     const [pKey, setPKey] = useState(project.key ? project.key : '');
     const [keyError, setKeyError] = useState('');
     const [description, setDescription] = useState(project.description ? project.description : '');
@@ -29,7 +31,7 @@ export const DetailProject = () => {
     const [observations, setObservations] = useState(project.observations ? project.observations : '');
     const [pms, setPms] = useState([]);
 
-    const [companyId, setCompanyId] = useState(project.companyId ? project.companyId : 2);
+    const [companyId, setCompanyId] = useState( project && project.companyId ? numberToString(project.companyId) : '2');
     const [companies, setCompanies] = useState([]);
 
     const fetchCatalogCompanies = () => {
@@ -48,8 +50,29 @@ export const DetailProject = () => {
         }
     }
 
+    const fetchProject = () => {
+        console.log('Getting project by key');
+        if( key ) {
+          getProjectById(key).then( response => {
+              if( response.code ) {
+                  displayNotification(dispatch, response.message, alertType.error);
+              } else {
+                  dispatch(setProject(response));
+                  set
+              }
+          }).catch( error => {
+              console.log(error);
+              displayNotification(dispatch, genericErrorMsg, alertType.error);
+          });
+        }
+      }
+
     useEffect(() => {
         fetchCatalogCompanies();
+        console.log(project, key);
+        if( project && !project.key && key ) {
+            fetchProject();
+        }
     }, []);
 
     const onChangeCompany = ({ target }) => {
