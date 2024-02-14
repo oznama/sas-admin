@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.application.ApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.dto.company.CompanyUpdateDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
@@ -368,6 +369,7 @@ public class ChangeBeanUtils extends Utils {
                     employee.getCompanyId(), employeeUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
             employee.setCompanyId(employeeUpdateDto.getCompanyId());
         }
+
         if( validateStringNoRequiredUpdate(employee.getPhone(), employeeUpdateDto.getPhone()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono",
                     employee.getPhone(), employeeUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
@@ -411,6 +413,7 @@ public class ChangeBeanUtils extends Utils {
             )).append(GeneralKeys.JUMP_LINE);
             employee.setPositionId(employeeUpdateDto.getPositionId() != null ? employeeUpdateDto.getPositionId(): null);
         }
+
         if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
                     employee.getActive(), employeeUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
@@ -524,6 +527,26 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.active,
                     company.getActive(), companyUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
             company.setActive(companyUpdateDto.getActive());
+        }
+
+        return sb.toString().trim();
+    }
+
+    public static String checkApplication(Application application, ApplicationUpdateDto applicationUpdateDto, CompanyService companyService) throws CustomException {
+        StringBuilder sb = new StringBuilder();
+
+        if( validateStringNoRequiredUpdate(application.getDescription(), applicationUpdateDto.getDescription()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripcion",
+                    application.getDescription(), applicationUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
+            application.setDescription(applicationUpdateDto.getDescription());
+        }
+
+        if( validateLongRequiredUpdate(application.getCompany().getId(), applicationUpdateDto.getCompanyId())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Empresa",
+                    application.getCompany().getName(),
+                    companyService.findById(applicationUpdateDto.getCompanyId()).getName()
+            )).append(GeneralKeys.JUMP_LINE);
+            application.setCompany(new Company(applicationUpdateDto.getCompanyId()));
         }
 
         return sb.toString().trim();

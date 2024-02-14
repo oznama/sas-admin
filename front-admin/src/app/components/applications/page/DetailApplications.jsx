@@ -19,7 +19,7 @@ export const DetailApplications = () => {
   const { project } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
   const {currentAppTab: currentTab} = useSelector( state => state.projectReducer );
-  const { projectId, id } = useParams();
+  const { projectKey, id } = useParams();
 
   const navigate = useNavigate();
   const [aplication, setAplication] = useState('');
@@ -44,7 +44,7 @@ export const DetailApplications = () => {
   const isModeEdit = ( id && !permissions.canEditProjApp );
 
   const fetchApplication = () => {
-    getProjectApplicationById(projectId, id).then( response => {
+    getProjectApplicationById(projectKey, id).then( response => {
       if( response.code ) {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
@@ -159,7 +159,7 @@ export const DetailApplications = () => {
       if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
         update(request);
       } else if ( permissions.canCreateProjApp ) {
-        request.projectId = projectId;
+        request.projectKey = projectKey;
         save(request);
       }
     }
@@ -171,7 +171,7 @@ export const DetailApplications = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Aplicación agregada correctamente al proyecto!', alertType.success);
-        navigate(`/project/${projectId}/edit`, { replace: true });
+        navigate(`/project/${projectKey}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error)
@@ -185,7 +185,7 @@ export const DetailApplications = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Aplicacion actualizada correctamente!', alertType.success);
-        navigate(`/project/${projectId}/edit`, { replace: true });
+        navigate(`/project/${projectKey}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error)
@@ -206,7 +206,7 @@ export const DetailApplications = () => {
     <div className='d-flex flex-row-reverse'>
       <ul className="nav nav-tabs">
         <li>
-          <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+          <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectKey }/edit`) }>&lt;&lt; Regresar</button>
         </li>
         <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
           <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
@@ -285,7 +285,7 @@ export const DetailApplications = () => {
             <div className="pt-3 d-flex flex-row-reverse">
                 { renderSaveButton() }
                 &nbsp;
-                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
+                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectKey }/edit`) }>Cancelar</button>
             </div>
           )
         }
