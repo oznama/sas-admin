@@ -123,6 +123,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         } catch (CustomException e) {
             log.error("Impossible add project application total, error: {}", e.getMessage());
         }
+        updateProjectAmount( new Project(projectKey) );
         return applications;
     }
 
@@ -223,10 +224,13 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         List<ProjectApplication> projectApplications = repository.findByProjectAndActiveIsTrueAndEliminateIsFalse(project);
         log.debug(" :::::: APPLICATIONS: {} :::::::", projectApplications.size());
         BigDecimal amount = projectApplications.stream()
+                .filter( pa -> pa.getAmount() != null )
                 .map( pa -> pa.getAmount() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal tax = projectApplications.stream()
+                .filter( pa -> pa.getTax() != null )
                 .map( pa -> pa.getTax() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal total = projectApplications.stream()
+                .filter( pa -> pa.getTotal() != null )
                 .map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         log.debug(" :::::: Update project totals, AMOUNT: {} :::::: ", amount);
         projectService.updateAmounts(project.getKey(), amount, tax, total);
