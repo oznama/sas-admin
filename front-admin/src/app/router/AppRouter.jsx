@@ -6,7 +6,7 @@ import { UserPage } from '../components/auth/UserPage';
 import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { CompanyRouter } from '../components/company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
-import { TableApplication } from '../components/Catalogs/TableApplication';
+import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 
 
@@ -17,7 +17,7 @@ export const AppRouter = () => (
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         <Route path="catalog" element={ <CatalogPage /> } />
-        <Route path="application" element={ <TableApplication catalogId={ 1000000004 } /> } />
+        <Route path="application/*" element={ <ApplicationRouter /> } />
         <Route path="employee/*" element={ <EmployeeRouter /> } />
         <Route path="user" element={ <UserPage /> } />
         <Route path="company/*" element={ <CompanyRouter /> } />
