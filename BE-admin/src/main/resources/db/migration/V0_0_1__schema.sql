@@ -198,7 +198,7 @@ CREATE TABLE invoices (
 CREATE TABLE log_movement (
     id bigserial not null,
     table_name varchar(255) not null,
-    record_id int8 not null,
+    record_id varchar not null,
     created_by int8 not null,
     user_fullname varchar(255) not null,
     creation_date timestamp default current_timestamp,

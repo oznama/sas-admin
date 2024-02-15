@@ -104,8 +104,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
             log.debug("Project to save, key: {}", project.getKey());
             repository.save(project);
             log.debug("Project {} created", projectDto.getKey());
-//            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_INSERT,
-//                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_INSERT,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
             log.error(msgError, e.getMessage());
@@ -123,7 +123,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto, companyService, employeeService);
         if(!message.isEmpty()) {
             repository.save(project);
-//            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
     }
 
@@ -137,9 +137,9 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         log.debug("Delete logic: {}", key);
         Project project = findEntityByKey(key);
         repository.deleteLogic(key, !project.getEliminate(), project.getEliminate());
-//        save(Project.class.getSimpleName(), key,
-//                !project.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
-//                I18nResolver.getMessage(!project.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+        save(Project.class.getSimpleName(), key,
+                !project.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!project.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         findEntityByKey(key);
         try{
             repository.deleteById(key);
-//            save(Project.class.getSimpleName(), key, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+            save(Project.class.getSimpleName(), key, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
         } catch (Exception e) {
             throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, key));
         }
@@ -160,8 +160,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
-//        projectFindDto.setCreatedBy(logMovementService
-//                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+        projectFindDto.setCreatedBy(logMovementService
+                .findFirstMovement(Project.class.getSimpleName(), project.getKey()).getUserName());
         projectFindDto.setCompanyId(project.getCompany().getId());
         projectFindDto.setProjectManagerId(project.getProjectManager().getId());
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
@@ -175,8 +175,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
 
     private ProjectPageableDto parseProjectPagged(Project project) throws CustomException {
         ProjectPageableDto projectPageableDto = from_M_To_N(project, ProjectPageableDto.class);
-//        projectPageableDto.setCreatedBy(logMovementService
-//                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+        projectPageableDto.setCreatedBy(logMovementService
+                .findFirstMovement(Project.class.getSimpleName(), project.getKey()).getUserName());
         projectPageableDto.setCompany(project.getCompany().getName());
         projectPageableDto.setProjectManager(buildFullname(project.getProjectManager()));
         projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));

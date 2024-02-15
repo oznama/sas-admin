@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import com.mexico.sas.admin.api.dto.role.RolePermissionDto;
 import com.mexico.sas.admin.api.dto.role.RolePermissionsEnaDisDto;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -27,12 +28,12 @@ public class RolePermissionController {
   @Autowired
   private RolePermissionService service;
 
-//  @PostMapping(headers = "Accept=application/json", path = "/save")
-//  @ResponseStatus(code = HttpStatus.CREATED)
-//  @ApiOperation(httpMethod = "POST",
-//      value = "Servicio para crear relacion rol con permisos",
-//      response = RolePermissionDto.class,
-//      nickname = "/save")
+  @PostMapping(headers = "Accept=application/json", path = "/save")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @ApiOperation(httpMethod = "POST",
+      value = "Servicio para crear relacion rol con permisos",
+      response = RolePermissionDto.class,
+      nickname = "/save")
   public ResponseEntity<?> save(@RequestBody RolePermissionDto rolePermissionDto) throws CustomException {
     log.info("Saving role-permission row");
     service.save(rolePermissionDto);
@@ -63,6 +64,18 @@ public class RolePermissionController {
     log.info("Deleting role-permission");
     service.delete(id);
     return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/catalog")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar todos los permisos",
+          nickname = "/findAllPermissions")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = PermissionFindDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<List<PermissionFindDto>> findAllPermissions() {
+    log.info("Finding all permissions");
+    return ResponseEntity.ok(service.findAllPermissions());
   }
 
 }

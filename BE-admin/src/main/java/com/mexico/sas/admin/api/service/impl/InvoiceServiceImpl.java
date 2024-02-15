@@ -56,8 +56,8 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
             log.debug("Invoice {} for order id {} to save",
                     invoiceDto.getInvoiceNum(), invoiceDto.getOrderNum());
             repository.save(invoice);
-//            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_INSERT,
-//                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_INSERT,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
             log.debug("Invoice {} created", invoice.getInvoiceNum());
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.INVOICE_NOT_CREATED, invoiceDto.getInvoiceNum());
@@ -73,7 +73,7 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         log.debug("Updating invoice {} with {}, changes: {}", invoice, invoiceDto, message);
         if(!message.isEmpty()) {
             repository.save(invoice);
-//            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+            save(Invoice.class.getSimpleName(), invoice.getInvoiceNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
             log.debug("Invoice updated!");
         }
     }
@@ -84,9 +84,9 @@ public class InvoiceServiceImpl extends LogMovementUtils implements InvoiceServi
         Invoice invoice = findEntityByInvoiceNum(invoiceNum);
         repository.deleteLogic(invoiceNum, !invoice.getEliminate() ? CatalogKeys.INVOICE_STATUS_CANCELED : CatalogKeys.INVOICE_STATUS_IN_PROCESS,
                 !invoice.getEliminate(), invoice.getEliminate());
-//        save(Invoice.class.getSimpleName(), invoiceNum,
-//                !invoice.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
-//                I18nResolver.getMessage(!invoice.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+        save(Invoice.class.getSimpleName(), invoiceNum,
+                !invoice.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!invoice.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override

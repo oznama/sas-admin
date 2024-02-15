@@ -63,8 +63,8 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
             log.debug("Order {} for project {} to save",
                     orderDto.getOrderNum(), orderDto.getProjectKey());
             repository.save(order);
-//            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_INSERT,
-//                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
+            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_INSERT,
+                    I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
             log.debug("Order {} created", order.getOrderNum());
             return parseFromEntity(order);
         } catch (Exception e) {
@@ -82,7 +82,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         if(!message.isEmpty()) {
 
             repository.save(order);
-//            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+            save(Order.class.getSimpleName(), order.getOrderNum(), CatalogKeys.LOG_DETAIL_UPDATE, message);
             log.debug("Order updated!");
         }
     }
@@ -93,9 +93,9 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         Order order = findEntityByOrderNum(orderNum);
         repository.deleteLogic(orderNum, !order.getEliminate() ? CatalogKeys.ORDER_STATUS_CANCELED : CatalogKeys.ORDER_STATUS_IN_PROCESS,
                 !order.getEliminate(), order.getEliminate());
-//        save(Order.class.getSimpleName(), orderNum,
-//                !order.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
-//                I18nResolver.getMessage(!order.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
+        save(Order.class.getSimpleName(), orderNum,
+                !order.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+                I18nResolver.getMessage(!order.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override

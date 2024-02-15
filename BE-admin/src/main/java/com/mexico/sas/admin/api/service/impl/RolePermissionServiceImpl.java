@@ -1,9 +1,12 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
+import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import com.mexico.sas.admin.api.dto.role.RolePermissionDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
+import com.mexico.sas.admin.api.model.Permission;
+import com.mexico.sas.admin.api.repository.PermissionRepository;
 import com.mexico.sas.admin.api.repository.RolePermisionRepository;
 import com.mexico.sas.admin.api.dto.role.RolePermissionsEnaDisDto;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
@@ -23,6 +26,9 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
 
   @Autowired
   private RolePermisionRepository repository;
+
+  @Autowired
+  private PermissionRepository permissionRepository;
 
   @Override
   public void save(RolePermissionDto rolePermissionDto) throws CustomException {
@@ -76,6 +82,23 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
   public RolePermission findEntityById(Long id) throws CustomException {
     return repository.findById(id).orElseThrow(() ->
             new NoContentException(I18nResolver.getMessage(I18nKeys.PERMISSION_NOT_FOUND)));
+  }
+
+  @Override
+  public List<PermissionFindDto> findAllPermissions() {
+    List<Permission> permissions = permissionRepository.findAll();
+    List<PermissionFindDto> permissionFindDtos = new ArrayList<>();
+    permissions.forEach( permission -> {
+      try {
+        PermissionFindDto permissionFindDto = from_M_To_N(permission, PermissionFindDto.class);
+        // If is necessary map custom propertys do it here
+        permissionFindDtos.add(permissionFindDto);
+      } catch (CustomException e) {
+        log.warn("Error to parse permission {}, error: {}", permission.getId(), e.getMessage());
+      }
+
+    });
+    return permissionFindDtos;
   }
 
 }
