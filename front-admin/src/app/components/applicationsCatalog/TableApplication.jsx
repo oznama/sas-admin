@@ -4,42 +4,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
-import { setModalChild } from '../../../store/modal/modalSlice';
-import { FormApplication } from '../applications/page/FormApplication';
+import { deleteLogic, getAplicationsF, getApplicationByName } from '../../services/ApplicationService';
+import { setApp } from '../../../store/application/applicationSlice';
+import { useNavigate } from "react-router-dom";
 
 export const TableApplication = ({
     pageSize = 10,
-    catalogId,
+    sort = 'name,asc',
 }) => {
     const dispatch = useDispatch();
-
+    const { app } = useSelector( state => state.applicationReducer );
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
-    const [catalogChilds, setCatalogChilds] = useState([]);
+    const [totalCatalogApplications, setTotalCatalogApplication] = useState(0);  
+    const [catalogApplications, setCatalogApplications] = useState([]);
     const [id, setId] = useState(null);
-    const [filter, setFilter] = useState('')
+    const [filter, setFilter] = useState(app.name? app.name: '')
+    const navigate = useNavigate();
 
     const onChangeFilter = async ({ target }) => {
         const value = target.value;
         setFilter(value);
-        await fetchChilds(value); // Esperamos a que se actualice el estado antes de llamar fetchChilds
+        await fetchApplications(value); // Esperamos a que se actualice el estado antes de llamar fetchChilds
     };
     
-    const fetchChilds = (filterText = '') => {
-        console.log("Fetching childrens for catalog: ", catalogId);
-        getCatalogChilds(catalogId)
+    const fetchApplications = (page) => {
+        getAplicationsF(page, pageSize, sort, filter)
         .then(response => {
             if (response.code && response.code === 401) {
                 displayNotification(dispatch, response.message, alertType.error);
             }
-            let filteredChilds = response.filter(child =>
-                child.description.toLowerCase().includes(String(filterText).toLowerCase()) ||
-                child.value.toLowerCase().includes(String(filterText).toLowerCase())
-            );
-            setCatalogChilds(filteredChilds);
-            setTotalCatalogChilds(filteredChilds.length);
+            setCatalogApplications(response.content);
+            setTotalCatalogApplication(response.length);
         }).catch(error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -47,22 +43,24 @@ export const TableApplication = ({
     }
 
     useEffect(() => {
-        fetchChilds(filter); // Ahora se ejecutará cada vez que filter cambie
+        console.log('Se imprime variable global'+JSON.stringify(app, null, 2));
+        fetchApplications(filter); // Ahora se ejecutará cada vez que filter cambie
     }, [filter]); 
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchChilds(filter); // Actualizado
+        fetchApplications(filter); // Actualizado
     }
 
     const onCancelModal = () => {
-        dispatch( setModalChild(null) );
-        fetchChilds(filter);
+        //dispatch( setModalChild(null) );
+        fetchApplications(filter);
     }
-    const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
+    // const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
 
     const handleAddCompany = () => {
-        showModal(null);
+        dispatch(setApp({}))
+        navigate(`/application/add`);
     }
 
     const renderAddButton = () => permissions.canCreateCat && (
@@ -79,7 +77,7 @@ export const TableApplication = ({
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(filter); } } /> */}
                 <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..." maxLength={ 100 } autoComplete='off' value={ filter } required onChange={ onChangeFilter }/>
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(filter) }>
+            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchApplications(filter) }>
                 <i className="bi bi-search"></i>
             </button>
         </div>
@@ -90,7 +88,7 @@ export const TableApplication = ({
             { renderSearcher() }
             <Pagination
                 currentPage={ currentPage + 1 }
-                totalCount={ totalCatalogChilds }
+                totalCount={ totalCatalogApplications }
                 pageSize={ pageSize }
                 onPageChange={ page => onPaginationClick(page) } 
             />
@@ -99,15 +97,19 @@ export const TableApplication = ({
     )
 
     const handledSelect = id => {
-        setId(id);
-        const catalogChild = catalogChilds.find( cat => cat.id === id );
-        showModal(catalogChild);
+        console.log("El catalogChild es:"+id);
+        console.log("El catalogChild es:"+id);
+        const catalogChild = catalogApplications.find( cat => cat.name === id );
+        console.log("El catalogChild es:"+JSON.stringify(catalogChild, null, 2));
+        dispatch(setApp(catalogChild));
+        navigate(`/application/add`);
+        // showModal(catalogChild);
     }
 
     const renderStatus = (status) => {
-        const backColor = status === 2000100003 ? 'bg-danger' : ( status === 2000100001 ? 'bg-success' : ( status === 2000100002 ? 'bg-warning' : '') );
-        const statusDesc = status === 2000100003 ? 'Eliminado' : ( status === 2000100002 ? 'Inactivo' : ( status === 2000100001 ? 'Activo' : '') );
-        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white `}>{ statusDesc }</span>);
+        const backColor = status ? 'bg-success' : 'bg-danger';
+        const desc = status ? 'Activo' : 'Inactivo';
+        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
     const deleteChild = catalogId => {
@@ -116,7 +118,7 @@ export const TableApplication = ({
             displayNotification(dispatch, response.message, alertType.error);
             } else {
             displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
-            fetchChilds();
+            fetchApplications();
             }
         }).catch(error => {
             console.log(error);
@@ -124,29 +126,28 @@ export const TableApplication = ({
         });
     }
 
-    const renderRows = () => catalogChilds && catalogChilds.map(({
-        id,
+    const renderRows = () => catalogApplications && catalogApplications.map(({
+        name,
         description,
-        value,
         createdBy,
         creationDate,
-        status
+        active
     }) => (
-        <tr key={ id } onClick={ () => console.log('Click en row') }>
-            <th className="text-center" scope="row">{ value }</th>
+        <tr key={ name } onClick={ () => console.log('Click en row') }>
+            <th className="text-center" scope="row">{ name }</th>
             <td className="text-start">{ description }</td>
             { permissions.isAdminRoot && (<td className="text-start">{ createdBy }</td>) }
             { permissions.isAdminRoot && (<td className="text-center">{ creationDate }</td>) }
-            <td className="text-center">{ renderStatus(status) }</td>
+            <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(name) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelCat && (
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(id, status) }>
-                    <span><i className={`bi bi-${ status ? 'trash' : 'folder-symlink'}`}></i></span>
+                <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(name, active) }>
+                    <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}

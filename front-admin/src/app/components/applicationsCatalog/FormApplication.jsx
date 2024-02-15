@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
-import { setModalChild } from '../../../../store/modal/modalSlice';
-import { displayNotification, genericErrorMsg } from '../../../helpers/utils';
-import { alertType } from '../../custom/alerts/types/types';
-import { save, update } from '../../../services/CatalogService';
-import { InputText } from '../../custom/InputText';
+import { setModalChild } from '../../../store/modal/modalSlice';
+import { displayNotification, genericErrorMsg } from '../../helpers/utils';
+import { alertType } from '../custom/alerts/types/types';
+import { save, update } from '../../services/CatalogService';
+import { InputText } from '../custom/InputText';
 
 export const FormApplication = ({
     catalogChild,
