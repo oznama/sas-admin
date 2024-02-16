@@ -76,13 +76,13 @@ export const TableInvoices = ({
         }
     }, []);
 
-    const handledSelect = (projectIdParam, orderIdParam, id) => {
-        if( !projectId || !orderIdParam ) {
+    const handledSelect = (projectKey, orderNum, id) => {
+        if( !projectId || !orderId ) {
             dispatch(setCurrentTab(3));
             dispatch(setCurrentOrdTab(2));
         }
         if ( permissions.canAdminOrd ) {
-            const urlRedirect = `/project/${ projectIdParam }/order/${ orderIdParam }/invoice/${ id }/edit`;
+            const urlRedirect = `/project/${ projectKey }/order/${ orderNum }/invoice/${ id }/edit`;
             navigate(urlRedirect);
         }
     }
@@ -142,7 +142,6 @@ export const TableInvoices = ({
     }
 
     const renderRows = () => invoices && invoices.map(({
-        id,
         invoiceNum,
         issuedDate,
         paymentDate,
@@ -151,11 +150,11 @@ export const TableInvoices = ({
         taxStr,
         totalStr,
         status,
-        orderId: odrId,
-        projectId,
+        orderNum,
+        projectKey,
         active
-    }) => (
-        <tr key={ id }>
+    }, index) => (
+        <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ invoiceNum }</th>
             <td className="text-center" style={ styleTableRow }>{ issuedDate }</td>
             <td className="text-center" style={ styleTableRow }>{ paymentDate }</td>
@@ -168,7 +167,7 @@ export const TableInvoices = ({
                 <button type="button" 
                     className={`btn btn-${ active && permissions.canEditOrd ? 'success' : 'primary' } btn-sm`} 
                     style={ styleTableRowBtn } 
-                    onClick={ () => handledSelect(projectId, odrId, id) }>
+                    onClick={ () => handledSelect(projectKey, orderNum, invoiceNum) }>
                     <span><i className={`bi bi-${ active && permissions.canEditOrd ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>

@@ -136,6 +136,14 @@ export const TableOrders = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
+    const btnDeleteDisabled = (status, amountPaid) => {
+        const hasInvoicePaid = amountPaid > 0; // Si factura tiene monto pagado
+        const isPaid = status === 2000600002; // Orden pagada
+        const isCanceledOrExpired = status === 2000600003 || status === 2000600004; // Orden cancelada o vencida
+        const paidIsEqualToProject = projectPaid.amountPaid >= project.amount; // El monto del proyecto se encuentra pagado
+        return hasInvoicePaid || isPaid || ( isCanceledOrExpired && paidIsEqualToProject );
+    }
+
     const renderRows = () => orders && orders.map(({
         orderNum,
         orderDate,
@@ -177,7 +185,7 @@ export const TableOrders = ({
                         <button type="button"
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
-                            disabled={ status === 2000600002 || ( (status === 2000600003 || status === 2000600004) && projectPaid.amountPaid >= project.amount ) }
+                            disabled={ btnDeleteDisabled(status,amountPaid) }
                             onClick={ () => deleteOrder(id, amount, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
