@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.application.*;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
@@ -8,6 +9,8 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Application;
+import com.mexico.sas.admin.api.model.Company;
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.repository.ApplicationRepository;
 import com.mexico.sas.admin.api.service.ApplicationService;
 import com.mexico.sas.admin.api.service.CompanyService;
@@ -112,6 +115,29 @@ public class ApplicationServiceImpl extends LogMovementUtils implements Applicat
     public Application findEntityByName(String name) throws CustomException {
         return repository.findByName(name).orElseThrow( () ->
                 new NoContentException(I18nResolver.getMessage(I18nKeys.APPLICATION_NOT_FOUND, name)));
+    }
+
+    @Override
+    public List<SelectDto> getForSelect() {
+        return getSelect(repository.findByOrderByNameAsc());
+    }
+
+    @Override
+    public List<SelectDto> getForSelect(Long companyId) {
+        return getSelect(repository.findByCompanyOrderByNameAsc(new Company(companyId)));
+    }
+
+    private List<SelectDto> getSelect(List<Application> applications) {
+        List<SelectDto> selectDtos = new ArrayList<>();
+        applications.forEach( employee -> {
+            try {
+                SelectDto selectDto = from_M_To_N(employee, SelectDto.class);
+                selectDtos.add(selectDto);
+            } catch (CustomException e2) {
+                log.error("Impossible add application {}", employee.getName());
+            }
+        });
+        return selectDtos;
     }
 
     private void validationSave(ApplicationDto applicationDto, Application application) throws CustomException {

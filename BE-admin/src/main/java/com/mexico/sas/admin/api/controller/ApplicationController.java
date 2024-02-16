@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.application.ApplicationDto;
 import com.mexico.sas.admin.api.dto.application.ApplicationFindDto;
 import com.mexico.sas.admin.api.dto.application.ApplicationPaggeableDto;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -78,6 +80,24 @@ public class ApplicationController {
                                                                   Pageable pageable) throws CustomException{
         log.info("Getting all applications");
         return ResponseEntity.ok(service.findAll(filter, type, pageable));
+    }
+
+    @GetMapping("/select")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar aplicaciones para select", nickname = "/select")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+    public ResponseEntity<List<SelectDto>> select() throws CustomException {
+        log.info("Getting catalog applications");
+        return ResponseEntity.ok(service.getForSelect());
+    }
+
+    @GetMapping("/select/{companyId}")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar aplicaciones por compania para select", nickname = "/selectByCompanyId")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+    public ResponseEntity<List<SelectDto>> selectByCompanyId(@PathVariable("companyId") Long companyId) throws CustomException {
+        log.info("Getting catalog applications by company");
+        return ResponseEntity.ok(service.getForSelect(companyId));
     }
 
 }

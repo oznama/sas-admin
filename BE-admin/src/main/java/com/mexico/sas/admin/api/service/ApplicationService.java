@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.application.*;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.Application;
@@ -18,4 +19,6 @@ public interface ApplicationService {
     ApplicationFindDto findByName(String name) throws CustomException;
 
     Application findEntityByName(String name) throws CustomException;
+    List<SelectDto> getForSelect();
+    List<SelectDto> getForSelect(Long companyId);
 }
