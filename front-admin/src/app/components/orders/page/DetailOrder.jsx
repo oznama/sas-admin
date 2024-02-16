@@ -238,7 +238,7 @@ export const DetailOrder = () => {
     if ( id && permissions.canEditOrd ) {
       updateOrder(request);
     } else if ( permissions.canCreateOrd ) {
-      request.projectId = pId;
+      request.projectKey = pId;
       saveOrder(request);
     }
     dispatch( setModalChild(null) );

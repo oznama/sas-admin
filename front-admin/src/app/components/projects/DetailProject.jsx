@@ -282,7 +282,7 @@ export const DetailProject = () => {
             { (currentTab === 2 && key ) && renderAddButton() }
             { 
                 currentTab === 2 ? ( <TableApplications projectId = { key } /> ) : ( 
-                    currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ numberToString(key, '') } />) : (
+                    currentTab === 4 ? (<TableLog tableName={ 'Project' } recordId={ key } />) : (
                     currentTab === 3 ? (<TableOrders projectId={ key } />) : renderDetailProject()
                     ) 
                 )

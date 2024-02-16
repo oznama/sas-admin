@@ -56,6 +56,15 @@ export const getAplications = async() => {
     return await response.json();
 };
 
+export const getAplicationsByCompany = async(companyId) => {
+    const request = {
+        headers: getHeaders()
+    }
+    const url = `${context}/select/${companyId}`;
+    const response = await api( url, request );
+    return await response.json();
+};
+
 export const getAplicationsF = async(page=0, size=10, sort='id,asc', filter='', companyId='') => {
     const request = {
         headers: getHeaders()

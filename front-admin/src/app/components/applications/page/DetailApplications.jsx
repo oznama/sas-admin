@@ -3,7 +3,6 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
 import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
 import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
@@ -12,6 +11,7 @@ import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
 import { setCurrentAppTab } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
+import { getAplications } from '../../../services/ApplicationService';
 
 export const DetailApplications = () => {
 
@@ -70,9 +70,11 @@ export const DetailApplications = () => {
 
   const fetchSelects = () => {
     
-    getCatalogChilds(1000000004)
+    getAplications()
       .then( response => {
-        setCatApliations(response.filter( cat => cat.status === 2000100001 ));
+        const cat = [];
+        response.map( r => cat.push({ ...r, id: r.value }) );
+        setCatApliations(cat);
       }).catch( error => {
         console.log(error);
       });
@@ -224,7 +226,7 @@ export const DetailApplications = () => {
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-6'>
-              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ !active || isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
+              <Select name="application" label="Aplicaci&oacute;n" disabled={ !active || isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
             </div>
           </div>
           <div className="row text-start">

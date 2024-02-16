@@ -22,7 +22,7 @@ export const DetailInvoice = () => {
   const { project, order, orderPaid } = useSelector( state => state.projectReducer );
   const [totalPaid, setTotalPaid] = useState(orderPaid.amount ? orderPaid.amount : 0);
   const { permissions } = useSelector( state => state.auth );
-  const { projectId, orderId, id } = useParams();
+  const { projectKey, orderId, id } = useParams();
 
   const navigate = useNavigate();
   const [holyDates, setHolyDates] = useState([]);
@@ -38,7 +38,7 @@ export const DetailInvoice = () => {
   const [observations, setObservations] = useState('');
   const [status, setStatus] = useState('2000800001');
   const [catStatus, setCatStatus] = useState([]);
-  const [pId, setPId] = useState(projectId === '0' ? '' : projectId);
+  const [pId, setPId] = useState(projectKey === '0' ? '' : projectKey);
   const [oId, setOId] = useState(orderId === '0' ? '' : orderId);
   const [orders, setOrders] = useState([]);
   const [pFilter, setPFilter] = useState('');
@@ -283,8 +283,8 @@ export const DetailInvoice = () => {
     if ( id && permissions.canEditOrd ) {
       updateInvoice(request);
     } else if ( permissions.canCreateOrd ) {
-      request.projectId = pId;
-      request.orderId = oId;
+      request.projectKey = pId;
+      request.orderNum = oId;
       saveInvoice(request);
     }
     dispatch( setModalChild(null) );
@@ -390,7 +390,7 @@ export const DetailInvoice = () => {
           <div className="pt-3 d-flex flex-row-reverse">
               { renderSaveButton() }
               &nbsp;
-              <button type="button" className="btn btn-danger" onClick={ () => navigate(  orderId !== '0' ? `/project/${ projectId }/order/${ orderId }/edit` : '/invoices') }>Cancelar</button>
+              <button type="button" className="btn btn-danger" onClick={ () => navigate(  orderId !== '0' ? `/project/${ projectKey }/order/${ orderId }/edit` : '/invoices') }>Cancelar</button>
           </div>
       </form>
     </div>
