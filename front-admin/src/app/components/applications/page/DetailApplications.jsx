@@ -48,7 +48,7 @@ export const DetailApplications = () => {
       if( response.code ) {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
-        setAplication(numberToString(response.applicationId, ''));
+        setAplication(response.application);
         setAmount(numberToString(response.amount, ''));
         setTax(numberToString(response.tax, ''))
         setTotal(numberToString(response.total, ''))
@@ -158,10 +158,10 @@ export const DetailApplications = () => {
     if( request.amount == 0 ) {
       displayNotification(dispatch, 'El monto del proyecto no puede ser 0', alertType.error);
     } else {
+      request.projectKey = projectKey;
       if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
         update(request);
       } else if ( permissions.canCreateProjApp ) {
-        request.projectKey = projectKey;
         save(request);
       }
     }

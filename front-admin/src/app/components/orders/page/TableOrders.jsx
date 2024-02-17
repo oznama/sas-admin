@@ -112,11 +112,11 @@ export const TableOrders = ({
         fetchOrders(0, '');
     }
 
-    const deleteOrder = (id, amount, active) => {
+    const deleteOrder = (orderNum, amount, active) => {
         if( !active && (amount > (project.amount - projectPaid.amountPaid) ) ) {
             displayNotification(dispatch, 'La orden no se puede reactivar ya que supera el monto pendiente', alertType.error);
         } else {
-            deleteLogic(id).then( response => {
+            deleteLogic(orderNum).then( response => {
                 if(response.code && response.code !== 200) {
                     displayNotification(dispatch, response.message, alertType.error);
                 } else {
@@ -186,7 +186,7 @@ export const TableOrders = ({
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
                             disabled={ btnDeleteDisabled(status,amountPaid) }
-                            onClick={ () => deleteOrder(id, amount, active) }>
+                            onClick={ () => deleteOrder(orderNum, amount, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>

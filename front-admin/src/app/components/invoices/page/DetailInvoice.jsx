@@ -413,9 +413,9 @@ export const DetailInvoice = () => {
   return (
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
-      { order.id && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
-      {/* { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(orderPaid.amount) }</span></p>) } */}
-      { order.id && renderPendingAmount('h4') }
+      { order.orderNum && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
+      {/* { order.orderNum && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(orderPaid.amount) }</span></p>) } */}
+      { order.orderNum && renderPendingAmount('h4') }
       { id && renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>

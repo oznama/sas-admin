@@ -127,8 +127,8 @@ export const TableInvoices = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
-    const deleteInvoice = (id, active) => {
-        deleteLogic(id).then( response => {
+    const deleteInvoice = (invoiceNum, active) => {
+        deleteLogic(invoiceNum).then( response => {
             if(response.code && response.code !== 200) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
@@ -178,7 +178,7 @@ export const TableInvoices = ({
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
                             disabled={ status === 2000800002 || ( status === 2000800003 && orderPaid.amount >= order.amount ) }
-                            onClick={ () => deleteInvoice(id, active) }>
+                            onClick={ () => deleteInvoice(invoiceNum, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>

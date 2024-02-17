@@ -11,9 +11,7 @@ export const Alert = ({
   
   return (
     <div className={ clasSNameAlert } >
-      <div className='d-flex justify-content-between'>
-        <div>
-        </div>
+      <div className='d-flex justify-content-between gap-3'>
         <span className='fw-bold'>{ message }</span>
         <button type="button" className="btn-close" aria-label="Close" onClick={ () => dispatch(hide()) } ></button>
       </div>
