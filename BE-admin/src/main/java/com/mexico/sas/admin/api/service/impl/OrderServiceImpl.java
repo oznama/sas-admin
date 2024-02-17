@@ -113,7 +113,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     public List<OrderPaggeableDto> findByProjectKey(String projectKey) throws CustomException {
         log.debug("Finding Orders by proyect {}", projectKey);
         Project project = projectService.findEntityByKey(projectKey);
-        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
+        List<Order> orders = repository.findByProjectOrderByOrderNumAscOrderDateAsc(project);
         List<OrderPaggeableDto> ordersFindDto = new ArrayList<>();
         orders.forEach( order -> {
             try {
@@ -153,7 +153,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
     @Override
     public OrderPaggeableDto getAmountPaid(String projectKey) throws CustomException {
         Project project = projectService.findEntityByKey(projectKey);
-        List<Order> orders = repository.findByProjectOrderByOrderDateDesc(project);
+        List<Order> orders = repository.findByProjectOrderByOrderNumAscOrderDateAsc(project);
         return getTotal(orders, project);
     }
 

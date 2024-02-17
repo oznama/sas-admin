@@ -16,6 +16,7 @@ public class ProjectApplicationUpdateDto implements Serializable {
     private static final long serialVersionUID = 1277148987583745666L;
 
     private Long id;
+    private String projectKey;
     private String application;
     private BigDecimal amount;
     private BigDecimal tax;

@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
 
     List<Order> findByActiveIsTrueAndEliminateIsFalseOrderByOrderNumAsc();
 
-    List<Order> findByProjectOrderByOrderDateDesc(Project project);
+    List<Order> findByProjectOrderByOrderNumAscOrderDateAsc(Project project);
 
     @Transactional
     @Modifying
