@@ -40,7 +40,7 @@ export const TableCatalogConexion = ({
     
     useEffect(() => {
         fetchChilds();
-    }, []);  
+    }, [catalogId]);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
