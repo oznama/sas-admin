@@ -13,6 +13,7 @@ public class SelectDto implements Serializable {
     private static final long serialVersionUID = 300386973188821805L;
 
     private Long id;
+    private String idStr;
     @JsonProperty("value")
     private String name;
     private String parentId;

@@ -267,6 +267,7 @@ public class OrderServiceImpl extends LogMovementUtils implements OrderService {
         orders.forEach( order -> {
             try {
                 SelectDto selectDto = from_M_To_N(order, SelectDto.class);
+                selectDto.setIdStr(order.getOrderNum());
                 selectDto.setName(String.format( "%s (%s - %s)", order.getOrderNum(), order.getProject().getKey(), order.getProject().getDescription()));
                 selectDto.setParentId(order.getProject().getKey());
                 selectDtos.add(selectDto);

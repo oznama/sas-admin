@@ -193,6 +193,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projects.forEach( project -> {
             try {
                 SelectDto selectDto = from_M_To_N(project, SelectDto.class);
+                selectDto.setIdStr(project.getKey());
                 selectDto.setName(String.format("%s - %s", project.getKey(), project.getDescription()));
                 selectDtos.add(selectDto);
             } catch (CustomException e) {
