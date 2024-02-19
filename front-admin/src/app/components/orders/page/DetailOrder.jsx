@@ -54,7 +54,9 @@ export const DetailOrder = () => {
 
   const fetchProjects = () => {
     getProjectSelect().then( response => {
-      setProjects(response);
+      const cat = [];
+      response.map( r => cat.push({ ...r, id: r.idStr }) );
+      setProjects(cat);
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);

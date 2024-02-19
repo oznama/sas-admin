@@ -63,7 +63,9 @@ export const DetailInvoice = () => {
 
   const fetchOrders = () => {
     getOrderSelect().then( response => {
-      setOrders(response);
+      const cat = [];
+      response.map( r => cat.push({ ...r, id: r.idStr }) );
+      setOrders(cat);
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -205,7 +207,7 @@ export const DetailInvoice = () => {
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangeOId = ({ target }) => {
     setPFilter(target.value);
-    const order = orders.find( o => o.value.include(target.value) );
+    const order = orders.find( o => o.value === target.value );
     if( order ) {
       setOId(order.id);
       const parentId = orders.find( o => o.id === order.id ).parentId;
@@ -223,6 +225,7 @@ export const DetailInvoice = () => {
     setPFilter('');
     setPId('');
     dispatch(setProject({}));
+    dispatch(setOrder({}));
     dispatch(setOrderPaid({}));
   }
 

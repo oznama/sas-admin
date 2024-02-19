@@ -88,6 +88,10 @@ export const TableInvoices = ({
     }
 
     const handleAddInvoice = () => {
+        if( !projectId || !orderId ) {
+            dispatch(setCurrentTab(3));
+            dispatch(setCurrentOrdTab(2));
+        }
         navigate(`/project/${ projectId ? projectId : 0 }/order/${ orderId ? orderId : 0 }/invoice/add`);
     }
 
