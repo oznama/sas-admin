@@ -20,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -159,9 +161,12 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
     private CatalogPaggedDto parseCatalogPaggedDto(Catalog catalog) throws CustomException {
         CatalogPaggedDto catalogDto = from_M_To_N(catalog, CatalogPaggedDto.class);
-        /*if( catalog.getCatalogParent().getId().equals(1000000007l) ) {
-            catalog.setValue(dateToString(stringToDate(catalog.getValue(), GeneralKeys.FORMAT_YYYYMMDD_HHMMSS), GeneralKeys.FORMAT_DDMMYYYY, true));
-        }*/
+        if( catalog.getCatalogParent().getId().equals(CatalogKeys.HOLYDAYS) && !StringUtils.isEmpty(catalog.getValue())) {
+            String dateToStr = dateToString(Date.from(Instant.parse(catalog.getValue())), GeneralKeys.FORMAT_DDMMYYYY, true);
+            catalogDto.setValue(dateToStr);
+        } else {
+            log.warn("Catalog {} not be parse because value is null or empty", catalog.getId());
+        }
         catalogDto.setCompany(companyService.findById(catalog.getCompanyId()).getName());
         catalogDto.setStatusDesc(findEntityById(catalog.getStatus()).getValue());
         return catalogDto;
