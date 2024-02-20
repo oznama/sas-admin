@@ -165,7 +165,7 @@ CREATE TABLE orders (
     amount decimal(15,2) not null,
     tax decimal(15,2),
     total decimal(15,2),
-    requisition varchar(15) unique,
+    requisition varchar(15),
     requisition_date timestamp,
     requisition_status int8,
     observations text,
