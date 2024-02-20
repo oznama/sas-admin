@@ -30,7 +30,7 @@ export const TableCatalogConexion = ({
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
-    const fetchChilds = () => {
+    const fetchChilds = catalogId => {
         getCatalogChilds(catalogId)
         .then( response => {
             if( response.code && response.code === 401 ) {
@@ -64,7 +64,7 @@ export const TableCatalogConexion = ({
             setFilter('');
             dispatch(setCatalogParent(catalogId));
         }
-        fetchChilds();
+        fetchChilds(catalogId);
     }, [catalogId, catalogParent, filter]);  
 
     const onPaginationClick = page => {
@@ -117,7 +117,6 @@ export const TableCatalogConexion = ({
         dispatch(setCatalogObj(catalogChild));
         dispatch(setCatalogParent(catalogId));
         dispatch(setCatalogName(catalogChild.value));
-        console.log('El catalogo es: '+JSON.stringify(catalogChild, null, 2));
         navigate(`/`+type+`/add`);
         // showModal(catalogChild);
     }
@@ -148,7 +147,7 @@ export const TableCatalogConexion = ({
         value,
         status
     }) => (
-        <tr key={ id } onClick={ () => console.log('Click en row') }>
+        <tr key={ id } >
             <th className="text-center" scope="row">{ value }</th>
             <td className="text-start">{ description }</td>
             <td className="text-center">{ renderStatus(status) }</td>

@@ -24,27 +24,25 @@ export const DetailCatalogConexion = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const [value, setValue] = useState('');
+    const [value, setValue] = useState(obj && obj.value ? obj.value : '');
     const [description, setDescription] = useState(obj && obj.description ? obj.description : '');
 
     const onChangeValue = ({ target }) => setValue(target.value);
     const onChangeDescription = ({ target }) => setDescription(target.value);
-    const onChangeStartDate = date => setValue(date);
+    const onChangeStartDate = date => setStartDate(date);
 
     const [active, setActive] = useState('');
     
     const isModeEdit = ((obj.id && !permissions.canEditCat) || (obj.id && !active ));
-    console.log('obj: '+obj+' permissions: '+!permissions.canEditCat+' active:'+(obj.id && !active )+" idModeEdit: "+isModeEdit)
     
     const onSubmit = event => {
         event.preventDefault()
         const data = new FormData(event.target)
         const request = Object.fromEntries(data.entries());
-        console.log(request);
         request.catalogParent = catalogParent;
+        request['value'] = type === 'days' ? startDate : value;
         if (obj.value){
             updateChild(request);
-            
         }else{
             saveChild(request);
         }
@@ -74,7 +72,6 @@ export const DetailCatalogConexion = () => {
     )
 
     const saveChild = request => {
-        request['value']=value;
         save(request).then( response => {
             if(response.code && response.code !== 201) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -89,8 +86,6 @@ export const DetailCatalogConexion = () => {
     }
 
     const updateChild = request => {
-        request['value']=value;
-        console.log('Se esta intentando actualizar: '+JSON.stringify(request, null, 2))
         update(obj.id, request).then( response => {
             if(response.code && response.code !== 201) {
                 displayNotification(dispatch, response.message, alertType.error);
@@ -105,7 +100,6 @@ export const DetailCatalogConexion = () => {
     }
     
     useEffect(() => {
-        console.log('El catalogo parent es: '+catalogParent);
         if (catalogParent == 1000000005) {
             setTitle('Puestos de trabajo');
             setType('role');
@@ -116,14 +110,8 @@ export const DetailCatalogConexion = () => {
             setTitle('Dias Feriados');
             setType('days');
         }
-        console.log("El valor de type es: "+type);
         if (catalogParent===1000000007) {
-            console.log("WELCOME TO DAYS");
-            // Encuentra el índice de la letra "T" en la cadena value
-            // const indiceT = objeto.value.indexOf('T');
-
-            // // Recorta la cadena desde el índice de la letra "T" hasta el final
-            // const valorRecortado = objeto.value.substring(indiceT);
+            setStartDate(handleDateStr(obj.value));
         }else if(obj.value){
             // setValue(obj.value)
         }
@@ -139,14 +127,25 @@ export const DetailCatalogConexion = () => {
     const renderDetail = () => {
         return (<div className='d-grid gap-2 col-6 mx-auto'>
                 <form className="needs-validation" onSubmit={ onSubmit }>
-                    {(type != 'days') &&(<div className="row text-start">
+                    <div className="row text-start">
                         <div className='col-12'>
-                            <InputText name='value' label='Nombre' placeholder='Escribe el nombre' disabled={ obj.value ? true :false} value={ value } required onChange={ onChangeValue } maxLength={ 255 } />
+                            {
+                                (type !== 'days') && (
+                                    <InputText name='value' label='Nombre' placeholder='Escribe el nombre' 
+                                    disabled={ obj.value ? true :false} value={ value } required 
+                                    onChange={ onChangeValue } maxLength={ 255 } />
+                                )
+                            }
+                            {
+                                (type === 'days') && (
+                                    <DatePicker name="value" label="Inicio" 
+                                    disabled={isModeEdit } value={ startDate } 
+                                    required onChange={ (date) => onChangeStartDate(date) } excludeDates={ false } />
+                                )
+                            }
                         </div>
-                    </div>)}
-                    {(type == 'days') &&(<div className='col-6'>
-                        <DatePicker name="value" label="Inicio" disabled={isModeEdit } value={ value } required onChange={ (date) => onChangeStartDate(date) } />
-                    </div>)}
+                    </div>
+
                     <div className="row text-start">
                         <div className='col-12'>
                             <InputText name='description' label='Descripci&oacute;n' placeholder='Escribe descripción' disabled={ isModeEdit } value={ description } onChange={ onChangeDescription } maxLength={ 255 } />
