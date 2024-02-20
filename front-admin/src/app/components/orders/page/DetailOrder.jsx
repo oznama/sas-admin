@@ -75,6 +75,7 @@ export const DetailOrder = () => {
 
   const fetchPaid = projectId => {
     getOrderPaid(projectId).then( response => {
+      setCurrentPaid(response.amount);
       dispatch(setProjectPaid(response));
     }).catch( error => {
         console.log(error);

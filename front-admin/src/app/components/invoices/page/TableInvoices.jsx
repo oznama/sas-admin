@@ -163,6 +163,8 @@ export const TableInvoices = ({
             <td className="text-center" style={ styleTableRow }>{ issuedDate }</td>
             <td className="text-center" style={ styleTableRow }>{ paymentDate }</td>
             { orderId && (<td className="text-center" style={ styleTableRow }>{ percentage }</td>) }
+            { permissions.isAdminRoot && !orderId && <td className="text-center" style={ styleTableRow }>{ orderNum }</td> }
+            { permissions.isAdminRoot && !projectId && <td className="text-center" style={ styleTableRow }>{ projectKey }</td> }
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status) }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ amountStr }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ taxStr }</td>
@@ -205,6 +207,8 @@ export const TableInvoices = ({
                             <th className="text-center fs-6" scope="col">Fecha Emisi&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Fecha Pago</th>
                             { orderId && (<th className="text-center fs-6" scope="col">Porcentaje</th>) }
+                            { permissions.isAdminRoot && !orderId && <th className="text-center fs-6" scope="col">Orden</th> }
+                            { permissions.isAdminRoot && !projectId && <th className="text-center fs-6" scope="col">Proyecto</th> }
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             <th className="text-center fs-6" scope="col">Iva</th>
@@ -223,6 +227,8 @@ export const TableInvoices = ({
                                 <th></th>
                                 <th></th>
                                 { orderId && (<th className="text-center fs-6" scope="col">{ orderPaid.percentage }</th>) }
+                                { permissions.isAdminRoot && !orderId && <th></th> }
+                                { permissions.isAdminRoot && !projectId && <th></th> }
                                 <td className="text-center fs-6" scope="col">{ renderStatus(orderPaid.status) }</td>
                                 <th className="text-end fs-6" scope="col">{ orderPaid.amountStr }</th>
                                 <th className="text-end fs-6" scope="col">{ orderPaid.taxStr }</th>

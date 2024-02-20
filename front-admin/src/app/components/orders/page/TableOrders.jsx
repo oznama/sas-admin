@@ -163,6 +163,7 @@ export const TableOrders = ({
         <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ orderNum }</th>
             <td className="text-center" style={ styleTableRow }>{ orderDate }</td>
+            { permissions.isAdminRoot && !projectId && <td className="text-center" style={ styleTableRow }>{ projectKey }</td> }
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status, '') }</td>
             <td className="text-center" style={ styleTableRow }>{ requisition }</td>
             <td className="text-center" style={ styleTableRow }>{ requisitionDate }</td>
@@ -207,6 +208,7 @@ export const TableOrders = ({
                         <tr>
                             <th className="text-center fs-6" scope="col">No. orden</th>
                             <th className="text-center fs-6" scope="col">Fecha No. De Orden</th>
+                            { permissions.isAdminRoot && !projectId && <th className="text-center fs-6" scope="col">Proyecto</th> }
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">No Requisici&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Fecha Requisici&oacute;n</th>
@@ -227,6 +229,7 @@ export const TableOrders = ({
                             <tr>
                                 <th className="text-center fs-6" scope="col">TOTALES</th>
                                 <th></th>
+                                { permissions.isAdminRoot && !projectId && <th></th> }
                                 <th className="text-center fs-6" scope="col">{ renderStatus(projectPaid.status, '') }</th>
                                 <th></th>
                                 <th></th>
