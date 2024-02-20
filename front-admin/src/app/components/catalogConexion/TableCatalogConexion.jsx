@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { displayNotification, genericErrorMsg } from "../../helpers/utils";
+import { displayNotification, genericErrorMsg, handleDateStr } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
@@ -13,6 +13,7 @@ export const TableCatalogConexion = ({
     pageSize = 10,
     catalogId,
 }) => {
+
     const dispatch = useDispatch();
     const { catalogParent } = useSelector( state => state.catalogReducer );
     const { obj } = useSelector( state => state.catalogReducer );
@@ -25,8 +26,7 @@ export const TableCatalogConexion = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    
-    const [filter, setFilter] = useState(obj.value && (catalogParent == catalogId) ? obj.value : '')
+    const [filter, setFilter] = useState(obj.value && (catalogParent === catalogId) ? ( type === 'days' ? handleDateStr(obj.value) : obj.value) : '')
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
@@ -121,19 +121,20 @@ export const TableCatalogConexion = ({
         // showModal(catalogChild);
     }
 
-    const renderStatus = (status) => {
+    const renderStatus = status => {
         const backColor = status === 2000100003 ? 'bg-danger' : ( status === 2000100001 ? 'bg-success' : ( status === 2000100002 ? 'bg-warning' : '') );
         const statusDesc = status === 2000100003 ? 'Eliminado' : ( status === 2000100002 ? 'Inactivo' : ( status === 2000100001 ? 'Activo' : '') );
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white `}>{ statusDesc }</span>);
     }
 
-    const deleteChild = catalogId => {
-        deleteLogic(catalogId).then( response => {
+    const deleteChild = catalog => {
+        dispatch(setCatalogObj(catalog));
+        deleteLogic(catalog.id).then( response => {
             if(response.code && response.code !== 200) {
             displayNotification(dispatch, response.message, alertType.error);
             } else {
             displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
-            fetchChilds();
+            fetchChilds(catalogId);
             }
         }).catch(error => {
             console.log(error);
@@ -141,25 +142,21 @@ export const TableCatalogConexion = ({
         });
     }
 
-    const renderRows = () => catalogChilds && catalogChilds.map(({
-        id,
-        description,
-        value,
-        status
-    }) => (
-        <tr key={ id } >
-            <th className="text-center" scope="row">{ value }</th>
-            <td className="text-start">{ description }</td>
-            <td className="text-center">{ renderStatus(status) }</td>
+    const renderRows = () => catalogChilds && catalogChilds.map((catalog) => (
+        <tr key={ catalog.id } >
+            { permissions.isAdminRoot && <th className="text-center" scope="row">{ catalog.id }</th> }
+            <th className="text-center" scope="row">{ catalog.value }</th>
+            <td className="text-start">{ catalog.description }</td>
+            <td className="text-center">{ renderStatus(catalog.status) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${ status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ catalog.status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(catalog.id) }>
+                    <span><i className={`bi bi-${ catalog.status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelCat && (
             <td className="text-center">
-                <button type="button" className={`btn btn-${ status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(id, status) }>
-                    <span><i className={`bi bi-${ status ? 'trash' : 'folder-symlink'}`}></i></span>
+                <button type="button" className={`btn btn-${ catalog.status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(catalog) }>
+                    <span><i className={`bi bi-${ catalog.status ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}
@@ -174,11 +171,12 @@ export const TableCatalogConexion = ({
 
             { renderHeader() }
 
-            <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+            <div className='table-responsive text-nowrap'>
 
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
+                            { permissions.isAdminRoot && <th className="text-center fs-6" scope="col">Id</th> }
                             <th className="text-center fs-6" scope="col">Nombre</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
