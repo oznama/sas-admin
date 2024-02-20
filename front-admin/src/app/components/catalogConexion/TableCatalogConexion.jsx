@@ -5,7 +5,8 @@ import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
-import { setModalChild } from '../../../store/modal/modalSlice';
+import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
+import { useNavigate } from "react-router-dom";
 // import { FormApplication } from '../applications/page/FormApplication';
 
 export const TableCatalogConexion = ({
@@ -13,14 +14,19 @@ export const TableCatalogConexion = ({
     catalogId,
 }) => {
     const dispatch = useDispatch();
+    const { catalogParent } = useSelector( state => state.catalogReducer );
+    const { obj } = useSelector( state => state.catalogReducer );
+    const [title, setTitle] = useState('');
+    const [type, setType] = useState('');
 
+    const navigate = useNavigate();
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
     
-    const [filter, setFilter] = useState('')
+    const [filter, setFilter] = useState(obj.value && (catalogParent == catalogId) ? obj.value : '')
 
     const onChangeFilter = ({ target }) => setFilter(target.value);
 
@@ -30,8 +36,9 @@ export const TableCatalogConexion = ({
             if( response.code && response.code === 401 ) {
                 displayNotification(dispatch, response.message, alertType.error);
             }
-            setCatalogChilds(response);
-            setTotalCatalogChilds(response.totalElements);
+            const filteredCatalogChilds = response.filter(child => child.value.includes(filter));
+            setCatalogChilds(filteredCatalogChilds);
+            setTotalCatalogChilds(filteredCatalogChilds.totalElements);
         }).catch( error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -39,27 +46,42 @@ export const TableCatalogConexion = ({
     }
     
     useEffect(() => {
+        
+        if (catalogId == 1000000005) {
+            setTitle('Puestos de trabajo');
+            setType('role');
+        } else if (catalogId == 1000000009) {
+            setTitle('Tipos de compañia');
+            setType('companyType');
+        } else {
+            setTitle('Dias Feriados');
+            setType('days');
+        }
+        if (catalogParent !== catalogId) {
+            dispatch(setCatalogObj({}));
+            dispatch(setCatalogName(''));
+            setCurrentPage(0);
+            setFilter('');
+            dispatch(setCatalogParent(catalogId));
+        }
         fetchChilds();
-    }, [catalogId]);  
+    }, [catalogId, catalogParent, filter]);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
         fetchChilds(currentPage);
     }
 
-    const onCancelModal = () => {
-        dispatch( setModalChild(null) );
-        fetchChilds();
-    }
-    // const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
-
-    const handleAddCompany = () => {
-        // showModal(null);
+    const handleAddCatalog = () => {
+        dispatch(setCatalogObj({}));
+        dispatch(setCatalogName(''));
+        dispatch(setCatalogParent(catalogId));
+        navigate(`/`+type+`/add`);
     }
 
     const renderAddButton = () => permissions.canCreateCat && (
         <div className="d-flex flex-row-reverse pb-2">
-            <button type="button" className="btn btn-primary" onClick={ handleAddCompany }>
+            <button type="button" className="btn btn-primary" onClick={ handleAddCatalog }>
                 <span className="bi bi-plus"></span>
             </button>
         </div>
@@ -92,6 +114,11 @@ export const TableCatalogConexion = ({
     const handledSelect = id => {
         setId(id);
         const catalogChild = catalogChilds.find( cat => cat.id === id );
+        dispatch(setCatalogObj(catalogChild));
+        dispatch(setCatalogParent(catalogId));
+        dispatch(setCatalogName(catalogChild.value));
+        console.log('El catalogo es: '+JSON.stringify(catalogChild, null, 2));
+        navigate(`/`+type+`/add`);
         // showModal(catalogChild);
     }
 
@@ -143,7 +170,7 @@ export const TableCatalogConexion = ({
     return (
         <div>
             <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">Aplicaciones</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">{title}</h3>
             </div>
 
             { renderHeader() }
