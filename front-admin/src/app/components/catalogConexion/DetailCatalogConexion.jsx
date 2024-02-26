@@ -6,7 +6,7 @@ import { Select } from "../custom/Select";
 import { displayNotification, genericErrorMsg, handleDateStr, numberToString } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
-import { setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
+import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
 import { save, update, getCatalogById } from '../../services/CatalogService';
 import { DatePicker } from "../custom/DatePicker";
 
@@ -15,6 +15,7 @@ export const DetailCatalogConexion = () => {
     const { obj } = useSelector( state => state.catalogReducer );
     const [title, setTitle] = useState('');
     const [type, setType] = useState('');
+    const [category, setCategory] = useState('');
     
     const [startDate, setStartDate] = useState();
     
@@ -59,7 +60,7 @@ export const DetailCatalogConexion = () => {
 
     const renderTabs = () => (//Esto controla los tabs
         <ul className="nav nav-tabs d-flex flex-row-reverse">
-        {name && (<li className="nav-item" onClick={ () => setCurrentTab(2) }>
+        {(<li className="nav-item" onClick={ () => setCurrentTab(2) }>
             <a className={ `nav-link ${ (currentTab === 2) ? 'active' : '' }` }>Historial</a>
         </li>)} 
         <li className="nav-item" onClick={ () => setCurrentTab(1) }>
@@ -103,15 +104,19 @@ export const DetailCatalogConexion = () => {
         if (catalogParent == 1000000005) {
             setTitle('Puestos de trabajo');
             setType('role');
+            setCategory('Roles');
         } else if (catalogParent == 1000000009) {
             setTitle('Tipos de compañia');
             setType('companyType');
+            setCategory('Tipo de compañia');
         } else {
-            setTitle('Dias Feriados');
+            setTitle('Días feriados');
             setType('days');
+            setCategory('Días feriados');
         }
         if (catalogParent===1000000007) {
             setStartDate(handleDateStr(obj.value));
+            dispatch(setCatalogName(startDate));
         }else if(obj.value){
             // setValue(obj.value)
         }
@@ -131,14 +136,15 @@ export const DetailCatalogConexion = () => {
                         <div className='col-12'>
                             {
                                 (type !== 'days') && (
-                                    <InputText name='value' label='Nombre' placeholder='Escribe el nombre' 
-                                    disabled={ obj.value ? true :false} value={ value } required 
+                                    <InputText name='value' label={category} placeholder='Escribe el nombre' 
+                                    // disabled={ obj.value ? true :false} value={ value } required
+                                    disabled={ isModeEdit} value={ value } required 
                                     onChange={ onChangeValue } maxLength={ 255 } />
                                 )
                             }
                             {
                                 (type === 'days') && (
-                                    <DatePicker name="value" label="Inicio" 
+                                    <DatePicker name="value" label="Día" 
                                     disabled={isModeEdit } value={ startDate } 
                                     required onChange={ (date) => onChangeStartDate(date) } excludeDates={ false } />
                                 )

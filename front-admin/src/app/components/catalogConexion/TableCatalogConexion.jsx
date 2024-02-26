@@ -7,6 +7,7 @@ import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
 import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
 import { useNavigate } from "react-router-dom";
+import { InputSearcher } from '../custom/InputSearcher';
 // import { FormApplication } from '../applications/page/FormApplication';
 
 export const TableCatalogConexion = ({
@@ -17,8 +18,10 @@ export const TableCatalogConexion = ({
     const dispatch = useDispatch();
     const { catalogParent } = useSelector( state => state.catalogReducer );
     const { obj } = useSelector( state => state.catalogReducer );
+    const { catalogName } = useSelector( state => state.catalogReducer );
     const [title, setTitle] = useState('');
     const [type, setType] = useState('');
+    const [category, setCategory] = useState('');
 
     const navigate = useNavigate();
     const { permissions, user } = useSelector( state => state.auth );
@@ -26,9 +29,9 @@ export const TableCatalogConexion = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    const [filter, setFilter] = useState(obj.value && (catalogParent === catalogId) ? ( type === 'days' ? handleDateStr(obj.value) : obj.value) : '')
+    const [filter, setFilter] = useState(obj.value && (catalogParent === catalogId) ? ( type === 'days' ? handleDateStr(catalogName) : obj.value) : '')
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
+    const onChangeFilter = ({ target }) => setFilter(target.value.toLowerCase());
 
     const fetchChilds = catalogId => {
         getCatalogChilds(catalogId)
@@ -36,9 +39,15 @@ export const TableCatalogConexion = ({
             if( response.code && response.code === 401 ) {
                 displayNotification(dispatch, response.message, alertType.error);
             }
-            const filteredCatalogChilds = response.filter(child => child.value.includes(filter));
-            setCatalogChilds(filteredCatalogChilds);
-            setTotalCatalogChilds(filteredCatalogChilds.totalElements);
+            if (filter==='') {
+                setCatalogChilds(response);
+                setTotalCatalogChilds(response.totalElements);
+            }else{
+                const filteredCatalogChilds = response.filter(child => child.value.toLowerCase().includes(filter));
+                setCatalogChilds(filteredCatalogChilds);
+                setTotalCatalogChilds(filteredCatalogChilds.totalElements);
+            }
+            
         }).catch( error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -50,12 +59,15 @@ export const TableCatalogConexion = ({
         if (catalogId == 1000000005) {
             setTitle('Puestos de trabajo');
             setType('role');
+            setCategory('Roles');
         } else if (catalogId == 1000000009) {
             setTitle('Tipos de compañia');
             setType('companyType');
+            setCategory('Tipo de compañia');
         } else {
-            setTitle('Dias Feriados');
+            setTitle('Días feriados');
             setType('days');
+            setCategory('Días feriados');
         }
         if (catalogParent !== catalogId) {
             dispatch(setCatalogObj({}));
@@ -87,14 +99,21 @@ export const TableCatalogConexion = ({
         </div>
     );
 
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchChilds(catalogId);
+    }
+
     const renderSearcher = () => (
-        <div className={`input-group w-${ permissions.canCreateCat ? '25' : '50' } py-3`}>
-            <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
+        <div className={`input-group w-${ permissions.canCreateCat ? '40' : '50' } py-3`}>
+            { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
+            {/* <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } />
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(currentPage) }>
+                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } onClean={ onClean }/> */}
+            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(currentPage) }>
                 <i className="bi bi-search"></i>
-            </button>
+            </button> */}
         </div>
     )
 
@@ -177,7 +196,7 @@ export const TableCatalogConexion = ({
                     <thead className="thead-dark">
                         <tr>
                             { permissions.isAdminRoot && <th className="text-center fs-6" scope="col">Id</th> }
-                            <th className="text-center fs-6" scope="col">Nombre</th>
+                            <th className="text-center fs-6" scope="col">{category}</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
                             <th className="text-center fs-6" scope="col">{permissions.canEditCat ? 'Editar' : 'Ver'}</th>
