@@ -64,8 +64,8 @@ export const NavBarPage = () => {
           Administraci&oacute;n
         </a>
         <div className={ `dropdown-menu bg-primary ${ showTabAdmin ? 'show' : '' }` } aria-labelledby="navbarDropdown">
-          { /* permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('catalog') }>Cat&aacute;logos</a>) */ }
           { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
+          { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('admin') }>Administraci&oacute;n</a>) }
           <div className="dropdown-divider"></div>
           { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }
           { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
