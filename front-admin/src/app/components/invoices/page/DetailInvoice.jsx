@@ -63,7 +63,9 @@ export const DetailInvoice = () => {
 
   const fetchOrders = () => {
     getOrderSelect().then( response => {
-      setOrders(response);
+      const cat = [];
+      response.map( r => cat.push({ ...r, id: r.idStr }) );
+      setOrders(cat);
     }).catch( error => {
         console.log(error);
         displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -96,6 +98,7 @@ export const DetailInvoice = () => {
 
   const fetchPaid = orderId => {
     getInvoicePaid(orderId).then( response => {
+      setTotalPaid(response.amount);
       dispatch(setOrderPaid(response));
     }).catch( error => {
         console.log(error);
@@ -145,12 +148,13 @@ export const DetailInvoice = () => {
       const nA = Number(newAmount);
       const tax = nA * taxRate;
       const total = nA + tax;
-      let amountDiff = Number(nA < amountInDb ? amountInDb - nA : nA - amountInDb).toFixed(2);
+      let amountDiff = Number(nA < amountInDb ? amountInDb - nA : nA - amountInDb).toFixed(2);      
       amountDiff = nA === amountInDb ? totalPaid : (nA < amountInDb ? totalPaid - amountDiff : (totalPaid + Number(amountDiff)));
       setAmount(newAmount);
       setTax(tax.toFixed(2));
       setTotal(total.toFixed(2));
-      dispatch( setOrderPaid( { ...orderPaid, amount: nA === amountInDb ? totalPaid : amountDiff } ) );
+      // dispatch( setOrderPaid( { ...orderPaid, amount: nA === amountInDb ? totalPaid : amountDiff } ) );
+      dispatch( setOrderPaid( { ...orderPaid, amount: amountDiff } ) );
 
       const porc = Math.round((nA * 100)/order.amount);
       setPercentage(porc);
@@ -205,7 +209,7 @@ export const DetailInvoice = () => {
   const onChangeObservations = ({ target }) => setObservations(target.value);
   const onChangeOId = ({ target }) => {
     setPFilter(target.value);
-    const order = orders.find( o => o.value.include(target.value) );
+    const order = orders.find( o => o.value === target.value );
     if( order ) {
       setOId(order.id);
       const parentId = orders.find( o => o.id === order.id ).parentId;
@@ -223,6 +227,7 @@ export const DetailInvoice = () => {
     setPFilter('');
     setPId('');
     dispatch(setProject({}));
+    dispatch(setOrder({}));
     dispatch(setOrderPaid({}));
   }
 
@@ -413,9 +418,10 @@ export const DetailInvoice = () => {
   return (
     <div className='px-5'>
       <h4 className="card-title fw-bold">{ title }</h4>
-      { order.id && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
-      {/* { order.id && (<p className="h4">Monto pagado: <span className='text-success'>{ formatter.format(orderPaid.amount) }</span></p>) } */}
-      { order.id && renderPendingAmount('h4') }
+      { order.orderNum && (<p className="h4">Valor de la orden: <span className='text-primary'>{ formatter.format(order.amount) }</span> Iva: <span className='text-primary'>{ formatter.format(order.tax) }</span> Total: <span className='text-primary'>{ formatter.format(order.total) }</span></p>) }
+      { /*order.orderNum && (<p className="h4">orderPaid.amount: <span className='text-success'>{ formatter.format(orderPaid.amount) }</span></p>)*/ }
+      
+      { order.orderNum && renderPendingAmount('h4') }
       { id && renderTabs() }
       { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Invoice' recordId={ id } />) }
     </div>

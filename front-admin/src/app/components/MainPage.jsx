@@ -10,15 +10,18 @@ import { ModalContainer } from './custom/ModalContainer'
 export const MainPage = () => {
 
   const { show } = useSelector(state => state.alert);
-  const classNameDivMain = show ? `mt-2 position-absolute z-2 w-100 align-items-center ${ show ? 'show' : '' }` : 'd-none';
+  const classNameAlert = show ? `d-flex align-items-center justify-content-center z-2 w-100 h-100 ${ show ? 'show' : '' }` : 'd-none';
+  const classNameAlertSm = show ? `mt-5 position-absolute z-3 align-items-center ${ show ? 'show' : '' }` : 'd-none';
 
   return (
     <>
         <Loading />
         <ModalContainer />
         <NavBarPage />
-        <div className={ classNameDivMain } >
-          <Alert padded />
+        <div className={ classNameAlert }>
+          <div className={ classNameAlertSm } >
+            <Alert padded />
+          </div>
         </div>
         <div className='w-100 p-1'>
             <AppRouter />

@@ -112,11 +112,11 @@ export const TableOrders = ({
         fetchOrders(0, '');
     }
 
-    const deleteOrder = (id, amount, active) => {
+    const deleteOrder = (orderNum, amount, active) => {
         if( !active && (amount > (project.amount - projectPaid.amountPaid) ) ) {
             displayNotification(dispatch, 'La orden no se puede reactivar ya que supera el monto pendiente', alertType.error);
         } else {
-            deleteLogic(id).then( response => {
+            deleteLogic(orderNum).then( response => {
                 if(response.code && response.code !== 200) {
                     displayNotification(dispatch, response.message, alertType.error);
                 } else {
@@ -134,6 +134,14 @@ export const TableOrders = ({
         const backColor = status === 2000600004 ? 'bg-secondary' : (status === 2000600003 ? 'bg-danger' : ( status === 2000600002 ? 'bg-success' : 'bg-warning' ));
         const statusDesc = status === 2000600004 ? 'Vencida' : (status === 2000600003 ? 'Cancelada' : ( status === 2000600002 ? 'Pagada' : 'Proceso' ));
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
+    }
+
+    const btnDeleteDisabled = (status, amountPaid) => {
+        const hasInvoicePaid = amountPaid > 0; // Si factura tiene monto pagado
+        const isPaid = status === 2000600002; // Orden pagada
+        const isCanceledOrExpired = status === 2000600003 || status === 2000600004; // Orden cancelada o vencida
+        const paidIsEqualToProject = projectPaid.amountPaid >= project.amount; // El monto del proyecto se encuentra pagado
+        return hasInvoicePaid || isPaid || ( isCanceledOrExpired && paidIsEqualToProject );
     }
 
     const renderRows = () => orders && orders.map(({
@@ -155,6 +163,7 @@ export const TableOrders = ({
         <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ orderNum }</th>
             <td className="text-center" style={ styleTableRow }>{ orderDate }</td>
+            { permissions.isAdminRoot && !projectId && <td className="text-center" style={ styleTableRow }>{ projectKey }</td> }
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status, '') }</td>
             <td className="text-center" style={ styleTableRow }>{ requisition }</td>
             <td className="text-center" style={ styleTableRow }>{ requisitionDate }</td>
@@ -177,8 +186,8 @@ export const TableOrders = ({
                         <button type="button"
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
-                            disabled={ status === 2000600002 || ( (status === 2000600003 || status === 2000600004) && projectPaid.amountPaid >= project.amount ) }
-                            onClick={ () => deleteOrder(id, amount, active) }>
+                            disabled={ btnDeleteDisabled(status,amountPaid) }
+                            onClick={ () => deleteOrder(orderNum, amount, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>
@@ -199,6 +208,7 @@ export const TableOrders = ({
                         <tr>
                             <th className="text-center fs-6" scope="col">No. orden</th>
                             <th className="text-center fs-6" scope="col">Fecha No. De Orden</th>
+                            { permissions.isAdminRoot && !projectId && <th className="text-center fs-6" scope="col">Proyecto</th> }
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">No Requisici&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Fecha Requisici&oacute;n</th>
@@ -219,6 +229,7 @@ export const TableOrders = ({
                             <tr>
                                 <th className="text-center fs-6" scope="col">TOTALES</th>
                                 <th></th>
+                                { permissions.isAdminRoot && !projectId && <th></th> }
                                 <th className="text-center fs-6" scope="col">{ renderStatus(projectPaid.status, '') }</th>
                                 <th></th>
                                 <th></th>

@@ -63,6 +63,16 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
 
     @Override
     public void update(Long projectApplicationId, ProjectApplicationUpdateDto projectApplicationUpdateDto) throws CustomException {
+        try {
+            ProjectApplicationDto result = findByProjectAndApplication(projectApplicationUpdateDto.getProjectKey(), projectApplicationUpdateDto.getApplication());
+            if( !result.getId().equals(projectApplicationId) ) {
+                throw new BadRequestException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_DUPLICATED,
+                        projectApplicationUpdateDto.getApplication(), projectApplicationUpdateDto.getProjectKey()), null);
+            }
+        } catch (CustomException e) {
+            if(e instanceof BadRequestException)
+                throw e;
+        }
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
         String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService);
         if(!message.isEmpty()) {

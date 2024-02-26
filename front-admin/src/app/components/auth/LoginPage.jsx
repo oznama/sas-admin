@@ -2,18 +2,20 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Footer } from '../custom/Footer';
 import { alertType } from '../custom/alerts/types/types';
-import { Alert } from '../custom/alerts/page/Alert';
 import { login } from '../../../store/auth/authSlice';
 import { doLogin } from '../../services/AuthService';
-import { displayNotification, genericErrorMsg } from '../../helpers/utils';
+import { genericErrorMsg } from '../../helpers/utils';
 import logo from '../../../assets/img/SAS_logo.png';
 import { setProject } from '../../../store/project/projectSlice';
+import { useState } from 'react';
 
 export const LoginPage = () => {
 
     const dispatch = useDispatch();
 
     const navigate = useNavigate();
+
+    const [errorMessage, setErrorMessage] = useState();
     
     const onLogin = event => {
         event.preventDefault();
@@ -21,7 +23,7 @@ export const LoginPage = () => {
         const request = Object.fromEntries(data.entries());
         doLogin(request).then( response => {
             if( response.code ) {
-                displayNotification(dispatch, response.message, alertType.error);
+                setErrorMessage(response.message);
             } else {
                 dispatch(login(response));
                 dispatch(setProject({}));
@@ -30,7 +32,7 @@ export const LoginPage = () => {
             }
         }).catch( error => {
             console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
+            setErrorMessage(genericErrorMsg);
         });
     }
 
@@ -45,7 +47,6 @@ export const LoginPage = () => {
                                 <div className="text-center my-2">
                                     <img src={ logo } alt="logo" width="100" />
                                 </div>
-                                <Alert />
                                 <form className="needs-validation" onSubmit={ onLogin }>
                                     <div className="mb-3">
                                         <label className="mb-2 text-muted">Email</label>
@@ -67,6 +68,7 @@ export const LoginPage = () => {
                                             </a>
                                         </div> */}
                                     </div>
+                                    <p className='text-danger text-center'>{ errorMessage }</p>
                                     <div className="d-flex align-items-center">
                                         {/* <div className="form-check">
                                             <input type="checkbox" name="remember" id="remember" className="form-check-input" />

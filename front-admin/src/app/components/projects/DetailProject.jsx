@@ -240,7 +240,7 @@ export const DetailProject = () => {
         <div className='d-grid gap-2 col-6 mx-auto'>
             <form className="needs-validation" onSubmit={ onSubmit }>
                 <Select name="companyId" label="Empresa" options={ companies } disabled={ key && !project.active } value={ companyId } required onChange={ onChangeCompany } />
-                <InputText name='key' label='Clave' placeholder='Ingresa clave' disabled={ key && !project.active }
+                <InputText name='key' label='Clave' placeholder='Ingresa clave' readOnly={ key && key.length > 0 }
                     value={ pKey } error={ keyError } required maxLength={ 12 } 
                     onChange={ onChangePKey } onFocus={ () => setKeyError('') } onBlur={ onBlurPKey } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ key && !project.active }
