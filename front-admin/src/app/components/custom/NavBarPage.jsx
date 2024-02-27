@@ -56,6 +56,7 @@ export const NavBarPage = () => {
   const gotoAdminOption = urlRedirect => {
     setShowTabAdmin(!showTabAdmin);
     navigate(`/${urlRedirect}`, { replace: true })
+    
   }
   
   const renderTabAdmin = () => (
@@ -66,6 +67,9 @@ export const NavBarPage = () => {
         <div className={ `dropdown-menu bg-primary ${ showTabAdmin ? 'show' : '' }` } aria-labelledby="navbarDropdown">
           { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
           { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('admin') }>Administraci&oacute;n</a>) }
+          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('role') }>Puestos de trabajo</a>) }
+          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('companyType') }>Tipos de compañia</a>) }
+          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('days') }>Dias Feriados</a>) }
           <div className="dropdown-divider"></div>
           { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }
           { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
