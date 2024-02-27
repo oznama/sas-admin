@@ -68,7 +68,7 @@ export const NavBarPage = () => {
           { /* permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('catalog') }>Cat&aacute;logos</a>) */ }
           { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
           { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('role') }>Puestos de trabajo</a>) }
-          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('companyType') }>Tipos de compañia</a>) }
+          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('companyType') }>Tipos de empresas</a>) }
           { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('days') }>Dias Feriados</a>) }
           <div className="dropdown-divider"></div>
           { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }

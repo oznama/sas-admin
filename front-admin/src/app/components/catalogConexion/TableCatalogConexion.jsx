@@ -8,7 +8,6 @@ import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
 import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
 import { useNavigate } from "react-router-dom";
 import { InputSearcher } from '../custom/InputSearcher';
-// import { FormApplication } from '../applications/page/FormApplication';
 
 export const TableCatalogConexion = ({
     pageSize = 10,
@@ -29,7 +28,12 @@ export const TableCatalogConexion = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    const [filter, setFilter] = useState(obj.value && (catalogParent === catalogId) ? ( type === 'days' ? handleDateStr(catalogName) : obj.value) : '')
+    console.log("Obj viene asi... ",obj);
+    console.log("Catalg parent es: ", catalogParent);
+    console.log("Catalg id es: ", catalogId);
+    console.log("El primer resultado es: "+ (obj.value && (catalogParent === catalogId)));
+    console.log("Type es igual a... ", catalogName)
+    const [filter, setFilter] = useState((catalogName && (catalogParent === catalogId)) ? ( type === 'days' ? handleDateStr(catalogName) : catalogName) : '');
 
     const onChangeFilter = ({ target }) => setFilter(target.value.toLowerCase());
 
@@ -43,6 +47,7 @@ export const TableCatalogConexion = ({
                 setCatalogChilds(response);
                 setTotalCatalogChilds(response.totalElements);
             }else{
+                console.log('Prueba de filter es: ', filter);
                 const filteredCatalogChilds = response.filter(child => child.value.toLowerCase().includes(filter));
                 setCatalogChilds(filteredCatalogChilds);
                 setTotalCatalogChilds(filteredCatalogChilds.totalElements);
@@ -61,9 +66,9 @@ export const TableCatalogConexion = ({
             setType('role');
             setCategory('Roles');
         } else if (catalogId == 1000000009) {
-            setTitle('Tipos de compañia');
+            setTitle('Tipos de empresas');
             setType('companyType');
-            setCategory('Tipo de compañia');
+            setCategory('Tipos de empresa');
         } else {
             setTitle('Días feriados');
             setType('days');
@@ -135,7 +140,7 @@ export const TableCatalogConexion = ({
         const catalogChild = catalogChilds.find( cat => cat.id === id );
         dispatch(setCatalogObj(catalogChild));
         dispatch(setCatalogParent(catalogId));
-        dispatch(setCatalogName(catalogChild.value));
+        dispatch(setCatalogName((catalogChild.value+'').toLowerCase()));
         navigate(`/`+type+`/add`);
         // showModal(catalogChild);
     }
@@ -168,14 +173,14 @@ export const TableCatalogConexion = ({
             <td className="text-start">{ catalog.description }</td>
             <td className="text-center">{ renderStatus(catalog.status) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ catalog.status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(catalog.id) }>
-                    <span><i className={`bi bi-${ catalog.status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ permissions.canEditCat && (catalog.status === 2000100001)  ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(catalog.id) }>
+                    <span><i className={`bi bi-${ permissions.canEditCat && (catalog.status === 2000100001) ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelCat && (
             <td className="text-center">
-                <button type="button" className={`btn btn-${ catalog.status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(catalog) }>
-                    <span><i className={`bi bi-${ catalog.status ? 'trash' : 'folder-symlink'}`}></i></span>
+                <button type="button" className={`btn btn-${ (catalog.status === 2000100001) ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(catalog) }>
+                    <span><i className={`bi bi-${ (catalog.status === 2000100001) ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}

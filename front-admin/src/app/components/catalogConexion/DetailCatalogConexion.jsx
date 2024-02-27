@@ -28,7 +28,12 @@ export const DetailCatalogConexion = () => {
     const [value, setValue] = useState(obj && obj.value ? obj.value : '');
     const [description, setDescription] = useState(obj && obj.description ? obj.description : '');
 
-    const onChangeValue = ({ target }) => setValue(target.value);
+    const onChangeValue = ({ target }) => {
+        setValue(target.value);
+        if (type!=='days') {
+            dispatch(setCatalogName((target.value).toLowerCase()))
+        }
+    };
     const onChangeDescription = ({ target }) => setDescription(target.value);
     const onChangeStartDate = date => setStartDate(date);
 
@@ -106,9 +111,9 @@ export const DetailCatalogConexion = () => {
             setType('role');
             setCategory('Roles');
         } else if (catalogParent == 1000000009) {
-            setTitle('Tipos de compañia');
+            setTitle('Tipos de empresas');
             setType('companyType');
-            setCategory('Tipo de compañia');
+            setCategory('Tipos de empresa');
         } else {
             setTitle('Días feriados');
             setType('days');
