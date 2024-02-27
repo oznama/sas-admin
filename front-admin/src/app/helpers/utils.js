@@ -41,9 +41,16 @@ export const handleDateStr = ( strDate ) => {
 }
 
 const convertDateToUTC = ( strDate ) => {
+    console.log( "convertDateToUTC - start", strDate );
     const dateParts = strDate.split("/");
     return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
 };
+
+export const stringToDate = strDate => {
+    const dateParts = strDate.split("/");
+    // month is 0-based, that's why we need dataParts[1] - 1
+    return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
+}
 
 const buildPayloadMessage = (msg, typ) => ({
     message: msg,
