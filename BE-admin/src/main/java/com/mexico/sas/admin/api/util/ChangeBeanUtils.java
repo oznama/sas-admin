@@ -50,7 +50,7 @@ public class ChangeBeanUtils extends Utils {
                     catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
         }
-        if( validateStringRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
+        if( validateStringNoRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), "Descripción",
                     catalog.getDescription(), catalogUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             catalog.setDescription(catalogUpdateDto.getDescription());

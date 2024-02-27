@@ -50,5 +50,6 @@ public interface CatalogKeys {
     Long INVOICE_STATUS_PAID = 2000800002L;
     Long INVOICE_STATUS_CANCELED = 2000800003L;
 
+    Long HOLYDAYS = 1000000007l;
 
 }
