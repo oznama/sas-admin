@@ -28,11 +28,6 @@ export const TableCatalogConexion = ({
     const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
     const [catalogChilds, setCatalogChilds] = useState([]);
     const [id, setId] = useState(null);
-    console.log("Obj viene asi... ",obj);
-    console.log("Catalg parent es: ", catalogParent);
-    console.log("Catalg id es: ", catalogId);
-    console.log("El primer resultado es: "+ (obj.value && (catalogParent === catalogId)));
-    console.log("Type es igual a... ", catalogName)
     const [filter, setFilter] = useState((catalogName && (catalogParent === catalogId)) ? ( type === 'days' ? handleDateStr(catalogName) : catalogName) : '');
 
     const onChangeFilter = ({ target }) => setFilter(target.value.toLowerCase());
@@ -47,7 +42,6 @@ export const TableCatalogConexion = ({
                 setCatalogChilds(response);
                 setTotalCatalogChilds(response.totalElements);
             }else{
-                console.log('Prueba de filter es: ', filter);
                 const filteredCatalogChilds = response.filter(child => child.value.toLowerCase().includes(filter));
                 setCatalogChilds(filteredCatalogChilds);
                 setTotalCatalogChilds(filteredCatalogChilds.totalElements);

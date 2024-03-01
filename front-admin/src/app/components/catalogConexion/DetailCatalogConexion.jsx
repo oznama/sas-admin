@@ -52,7 +52,7 @@ export const DetailCatalogConexion = () => {
         }else{
             saveChild(request);
         }
-        navigate('/'+type);
+        
     }
 
     const onClickBack = () => {
@@ -84,6 +84,7 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
+                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -98,6 +99,7 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
+                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -178,7 +180,7 @@ export const DetailCatalogConexion = () => {
             <h3 className="fs-4 card-title fw-bold mb-4">{`Agregar ${title}`}</h3>
         </div>
         {renderTabs() }
-        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Aplication' recordId={ value } />) }
+        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Catalog' recordId={ obj.id } />) }
         </>
     )
 }
