@@ -18,6 +18,7 @@ public interface CatalogService {
     void deleteLogic(Long id) throws CustomException;
     void delete(Long id) throws CustomException;
     Catalog findEntityById(Long id) throws CustomException;
+    Catalog findEntityByValueAndCatalogParentId(String value, Long catalogParentId) throws CustomException;
     Catalog findEntityByIdAndCatalogParentId(Long id, Long catalogParentId) throws CustomException;
     CatalogDto findById(Long id) throws CustomException;
     List<CatalogPaggedDto> findAll() throws CustomException;

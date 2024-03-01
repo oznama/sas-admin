@@ -10,7 +10,7 @@ import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/
 import { save, update, getCatalogById } from '../../services/CatalogService';
 import { DatePicker } from "../custom/DatePicker";
 
-export const DetailCatalogConexion = () => {
+export const DetailAdmin = () => {
     const { catalogParent } = useSelector( state => state.catalogReducer );
     const { obj } = useSelector( state => state.catalogReducer );
     const [title, setTitle] = useState('');
@@ -28,12 +28,7 @@ export const DetailCatalogConexion = () => {
     const [value, setValue] = useState(obj && obj.value ? obj.value : '');
     const [description, setDescription] = useState(obj && obj.description ? obj.description : '');
 
-    const onChangeValue = ({ target }) => {
-        setValue(target.value);
-        if (type!=='days') {
-            dispatch(setCatalogName((target.value).toLowerCase()))
-        }
-    };
+    const onChangeValue = ({ target }) => setValue(target.value);
     const onChangeDescription = ({ target }) => setDescription(target.value);
     const onChangeStartDate = date => setStartDate(date);
 
@@ -52,7 +47,7 @@ export const DetailCatalogConexion = () => {
         }else{
             saveChild(request);
         }
-        
+        navigate('/'+type);
     }
 
     const onClickBack = () => {
@@ -84,7 +79,6 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
-                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -99,7 +93,6 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
-                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -113,9 +106,9 @@ export const DetailCatalogConexion = () => {
             setType('role');
             setCategory('Roles');
         } else if (catalogParent == 1000000009) {
-            setTitle('Tipos de empresas');
+            setTitle('Tipos de compañia');
             setType('companyType');
-            setCategory('Tipos de empresa');
+            setCategory('Tipo de compañia');
         } else {
             setTitle('Días feriados');
             setType('days');
@@ -180,7 +173,7 @@ export const DetailCatalogConexion = () => {
             <h3 className="fs-4 card-title fw-bold mb-4">{`Agregar ${title}`}</h3>
         </div>
         {renderTabs() }
-        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Catalog' recordId={ obj.id } />) }
+        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Aplication' recordId={ value } />) }
         </>
     )
 }

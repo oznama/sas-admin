@@ -334,4 +334,17 @@ public class Utils {
         return Arrays.asList(1L);
     }
 
+    public static String parseHoliday(String value, Long parent, Long id){
+        if( parent.equals(CatalogKeys.HOLYDAYS) && !StringUtils.isEmpty(value)) {
+            try {
+                return dateToString(Date.from(Instant.parse(value)), GeneralKeys.FORMAT_DDMMYYYY, true);
+            } catch (CustomException e) {
+                return value;
+            }
+        } else {
+            log.warn("Catalog {} not be parse because value is null or empty", id);
+            return value;
+        }
+    }
+
 }
