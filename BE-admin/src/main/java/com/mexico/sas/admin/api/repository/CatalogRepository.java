@@ -22,6 +22,7 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
     List<Catalog> findByCatalogParentOrderByIdAsc(Catalog catalogParent);
     List<Catalog> findByCatalogParentAndCompanyIdAndStatusIsNotOrderByIdAsc(Catalog catalogParent, Long companyId, Long status);
     Optional<Catalog> findById(Long id);
+    Optional<Catalog> findByValueAndCatalogParent(String value, Catalog catalogParent);
     Optional<Catalog> findByIdAndCatalogParent(Long id, Catalog catalogParent);
     Optional<Catalog> findFirstByCatalogParentIsNullOrderByIdDesc();
     Optional<Catalog> findFirstByCatalogParentOrderByIdDesc(Catalog catalogParent);

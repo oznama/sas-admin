@@ -122,7 +122,6 @@ export const DetailEmployee = () => {
   const onChangeLeader = ({ target }) => setLeader(target.value);
 
   const isModeEdit = ( (id && !permissions.canEditEmp) || (id && !active ));
-  console.log('id: '+id+' Permission: '+!permissions.canEditEmp+' Active: '+active);
 
   const onSubmit = event => {
     event.preventDefault()
@@ -183,7 +182,6 @@ export const DetailEmployee = () => {
             setCellphone(response.cellphone);
             setExt(response.ext);
             setCity(response.city);
-            console.log('Valor de employee: '+JSON.stringify(response, null, 2));
         }
     }).catch( error => {
         console.log(error);
@@ -216,7 +214,7 @@ export const DetailEmployee = () => {
   const updateEmployee = request => {
     //console.log('Aqui actualiza el usuario seleccionado')
     update(id, request).then( response => {
-      console.log(response);
+      // console.log(response);
         if(response.code && response.code === 401) {
           displayNotification(dispatch, response.message, alertType.error);
         } else if (response.code && response.code !== 200) {

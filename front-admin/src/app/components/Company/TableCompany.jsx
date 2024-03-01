@@ -7,6 +7,7 @@ import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
 import { deleteLogic, getCompanies, getCompanySelect } from '../../services/CompanyService';
 import { setCompanyName } from '../../../store/company/companySlice';
+import { InputSearcher } from '../custom/InputSearcher';
 
 export const TableCompany = ({
     pageSize = 10,
@@ -24,12 +25,16 @@ export const TableCompany = ({
     const [currentPage, setCurrentPage] = useState(0);
     const [company, setCompany] = useState([]);
     const [totalCompanies, setTotalCompanies] = useState(0);
-    const [filter, setFilter] = useState(companyName)
+    // const [filter, setFilter] = useState(companyName)
+    const [filter, setFilter] = useState(companyName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
     const [companies, setCompanies] = useState([]);
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
-    console.log(companies);
-
+    const onChangeFilter = ({ target }) => {
+        // setFilter(target.value);
+        setFilter(target.value.normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+        fetchCompanies(currentPage);
+    };
+    
     const fetchCompanies = (page) => {
         getCompanies(page, pageSize, sort, filter, '')
             .then( response => {
@@ -57,7 +62,7 @@ export const TableCompany = ({
     useEffect(() => {
         fetchSelects();
         fetchCompanies(currentPage);
-    }, [currentPage]);
+    }, [currentPage, filter]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
@@ -77,14 +82,21 @@ export const TableCompany = ({
         </div>
     );
 
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchCompanies(currentPage);
+    }
+
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateComp ? '25' : '50' } py-3`}>
-            <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
+            {/* <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchCompanies(currentPage); } } />
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchCompanies(currentPage) }>
+                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchCompanies(currentPage); } } /> */}
+            { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ async (e) => { await onChangeFilter(e); fetchCompanies(currentPage); } } onClean={ onClean } /> }
+            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchCompanies(currentPage) }>
                 <i className="bi bi-search"></i>
-            </button>
+            </button> */}
         </div>
     )
 

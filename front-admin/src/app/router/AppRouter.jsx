@@ -23,10 +23,10 @@ export const AppRouter = () => (
         <Route path="employee/*" element={ <EmployeeRouter /> } />
         <Route path="user" element={ <UserPage /> } />
         <Route path="company/*" element={ <CompanyRouter /> } />
-        <Route  path="admin/*" element={ <adminRouter />} />
         <Route path="role/*" element={ <CatalogConexionRouter catalogId={1000000005}/> } />
         <Route path="companyType/*" element={ <CatalogConexionRouter catalogId={1000000009}/> } />
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
+        <Route  path="admin/*" element={ <adminRouter />} />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

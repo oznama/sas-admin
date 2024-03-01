@@ -28,7 +28,12 @@ export const DetailCatalogConexion = () => {
     const [value, setValue] = useState(obj && obj.value ? obj.value : '');
     const [description, setDescription] = useState(obj && obj.description ? obj.description : '');
 
-    const onChangeValue = ({ target }) => setValue(target.value);
+    const onChangeValue = ({ target }) => {
+        setValue(target.value);
+        if (type!=='days') {
+            dispatch(setCatalogName((target.value).toLowerCase()))
+        }
+    };
     const onChangeDescription = ({ target }) => setDescription(target.value);
     const onChangeStartDate = date => setStartDate(date);
 
@@ -47,7 +52,7 @@ export const DetailCatalogConexion = () => {
         }else{
             saveChild(request);
         }
-        navigate('/'+type);
+        
     }
 
     const onClickBack = () => {
@@ -79,6 +84,7 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
+                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -93,6 +99,7 @@ export const DetailCatalogConexion = () => {
             } else {
                 displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
                 dispatch(setCatalogObj(request));
+                navigate('/'+type);
             }
         }).catch(error => {
             console.log(error);
@@ -106,9 +113,9 @@ export const DetailCatalogConexion = () => {
             setType('role');
             setCategory('Roles');
         } else if (catalogParent == 1000000009) {
-            setTitle('Tipos de compañia');
+            setTitle('Tipos de empresas');
             setType('companyType');
-            setCategory('Tipo de compañia');
+            setCategory('Tipos de empresa');
         } else {
             setTitle('Días feriados');
             setType('days');
@@ -173,7 +180,7 @@ export const DetailCatalogConexion = () => {
             <h3 className="fs-4 card-title fw-bold mb-4">{`Agregar ${title}`}</h3>
         </div>
         {renderTabs() }
-        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Aplication' recordId={ value } />) }
+        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Catalog' recordId={ obj.id } />) }
         </>
     )
 }

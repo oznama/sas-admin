@@ -20,7 +20,7 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    @Column(updatable = false, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String name;
