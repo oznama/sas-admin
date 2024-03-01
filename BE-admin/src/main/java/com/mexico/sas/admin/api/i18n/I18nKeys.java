@@ -38,6 +38,7 @@ public interface I18nKeys {
     String CATALOG_NOT_UPDATED = "catalog.not.updated";
     String CATALOG_NOT_DELETED = "catalog.not.deleted";
     String CATALOG_NOT_FOUND = "catalog.not.found";
+    String CATALOG_DUPLICATED_DISABLED = "catalog.duplicated.disabled";
     String CATALOG_DUPLICATED = "catalog.duplicated";
     String VALIDATION_FIELD_REQUIRED = "validation.field.required";
     String VALIDATION_VALUE_INVALID = "validation.value.invalid";

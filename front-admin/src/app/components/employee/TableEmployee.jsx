@@ -25,23 +25,25 @@ export const TableEmployee = ({
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
     const [filter, setFilter] = useState(employeeS.name ? employeeS.name : ''); 
-    const [companyId, setCompanyId] = useState(companyS) ;
+    const [companyId, setCompanyId] = useState(companyS ? companyS : 0) ;
     const [companies, setCompanies] = useState([]);
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
+    const onChangeFilter = ({ target }) => { 
+        setFilter(target.value);
+        fetchEmployees(currentPage);
+    };
     const onChangeCompany = ({ target }) => {
         setCompanyId(target.value);
         dispatch(setCompanyS(target.value));
         const companyIds = parseInt(target.value, 10);
         setCompanyId(companyIds);
-        // console.log('Lista de compañías:', companies);
         const selectedCompany = companies.find(company => company.id === companyIds);
         if (selectedCompany) {
             dispatch(setCompanyObj(selectedCompany));
-            // console.log('El dominio de correo de la compañía seleccionada es:', companyDomain);
         }else{
             dispatch(setCompanyObj({}));
         }
+        fetchEmployees(currentPage);
     };
 
     const fetchEmployees = (page) => {
@@ -72,7 +74,7 @@ export const TableEmployee = ({
     useEffect(() => {
         fetchSelects();
         fetchEmployees(currentPage);
-    }, [currentPage]);
+    }, [currentPage, filter, pageSize, sort, companyId]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
@@ -92,6 +94,13 @@ export const TableEmployee = ({
         </div>
     );
 
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        setCompanyId(0);
+        fetchEmployees(currentPage);
+    }
+
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
             <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
@@ -101,6 +110,9 @@ export const TableEmployee = ({
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchEmployees(currentPage); } } />
+            <button type="button" className="btn btn-outline-secondary" onClick={onClean}>
+                <i className="bi bi-x"></i>
+            </button>
             <button type="button" className="btn btn-outline-primary" onClick={ () => fetchEmployees(currentPage) }>
                 <i className="bi bi-search"></i>
             </button>

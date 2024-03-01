@@ -46,8 +46,10 @@ public class ChangeBeanUtils extends Utils {
         StringBuilder sb = new StringBuilder();
 
         if( validateStringRequiredUpdate(catalog.getValue(), catalogUpdateDto.getValue()) ) {
+            String valueOld = parseHoliday(catalog.getValue(),catalog.getCatalogParent().getId(),catalog.getId());
+            String valueNew = parseHoliday(catalogUpdateDto.getValue(),catalog.getCatalogParent().getId(),catalog.getId());
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Valor",
-                    catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
+                    valueOld, valueNew)).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
         }
         if( validateStringNoRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
