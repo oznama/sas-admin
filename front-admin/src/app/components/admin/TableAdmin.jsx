@@ -14,18 +14,13 @@ export const TableAdmin = ({
 }) => {
 
     const dispatch = useDispatch();
-    const { catalogParent } = useSelector( state => state.catalogReducer );
-    const { obj } = useSelector( state => state.catalogReducer );
-    const { catalogName } = useSelector( state => state.catalogReducer );
-    const [title, setTitle] = useState('');
-    const [type, setType] = useState('');
-    const [category, setCategory] = useState('');
+    // const { catalogParent } = useSelector( state => state.catalogReducer );
 
     const navigate = useNavigate();
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalCatalogChilds, setTotalCatalogChilds] = useState(0);  
-    const [catalogChilds, setCatalogChilds] = useState([]);
+    const [totalRolesPermissions, setTotalRolesPermissions] = useState(0);  
+    const [rolesPermissions, setRolesPermissions] = useState([]);
     const [id, setId] = useState(null);
     const [filter, setFilter] = useState('')
 
@@ -38,12 +33,12 @@ export const TableAdmin = ({
                 displayNotification(dispatch, response.message, alertType.error);
             }
             if (filter==='') {
-                setCatalogChilds(response);
-                setTotalCatalogChilds(response.totalElements);
+                setRolesPermissions(response);
+                setTotalRolesPermissions(response.totalElements);
             }else{
                 const filteredCatalogChilds = response.filter(child => child.value.toLowerCase().includes(filter));
-                setCatalogChilds(filteredCatalogChilds);
-                setTotalCatalogChilds(filteredCatalogChilds.totalElements);
+                setRolesPermissions(filteredCatalogChilds);
+                setTotalRolesPermissions(filteredCatalogChilds.totalElements);
             }
             
         }).catch( error => {
@@ -106,7 +101,7 @@ export const TableAdmin = ({
             { renderSearcher() }
             <Pagination
                 currentPage={ currentPage + 1 }
-                totalCount={ totalCatalogChilds }
+                totalCount={ totalRolesPermissions }
                 pageSize={ pageSize }
                 onPageChange={ page => onPaginationClick(page) } 
             />
@@ -116,7 +111,7 @@ export const TableAdmin = ({
 
     const handledSelect = id => {
         setId(id);
-        const catalogChild = catalogChilds.find( cat => cat.id === id );
+        const catalogChild = rolesPermissions.find( cat => cat.id === id );
         dispatch(setCatalogObj(catalogChild));
         dispatch(setCatalogParent(''));
         dispatch(setCatalogName(catalogChild.value));
@@ -145,7 +140,7 @@ export const TableAdmin = ({
         });
     }
 
-    const renderRows = () => catalogChilds && catalogChilds.map((catalog) => (
+    const renderRows = () => rolesPermissions && rolesPermissions.map((catalog) => (
         <tr key={ catalog.id } >
             { permissions.isAdminRoot && <th className="text-center" scope="row">{ catalog.id }</th> }
             <th className="text-center" scope="row">{ catalog.value }</th>
