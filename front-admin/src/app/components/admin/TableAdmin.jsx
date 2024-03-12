@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { displayNotification, genericErrorMsg, handleDateStr } from "../../helpers/utils";
+import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { deleteLogic, getCatalogChilds } from '../../services/CatalogService';
-import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
+import { setRole  } from '../../../store/admin/adminSlice';
+import { getRoles, deleteLogic, getRoleById } from '../../services/RoleService';
 import { useNavigate } from "react-router-dom";
 import { InputSearcher } from '../custom/InputSearcher';
 
@@ -14,31 +14,34 @@ export const TableAdmin = ({
 }) => {
 
     const dispatch = useDispatch();
-    // const { catalogParent } = useSelector( state => state.catalogReducer );
+    const { role } = useSelector( state => state.adminReducer );
 
     const navigate = useNavigate();
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalRolesPermissions, setTotalRolesPermissions] = useState(0);  
-    const [rolesPermissions, setRolesPermissions] = useState([]);
+    const [totalRoles, setTotalRoles] = useState(0);  
+    const [roles, setRoles] = useState([]);
     const [id, setId] = useState(null);
-    const [filter, setFilter] = useState('')
+    const [filter, setFilter] = useState(role.name ? (role.name+'').toLowerCase() : '');
 
     const onChangeFilter = ({ target }) => setFilter(target.value.toLowerCase());
 
-    const fetchChilds = id => {
-        getCatalogChilds('')
+    const fetchRoles = () => {
+        getRoles()
         .then( response => {
             if( response.code && response.code === 401 ) {
                 displayNotification(dispatch, response.message, alertType.error);
             }
             if (filter==='') {
-                setRolesPermissions(response);
-                setTotalRolesPermissions(response.totalElements);
+                const sortedRoles = response.content.sort((a, b) => a.id - b.id);
+                setRoles(sortedRoles);
+                setTotalRoles(response.totalElements);
             }else{
-                const filteredCatalogChilds = response.filter(child => child.value.toLowerCase().includes(filter));
-                setRolesPermissions(filteredCatalogChilds);
-                setTotalRolesPermissions(filteredCatalogChilds.totalElements);
+            const filteredCatalogRoles = response.content.filter(child => child.name.toLowerCase().includes(filter));
+            // Ordenar por el campo id después de filtrar
+            const sortedFilteredRoles = filteredCatalogRoles.sort((a, b) => a.id - b.id);
+                setRoles(sortedFilteredRoles);
+                setTotalRoles(sortedFilteredRoles.totalElements);
             }
             
         }).catch( error => {
@@ -47,27 +50,18 @@ export const TableAdmin = ({
             });
     }
     
-    useEffect(() => {
-        if (catalogParent !== 'catalogId') {
-            dispatch(setCatalogObj({}));
-            dispatch(setCatalogName(''));
-            setCurrentPage(0);
-            setFilter('');
-            dispatch(setCatalogParent(''));
-        }
-        fetchChilds('');
-    }, [ catalogParent, filter]);  
+    useEffect(() => {  
+        fetchRoles();
+    }, [filter]);  
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchChilds(currentPage);
+        fetchRoles(currentPage);
     }
 
     const handleAddCatalog = () => {
-        dispatch(setCatalogObj({}));
-        dispatch(setCatalogName(''));
-        dispatch(setCatalogParent(''));
-        navigate(`/`+type+`/add`);
+        dispatch(setRole({}));
+        navigate(`/admin/add`);
     }
 
     const renderAddButton = () => permissions.canCreateCat && (
@@ -81,18 +75,12 @@ export const TableAdmin = ({
     const onClean = () => {
         setFilter('');
         setCurrentPage(0);
-        fetchChilds('');
+        fetchRoles();
     }
 
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateCat ? '40' : '50' } py-3`}>
             { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
-            {/* <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
-                maxLength={ 100 } autoComplete='off'
-                value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(currentPage); } } onClean={ onClean }/> */}
-            {/* <button type="button" className="btn btn-outline-primary" onClick={ () => fetchChilds(currentPage) }>
-                <i className="bi bi-search"></i>
-            </button> */}
         </div>
     )
 
@@ -101,7 +89,7 @@ export const TableAdmin = ({
             { renderSearcher() }
             <Pagination
                 currentPage={ currentPage + 1 }
-                totalCount={ totalRolesPermissions }
+                totalCount={ totalRoles }
                 pageSize={ pageSize }
                 onPageChange={ page => onPaginationClick(page) } 
             />
@@ -109,30 +97,25 @@ export const TableAdmin = ({
         </div>
     )
 
-    const handledSelect = id => {
-        setId(id);
-        const catalogChild = rolesPermissions.find( cat => cat.id === id );
-        dispatch(setCatalogObj(catalogChild));
-        dispatch(setCatalogParent(''));
-        dispatch(setCatalogName(catalogChild.value));
-        navigate(`/`+type+`/add`);
-        // showModal(catalogChild);
+    const handledSelect = roleSel => {
+        dispatch(setRole(roleSel));
+        navigate(`/admin/edit`);
     }
 
     const renderStatus = status => {
-        const backColor = status === 2000100003 ? 'bg-danger' : ( status === 2000100001 ? 'bg-success' : ( status === 2000100002 ? 'bg-warning' : '') );
-        const statusDesc = status === 2000100003 ? 'Eliminado' : ( status === 2000100002 ? 'Inactivo' : ( status === 2000100001 ? 'Activo' : '') );
-        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white `}>{ statusDesc }</span>);
+        const backColor = status ? 'bg-success' : 'bg-danger';
+        const desc = status ? 'Activo' : 'Inactivo';
+        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
     }
 
-    const deleteChild = catalog => {
-        dispatch(setCatalogObj(catalog));
-        deleteLogic(catalog.id).then( response => {
+    const deleteChild = role => {
+        // dispatch(setCatalogObj(catalog));
+        deleteLogic(role.id).then( response => {
             if(response.code && response.code !== 200) {
             displayNotification(dispatch, response.message, alertType.error);
             } else {
             displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
-            fetchChilds('');
+            fetchRoles('');
             }
         }).catch(error => {
             console.log(error);
@@ -140,21 +123,21 @@ export const TableAdmin = ({
         });
     }
 
-    const renderRows = () => rolesPermissions && rolesPermissions.map((catalog) => (
-        <tr key={ catalog.id } >
-            { permissions.isAdminRoot && <th className="text-center" scope="row">{ catalog.id }</th> }
-            <th className="text-center" scope="row">{ catalog.value }</th>
-            <td className="text-start">{ catalog.description }</td>
-            <td className="text-center">{ renderStatus(catalog.status) }</td>
+    const renderRows = () => roles && roles.map((role) => (
+        <tr key={ role.id } >
+            { permissions.isAdminRoot && <th className="text-center" scope="row">{ role.id }</th> }
+            <th className="text-center" scope="row">{ role.name }</th>
+            <td className="text-start">{ role.description }</td>
+            <td className="text-center">{ renderStatus(role.active) }</td>
             <td className="text-center">
-                <button type="button" className={`btn btn-${ catalog.status && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(catalog.id) }>
-                    <span><i className={`bi bi-${ catalog.status && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ role.active && permissions.canEditCat ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(role) }>
+                    <span><i className={`bi bi-${ role.active && permissions.canEditCat ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelCat && (
             <td className="text-center">
-                <button type="button" className={`btn btn-${ catalog.status ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(catalog) }>
-                    <span><i className={`bi bi-${ catalog.status ? 'trash' : 'folder-symlink'}`}></i></span>
+                <button type="button" className={`btn btn-${ role.active ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteChild(role) }>
+                    <span><i className={`bi bi-${ role.active ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}
@@ -164,7 +147,7 @@ export const TableAdmin = ({
     return (
         <div>
             <div className="d-flex d-flex justify-content-center">
-                <h3 className="fs-4 card-title fw-bold mb-4">{title}</h3>
+                <h3 className="fs-4 card-title fw-bold mb-4">Roles</h3>
             </div>
 
             { renderHeader() }
@@ -175,7 +158,7 @@ export const TableAdmin = ({
                     <thead className="thead-dark">
                         <tr>
                             { permissions.isAdminRoot && <th className="text-center fs-6" scope="col">Id</th> }
-                            <th className="text-center fs-6" scope="col">{category}</th>
+                            <th className="text-center fs-6" scope="col">Rol</th>
                             <th className="text-center fs-6" scope="col">Descripcion</th>
                             <th className="text-center fs-6" scope="col">Estatus</th>
                             <th className="text-center fs-6" scope="col">{permissions.canEditCat ? 'Editar' : 'Ver'}</th>

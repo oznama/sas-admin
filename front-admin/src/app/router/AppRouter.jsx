@@ -7,7 +7,8 @@ import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { CompanyRouter } from '../components/company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
-import { adminRouter } from '../components/admin/adminRouter';
+//import { AdminRouter } from '../components/admin/AdminRouter';
+import { AdminRouter } from '../components/admin/adminRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
 
@@ -26,7 +27,7 @@ export const AppRouter = () => (
         <Route path="role/*" element={ <CatalogConexionRouter catalogId={1000000005}/> } />
         <Route path="companyType/*" element={ <CatalogConexionRouter catalogId={1000000009}/> } />
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
-        <Route  path="admin/*" element={ <adminRouter />} />
+        <Route path="admin/*" element={ <AdminRouter /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

@@ -19,6 +19,8 @@ public class RolePermission implements Serializable {
   private Long id;
   @Column(columnDefinition = "boolean default true")
   private Boolean active;
+  @Column(columnDefinition = "boolean default false")
+  private Boolean eliminate;
   @Temporal(TemporalType.TIMESTAMP)
   @Column(columnDefinition = "timestamp default current_timestamp")
   private Date creationDate;

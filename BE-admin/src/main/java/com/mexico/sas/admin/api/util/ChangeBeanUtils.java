@@ -10,6 +10,7 @@ import com.mexico.sas.admin.api.dto.invoice.InvoiceDto;
 import com.mexico.sas.admin.api.dto.order.OrderDto;
 import com.mexico.sas.admin.api.dto.project.ProjectApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.project.ProjectUpdateDto;
+import com.mexico.sas.admin.api.dto.role.RoleUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
@@ -17,7 +18,9 @@ import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.service.RoleService;
 import com.mexico.sas.admin.api.service.impl.EmployeeServiceImpl;
+import com.mexico.sas.admin.api.service.impl.RoleServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -549,6 +552,27 @@ public class ChangeBeanUtils extends Utils {
                     companyService.findById(applicationUpdateDto.getCompanyId()).getName()
             )).append(GeneralKeys.JUMP_LINE);
             application.setCompany(new Company(applicationUpdateDto.getCompanyId()));
+        }
+
+        return sb.toString().trim();
+    }
+
+    public static String checkRole(Role role, RoleUpdateDto roleDto, RoleService roleService) {
+        StringBuilder sb = new StringBuilder();
+        if(roleDto.getName() != null && !roleDto.getName().equalsIgnoreCase(role.getName())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Nombre",
+                    role.getName(), roleDto.getName())).append(GeneralKeys.JUMP_LINE);
+            role.setName(roleDto.getName());
+        }
+        if( validateStringNoRequiredUpdate(role.getDescription(), roleDto.getDescription()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripcion",
+                    role.getDescription(), roleDto.getDescription())).append(GeneralKeys.JUMP_LINE);
+            role.setDescription(roleDto.getDescription());
+        }
+        if(roleDto.getActive() != null && !roleDto.getActive().equals(role.getActive())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
+                    role.getActive(), roleDto.getActive())).append(GeneralKeys.JUMP_LINE);
+            role.setActive(roleDto.getActive());
         }
 
         return sb.toString().trim();

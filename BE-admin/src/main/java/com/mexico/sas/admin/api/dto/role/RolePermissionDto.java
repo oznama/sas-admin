@@ -15,5 +15,7 @@ public class RolePermissionDto implements Serializable {
   private Long id;
   private Long permissionId;
   private Long roleId;
+  private Boolean active;
+  private Boolean eliminate;
 
 }
