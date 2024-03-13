@@ -5,17 +5,20 @@ import java.util.Date;
 import javax.persistence.*;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Table(name = "sso_roles_permissions")
 @Data
 @DynamicInsert
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RolePermission implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(updatable = false, nullable = false)
+  @EqualsAndHashCode.Include
   private Long id;
   @Column(columnDefinition = "boolean default true")
   private Boolean active;

@@ -150,11 +150,11 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
   public void delete(Long id) throws CustomException {
     //findEntityById(id);
     RolePermission rolePermission = findEntityById(id);
-    log.debug("Este es el rolePermission que va a borrar");
     try{
       //repository.deleteById(id);
+      rolePermission.getRole().getPermissions().remove(rolePermission);
+      rolePermission.setRole(null);
       repository.delete(rolePermission);
-      log.debug("Si logro pasar el delete");
       /*save(RolePermission.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");*/
       save(RolePermission.class.getSimpleName(), rolePermission.getId(), CatalogKeys.LOG_DETAIL_DELETE, "TODO");
     } catch (Exception e) {
@@ -165,13 +165,13 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
   }
 
   private void validationSave(RolePermissionDto rolePermissionDto, RolePermission rolePermission) throws CustomException {
-    try {
-      findEntityById(rolePermissionDto.getId());
-      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_EMAIL_DUPLICATED, rolePermissionDto.getId()), null);
-    } catch (CustomException e) {
-      if(e instanceof BadRequestException)
-        throw e;
-    }
+//    try {
+//      findEntityById(rolePermissionDto.getId());
+//      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_EMAIL_DUPLICATED, rolePermissionDto.getId()), null);
+//    } catch (CustomException e) {
+//      if(e instanceof BadRequestException)
+//        throw e;
+//    }
     rolePermission.setRole(roleRepository.findById(rolePermissionDto.getRoleId()).get());
     rolePermission.setPermission(permissionRepository.findById(rolePermissionDto.getPermissionId()).get());
   }
