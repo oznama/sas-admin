@@ -83,10 +83,6 @@ export const TableApplication = ({
     )
 
     const renderHeader = () => {
-        console.log(currentPage)
-        console.log(totalCatalogApplications)
-        console.log(pageSize)
-        
         return (
             <div className="d-flex justify-content-between align-items-center">
                 { renderSearcher() }
