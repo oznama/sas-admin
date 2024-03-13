@@ -1,9 +1,11 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
+import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.dto.catalog.CatalogDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogPaggedDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
+import com.mexico.sas.admin.api.dto.company.CompanyFindDto;
 import com.mexico.sas.admin.api.exception.BadRequestException;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.exception.NoContentException;
@@ -19,7 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -43,9 +47,9 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
         try{
             repository.save(catalog);
-            save(Catalog.class.getSimpleName(),
-                    catalogDto.getCatalogParent() == null ? catalog.getId() : catalogDto.getCatalogParent(),
-                    CatalogKeys.LOG_DETAIL_INSERT, I18nResolver.getMessage(I18nKeys.LOG_CATALOG_CREATION, catalogDto.getValue()));
+            String value = parseHoliday(catalog.getValue(),catalog.getCatalogParent().getId(),catalog.getId());
+            save(Catalog.class.getSimpleName(), catalog.getId(),
+                    CatalogKeys.LOG_DETAIL_INSERT, I18nResolver.getMessage(I18nKeys.LOG_CATALOG_CREATION, value));
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.CATALOG_DUPLICATED, catalogDto.getDescription()), catalogDto);
         } catch (Exception e) {
@@ -69,8 +73,7 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
         if(!message.isEmpty()) {
             try {
                 repository.save(catalog);
-                save(Catalog.class.getSimpleName(),
-                        catalog.getCatalogParent() == null ? catalog.getId() : catalog.getCatalogParent().getId(),
+                save(Catalog.class.getSimpleName(),catalog.getId(),
                         CatalogKeys.LOG_DETAIL_UPDATE, message);
             } catch (Exception e) {
                 throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_UPDATED, catalog.getId()));
@@ -142,6 +145,14 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     }
 
     @Override
+    public Catalog findEntityByValueAndCatalogParentId(String value, Long catalogParentId) throws CustomException {
+        Catalog parent = new Catalog();
+        parent.setId(catalogParentId);
+        return repository.findByValueAndCatalogParent(value, parent).orElseThrow(() ->
+                new NoContentException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_FOUND, value)));
+    }
+
+    @Override
     public Catalog findEntityByIdAndCatalogParentId(Long id, Long catalogParentId) throws CustomException {
         Catalog parent = new Catalog();
         parent.setId(catalogParentId);
@@ -158,10 +169,15 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
 
     private CatalogPaggedDto parseCatalogPaggedDto(Catalog catalog) throws CustomException {
         CatalogPaggedDto catalogDto = from_M_To_N(catalog, CatalogPaggedDto.class);
+        if (catalog.getCatalogParent() != null) {
+            catalogDto.setValue(parseHoliday(catalog.getValue(), catalog.getCatalogParent().getId(), catalog.getId()));
+        }
         catalogDto.setCompany(companyService.findById(catalog.getCompanyId()).getName());
         catalogDto.setStatusDesc(findEntityById(catalog.getStatus()).getValue());
         return catalogDto;
     }
+
+
 
     private List<CatalogPaggedDto> parsingPage(List<Catalog> catalogs) {
         List<CatalogPaggedDto> catalogDtos = new ArrayList<>();
@@ -178,6 +194,7 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     private void validationSave(CatalogDto catalogDto, Catalog catalog) throws CustomException {
         long nextId = 1;
         if (catalogDto.getCatalogParent() != null) {
+            validateValue(catalogDto.getValue(), catalogDto.getCatalogParent(),null);
             log.debug("Catalog parent not null: {}", catalogDto.getCatalogParent());
             Catalog catalogParent = findEntityById(catalogDto.getCatalogParent());
             catalog.setCatalogParent(catalogParent);
@@ -205,9 +222,30 @@ public class CatalogServiceImpl extends LogMovementUtils implements CatalogServi
     }
 
     private Catalog validationUpdate(CatalogUpdateDto catalogDto) throws CustomException {
-        Catalog catalog = findEntityById(catalogDto.getId());
 
+        Catalog catalog = findEntityById(catalogDto.getId());
+        if (catalog.getCatalogParent()!=null){
+            validateValue(catalogDto.getValue(), catalog.getCatalogParent().getId(), catalogDto.getId());
+        }
         return catalog;
+    }
+
+    private void validateValue(String value, Long catalogParent, Long currentId) throws CustomException {
+        try {
+            Catalog catalog = findEntityByValueAndCatalogParentId(value, catalogParent);
+            if (catalog.getId().equals(currentId)){
+                return;
+            }
+            log.debug("Value {} already exist for catalog {}", value, catalog.getCatalogParent().getValue());
+            String msgError=!catalog.getStatus().equals(CatalogKeys.ESTATUS_MACHINE_ENABLED) ? I18nKeys.CATALOG_DUPLICATED_DISABLED : I18nKeys.CATALOG_DUPLICATED;
+            throw new BadRequestException(I18nResolver.getMessage(msgError,
+                    parseHoliday(catalog.getValue(),catalog.getCatalogParent().getId(),catalog.getId())), null);
+
+        } catch (CustomException e) {
+            log.error("Validating value Exception: {}", e.getMessage());
+            if ( e instanceof BadRequestException)
+                throw e;
+        }
     }
 
     private List<CatalogDto> parseCatalogDto(List<Catalog> catalogs) {

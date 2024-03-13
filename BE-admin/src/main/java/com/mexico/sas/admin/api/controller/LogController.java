@@ -24,7 +24,7 @@ public class LogController {
   @ApiOperation(
           httpMethod = "GET", value = "Servicio para recuperar logs por tabla y id", nickname = "findByTableAndRecordId")
   public ResponseEntity<List<LogMovementDto>> findByTableAndRecordId(
-          @PathVariable("tableName") String tableName, @PathVariable("recordId") Long recordId) throws CustomException {
+          @PathVariable("tableName") String tableName, @PathVariable("recordId") String recordId) throws CustomException {
     log.info("Finding catalog by id and parent");
     return ResponseEntity.ok(service.findByTableAndRecordId(tableName, recordId));
   }

@@ -7,6 +7,7 @@ import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -15,7 +16,6 @@ import java.math.BigDecimal;
 public class ProjectDto implements Serializable {
     private static final long serialVersionUID = 6304036644034478431L;
 
-    private Long id;
     private String key;
     private String description;
     private Long companyId;
@@ -26,5 +26,9 @@ public class ProjectDto implements Serializable {
     private BigDecimal tax;
     private BigDecimal total;
     private String observations;
+    private Date qaStartDate;
+    private Date qaEndDate;
+    private Date deliveryDate;
+    private String followCode;
 
 }

@@ -3,7 +3,6 @@ import { InputText } from '../../custom/InputText';
 import { Select } from '../../custom/Select';
 import { DatePicker } from '../../custom/DatePicker';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCatalogChilds } from '../../../services/CatalogService';
 import { getEmployess } from '../../../services/EmployeeService';
 import { getProjectApplicationById, saveApplication, updateApplication } from '../../../services/ProjectService';
 import { handleDateStr, numberToString, mountMax, numberMaxLength, taxRate, genericErrorMsg, displayNotification, formatter, isNumDec, removeCurrencyFormat } from '../../../helpers/utils';
@@ -12,6 +11,7 @@ import { alertType } from '../../custom/alerts/types/types';
 import { TableLog } from '../../custom/TableLog';
 import { setCurrentAppTab } from '../../../../store/project/projectSlice';
 import { TextArea } from '../../custom/TextArea';
+import { getAplications } from '../../../services/ApplicationService';
 
 export const DetailApplications = () => {
 
@@ -19,7 +19,7 @@ export const DetailApplications = () => {
   const { project } = useSelector( state => state.projectReducer );
   const { permissions } = useSelector( state => state.auth );
   const {currentAppTab: currentTab} = useSelector( state => state.projectReducer );
-  const { projectId, id } = useParams();
+  const { projectKey, id } = useParams();
 
   const navigate = useNavigate();
   const [aplication, setAplication] = useState('');
@@ -44,11 +44,11 @@ export const DetailApplications = () => {
   const isModeEdit = ( id && !permissions.canEditProjApp );
 
   const fetchApplication = () => {
-    getProjectApplicationById(projectId, id).then( response => {
+    getProjectApplicationById(projectKey, id).then( response => {
       if( response.code ) {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
-        setAplication(numberToString(response.applicationId, ''));
+        setAplication(response.application);
         setAmount(numberToString(response.amount, ''));
         setTax(numberToString(response.tax, ''))
         setTotal(numberToString(response.total, ''))
@@ -70,9 +70,11 @@ export const DetailApplications = () => {
 
   const fetchSelects = () => {
     
-    getCatalogChilds(1000000004)
+    getAplications()
       .then( response => {
-        setCatApliations(response.filter( cat => cat.status === 2000100001 ));
+        const cat = [];
+        response.map( r => cat.push({ ...r, id: r.value }) );
+        setCatApliations(cat);
       }).catch( error => {
         console.log(error);
       });
@@ -156,10 +158,10 @@ export const DetailApplications = () => {
     if( request.amount == 0 ) {
       displayNotification(dispatch, 'El monto del proyecto no puede ser 0', alertType.error);
     } else {
+      request.projectKey = projectKey;
       if ( id && (permissions.canEditProjApp || permissions.canEditRequi) ) {
         update(request);
       } else if ( permissions.canCreateProjApp ) {
-        request.projectId = projectId;
         save(request);
       }
     }
@@ -171,7 +173,7 @@ export const DetailApplications = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Aplicación agregada correctamente al proyecto!', alertType.success);
-        navigate(`/project/${projectId}/edit`, { replace: true });
+        navigate(`/project/${projectKey}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error)
@@ -185,7 +187,7 @@ export const DetailApplications = () => {
         displayNotification(dispatch, response.message, alertType.error);
       } else {
         displayNotification(dispatch, '¡Aplicacion actualizada correctamente!', alertType.success);
-        navigate(`/project/${projectId}/edit`, { replace: true });
+        navigate(`/project/${projectKey}/edit`, { replace: true });
       }
     }).catch(error => {
       console.log(error)
@@ -206,7 +208,7 @@ export const DetailApplications = () => {
     <div className='d-flex flex-row-reverse'>
       <ul className="nav nav-tabs">
         <li>
-          <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectId }/edit`) }>&lt;&lt; Regresar</button>
+          <button type="button" className="btn btn-link" onClick={ () => navigate(`/project/${ projectKey }/edit`) }>&lt;&lt; Regresar</button>
         </li>
         <li className="nav-item" onClick={ () => dispatch(setCurrentAppTab(1)) }>
           <a className={ `nav-link ${ (currentTab === 1) ? 'active' : '' }` }>Detalle</a>
@@ -224,7 +226,7 @@ export const DetailApplications = () => {
         <div className='text-center'>
           <div className="row text-start">
             <div className='col-6'>
-              <Select name="applicationId" label="Aplicaci&oacute;n" disabled={ !active || isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
+              <Select name="application" label="Aplicaci&oacute;n" disabled={ !active || isModeEdit } options={ catAplications } value={ aplication } required onChange={ onChangeAplication } />
             </div>
           </div>
           <div className="row text-start">
@@ -285,7 +287,7 @@ export const DetailApplications = () => {
             <div className="pt-3 d-flex flex-row-reverse">
                 { renderSaveButton() }
                 &nbsp;
-                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectId }/edit`) }>Cancelar</button>
+                <button type="button" className="btn btn-danger" onClick={ () => navigate(`/project/${ projectKey }/edit`) }>Cancelar</button>
             </div>
           )
         }

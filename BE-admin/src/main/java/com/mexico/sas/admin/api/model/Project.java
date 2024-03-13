@@ -6,6 +6,7 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -15,13 +16,12 @@ import java.util.Date;
 @NoArgsConstructor
 @FieldNameConstants
 @DynamicInsert
-public class Project {
+public class Project implements Serializable {
+
+    private static final long serialVersionUID = -3093222154480163542L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false, nullable = false, unique = true)
-    private Long id;
-    @Column(name = "p_key", length = 15)
+    @Column(updatable = false, nullable = false, name = "p_key", length = 15)
     private String key;
     @Column(length = 255)
     private String description;
@@ -31,6 +31,10 @@ public class Project {
     private BigDecimal tax;
     private BigDecimal total;
     private String observations;
+    private Date qaStartDate;
+    private Date qaEndDate;
+    private Date deliveryDate;
+    private String followCode;
 
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
@@ -49,7 +53,7 @@ public class Project {
     @JoinColumn
     private Employee projectManager;
 
-    public Project(Long id) {
-        this.id = id;
+    public Project(String key) {
+        this.key = key;
     }
 }

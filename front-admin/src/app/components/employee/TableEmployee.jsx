@@ -6,7 +6,8 @@ import { getEmployees, deleteLogic } from "../../services/EmployeeService";
 import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from '../custom/pagination/page/Pagination';
-import { getCompanySelect } from '../../services/CompanyService';
+import { getCompanyById, getCompanySelect } from '../../services/CompanyService';
+import { setCompanyS, setEmployeeS, setCompanyObj} from '../../../store/company/companySlice';
 
 export const TableEmployee = ({
     pageSize = 10,
@@ -16,16 +17,34 @@ export const TableEmployee = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const { companyS } = useSelector( state => state.companyReducer );
+    const { employeeS } = useSelector( state => state.companyReducer );
+
     const { permissions, user } = useSelector( state => state.auth );
     const [currentPage, setCurrentPage] = useState(0);
     const [employees, setEmployees] = useState([]);
     const [totalEmployees, setTotalEmployees] = useState(0);
-    const [filter, setFilter] = useState('')
-    const [companyId, setCompanyId] = useState( permissions.isAdminRoot ? '' : user.companyId) ;
+    const [filter, setFilter] = useState(employeeS.name ? employeeS.name : ''); 
+    const [companyId, setCompanyId] = useState(companyS ? companyS : 0) ;
     const [companies, setCompanies] = useState([]);
 
-    const onChangeFilter = ({ target }) => setFilter(target.value);
-    const onChangeCompany = ({ target }) => setCompanyId(target.value);
+    const onChangeFilter = ({ target }) => { 
+        setFilter(target.value);
+        fetchEmployees(currentPage);
+    };
+    const onChangeCompany = ({ target }) => {
+        setCompanyId(target.value);
+        dispatch(setCompanyS(target.value));
+        const companyIds = parseInt(target.value, 10);
+        setCompanyId(companyIds);
+        const selectedCompany = companies.find(company => company.id === companyIds);
+        if (selectedCompany) {
+            dispatch(setCompanyObj(selectedCompany));
+        }else{
+            dispatch(setCompanyObj({}));
+        }
+        fetchEmployees(currentPage);
+    };
 
     const fetchEmployees = (page) => {
         getEmployees(page, pageSize, sort, filter, companyId)
@@ -40,11 +59,12 @@ export const TableEmployee = ({
                 displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
     }
+    console.log('Valor del reducer: '+companyS);
 
     const fetchSelects = () => {
-        
         getCompanySelect().then( response => {
             setCompanies(response);
+            // console.log('Valor de companies: '+JSON.stringify(response, null, 2));
         }).catch( error => {
             console.log(error);
         });
@@ -54,7 +74,7 @@ export const TableEmployee = ({
     useEffect(() => {
         fetchSelects();
         fetchEmployees(currentPage);
-    }, [currentPage]);
+    }, [currentPage, filter, pageSize, sort, companyId]);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
@@ -62,7 +82,7 @@ export const TableEmployee = ({
     }
 
     const handleAddEmployee = () => {
-        // dispatch(setCurrentTab(1));
+        dispatch(setEmployeeS(''));
         navigate(`/employee/add`);
     }
 
@@ -74,6 +94,13 @@ export const TableEmployee = ({
         </div>
     );
 
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        setCompanyId(0);
+        fetchEmployees(currentPage);
+    }
+
     const renderSearcher = () => (
         <div className={`input-group w-${ permissions.canCreateEmp ? '25' : '50' } py-3`}>
             <select className="form-select" name="companyId" value={ companyId }  onChange={ onChangeCompany }>
@@ -83,6 +110,9 @@ export const TableEmployee = ({
             <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..."
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchEmployees(currentPage); } } />
+            <button type="button" className="btn btn-outline-secondary" onClick={onClean}>
+                <i className="bi bi-x"></i>
+            </button>
             <button type="button" className="btn btn-outline-primary" onClick={ () => fetchEmployees(currentPage) }>
                 <i className="bi bi-search"></i>
             </button>
@@ -132,7 +162,6 @@ export const TableEmployee = ({
     const renderRows = () => employees && employees.map(({
         id,
         email,
-        phone,
         fullName,
         company,
         position,
@@ -151,14 +180,14 @@ export const TableEmployee = ({
             { permissions.isAdminRoot && (<td className="text-center">{ creationDate }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center">
-                <button type="button" className="btn btn-success btn-sm" onClick={ () => handledSelect(id) }>
-                    <span><i className={`bi bi-${permissions.canEditEmp ? 'pencil-square' : 'eye'}`}></i></span>
+                <button type="button" className={`btn btn-${ active && permissions.canEditComp ? 'success' : 'primary' } btn-sm`} onClick={ () => handledSelect(id) }>
+                    <span><i className={`bi bi-${ active && permissions.canEditComp ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
             { permissions.canDelEmp && (
             <td className="text-center">
-                <button type="button" className="btn btn-danger btn-sm" onClick={ () => deleteEmployee(id) }>
-                    <span><i className="bi bi-trash"></i></span>
+                <button type="button" className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`} onClick={ () => deleteEmployee(id) }>
+                    <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                 </button>
             </td>
             )}

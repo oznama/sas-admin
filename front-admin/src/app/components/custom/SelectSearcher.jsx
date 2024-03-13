@@ -16,7 +16,7 @@ export const SelectSearcher = ({
     ));
     
     return (
-        <>
+        <div>
             <label htmlFor="selectSearcherList" className="form-label">{ label }</label>
             <div className="input-group py-1">
                 <input className="form-control"
@@ -35,7 +35,7 @@ export const SelectSearcher = ({
                     <i className="bi bi-x-lg"></i>
                 </span>
             </div>
-        </>
+        </div>
     )
 }
 

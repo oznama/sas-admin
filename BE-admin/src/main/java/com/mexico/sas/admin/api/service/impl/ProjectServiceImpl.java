@@ -79,23 +79,17 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     }
 
     @Override
-    public ProjectFindDto findById(Long id) throws CustomException {
-        Project project = findEntityById(id);
+    public ProjectFindDto findByKey(String key) throws CustomException {
+        Project project = findEntityByKey(key);
         ProjectFindDto projectFindDto = parseFromEntity(project);
         List<ProjectApplicationFindDto> applications = new ArrayList<>();
         return projectFindDto;
     }
 
     @Override
-    public ProjectFindDto findByKey(String key) throws CustomException {
-        return parseFromEntity(repository.findByKey(key)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_BYKEY_NOT_FOUND, key))));
-    }
-
-    @Override
-    public Project findEntityById(Long id) throws CustomException {
-        return repository.findById(id)
-                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, id)));
+    public Project findEntityByKey(String key) throws CustomException {
+        return repository.findById(key)
+                .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_NOT_FOUND, key)));
     }
 
     @Override
@@ -109,9 +103,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         try {
             log.debug("Project to save, key: {}", project.getKey());
             repository.save(project);
-            projectDto.setId(project.getId());
-            log.debug("Project created with id: {}", projectDto.getId());
-            save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_INSERT,
+            log.debug("Project {} created", projectDto.getKey());
+            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_INSERT,
                     I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
         } catch (Exception e) {
             String msgError = I18nResolver.getMessage(I18nKeys.PROJECT_NOT_CREATED, projectDto.getKey());
@@ -121,42 +114,42 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     }
 
     @Override
-    public void update(Long projectId, ProjectUpdateDto projectUpdateDto) throws CustomException {
-        log.debug("Update project {} with {}", projectId, projectUpdateDto);
-        Project project = findEntityById(projectId);
+    public void update(String projectKey, ProjectUpdateDto projectUpdateDto) throws CustomException {
+        log.debug("Update project {} with {}", projectKey, projectUpdateDto);
+        Project project = findEntityByKey(projectKey);
         if( !project.getKey().equals(projectUpdateDto.getKey()) ) {
             validateKey(projectUpdateDto.getKey());
         }
         String message = ChangeBeanUtils.checkProyect(project, projectUpdateDto, companyService, employeeService);
         if(!message.isEmpty()) {
             repository.save(project);
-            save(Project.class.getSimpleName(), project.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+            save(Project.class.getSimpleName(), project.getKey(), CatalogKeys.LOG_DETAIL_UPDATE, message);
         }
     }
 
     @Override
-    public void updateAmounts(Long projectId, BigDecimal amount, BigDecimal tax, BigDecimal total) {
-        repository.updateAmount(projectId, amount, tax, total);
+    public void updateAmounts(String projectKey, BigDecimal amount, BigDecimal tax, BigDecimal total) {
+        repository.updateAmount(projectKey, amount, tax, total);
     }
 
     @Override
-    public void deleteLogic(Long id) throws CustomException {
-        log.debug("Delete logic: {}", id);
-        Project project = findEntityById(id);
-        repository.deleteLogic(id, !project.getEliminate(), project.getEliminate());
-        save(Project.class.getSimpleName(), id,
+    public void deleteLogic(String key) throws CustomException {
+        log.debug("Delete logic: {}", key);
+        Project project = findEntityByKey(key);
+        repository.deleteLogic(key, !project.getEliminate(), project.getEliminate());
+        save(Project.class.getSimpleName(), key,
                 !project.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
                 I18nResolver.getMessage(!project.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
     }
 
     @Override
-    public void delete(Long id) throws CustomException {
-        findEntityById(id);
+    public void delete(String key) throws CustomException {
+        findEntityByKey(key);
         try{
-            repository.deleteById(id);
-            save(Project.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+            repository.deleteById(key);
+            save(Project.class.getSimpleName(), key, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
         } catch (Exception e) {
-            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
+            throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, key));
         }
     }
 
@@ -168,30 +161,30 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     private ProjectFindDto parseFromEntity(Project project) throws CustomException {
         ProjectFindDto projectFindDto = from_M_To_N(project, ProjectFindDto.class);
         projectFindDto.setCreatedBy(logMovementService
-                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+                .findFirstMovement(Project.class.getSimpleName(), project.getKey()).getUserName());
         projectFindDto.setCompanyId(project.getCompany().getId());
         projectFindDto.setProjectManagerId(project.getProjectManager().getId());
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectFindDto.setAmountStr(formatCurrency(project.getAmount().doubleValue()));
-        projectFindDto.setTaxStr(formatCurrency(project.getTax().doubleValue()));
-        projectFindDto.setTotalStr(formatCurrency(project.getTotal().doubleValue()));
+        projectFindDto.setAmountStr(formatCurrency(project.getAmount()));
+        projectFindDto.setTaxStr(formatCurrency(project.getTax()));
+        projectFindDto.setTotalStr(formatCurrency(project.getTotal()));
         return projectFindDto;
     }
 
     private ProjectPageableDto parseProjectPagged(Project project) throws CustomException {
         ProjectPageableDto projectPageableDto = from_M_To_N(project, ProjectPageableDto.class);
         projectPageableDto.setCreatedBy(logMovementService
-                .findFirstMovement(Project.class.getSimpleName(), project.getId()).getUserName());
+                .findFirstMovement(Project.class.getSimpleName(), project.getKey()).getUserName());
         projectPageableDto.setCompany(project.getCompany().getName());
         projectPageableDto.setProjectManager(buildFullname(project.getProjectManager()));
         projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectPageableDto.setAmount(formatCurrency(project.getAmount().doubleValue()));
-        projectPageableDto.setTax(formatCurrency(project.getTax().doubleValue()));
-        projectPageableDto.setTotal(formatCurrency(project.getTotal().doubleValue()));
+        projectPageableDto.setAmount(formatCurrency(project.getAmount()));
+        projectPageableDto.setTax(formatCurrency(project.getTax()));
+        projectPageableDto.setTotal(formatCurrency(project.getTotal()));
         return projectPageableDto;
     }
 
@@ -200,10 +193,11 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projects.forEach( project -> {
             try {
                 SelectDto selectDto = from_M_To_N(project, SelectDto.class);
+                selectDto.setIdStr(project.getKey());
                 selectDto.setName(String.format("%s - %s", project.getKey(), project.getDescription()));
                 selectDtos.add(selectDto);
             } catch (CustomException e) {
-                log.error("Impossible add project {}", project.getId());
+                log.error("Impossible add project {}", project.getKey());
             }
         });
         return selectDtos;

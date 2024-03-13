@@ -38,6 +38,7 @@ public interface I18nKeys {
     String CATALOG_NOT_UPDATED = "catalog.not.updated";
     String CATALOG_NOT_DELETED = "catalog.not.deleted";
     String CATALOG_NOT_FOUND = "catalog.not.found";
+    String CATALOG_DUPLICATED_DISABLED = "catalog.duplicated.disabled";
     String CATALOG_DUPLICATED = "catalog.duplicated";
     String VALIDATION_FIELD_REQUIRED = "validation.field.required";
     String VALIDATION_VALUE_INVALID = "validation.value.invalid";
@@ -53,6 +54,8 @@ public interface I18nKeys {
     String COMPANY_NOT_FOUND = "company.not.found";
     String COMPANY_RFC_DUPLICATED = "company.rfc.duplicated";
     String COMPANY_BYRFC_NOT_FOUND = "company.byrfc.not.found";
+    String APPLICATION_BYNAME_NOT_FOUND ="application.byname.not.found";
+    String APPLICATION_NAME_DUPLICATED ="application.name.duplicated";
     String PROJECT_KEY_DUPLICATED = "project.key.duplicated";
     String PROJECT_NOT_FOUND = "project.not.found";
     String PROJECT_BYKEY_NOT_FOUND = "project.bykey.not.found";
@@ -76,5 +79,7 @@ public interface I18nKeys {
     String INVOICE_NUMBER_NOT_FOUND = "invoice.number.not.found";
     String INVOICE_NUMBER_DUPLICATED = "invoice.number.duplicated";
     String INVOICE_NOT_CREATED = "invoice.not.created";
+    String APPLICATION_NOT_CREATED = "application.not.created";
     String INVOICE_NOT_FOUND = "invoice.not.found";
+    String APPLICATION_NOT_FOUND = "application.not.found";
 }

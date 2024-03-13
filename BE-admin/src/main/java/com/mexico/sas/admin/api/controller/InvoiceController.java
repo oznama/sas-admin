@@ -40,10 +40,10 @@ public class InvoiceController {
   public ResponseEntity<InvoiceDto> saveInvoice(@Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
     log.info("Saving invoice");
     service.save(invoiceDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(service.findById(invoiceDto.getId()));
+    return ResponseEntity.status(HttpStatus.CREATED).body(invoiceDto);
   }
 
-  @PutMapping(path = "/{id}", headers = "Accept=application/json")
+  @PutMapping(path = "/{invoiceNum}", headers = "Accept=application/json")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PUT",
           value = "Servicio para actualizar factura",
@@ -51,47 +51,47 @@ public class InvoiceController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = InvoiceDto.class)
   })
-  public ResponseEntity<InvoiceDto> updateInvoice(@PathVariable("id") Long id, @Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
+  public ResponseEntity<InvoiceDto> updateInvoice(@PathVariable("invoiceNum") String invoiceNum, @Valid @RequestBody InvoiceDto invoiceDto) throws CustomException {
     log.info("Updating invoice");
-    service.update(id, invoiceDto);
+    service.update(invoiceNum, invoiceDto);
     return ResponseEntity.ok().body(invoiceDto);
   }
 
-  @DeleteMapping(path = "/{id}")
+  @DeleteMapping(path = "/{invoiceNum}")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar desactivar factura", nickname = "delete")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })
-  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
+  public ResponseEntity<ResponseDto> delete(@PathVariable("invoiceNum") String invoiceNum) throws CustomException {
     log.info("Delete invoice");
-    service.deleteLogic(id);
+    service.deleteLogic(invoiceNum);
     return ResponseEntity.ok(
             new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
-  @GetMapping("/byOrder/{orderId}")
+  @GetMapping("/byOrder/{orderNum}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar facturas de orden",
           nickname = "/findByOrderId")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = InvoiceFindDto.class, responseContainer = "List")
   })
-  public ResponseEntity<List<InvoiceFindDto>> findByOrderId(@PathVariable("orderId") Long orderId) throws CustomException {
+  public ResponseEntity<List<InvoiceFindDto>> findByOrderId(@PathVariable("orderNum") String orderNum) throws CustomException {
     log.info("Finding invoices by order");
-    return ResponseEntity.ok(service.findByOrderId(orderId));
+    return ResponseEntity.ok(service.findByOrderNum(orderNum));
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{invoiceNum}")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar factura",
           nickname = "/findById")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = InvoiceDto.class)
   })
-  public ResponseEntity<InvoiceDto> findById(@PathVariable("id") Long id) throws CustomException {
-    log.info("Finding project by id");
-    return ResponseEntity.ok(service.findById(id));
+  public ResponseEntity<InvoiceDto> findById(@PathVariable("invoiceNum") String invoiceNum) throws CustomException {
+    log.info("Finding project by invoiceNum");
+    return ResponseEntity.ok(service.findByInvoiceNum(invoiceNum));
   }
 
   @GetMapping
@@ -106,16 +106,16 @@ public class InvoiceController {
     return ResponseEntity.ok(service.findAll(filter, pageable));
   }
 
-  @GetMapping("/{orderId}/paid")
+  @GetMapping("/{orderNum}/paid")
   @ApiOperation(httpMethod = "GET",
           value = "Servicio para recuperar total de facturas pagadas de orden",
           nickname = "/getAmountPaid")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = InvoiceFindDto.class)
   })
-  public ResponseEntity<InvoiceFindDto> getAmountPaid(@PathVariable("orderId") Long orderId) throws CustomException {
+  public ResponseEntity<InvoiceFindDto> getAmountPaid(@PathVariable("orderNum") String orderNum) throws CustomException {
     log.info("Finding total invoices paid by order");
-    return ResponseEntity.ok(service.getAmountPaid(orderId));
+    return ResponseEntity.ok(service.getAmountPaid(orderNum));
   }
 
 }

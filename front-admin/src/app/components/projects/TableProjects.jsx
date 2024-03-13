@@ -85,9 +85,9 @@ export const TableProject = ({
     //     setProjects( project => [ ...project, newElement] );
     // }
 
-    const handledSelect = id => {
+    const handledSelect = key => {
         dispatch(setCurrentTab( permissions.canEditProj ? 1 : 2));
-        navigate(`/project/${id}/edit`);
+        navigate(`/project/${key}/edit`);
     }
 
     const renderStatus = status => {
@@ -111,7 +111,6 @@ export const TableProject = ({
     }
 
     const renderRows = () => projects && projects.map(({
-        id,
         key,
         // name,
         description,
@@ -124,11 +123,11 @@ export const TableProject = ({
         tax,
         total,
         active
-    }) => (
-        <tr key={ id }>
+    }, index) => (
+        <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ key }</th>
             {/* <td className="text-start">{ name }</td> */}
-            <td className="text-start" style={ styleTableRow }>{ description.substring(0,70) }</td>
+            <td className="text-start" style={ styleTableRow }>{ description }</td>
             {/* <td className="text-center">{ renderStatus(status, '') }</td> */}
             { permissions.isAdminRoot && (<td className="text-start" style={ styleTableRow }>{ createdBy }</td>) }
             { permissions.isAdminRoot && (<td className="text-center" style={ styleTableRow }>{ creationDate }</td>) }
@@ -140,7 +139,7 @@ export const TableProject = ({
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
             <td className="text-center">{ renderStatus(active) }</td>
             <td className="text-center" style={ styleTableRow }>
-                <button type="button" className={`btn btn-${ active && permissions.canEditProj ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(id) }>
+                <button type="button" className={`btn btn-${ active && permissions.canEditProj ? 'success' : 'primary' } btn-sm`} style={ styleTableRowBtn } onClick={ () => handledSelect(key) }>
                     <span><i className={`bi bi-${ active && permissions.canEditProj ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>

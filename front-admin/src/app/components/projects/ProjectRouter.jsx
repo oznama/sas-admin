@@ -1,13 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
-import { ProjectPage } from './ProjectPage'
 import { ApplicationRouter } from '../applications/ApplicationRouter'
 import { OrderRouter } from "../orders/OrderRouter";
+import { DetailProject } from './DetailProject';
 
 export const ProjectRouter = () => (
     <Routes>
-        <Route path="/add" element={ <ProjectPage /> } />
-        <Route path="/:id/edit" element={ <ProjectPage /> } />
-        <Route path="/:projectId/application/*" element={ <ApplicationRouter /> } />
-        <Route path="/:projectId/order/*" element={ <OrderRouter /> } />
+        <Route path="/add" element={ <DetailProject /> } />
+        <Route path="/:key/edit" element={ <DetailProject /> } />
+        <Route path="/:projectKey/application/*" element={ <ApplicationRouter /> } />
+        <Route path="/:projectKey/order/*" element={ <OrderRouter /> } />
     </Routes>
 )

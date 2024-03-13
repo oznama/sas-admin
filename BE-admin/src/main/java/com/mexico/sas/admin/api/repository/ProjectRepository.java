@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
+public interface ProjectRepository extends JpaRepository<Project, String>, JpaSpecificationExecutor<Project> {
 
     List<Project> findByActiveIsTrueAndEliminateIsFalseOrderByKeyAscDescriptionAsc();
 
@@ -25,18 +25,18 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
 //    Long countByCompanyAndCreatedBy(Company company, Long createdBy);
 //    Page<Project> findByCompany(Company company, Pageable pageable);
 //    Page<Project> findByCompanyAndCreatedBy(Company company, Long createdBy, Pageable pageable);
-    Optional<Project> findByIdAndActiveIsTrueAndEliminateIsFalse(Long id);
-    Optional<Project> findByKey(String key);
+    Optional<Project> findByKeyAndActiveIsTrueAndEliminateIsFalse(String projectKey);
+
     @Transactional
     @Modifying
-    @Query("update Project p set p.amount = :amount, p.tax = :tax, p.total = :total where p.id = :id")
-    void updateAmount(@Param(value = "id") Long id,
+    @Query("update Project p set p.amount = :amount, p.tax = :tax, p.total = :total where p.key = :key")
+    void updateAmount(@Param(value = "key") String key,
                       @Param(value = "amount") BigDecimal amount,
                       @Param(value = "tax") BigDecimal tax,
                       @Param(value = "total") BigDecimal total);
 
     @Transactional
     @Modifying
-    @Query("update Project p set p.eliminate = :eliminate, p.active = :active where p.id = :id")
-    void deleteLogic(@Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
+    @Query("update Project p set p.eliminate = :eliminate, p.active = :active where p.key = :key")
+    void deleteLogic(@Param(value = "key") String key, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 }

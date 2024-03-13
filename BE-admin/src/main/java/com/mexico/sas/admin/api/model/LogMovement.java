@@ -22,7 +22,7 @@ public class LogMovement implements Serializable {
     private Long id;
 
     private String tableName;
-    private Long recordId;
+    private String recordId;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(columnDefinition = "timestamp default current_timestamp")
     private Date creationDate;

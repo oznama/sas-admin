@@ -33,22 +33,22 @@ public class LogMovementServiceImpl extends Utils implements LogMovementService 
     private CatalogService catalogService;
 
     @Override
-    public LogMovementDto findFirstMovement(String tableName, Long recordId) {
+    public LogMovementDto findFirstMovement(String tableName, String recordId) {
         return parseEntityToDto(repository.findFirstByTableNameAndRecordIdOrderByCreationDateAsc(tableName, recordId).orElse(null));
     }
 
     @Override
-    public LogMovementDto findLastMovement(String tableName, Long recordId) {
+    public LogMovementDto findLastMovement(String tableName, String recordId) {
         return parseEntityToDto(repository.findFirstByTableNameAndRecordIdOrderByCreationDateDesc(tableName, recordId).orElse(null));
     }
 
     @Override
-    public Page<LogMovementDto> findByTableAndRecordId(String tableName, Long recordId, Pageable pageable) throws CustomException {
+    public Page<LogMovementDto> findByTableAndRecordId(String tableName, String recordId, Pageable pageable) throws CustomException {
         return parseLogMovementList(repository.findByTableNameAndRecordId(tableName, recordId, pageable), pageable);
     }
 
     @Override
-    public List<LogMovementDto> findByTableAndRecordId(String tableName, Long recordId) throws CustomException {
+    public List<LogMovementDto> findByTableAndRecordId(String tableName, String recordId) throws CustomException {
         return parseLogMovementList(repository.findByTableNameAndRecordId(tableName, recordId,
                 PageRequest.of(0, 100, Sort.Direction.DESC, "creationDate")));
     }

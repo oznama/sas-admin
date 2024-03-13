@@ -1,5 +1,6 @@
 package com.mexico.sas.admin.api.service;
 
+import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import com.mexico.sas.admin.api.dto.role.RolePermissionDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.dto.role.RolePermissionsEnaDisDto;
@@ -14,5 +15,7 @@ public interface RolePermissionService {
   List<Map<Long, Boolean>> setActive(List<RolePermissionsEnaDisDto> list);
   void delete(Long id) throws CustomException;
 
-    RolePermission findEntityById(Long id) throws CustomException;
+  RolePermission findEntityById(Long id) throws CustomException;
+
+  List<PermissionFindDto> findAllPermissions();
 }

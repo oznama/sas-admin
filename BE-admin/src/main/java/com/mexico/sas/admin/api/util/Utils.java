@@ -161,8 +161,17 @@ public class Utils {
         return new DecimalFormat(format).format(d);
     }
 
-    public static String formatCurrency(double d) {
+    // TODO Refactor this function to BigDecimal
+    public static String formatCurrency(Double d) {
+        if( d == null)
+            return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(0);
         return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(d);
+    }
+
+    public static String formatCurrency(BigDecimal d) {
+        if( d == null)
+            return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(0);
+        return NumberFormat.getCurrencyInstance(AuthorizationFilter.LOCALE).format(d.doubleValue());
     }
 
     protected String formatPercent(double d) {
@@ -323,6 +332,19 @@ public class Utils {
 
     protected List<Long> employessNotIn() {
         return Arrays.asList(1L);
+    }
+
+    public static String parseHoliday(String value, Long parent, Long id){
+        if( parent.equals(CatalogKeys.HOLYDAYS) && !StringUtils.isEmpty(value)) {
+            try {
+                return dateToString(Date.from(Instant.parse(value)), GeneralKeys.FORMAT_DDMMYYYY, true);
+            } catch (CustomException e) {
+                return value;
+            }
+        } else {
+            log.warn("Catalog {} not be parse because value is null or empty", id);
+            return value;
+        }
     }
 
 }

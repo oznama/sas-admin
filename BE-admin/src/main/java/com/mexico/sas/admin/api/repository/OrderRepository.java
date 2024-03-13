@@ -14,17 +14,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
+public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecificationExecutor<Order> {
 
     List<Order> findByActiveIsTrueAndEliminateIsFalseOrderByOrderNumAsc();
 
-    Optional<Order> findByOrderNum(String orderNum);
-    List<Order> findByProjectOrderByOrderDateDesc(Project project);
+    List<Order> findByProjectOrderByOrderNumAscOrderDateAsc(Project project);
 
     @Transactional
     @Modifying
-    @Query("update Order o set o.eliminate = :eliminate, o.active = :active, o.status = :status, o.requisitionStatus = :status where o.id = :id")
-    void deleteLogic(@Param(value = "id") Long id, @Param(value = "status") Long status,
+    @Query("update Order o set o.eliminate = :eliminate, o.active = :active, o.status = :status, o.requisitionStatus = :status where o.orderNum = :orderNum")
+    void deleteLogic(@Param(value = "orderNum") String orderNum, @Param(value = "status") Long status,
                      @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 
 }

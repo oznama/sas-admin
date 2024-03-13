@@ -101,7 +101,7 @@ public class RoleServiceImpl extends LogMovementUtils implements RoleService {
         PermissionFindDto permissionFindDto = from_M_To_N(p, PermissionFindDto.class);
         permissionFindDto.setName(p.getPermission().getName());
         permissionFindDto.setDescription(p.getPermission().getDescription());
-        permissionFindDtos.add(permissionFindDto);
+//        permissionFindDtos.add(permissionFindDto);
       } catch (CustomException e) {
         log.warn("Permission with id {} not added to list error parsing: {}", p.getId(), e.getMessage());
       }

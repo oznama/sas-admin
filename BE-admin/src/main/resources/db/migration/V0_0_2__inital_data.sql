@@ -5,14 +5,14 @@ INSERT INTO companies (id, name, email_domain, type) VALUES (2, 'PROSA', 'prosa.
 SELECT setval('companies_id_seq', 2);
 
 -- Empleados
-INSERT INTO employees (id, email, name, surname, company_id) VALUES (1, 'admin@sas-mexico.com', 'admin', 'admin', 1);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, position_id) VALUES (2, 'jaime.carreno@sas-mexico.com', 'Jaime', CONCAT('Carre',E'\u00F1','o'), 'Mendez', 1, 2000500001);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (3, 'selene.pascalis@sas-mexico.com', 'Selene', 'Pascalis', 'Garcia', 1, 2, 2000500002);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (4, 'angel.calzada@sas-mexico.com', 'Angel', 'Calzada', 1, 3, 2000500005);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (5, 'alvaro.mendoza@sas-mexico.com', 'Alvaro', 'Mendoza', 1, 3, 2000500006);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (6, 'juan.banos@sas-mexico.com', 'Juan', CONCAT('Ba',E'\u00F1','os'), 'Soto', 1, 3, 2000500006);
-INSERT INTO employees (id, email, name, surname, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000500006);
-INSERT INTO employees (id, email, name, surname, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, last_name, company_id) VALUES (1, 'admin@sas-mexico.com', 'admin', 'admin', 1);
+INSERT INTO employees (id, email, name, last_name, second_surname, company_id, position_id) VALUES (2, 'jaime.carreno@sas-mexico.com', 'Jaime', CONCAT('Carre',E'\u00F1','o'), 'Mendez', 1, 2000500001);
+INSERT INTO employees (id, email, name, last_name, second_surname, company_id, boss_id, position_id) VALUES (3, 'selene.pascalis@sas-mexico.com', 'Selene', 'Pascalis', 'Garcia', 1, 2, 2000500002);
+INSERT INTO employees (id, email, name, last_name, company_id, boss_id, position_id) VALUES (4, 'angel.calzada@sas-mexico.com', 'Angel', 'Calzada', 1, 3, 2000500005);
+INSERT INTO employees (id, email, name, last_name, company_id, boss_id, position_id) VALUES (5, 'alvaro.mendoza@sas-mexico.com', 'Alvaro', 'Mendoza', 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, last_name, second_surname, company_id, boss_id, position_id) VALUES (6, 'juan.banos@sas-mexico.com', 'Juan', CONCAT('Ba',E'\u00F1','os'), 'Soto', 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, last_name, company_id, boss_id, position_id) VALUES (7, 'gerardo.lopez@sas-mexico.com', 'Gerardo', 'Lopez', 1, 3, 2000500006);
+INSERT INTO employees (id, email, name, last_name, second_surname, company_id, boss_id, position_id) VALUES (8, 'oziel.naranjo@sas-mexico.com', 'Oziel', 'Naranjo', CONCAT('M',E'\u00E1','rquez'), 1, 3, 2000500006);
 
 SELECT setval('employees_id_seq', 8);
 

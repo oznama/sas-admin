@@ -23,12 +23,12 @@ public class RoleController {
   @Autowired
   private RoleService service;
 
-//  @PostMapping(headers = "Accept=application/json", path = "/save")
-//  @ResponseStatus(code = HttpStatus.CREATED)
-//  @ApiOperation(httpMethod = "POST",
-//      value = "Servicio para crear roles",
-//      response = RoleDto.class,
-//      nickname = "/save")
+  @PostMapping(headers = "Accept=application/json", path = "/save")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @ApiOperation(httpMethod = "POST",
+      value = "Servicio para crear roles",
+      response = RoleDto.class,
+      nickname = "/save")
   public ResponseEntity<?> save(@RequestBody RoleDto roleDto) throws CustomException {
     log.info("Saving role");
     service.save(roleDto);

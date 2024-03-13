@@ -11,6 +11,7 @@ import { registerLocale, setDefaultLocale } from 'react-datepicker';
 import es from 'date-fns/locale/es';
 import { getCatalogChilds } from '../../services/CatalogService';
 import { useState, useEffect } from 'react';
+import { stringToDate } from '../../helpers/utils';
 registerLocale('es', es)
 
 export const DatePicker = ({
@@ -21,7 +22,9 @@ export const DatePicker = ({
   onChange, 
   disabled,
   minDate,
-  maxDate
+  maxDate,
+  excludeDates,
+  readOnly
 }) => {
 
   // const filterWeekends = date => date.getDay() !== 0 && date.getDay() !== 6;
@@ -34,7 +37,9 @@ export const DatePicker = ({
       .then( response => {
         const catHolyDates = response.filter( cat => cat.status === 2000100001 );
         const arrayHolyDates = [];
-        catHolyDates.forEach( ({ value }) => arrayHolyDates.push(new Date(value)) );
+        catHolyDates.forEach( ({ value }) => {
+          arrayHolyDates.push(stringToDate(value)) 
+        });
         setHolyDates(arrayHolyDates);
       }).catch( error => {
         console.log(error);
@@ -42,7 +47,9 @@ export const DatePicker = ({
   };
 
   useEffect(() => {
-    fetchHolidays();
+    if( excludeDates ) {
+      fetchHolidays();
+    }
   }, []);
   
   return (
@@ -51,7 +58,7 @@ export const DatePicker = ({
         <br/>
         <DatePickerReact className="form-control padding-short" name={ name } disabled={ disabled } required={ required }
           selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' autoComplete='off'
-          minDate={ minDate } maxDate={ maxDate } excludeDates={ holyDates } />
+          minDate={ minDate } maxDate={ maxDate } excludeDates={ holyDates } readOnly={ readOnly } />
           {/* filterDate={ filterWeekends } */}
     </>
   )
@@ -63,10 +70,12 @@ DatePicker.propTypes = {
     required: PropTypes.bool,
     onChange: PropTypes.func.isRequired,
     minDate: PropTypes.object,
-    maxDate: PropTypes.object
+    maxDate: PropTypes.object,
+    excludeDates: PropTypes.bool
 }
 
 DatePicker.defaultProps = {
   disabled: false,
-  required: false
+  required: false,
+  excludeDates: true
 }

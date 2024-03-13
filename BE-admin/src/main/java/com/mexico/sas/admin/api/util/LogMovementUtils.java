@@ -13,7 +13,7 @@ public class LogMovementUtils extends Utils {
 
     private final String LOG_MOVEMENT_BEAN = "logMovementRepository";
 
-    private LogMovement buildLogMovement(String tableName, Long recordId, Long eventId, String description) {
+    private LogMovement buildLogMovement(String tableName, String recordId, Long eventId, String description) {
         SecurityContextPrincipal principal = getCurrentUser();
         LogMovement logMovement = new LogMovement();
         logMovement.setTableName(tableName);
@@ -25,10 +25,10 @@ public class LogMovementUtils extends Utils {
         return logMovement;
     }
 
-    protected void save(String tableName, Long recordId, Long eventId, String description) {
+    protected void save(String tableName, Object recordId, Long eventId, String description) {
         try {
             LogMovementRepository logMovementRepository = (LogMovementRepository) BeanUtils.getBean(LOG_MOVEMENT_BEAN);
-            logMovementRepository.save(buildLogMovement(tableName, recordId, eventId, description));
+            logMovementRepository.save(buildLogMovement(tableName, String.valueOf(recordId), eventId, description));
         } catch (Exception e) {
             log.error("Error saving in LogMovement, error: {}", e.getMessage());
         }

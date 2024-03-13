@@ -20,12 +20,12 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
     private Long id;
-    @Column(updatable = false, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String name;
     private String secondName;
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String surname;
     private String secondSurname;
     private String phone;
@@ -41,6 +41,11 @@ public class Employee {
     private Long createdBy;
     private Long companyId;
     private Long bossId;
+    private String cellphone;
+    private String country;
+    private String city;
+    private String ext;
+
 
     public Employee(Long id) {
         this.id = id;

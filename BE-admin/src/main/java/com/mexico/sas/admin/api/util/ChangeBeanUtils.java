@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.util;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.application.ApplicationUpdateDto;
 import com.mexico.sas.admin.api.dto.catalog.CatalogUpdateDto;
 import com.mexico.sas.admin.api.dto.company.CompanyUpdateDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
@@ -16,6 +17,7 @@ import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.service.CatalogService;
 import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
+import com.mexico.sas.admin.api.service.impl.EmployeeServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,11 +46,13 @@ public class ChangeBeanUtils extends Utils {
         StringBuilder sb = new StringBuilder();
 
         if( validateStringRequiredUpdate(catalog.getValue(), catalogUpdateDto.getValue()) ) {
+            String valueOld = parseHoliday(catalog.getValue(),catalog.getCatalogParent().getId(),catalog.getId());
+            String valueNew = parseHoliday(catalogUpdateDto.getValue(),catalog.getCatalogParent().getId(),catalog.getId());
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Valor",
-                    catalog.getValue(), catalogUpdateDto.getValue())).append(GeneralKeys.JUMP_LINE);
+                    valueOld, valueNew)).append(GeneralKeys.JUMP_LINE);
             catalog.setValue(catalogUpdateDto.getValue());
         }
-        if( validateStringRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
+        if( validateStringNoRequiredUpdate(catalog.getDescription(), catalogUpdateDto.getDescription()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_CATALOG_UPDATE, catalog.getValue(), "Descripción",
                     catalog.getDescription(), catalogUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
             catalog.setDescription(catalogUpdateDto.getDescription());
@@ -110,15 +114,14 @@ public class ChangeBeanUtils extends Utils {
     }
 
     public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto,
-                                                 CatalogService catalogService, EmployeeService employeeService) throws CustomException {
+                                                 EmployeeService employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
-        if( !projectApplication.getApplicationId().equals(projectApplicationUpdateDto.getApplicationId()) ) {
+        if( validateStringRequiredUpdate(projectApplication.getApplication().getName(), projectApplicationUpdateDto.getApplication()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Aplicación",
-                    catalogService.findById(projectApplication.getApplicationId()).getValue(),
-                    catalogService.findById(projectApplicationUpdateDto.getApplicationId()).getValue()))
+                            projectApplication.getApplication().getName(), projectApplicationUpdateDto.getApplication()))
                     .append(GeneralKeys.JUMP_LINE);
-            projectApplication.setApplicationId(projectApplicationUpdateDto.getApplicationId());
+            projectApplication.setApplication(new Application(projectApplicationUpdateDto.getApplication()));
         }
         double currentAmount = doubleScale(projectApplication.getAmount().doubleValue());
         double newAmount = doubleScale(projectApplicationUpdateDto.getAmount().doubleValue());
@@ -250,11 +253,11 @@ public class ChangeBeanUtils extends Utils {
                 order.setEliminate(false);
             }
         }
-        if( (order.getRequisitionStatus() == null && orderDto.getRequisitionStatus() != null)
-                || ( order.getRequisitionStatus() != null && orderDto.getRequisitionStatus() != null && !order.getRequisitionStatus().equals(orderDto.getRequisitionStatus())) ) {
+        if( validateLongNoRequiredUpdate(order.getRequisitionStatus(), orderDto.getRequisitionStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de requisición",
-                    catalogService.findById(order.getRequisitionStatus()).getValue(),
-                    catalogService.findById(orderDto.getRequisitionStatus()).getValue())
+                    order.getRequisitionStatus() != null ? catalogService.findById(order.getRequisitionStatus()).getValue() : "Sin estatus",
+                    orderDto.getRequisitionStatus() != null ? catalogService.findById(orderDto.getRequisitionStatus()).getValue() : "Sin estatus"
+                    )
             ).append(GeneralKeys.JUMP_LINE);
             order.setRequisitionStatus(orderDto.getRequisitionStatus());
         }
@@ -334,56 +337,85 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkEmployee(Employee employee, EmployeeUpdateDto employeeUpdateDto) {
+    public static String checkEmployee(Employee employee, EmployeeUpdateDto employeeUpdateDto,
+                                       CatalogService catalogService, EmployeeServiceImpl employeeService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         if(employeeUpdateDto.getEmail() != null && !employeeUpdateDto.getEmail().equalsIgnoreCase(employee.getEmail())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.email,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Correo",
                     employee.getEmail(), employeeUpdateDto.getEmail())).append(GeneralKeys.JUMP_LINE);
             employee.setEmail(employeeUpdateDto.getEmail());
         }
         if(employeeUpdateDto.getName() != null && !employeeUpdateDto.getName().equalsIgnoreCase(employee.getName())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.name,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Nombre",
                     employee.getName(), employeeUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
             employee.setName(employeeUpdateDto.getName());
         }
         if( validateStringNoRequiredUpdate(employee.getSecondName(), employeeUpdateDto.getSecondName()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.secondName,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Segundo nombre",
                     employee.getSecondName(), employeeUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
             employee.setSecondName(employeeUpdateDto.getSecondName());
         }
         if(employeeUpdateDto.getSurname() != null && !employeeUpdateDto.getSurname().equalsIgnoreCase(employee.getSurname())) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.surname,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Apellido paterno",
                     employee.getSurname(), employeeUpdateDto.getSurname())).append(GeneralKeys.JUMP_LINE);
             employee.setSurname(employeeUpdateDto.getSurname());
         }
         if( validateStringNoRequiredUpdate(employee.getSecondSurname(), employeeUpdateDto.getSecondSurname()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.secondSurname,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Apellido materno",
                     employee.getSecondSurname(), employeeUpdateDto.getSecondSurname())).append(GeneralKeys.JUMP_LINE);
             employee.setSecondSurname(employeeUpdateDto.getSecondSurname());
         }
         if((employee.getCompanyId() == null && employeeUpdateDto.getCompanyId() != null)
                 || (employeeUpdateDto.getCompanyId() != null && !employeeUpdateDto.getCompanyId().equals(employee.getCompanyId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.companyId,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Compañia",
                     employee.getCompanyId(), employeeUpdateDto.getCompanyId())).append(GeneralKeys.JUMP_LINE);
             employee.setCompanyId(employeeUpdateDto.getCompanyId());
         }
-        if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null)
-                || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.positionId,
-                    employee.getPositionId(), employeeUpdateDto.getPositionId())).append(GeneralKeys.JUMP_LINE);
-            employee.setPositionId(employeeUpdateDto.getPositionId());
-        }
+
         if( validateStringNoRequiredUpdate(employee.getPhone(), employeeUpdateDto.getPhone()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.phone,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono",
                     employee.getPhone(), employeeUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
             employee.setPhone(employeeUpdateDto.getPhone());
         }
-        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null)
-                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.bossId,
-                    employee.getBossId(), employeeUpdateDto.getBossId())).append(GeneralKeys.JUMP_LINE);
-            employee.setBossId(employeeUpdateDto.getBossId());
+        if( validateStringNoRequiredUpdate(employee.getCellphone(), employeeUpdateDto.getCellphone()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Celular",
+                    employee.getCellphone(), employeeUpdateDto.getCellphone())).append(GeneralKeys.JUMP_LINE);
+            employee.setCellphone(employeeUpdateDto.getCellphone());
         }
+        if( validateStringNoRequiredUpdate(employee.getCountry(), employeeUpdateDto.getCountry()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Pais",
+                    employee.getCountry(), employeeUpdateDto.getCountry())).append(GeneralKeys.JUMP_LINE);
+            employee.setCountry(employeeUpdateDto.getCountry());
+        }
+        if( validateStringNoRequiredUpdate(employee.getCity(), employeeUpdateDto.getCity()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Ciudad",
+                    employee.getCity(), employeeUpdateDto.getCity())).append(GeneralKeys.JUMP_LINE);
+            employee.setCity(employeeUpdateDto.getCity());
+        }
+        if( validateStringNoRequiredUpdate(employee.getExt(), employeeUpdateDto.getExt()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Extencion",
+                    employee.getExt(), employeeUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
+            employee.setExt(employeeUpdateDto.getExt());
+        }
+        // Se cambia el jefe
+        if((employee.getBossId() == null && employeeUpdateDto.getBossId() != null) || (employee.getBossId() != null && employeeUpdateDto.getBossId() == null)
+                || (employee.getBossId() != null && employeeUpdateDto.getBossId() != null && !employeeUpdateDto.getBossId().equals(employee.getBossId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Jefe",
+                    employee.getBossId() != null ? getFullname(employeeService.findEntityById(employee.getBossId())) : "Sin jefe asignado",
+                    employeeUpdateDto.getBossId() != null ? getFullname(employeeService.findEntityById(employeeUpdateDto.getBossId())) : "Sin jefe"
+            )).append(GeneralKeys.JUMP_LINE);
+            employee.setBossId(employeeUpdateDto.getBossId() != null ? employeeUpdateDto.getBossId() : null);
+        }
+        //Se actualiza la posicion
+        if((employee.getPositionId() == null && employeeUpdateDto.getPositionId() != null) || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() == null)
+                || (employee.getPositionId() != null && employeeUpdateDto.getPositionId() != null && !employeeUpdateDto.getPositionId().equals(employee.getPositionId()))) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Puesto",
+                    employee.getPositionId() != null ? catalogService.findById(employee.getPositionId()).getValue() : "Sin puesto asignado",
+                    employeeUpdateDto.getPositionId() != null ? catalogService.findById(employeeUpdateDto.getPositionId()).getValue() : "Sin puesto"
+            )).append(GeneralKeys.JUMP_LINE);
+            employee.setPositionId(employeeUpdateDto.getPositionId() != null ? employeeUpdateDto.getPositionId(): null);
+        }
+
         if(employeeUpdateDto.getActive() != null && !employeeUpdateDto.getActive().equals(employee.getActive())) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, EmployeeUpdateDto.Fields.active,
                     employee.getActive(), employeeUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
@@ -392,101 +424,103 @@ public class ChangeBeanUtils extends Utils {
         return sb.toString().trim();
     }
 
-    public static String checkCompany(Company company, CompanyUpdateDto companyUpdateDto) {
+    public static String checkCompany(Company company, CompanyUpdateDto companyUpdateDto, CatalogService catalogService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         if( validateStringNoRequiredUpdate(company.getName(), companyUpdateDto.getName()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.name,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Razón social",
                     company.getName(), companyUpdateDto.getName())).append(GeneralKeys.JUMP_LINE);
             company.setName(companyUpdateDto.getName());
         }
 
         if( validateStringNoRequiredUpdate(company.getAlias(), companyUpdateDto.getAlias()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.alias,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Alias",
                     company.getAlias(), companyUpdateDto.getAlias())).append(GeneralKeys.JUMP_LINE);
             company.setAlias(companyUpdateDto.getAlias());
         }
 
         if( validateStringNoRequiredUpdate(company.getRfc(), companyUpdateDto.getRfc()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.rfc,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "RFC",
                     company.getRfc(), companyUpdateDto.getRfc())).append(GeneralKeys.JUMP_LINE);
             company.setRfc(companyUpdateDto.getRfc());
         }
 
         if( validateStringNoRequiredUpdate(company.getAddress(), companyUpdateDto.getAddress()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.address,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Calle",
                     company.getAddress(), companyUpdateDto.getAddress())).append(GeneralKeys.JUMP_LINE);
             company.setAddress(companyUpdateDto.getAddress());
         }
 
         if( validateStringNoRequiredUpdate(company.getInterior(), companyUpdateDto.getInterior()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.interior,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Interior",
                     company.getInterior(), companyUpdateDto.getInterior())).append(GeneralKeys.JUMP_LINE);
             company.setInterior(companyUpdateDto.getInterior());
         }
 
         if( validateStringNoRequiredUpdate(company.getExterior(), companyUpdateDto.getExterior()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.exterior,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Exterior",
                     company.getExterior(), companyUpdateDto.getExterior())).append(GeneralKeys.JUMP_LINE);
             company.setExterior(companyUpdateDto.getExterior());
         }
 
         if( validateStringNoRequiredUpdate(company.getCp(), companyUpdateDto.getCp()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.cp,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Codigo postal",
                     company.getCp(), companyUpdateDto.getCp())).append(GeneralKeys.JUMP_LINE);
             company.setCp(companyUpdateDto.getCp());
         }
 
         if( validateStringNoRequiredUpdate(company.getLocality(), companyUpdateDto.getLocality()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.locality,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Localidad/Colonia",
                     company.getLocality(), companyUpdateDto.getLocality())).append(GeneralKeys.JUMP_LINE);
             company.setLocality(companyUpdateDto.getLocality());
         }
 
         if( validateStringNoRequiredUpdate(company.getCity(), companyUpdateDto.getCity()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.city,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Ciudad",
                     company.getCity(), companyUpdateDto.getCity())).append(GeneralKeys.JUMP_LINE);
             company.setCity(companyUpdateDto.getCity());
         }
 
         if( validateStringNoRequiredUpdate(company.getState(), companyUpdateDto.getState()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.state,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estado",
                     company.getState(), companyUpdateDto.getState())).append(GeneralKeys.JUMP_LINE);
             company.setState(companyUpdateDto.getState());
         }
 
         if( validateStringNoRequiredUpdate(company.getCountry(), companyUpdateDto.getCountry()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.country,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Pais",
                     company.getCountry(), companyUpdateDto.getCountry())).append(GeneralKeys.JUMP_LINE);
             company.setCountry(companyUpdateDto.getCountry());
         }
 
         if( validateStringNoRequiredUpdate(company.getPhone(), companyUpdateDto.getPhone()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.phone,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono",
                     company.getPhone(), companyUpdateDto.getPhone())).append(GeneralKeys.JUMP_LINE);
             company.setPhone(companyUpdateDto.getPhone());
         }
 
         if( validateStringNoRequiredUpdate(company.getCellphone(), companyUpdateDto.getCellphone()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.cellphone,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Telefono celular",
                     company.getCellphone(), companyUpdateDto.getCellphone())).append(GeneralKeys.JUMP_LINE);
             company.setCellphone(companyUpdateDto.getCellphone());
         }
 
         if( validateStringNoRequiredUpdate(company.getExt(), companyUpdateDto.getExt()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.ext,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Extencion",
                     company.getExt(), companyUpdateDto.getExt())).append(GeneralKeys.JUMP_LINE);
             company.setExt(companyUpdateDto.getExt());
         }
 
         if( ( company.getType() == null && companyUpdateDto.getType() != null )
                 || ( company.getType() != null && companyUpdateDto.getType() != null && !company.getType().equals(companyUpdateDto.getType()) ) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.type,
-                    company.getType(), companyUpdateDto.getType())).append(GeneralKeys.JUMP_LINE);
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Tipo",
+                    catalogService.findById(company.getType()).getValue(),
+                    catalogService.findById(companyUpdateDto.getType()).getValue()
+            )).append(GeneralKeys.JUMP_LINE);
             company.setType(companyUpdateDto.getType());
         }
 
         if( validateStringNoRequiredUpdate(company.getEmailDomain(), companyUpdateDto.getEmailDomain()) ) {
-            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.emailDomain,
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Dominio de correo",
                     company.getEmailDomain(), companyUpdateDto.getEmailDomain())).append(GeneralKeys.JUMP_LINE);
             company.setEmailDomain(companyUpdateDto.getEmailDomain());
         }
@@ -495,6 +529,26 @@ public class ChangeBeanUtils extends Utils {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, CompanyUpdateDto.Fields.active,
                     company.getActive(), companyUpdateDto.getActive())).append(GeneralKeys.JUMP_LINE);
             company.setActive(companyUpdateDto.getActive());
+        }
+
+        return sb.toString().trim();
+    }
+
+    public static String checkApplication(Application application, ApplicationUpdateDto applicationUpdateDto, CompanyService companyService) throws CustomException {
+        StringBuilder sb = new StringBuilder();
+
+        if( validateStringNoRequiredUpdate(application.getDescription(), applicationUpdateDto.getDescription()) ) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Descripcion",
+                    application.getDescription(), applicationUpdateDto.getDescription())).append(GeneralKeys.JUMP_LINE);
+            application.setDescription(applicationUpdateDto.getDescription());
+        }
+
+        if( validateLongRequiredUpdate(application.getCompany().getId(), applicationUpdateDto.getCompanyId())) {
+            sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Empresa",
+                    application.getCompany().getName(),
+                    companyService.findById(applicationUpdateDto.getCompanyId()).getName()
+            )).append(GeneralKeys.JUMP_LINE);
+            application.setCompany(new Company(applicationUpdateDto.getCompanyId()));
         }
 
         return sb.toString().trim();

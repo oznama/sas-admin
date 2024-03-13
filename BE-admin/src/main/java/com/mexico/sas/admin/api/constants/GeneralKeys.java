@@ -26,6 +26,7 @@ public interface GeneralKeys {
     String FORMAT_DATE_FOR_NAME = "yyyyMMdd_HHmmss";
     String FORMAT_DDMMYYYY = "dd/MM/yyyy";
     String FORMAT_DDMMYYYY_HHMMSS = "dd/MM/yyyy HH:mm:ss";
+    String FORMAT_YYYYMMDD_HHMMSS = "yyyy-MM-ddThh:mm:ss.mmmZ";
 
     String REQUEST_PROPERTY_USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
 

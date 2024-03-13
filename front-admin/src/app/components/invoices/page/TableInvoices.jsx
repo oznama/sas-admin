@@ -76,18 +76,22 @@ export const TableInvoices = ({
         }
     }, []);
 
-    const handledSelect = (projectIdParam, orderIdParam, id) => {
-        if( !projectId || !orderIdParam ) {
+    const handledSelect = (projectKey, orderNum, id) => {
+        if( !projectId || !orderId ) {
             dispatch(setCurrentTab(3));
             dispatch(setCurrentOrdTab(2));
         }
         if ( permissions.canAdminOrd ) {
-            const urlRedirect = `/project/${ projectIdParam }/order/${ orderIdParam }/invoice/${ id }/edit`;
+            const urlRedirect = `/project/${ projectKey }/order/${ orderNum }/invoice/${ id }/edit`;
             navigate(urlRedirect);
         }
     }
 
     const handleAddInvoice = () => {
+        if( !projectId || !orderId ) {
+            dispatch(setCurrentTab(3));
+            dispatch(setCurrentOrdTab(2));
+        }
         navigate(`/project/${ projectId ? projectId : 0 }/order/${ orderId ? orderId : 0 }/invoice/add`);
     }
 
@@ -127,8 +131,8 @@ export const TableInvoices = ({
         return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ statusDesc }</span>);
     }
 
-    const deleteInvoice = (id, active) => {
-        deleteLogic(id).then( response => {
+    const deleteInvoice = (invoiceNum, active) => {
+        deleteLogic(invoiceNum).then( response => {
             if(response.code && response.code !== 200) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
@@ -142,7 +146,6 @@ export const TableInvoices = ({
     }
 
     const renderRows = () => invoices && invoices.map(({
-        id,
         invoiceNum,
         issuedDate,
         paymentDate,
@@ -151,15 +154,17 @@ export const TableInvoices = ({
         taxStr,
         totalStr,
         status,
-        orderId: odrId,
-        projectId,
+        orderNum,
+        projectKey,
         active
-    }) => (
-        <tr key={ id }>
+    }, index) => (
+        <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ invoiceNum }</th>
             <td className="text-center" style={ styleTableRow }>{ issuedDate }</td>
             <td className="text-center" style={ styleTableRow }>{ paymentDate }</td>
             { orderId && (<td className="text-center" style={ styleTableRow }>{ percentage }</td>) }
+            { permissions.isAdminRoot && !orderId && <td className="text-center" style={ styleTableRow }>{ orderNum }</td> }
+            { permissions.isAdminRoot && !projectId && <td className="text-center" style={ styleTableRow }>{ projectKey }</td> }
             <td className="text-center" style={ styleTableRow }>{ renderStatus(status) }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ amountStr }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ taxStr }</td>
@@ -168,7 +173,7 @@ export const TableInvoices = ({
                 <button type="button" 
                     className={`btn btn-${ active && permissions.canEditOrd ? 'success' : 'primary' } btn-sm`} 
                     style={ styleTableRowBtn } 
-                    onClick={ () => handledSelect(projectId, odrId, id) }>
+                    onClick={ () => handledSelect(projectKey, orderNum, invoiceNum) }>
                     <span><i className={`bi bi-${ active && permissions.canEditOrd ? 'pencil-square' : 'eye'}`}></i></span>
                 </button>
             </td>
@@ -179,7 +184,7 @@ export const TableInvoices = ({
                             className={`btn btn-${ active ? 'danger' : 'warning'} btn-sm`}
                             style={ styleTableRowBtn }
                             disabled={ status === 2000800002 || ( status === 2000800003 && orderPaid.amount >= order.amount ) }
-                            onClick={ () => deleteInvoice(id, active) }>
+                            onClick={ () => deleteInvoice(invoiceNum, active) }>
                             <span><i className={`bi bi-${ active ? 'trash' : 'folder-symlink'}`}></i></span>
                         </button>
                     </td>
@@ -202,6 +207,8 @@ export const TableInvoices = ({
                             <th className="text-center fs-6" scope="col">Fecha Emisi&oacute;n</th>
                             <th className="text-center fs-6" scope="col">Fecha Pago</th>
                             { orderId && (<th className="text-center fs-6" scope="col">Porcentaje</th>) }
+                            { permissions.isAdminRoot && !orderId && <th className="text-center fs-6" scope="col">Orden</th> }
+                            { permissions.isAdminRoot && !projectId && <th className="text-center fs-6" scope="col">Proyecto</th> }
                             <th className="text-center fs-6" scope="col">Status</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             <th className="text-center fs-6" scope="col">Iva</th>
@@ -220,6 +227,8 @@ export const TableInvoices = ({
                                 <th></th>
                                 <th></th>
                                 { orderId && (<th className="text-center fs-6" scope="col">{ orderPaid.percentage }</th>) }
+                                { permissions.isAdminRoot && !orderId && <th></th> }
+                                { permissions.isAdminRoot && !projectId && <th></th> }
                                 <td className="text-center fs-6" scope="col">{ renderStatus(orderPaid.status) }</td>
                                 <th className="text-end fs-6" scope="col">{ orderPaid.amountStr }</th>
                                 <th className="text-end fs-6" scope="col">{ orderPaid.taxStr }</th>
