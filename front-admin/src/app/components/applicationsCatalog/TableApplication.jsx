@@ -25,7 +25,7 @@ export const TableApplication = ({
     const onChangeFilter = async ({ target }) => {
         const value = target.value;
         setFilter(value);
-        await fetchApplications(value); // Esperamos a que se actualice el estado antes de llamar fetchChilds
+        await fetchApplications(currentPage); // Esperamos a que se actualice el estado antes de llamar fetchChilds
     };
     
     const fetchApplications = (page) => {
@@ -35,7 +35,7 @@ export const TableApplication = ({
                 displayNotification(dispatch, response.message, alertType.error);
             }
             setCatalogApplications(response.content);
-            setTotalCatalogApplication(response.length);
+            setTotalCatalogApplication(response.totalElements);
         }).catch(error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
@@ -43,18 +43,17 @@ export const TableApplication = ({
     }
 
     useEffect(() => {
-        console.log('Se imprime variable global'+JSON.stringify(app, null, 2));
-        fetchApplications(filter); // Ahora se ejecutará cada vez que filter cambie
+        fetchApplications(currentPage); // Ahora se ejecutará cada vez que filter cambie
     }, [filter]); 
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchApplications(filter); // Actualizado
+        fetchApplications(currentPage); // Actualizado
     }
 
     const onCancelModal = () => {
         //dispatch( setModalChild(null) );
-        fetchApplications(filter);
+        fetchApplications(currentPage);
     }
     // const showModal = catalogChild => dispatch( setModalChild(  <FormApplication catalogChild={ catalogChild } onCancelModal={ onCancelModal } /> ) );
 
@@ -77,30 +76,33 @@ export const TableApplication = ({
                 maxLength={ 100 } autoComplete='off'
                 value={ filter } required onChange={ async (e) => { await onChangeFilter(e); fetchChilds(filter); } } /> */}
                 <input name="filter" type="text" className="form-control" placeholder="Escribe para filtrar..." maxLength={ 100 } autoComplete='off' value={ filter } required onChange={ onChangeFilter }/>
-            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchApplications(filter) }>
+            <button type="button" className="btn btn-outline-primary" onClick={ () => fetchApplications(currentPage) }>
                 <i className="bi bi-search"></i>
             </button>
         </div>
     )
 
-    const renderHeader = () => (
-        <div className="d-flex justify-content-between align-items-center">
-            { renderSearcher() }
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalCatalogApplications }
-                pageSize={ pageSize }
-                onPageChange={ page => onPaginationClick(page) } 
-            />
-            { renderAddButton() }
-        </div>
-    )
+    const renderHeader = () => {
+        console.log(currentPage)
+        console.log(totalCatalogApplications)
+        console.log(pageSize)
+        
+        return (
+            <div className="d-flex justify-content-between align-items-center">
+                { renderSearcher() }
+                <Pagination
+                    currentPage={ currentPage + 1 }
+                    totalCount={ totalCatalogApplications }
+                    pageSize={ pageSize }
+                    onPageChange={ page => onPaginationClick(page) } 
+                />
+                { renderAddButton() }
+            </div>
+        )
+    }
 
     const handledSelect = id => {
-        console.log("El catalogChild es:"+id);
-        console.log("El catalogChild es:"+id);
         const catalogChild = catalogApplications.find( cat => cat.name === id );
-        console.log("El catalogChild es:"+JSON.stringify(catalogChild, null, 2));
         dispatch(setApp(catalogChild));
         navigate(`/application/add`);
         // showModal(catalogChild);
