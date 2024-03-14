@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +92,18 @@ public class ProjectApplicationController {
                                                         @PathVariable("id") Long id) throws CustomException {
     log.info("Finding project by id");
     return ResponseEntity.ok(service.findByProjectKeyAndId(projectKey, id));
+  }
+
+  @GetMapping("/pendings")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar todos los proyectos",
+          nickname = "/findPendingsByEmployee")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(Pageable pageable) throws CustomException {
+    log.info("Finding all pendings");
+    return ResponseEntity.ok(service.findPendingsByEmployee(pageable));
   }
 
 }

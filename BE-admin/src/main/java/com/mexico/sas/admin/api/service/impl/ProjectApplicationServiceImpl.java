@@ -9,6 +9,7 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Application;
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.ProjectApplication;
 import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
@@ -17,10 +18,14 @@ import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -149,6 +154,22 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         log.debug("Finding project application with projectKey: {} and application: {}", projectKey, application);
         return parseFromEntity(repository.findByProjectAndApplicationAndActiveIsTrueAndEliminateIsFalse(new Project(projectKey), new Application(application))
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, application))));
+    }
+
+    @Override
+    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(Pageable pageable) throws CustomException {
+        Long roleId = getCurrentUser().getRoleId();
+        Page<ProjectApplication> projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
+                repository.findPendings(new Date(), pageable) : repository.findPendings(new Employee(getCurrentUser().getUserId()), new Date(), pageable);
+        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
+        projectApplications.forEach( pa -> {
+            try {
+                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
+            } catch (CustomException e) {
+                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
+            }
+        });
+        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
     }
 
     private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
