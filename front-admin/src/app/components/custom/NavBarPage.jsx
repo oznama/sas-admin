@@ -13,6 +13,8 @@ export const NavBarPage = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [showTabAdmin, setShowTabAdmin] = useState(false);
 
+  const userAdmin = user && user.role && user.role.id < 4;
+
   useEffect(() => {
     
     const handleAdminTabOnBlur = event => {
@@ -59,7 +61,7 @@ export const NavBarPage = () => {
     
   }
   
-  const renderTabAdmin = () => (
+  const renderTabAdmin = () => userAdmin && (
     <li className={ `nav-item dropdown ${ showTabAdmin ? 'show' : '' }` } ref={ refAdminTab }>
         <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabAdmin } onClick={ () => setShowTabAdmin(!showTabAdmin) }>
           Administraci&oacute;n
@@ -89,7 +91,7 @@ export const NavBarPage = () => {
             <li className="nav-item">
               <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
                 onClick={ () => setCurrentTab(0) } to="/">
-                Proyectos
+                { userAdmin ? 'Proyectos' : 'Pendientes' }
               </NavLink>
             </li>
             { renderTabOrders() }

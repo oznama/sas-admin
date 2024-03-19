@@ -41,7 +41,6 @@ export const handleDateStr = ( strDate ) => {
 }
 
 const convertDateToUTC = ( strDate ) => {
-    console.log( "convertDateToUTC - start", strDate );
     const dateParts = strDate.split("/");
     return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
 };

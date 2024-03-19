@@ -157,10 +157,19 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(Pageable pageable) throws CustomException {
+    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(String filter, Pageable pageable) throws CustomException {
+        boolean hasFilter = filter != null && !filter.isEmpty();
+        log.debug("Finding pedings{}", ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
         Long roleId = getCurrentUser().getRoleId();
         Page<ProjectApplication> projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
-                repository.findPendings(new Date(), pageable) : repository.findPendings(new Employee(getCurrentUser().getUserId()), new Date(), pageable);
+                (
+                        !hasFilter ? repository.findPendings(new Date(), pageable) :
+                                repository.findPendingsByFilter(filter, new Date(), pageable)
+                ) :
+                (
+                        !hasFilter ? repository.findPendings(new Employee(getCurrentUser().getUserId()), new Date(), pageable) :
+                                repository.findPendingsByFilter(filter, new Employee(getCurrentUser().getUserId()), new Date(), pageable)
+                );
         List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {

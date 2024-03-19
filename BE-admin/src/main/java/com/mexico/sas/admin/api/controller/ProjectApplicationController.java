@@ -101,9 +101,9 @@ public class ProjectApplicationController {
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(Pageable pageable) throws CustomException {
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
     log.info("Finding all pendings");
-    return ResponseEntity.ok(service.findPendingsByEmployee(pageable));
+    return ResponseEntity.ok(service.findPendingsByEmployee(filter, pageable));
   }
 
 }
