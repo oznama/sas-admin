@@ -4,6 +4,7 @@ import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import com.mexico.sas.admin.api.dto.role.*;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.model.Role;
 import com.mexico.sas.admin.api.model.RolePermission;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,8 @@ public interface RolePermissionService {
   RolePermission findEntityById(Long id) throws CustomException;
   List<PermissionFindDto> findAllPermissions();
   List<PermissionFindDto> findByRoleId(Long roleId);
+
+  List<RolePermission> findEntityByRole(Role role);
   void deleteLogic(Long id) throws CustomException;
   void delete(Long id) throws CustomException;
 }

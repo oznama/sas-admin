@@ -122,7 +122,7 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
 
   @Override
   public List<PermissionFindDto> findByRoleId(Long roleId) {
-    List<RolePermission> rolePermissions = repository.findByRole(new Role(roleId));
+    List<RolePermission> rolePermissions = findEntityByRole(new Role(roleId));
     List<PermissionFindDto> permissionFindDtos = new ArrayList<>();
     rolePermissions.forEach( rolePermission -> {
       try {
@@ -137,6 +137,11 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
   }
 
   @Override
+  public List<RolePermission> findEntityByRole(Role role) {
+    return repository.findByRole(role);
+  }
+
+  @Override
   public void deleteLogic(Long id) throws CustomException {
     log.debug("Delete logic: {}", id);
     RolePermission rolePermission = findEntityById(id);
@@ -148,19 +153,12 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
 
   @Override
   public void delete(Long id) throws CustomException {
-    //findEntityById(id);
-    RolePermission rolePermission = findEntityById(id);
     try{
-      //repository.deleteById(id);
-      rolePermission.getRole().getPermissions().remove(rolePermission);
-      rolePermission.setRole(null);
-      repository.delete(rolePermission);
-      /*save(RolePermission.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");*/
-      save(RolePermission.class.getSimpleName(), rolePermission.getId(), CatalogKeys.LOG_DETAIL_DELETE, "TODO");
+      repository.deleteById(id);
+      save(RolePermission.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
     } catch (Exception e) {
       //throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
       throw new CustomException(e.getMessage());
-
     }
   }
 

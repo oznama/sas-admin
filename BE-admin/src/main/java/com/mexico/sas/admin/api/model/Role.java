@@ -31,7 +31,7 @@ public class Role implements Serializable {
   private Boolean active;
   private Boolean eliminate;
 
-  @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "role")
   private List<RolePermission> permissions;
 
   @OneToMany(mappedBy = "role")
