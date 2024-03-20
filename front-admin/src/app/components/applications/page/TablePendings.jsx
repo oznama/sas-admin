@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { getPendings } from '../../../services/ProjectService';
 import { displayNotification, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
 import { alertType } from '../../custom/alerts/types/types';
@@ -11,13 +10,13 @@ import { setModalChild } from '../../../../store/modal/modalSlice';
 import { FormPending } from './FormPending';
 
 export const TablePendings = ({
-    pageSize = 10
+    pageSize = 10,
+    renderByUrl = false
 }) => {
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
-    const { permissions } = useSelector( state => state.auth );
+    const { user, permissions } = useSelector( state => state.auth );
     const { project } = useSelector( state => state.projectReducer );
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -65,8 +64,6 @@ export const TablePendings = ({
     }
 
     const handledSelect = application => {
-        //dispatch(setCurrentTab( permissions.canEditProj ? 1 : 2));
-        //navigate(`/project/${key}/edit`);
         dispatch(setModalChild( <FormPending application={application} onCancelModal={onCancelModal} /> ));
     }
 
@@ -99,7 +96,7 @@ export const TablePendings = ({
         </tr>
     ));
 
-    return (
+    const renderTable = () => (
         <div>
             <div className="d-flex justify-content-between align-items-center">
                 { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
@@ -138,6 +135,17 @@ export const TablePendings = ({
                 onPageChange={ page => onPaginationClick(page) } 
             />
         </div>
+    )
+
+    const renderPage = () => (
+        <div className='px-5'>
+            <h4 className="card-title fw-bold">Pendientes</h4>
+            { user.role.id === 3 ? <div>Pendientes de Selene</div> : renderTable() }
+        </div>
+    )
+
+    return (
+        renderByUrl ? renderPage() : renderTable()
     )
 }
 

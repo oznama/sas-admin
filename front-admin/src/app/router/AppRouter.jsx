@@ -10,12 +10,14 @@ import { ApplicationRouter } from '../components/applicationsCatalog/Application
 import { adminRouter } from '../components/admin/adminRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
+import { TablePendings } from '../components/applications/page/TablePendings';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
+        <Route path="pendings" element={ <TablePendings renderByUrl={true} /> } />
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         {/* <Route path="catalog" element={ <CatalogPage /> } /> */}
