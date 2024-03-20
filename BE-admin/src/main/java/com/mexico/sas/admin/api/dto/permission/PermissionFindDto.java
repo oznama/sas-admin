@@ -17,5 +17,6 @@ public class PermissionFindDto implements Serializable {
   private String name;
   private String description;
   private Boolean active;
+  private Long idRolePermission;
 
 }

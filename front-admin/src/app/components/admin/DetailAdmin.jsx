@@ -69,14 +69,59 @@ export const DetailAdmin = () => {
     
     const onSubmit = event => {
         event.preventDefault()
-        const data = new FormData(event.target)
-        const request = Object.fromEntries(data.entries());
-        console.log('Guardado',request);
-        console.log('Seleccionados',selected);
-        console.log('Seleccionados guardados',permissionByRole);
-        console.log('Seleccionados guardados',permissionByRoleResp);
-        // updateChild(request);
-        // navigate('/admin');
+        // const data = new FormData(event.target)
+        // const request = Object.fromEntries(data.entries());
+        deleteMissingIds();
+        printMissingSelected();
+        //updateRole(request);
+        navigate('/admin');
+    }
+    
+    const selectedNames = selected; // Copia los nombres seleccionados
+
+    const selectedIds = permissionByRoleResp
+        .filter(item => selectedNames.includes(item.name))
+        .map(item => item.idRolePermission);
+
+    const deleteMissingIds = () => {
+        permissionByRoleResp.forEach(item => {
+            if (!selectedIds.includes(item.idRolePermission)) {
+                console.log('dato eliminao: ',item.idRolePermission);
+                deleteChild(item.idRolePermission);
+            }
+        });
+    };
+
+    const permissionNames = permissionByRoleResp.map(item => item.name);
+
+    const printMissingSelected = () => {
+        selected.forEach(name => {
+            if (!permissionNames.includes(name)) {
+                const dsave = permission.find(item => item.name === name);
+                const dato = '{"permissionId":'+dsave.id+', "roleId":'+role.id+'}';
+                const datoJ = JSON.parse(dato);
+                console.log('Dato agregado: ', datoJ);
+                saveChild(datoJ);
+            }
+        });
+    };
+
+
+    const deleteChild = id => {
+        for (let index = 0; index < permissionByRoleResp.length; index++) {
+            deleteLogic(id).then( response => {
+                if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+                } else {
+                displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
+                fetchRoles('');
+                }
+            }).catch(error => {
+                console.log(error);
+                displayNotification(dispatch, genericErrorMsg, alertType.error);
+            });
+        }
+        
     }
 
     const onClickBack = () => {
@@ -101,13 +146,26 @@ export const DetailAdmin = () => {
         </ul>
     )
 
-    const updateChild = request => {
+    const updateRole = request => {
         update(role.id, request).then( response => {
             if(response.code && response.code !== 201) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
                 dispatch(setRole(request));
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
+
+    const saveChild = request => {
+        savePermissions(request).then( response => {
+            if(response.code && response.code !== 201) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
             }
         }).catch(error => {
             console.log(error);

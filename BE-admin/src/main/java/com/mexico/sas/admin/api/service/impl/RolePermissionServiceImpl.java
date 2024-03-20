@@ -127,6 +127,7 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
     rolePermissions.forEach( rolePermission -> {
       try {
         PermissionFindDto permissionFindDto = from_M_To_N(rolePermission.getPermission(), PermissionFindDto.class);
+        permissionFindDto.setIdRolePermission(rolePermission.getId());
         permissionFindDtos.add(permissionFindDto);
       } catch (CustomException e) {
         log.warn("Error to parse permission {}, error: {}", rolePermission.getId(), e.getMessage());
@@ -154,10 +155,12 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
       //repository.deleteById(id);
       rolePermission.getRole().getPermissions().remove(rolePermission);
       rolePermission.setRole(null);
+      log.debug("Se esta intentando eliminar: {}",id);
       repository.delete(rolePermission);
       /*save(RolePermission.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");*/
       save(RolePermission.class.getSimpleName(), rolePermission.getId(), CatalogKeys.LOG_DETAIL_DELETE, "TODO");
     } catch (Exception e) {
+      e.printStackTrace();
       //throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
       throw new CustomException(e.getMessage());
 
@@ -172,6 +175,7 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
 //      if(e instanceof BadRequestException)
 //        throw e;
 //    }
+    log.debug("Se imprime el serRole: {}, permissionId: {}",rolePermissionDto.getRoleId(), rolePermissionDto.getPermissionId());
     rolePermission.setRole(roleRepository.findById(rolePermissionDto.getRoleId()).get());
     rolePermission.setPermission(permissionRepository.findById(rolePermissionDto.getPermissionId()).get());
   }
