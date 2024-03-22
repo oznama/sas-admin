@@ -269,9 +269,15 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
-        projectApplicationPaggeableDto.setDesignStatusDesc(catalogService.findById(projectApplication.getDesignStatus()).getValue());
-        projectApplicationPaggeableDto.setDevelopmentStatusDesc(catalogService.findById(projectApplication.getDevelopmentStatus()).getValue());
-        projectApplicationPaggeableDto.setEndStatusDesc(catalogService.findById(projectApplication.getEndStatus()).getValue());
+        if( projectApplication.getDesignStatus() != null ) {
+            projectApplicationPaggeableDto.setDesignStatusDesc(catalogService.findById(projectApplication.getDesignStatus()).getValue());
+        }
+        if( projectApplication.getDevelopmentStatus() != null ) {
+            projectApplicationPaggeableDto.setDevelopmentStatusDesc(catalogService.findById(projectApplication.getDevelopmentStatus()).getValue());
+        }
+        if( projectApplication.getEndStatus() != null ) {
+            projectApplicationPaggeableDto.setEndStatusDesc(catalogService.findById(projectApplication.getEndStatus()).getValue());
+        }
         return projectApplicationPaggeableDto;
     }
 
