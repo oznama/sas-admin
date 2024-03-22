@@ -157,19 +157,62 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(String filter, Pageable pageable) throws CustomException {
+    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(String filter, Pageable pageable) {
         boolean hasFilter = filter != null && !filter.isEmpty();
-        log.debug("Finding pedings{}", ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
         Long roleId = getCurrentUser().getRoleId();
-        Page<ProjectApplication> projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
+        Long employeeId = getCurrentUser().getEmployeeId();
+        log.debug("Finding pedings for user: {} with role: {} and employeeId: {}{}", getCurrentUser().getUserId(), roleId, employeeId,
+                ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
+        Page<ProjectApplication> projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) ||
+                roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
                 (
                         !hasFilter ? repository.findPendings(new Date(), pageable) :
                                 repository.findPendingsByFilter(filter, new Date(), pageable)
                 ) :
                 (
-                        !hasFilter ? repository.findPendings(new Employee(getCurrentUser().getUserId()), new Date(), pageable) :
-                                repository.findPendingsByFilter(filter, new Employee(getCurrentUser().getUserId()), new Date(), pageable)
+                        !hasFilter ? repository.findPendings(new Employee(employeeId), new Date(), pageable) :
+                                repository.findPendingsByFilter(filter, new Employee(employeeId), new Date(), pageable)
                 );
+        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
+        projectApplications.forEach( pa -> {
+            try {
+                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
+            } catch (CustomException e) {
+                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
+            }
+        });
+        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
+    }
+
+    @Override
+    public Page<ProjectApplicationPaggeableDto> findCurrentsByEmployee(String filter, Pageable pageable) {
+        boolean hasFilter = filter != null && !filter.isEmpty();
+        Long employeeId = getCurrentUser().getEmployeeId();
+        log.debug("Finding currents for user: {} and employeeId: {}{}", getCurrentUser().getUserId(), employeeId,
+                ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
+        Page<ProjectApplication> projectApplications = !hasFilter ?
+                repository.findCurrents(new Employee(employeeId), new Date(), pageable) :
+                repository.findCurrentsByFilter(filter, new Employee(employeeId), new Date(), pageable);
+        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
+        projectApplications.forEach( pa -> {
+            try {
+                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
+            } catch (CustomException e) {
+                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
+            }
+        });
+        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
+    }
+
+    @Override
+    public Page<ProjectApplicationPaggeableDto> findFuturesByEmployee(String filter, Pageable pageable) {
+        boolean hasFilter = filter != null && !filter.isEmpty();
+        Long employeeId = getCurrentUser().getEmployeeId();
+        log.debug("Finding futures for user: {} and employeeId: {}{}", getCurrentUser().getUserId(), employeeId,
+                ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
+        Page<ProjectApplication> projectApplications = !hasFilter ?
+                repository.findFutures(new Employee(employeeId), new Date(), pageable) :
+                repository.findFuturesByFilter(filter, new Employee(employeeId), new Date(), pageable);
         List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {

@@ -96,14 +96,38 @@ public class ProjectApplicationController {
 
   @GetMapping("/pendings")
   @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar todos los proyectos",
+          value = "Servicio para recuperar todos las aplicaciones de proyectos pendientes",
           nickname = "/findPendingsByEmployee")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) throws CustomException {
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
     log.info("Finding all pendings");
     return ResponseEntity.ok(service.findPendingsByEmployee(filter, pageable));
+  }
+
+  @GetMapping("/currents")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar las aplicaciones de proyectos en curso",
+          nickname = "/findCurrentsByEmployee")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findCurrentsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
+    log.info("Finding all currents");
+    return ResponseEntity.ok(service.findCurrentsByEmployee(filter, pageable));
+  }
+
+  @GetMapping("/futures")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar las aplicaciones de proyectos proximas",
+          nickname = "/findFuturesByEmployee")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findFuturesByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
+    log.info("Finding all currents");
+    return ResponseEntity.ok(service.findFuturesByEmployee(filter, pageable));
   }
 
 }

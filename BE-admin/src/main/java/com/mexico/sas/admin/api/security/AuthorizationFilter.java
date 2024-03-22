@@ -78,6 +78,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         principal.setName(Utils.getFullname(employee));
         principal.setRoleId(user.getRole().getId());
         principal.setCompanyId(employee.getCompanyId());
+        principal.setEmployeeId(employee.getId());
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(principal, user.getPassword(), null);
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
