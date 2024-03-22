@@ -4,14 +4,14 @@ import { TablePendings } from '../applications/page/TablePendings';
 
 export const Home = () => {
 
-    const { user } = useSelector( state => state.auth );
+    const { permissions } = useSelector( state => state.auth );
 
-    const userAdmin = user && user.role && user.role.id < 4;
-
-    return (
+    const renderProjects = () => (
         <div className='px-5'>
-            <h4 className="card-title fw-bold">{ userAdmin ? 'Proyectos' : 'Pendientes' }</h4>
-            { userAdmin ? <TableProject /> : <TablePendings /> }
+            <h4 className="card-title fw-bold">Proyectos</h4>
+            <TableProject />
         </div>
-    );
+    )
+
+    return permissions.isAdminSas ? renderProjects() : <TablePendings />
 };

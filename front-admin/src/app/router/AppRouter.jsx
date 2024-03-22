@@ -11,13 +11,14 @@ import { adminRouter } from '../components/admin/adminRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
 import { TablePendings } from '../components/applications/page/TablePendings';
+import { FormReport } from '../components/admin/FormReport';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
-        <Route path="pendings" element={ <TablePendings renderByUrl={true} /> } />
+        <Route path="pendings" element={ <TablePendings /> } />
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         {/* <Route path="catalog" element={ <CatalogPage /> } /> */}
@@ -29,6 +30,7 @@ export const AppRouter = () => (
         <Route path="companyType/*" element={ <CatalogConexionRouter catalogId={1000000009}/> } />
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
         <Route  path="admin/*" element={ <adminRouter />} />
+        <Route path="reports/:reportName" element={ <FormReport /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

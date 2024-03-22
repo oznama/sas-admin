@@ -49,7 +49,7 @@ export const FormPending = ({
 
     return (
         <div className='p-5 bg-white rounded-3'>
-            <h2>{ `Actualizacion de estatus para ${application.application}` }</h2>
+            <h2>{ `Actualización de estatus para ${application.application}` }</h2>
                 
             <div className="row text-start">
                 <div className='col-6'>

@@ -117,12 +117,12 @@ export const deleteApplicationLogic = async(id) => {
     return await response.json();
 };
 
-export const getPendings = async(page=0, size=10, filter='') => {
+export const getPendings = async(service, page=0, size=10, filter='') => {
     const request = {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlProjects = `${context}/application/pendings?page=${page}&size=${size}${ filterParam }`;
+    const urlProjects = `${context}/application/${service}?page=${page}&size=${size}${ filterParam }`;
     const response = await api( urlProjects, request );
     const projectApplication = await response.json();
     return projectApplication;
