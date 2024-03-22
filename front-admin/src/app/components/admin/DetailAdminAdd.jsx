@@ -2,85 +2,43 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { InputText } from "../custom/InputText";
-import { displayNotification, genericErrorMsg } from "../../helpers/utils";
+import { Select } from "../custom/Select";
+import { displayNotification, genericErrorMsg, handleDateStr } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
 import 'react-dual-listbox/lib/react-dual-listbox.css';
-import DualListBox from "react-dual-listbox";
 // import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
 // import { save, update, getCatalogById } from '../../services/CatalogService';
 import { setRole  } from '../../../store/admin/adminSlice';
-import { update } from '../../services/RoleService';
-import { getRolesPermissions, getRolePermissionsByRoleId, savePermissions, deleteLogic} from "../../services/RolesPermissionsService";
+import { save } from '../../services/RoleService';
 
-export const DetailAdmin = () => {
+export const DetailAdminAdd = () => {
     const { role } = useSelector( state => state.adminReducer );
-    // const { name } = useParams();
     const { permissions} = useSelector( state => state.auth );
     const [currentTab, setCurrentTab] = useState(1);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [name, setName] = useState(role.name);
-    const [description, setDescription] = useState(role.description);
-    const [selected, setSelected] = useState([]);
-    
-    const [totalPermissionByRoles, setTotalPermissionByRoles] = useState(0);  
-    const [permissionByRole, setPermissionByRoles] = useState([]);
-    const [permissionByRoleResp, setPermissionByRolesResp] = useState([]);
-    const [totalPermission, setTotalPermission] = useState(0);  
-    const [permission, setPermission] = useState([]);
+    const [name, setValue] = useState('');
+    const [description, setDescription] = useState('');
 
-    const onChangeValue = ({ target }) => setName(target.value);
+    const onChangeValue = ({ target }) => setValue(target.value);
     const onChangeDescription = ({ target }) => setDescription(target.value);
 
-    const [active, setActive] = useState(role.active);
+    const [active, setActive] = useState('');
 
-    const options = permission.reduce((acc, role) => {
-        // Extraer el primer elemento de la descripción para obtener la etiqueta del grupo
-        const groupLabel = role.description.split('-')[0];
-        // Verificar si el grupo ya existe en el acumulador
-        const existingGroup = acc.find(group => group.label === groupLabel);
-        // Si el grupo no existe, agregarlo al acumulador
-        if (!existingGroup) {
-            acc.push({
-                label: groupLabel,
-                options: [{ value: role.name, label: role.description }]
-            });
-        } else {
-            // Si el grupo ya existe, agregar la opción al grupo existente
-            existingGroup.options.push({ value: role.name, label: role.description });
-        }
-        
-        return acc;
-    }, []);
-
-
-    const renderDualList = () => {
-        return (
-            <DualListBox
-                options={options}
-                selected={selected}
-                onChange={(newValue) => setSelected(newValue)}
-            />
-        );
-    }
     
-    const isModeEdit = ((role.id && !permissions.canAdminUsr) || (role.id && !active ));
+    const isModeEdit = (!permissions.canAdminUsr);
     
     const onSubmit = event => {
         event.preventDefault()
         const data = new FormData(event.target)
         const request = Object.fromEntries(data.entries());
-        console.log('Guardado',request);
-        console.log('Seleccionados',selected);
-        console.log('Seleccionados guardados',permissionByRole);
-        console.log('Seleccionados guardados',permissionByRoleResp);
-        // updateChild(request);
-        // navigate('/admin');
+        saveChild(request);
+        navigate('/admin');
     }
 
     const onClickBack = () => {
-        if ( (!permissions.canAdminUsr && currentTab == 2) || currentTab === 1 ) {
+        if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
         navigate('/admin')
         } else {
         setCurrentTab(currentTab - 1);
@@ -101,12 +59,12 @@ export const DetailAdmin = () => {
         </ul>
     )
 
-    const updateChild = request => {
-        update(role.id, request).then( response => {
+    const saveChild = request => {
+        save(request).then( response => {
             if(response.code && response.code !== 201) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
-                displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
+                displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
                 dispatch(setRole(request));
             }
         }).catch(error => {
@@ -115,32 +73,9 @@ export const DetailAdmin = () => {
         });
     }
 
-    const fetchRoles = () => {
-        getRolePermissionsByRoleId(role.id)
-        .then( response => {
-            const idsArray = response.map( item => item.name );
-            setSelected(idsArray);
-            setPermissionByRoles(idsArray);
-            setPermissionByRolesResp(response);
-            setTotalPermissionByRoles(response.totalElements);
-        }).catch( error => {
-            console.log(error);
-        });
-    }
-
-    const fetchAllRoles = () =>{
-        getRolesPermissions()
-        .then( response => {
-            setPermission(response);
-            setTotalPermission(response.totalElements);
-        }).catch( error => {
-            console.log(error);
-        })
-    }
-    
     useEffect(() => {
-        fetchRoles();
-        fetchAllRoles();
+        // setValue(obj.value)
+        // fetchSelects()
     }, [])
     
     const renderDetail = () => {
@@ -161,9 +96,8 @@ export const DetailAdmin = () => {
                         </div>
                     </div>
                     
-                {renderDualList()}
                     <div className="pt-3 d-flex flex-row-reverse">
-                        {permissions.canAdminUsr &&(<button type="submit" className="btn btn-primary" >Guardar</button>)}
+                        {permissions.canEditEmp &&(<button type="submit" className="btn btn-primary" >Guardar</button>)}
                         &nbsp;
                         <button type="button" className="btn btn-danger" onClick={ () => navigate(`/admin`) }>{permissions.canAdminUsr ? 'Cancelar' : 'Regresar'}</button>
                     </div>

@@ -44,6 +44,9 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   private RoleService roleService;
 
   @Autowired
+  private RolePermissionService rolePermissionService;
+
+  @Autowired
   private CatalogService catalogService;
 
   @Autowired
@@ -178,8 +181,11 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
 
   private User getUser(Employee employee, String password) throws CustomException {
     log.debug("Finding user {} ...", employee.getEmail());
-    return repository.findByEmployeeIdAndPasswordAndEliminateFalse(employee.getId(), password).orElseThrow(() ->
+    User user = repository.findByEmployeeIdAndPasswordAndEliminateFalse(employee.getId(), password).orElseThrow(() ->
             new LoginException(I18nResolver.getMessage(I18nKeys.LOGIN_USER_NOT_AUTHORIZED)));
+
+    user.getRole().setPermissions( rolePermissionService.findEntityByRole(user.getRole()) );
+    return user;
   }
 
   private UserDto parse(User user) throws CustomException {

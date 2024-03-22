@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const catalogSlice = createSlice({
-    name: 'catalogReducer',
+    name: 'adminReducer',
     initialState: {
         obj: {},
         catalogName: '',
