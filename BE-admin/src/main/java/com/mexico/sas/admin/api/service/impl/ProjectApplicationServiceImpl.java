@@ -44,6 +44,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private CatalogService catalogService;
+
     @Override
     public void save(ProjectApplicationDto projectApplicationDto) throws CustomException {
         ProjectApplication projectApplication = from_M_To_N(projectApplicationDto, ProjectApplication.class);
@@ -266,6 +269,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectApplicationPaggeableDto.setDesignStatusDesc(catalogService.findById(projectApplication.getDesignStatus()).getValue());
+        projectApplicationPaggeableDto.setDevelopmentStatusDesc(catalogService.findById(projectApplication.getDevelopmentStatus()).getValue());
+        projectApplicationPaggeableDto.setEndStatusDesc(catalogService.findById(projectApplication.getEndStatus()).getValue());
         return projectApplicationPaggeableDto;
     }
 
@@ -300,6 +306,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplication.setLeader(employeeService.findEntityById(projectApplicationDto.getLeaderId()));
         projectApplication.setDeveloper(employeeService.findEntityById(projectApplicationDto.getDeveloperId()));
         projectApplication.setCreatedBy(getCurrentUser().getUserId());
+        projectApplication.setDesignStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
+        projectApplication.setDevelopmentStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
+        projectApplication.setEndStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
     }
 
     private void updateProjectAmount(Project project) {

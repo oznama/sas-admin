@@ -28,8 +28,11 @@ public class ProjectApplication implements Serializable {
     private Integer hours;
     private Date startDate;
     private Date designDate;
+    private Long designStatus;
     private Date developmentDate;
+    private Long developmentStatus;
     private Date endDate;
+    private Long endStatus;
     private String observations;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;

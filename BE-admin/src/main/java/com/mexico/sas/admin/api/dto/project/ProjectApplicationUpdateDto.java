@@ -3,7 +3,6 @@ package com.mexico.sas.admin.api.dto.project;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -26,7 +25,10 @@ public class ProjectApplicationUpdateDto implements Serializable {
     private Long developerId;
     private String startDate;
     private String designDate;
+    private Long designStatus;
     private String developmentDate;
+    private Long developmentStatus;
     private String endDate;
+    private Long endStatus;
     private String observations;
 }
