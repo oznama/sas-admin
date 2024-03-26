@@ -7,6 +7,7 @@ import com.mexico.sas.admin.api.model.ProjectApplication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,36 +19,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProjectApplicationRepository extends JpaRepository<ProjectApplication, Long> {
+public interface ProjectApplicationRepository extends JpaRepository<ProjectApplication, Long>, JpaSpecificationExecutor<ProjectApplication> {
     Optional<ProjectApplication> findByProjectAndId(Project project, Long id);
     Optional<ProjectApplication> findByProjectAndApplicationAndActiveIsTrueAndEliminateIsFalse(Project project, Application application);
     List<ProjectApplication> findByProjectOrderByIdAsc(Project project);
 
     List<ProjectApplication> findByProjectAndActiveIsTrueAndEliminateIsFalse(Project project);
-
-    @Query("select pa from ProjectApplication pa where ((pa.designDate < :date and pa.designStatus != :status) or (pa.developmentDate < :date and pa.developmentStatus != :status) or (pa.endDate < :date and pa.endStatus != :status)) order by pa.designDate, pa.developmentDate, pa.endDate")
-    Page<ProjectApplication> findPendings(Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (lower(pa.project.key) like lower(concat('%', :filter,'%')) or lower(pa.application.name) like lower(concat('%', :filter,'%'))) and ((pa.designDate < :date and pa.designStatus != :status) or (pa.developmentDate < :date and pa.developmentStatus != :status) or (pa.endDate < :date and pa.endStatus != :status)) order by pa.designDate, pa.developmentDate, pa.endDate")
-    Page<ProjectApplication> findPendingsByFilter(String filter, Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (pa.leader = :employee or pa.developer = :employee) and ((pa.designDate < :date and pa.designStatus != :status) or (pa.developmentDate < :date and pa.developmentStatus != :status) or (pa.endDate < :date and pa.endStatus != :status)) order by pa.designDate, pa.developmentDate, pa.endDate")
-    Page<ProjectApplication> findPendings(Employee employee, Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (lower(pa.project.key) like lower(concat('%', :filter,'%')) or lower(pa.application.name) like lower(concat('%', :filter,'%'))) and (pa.leader = :employee or pa.developer = :employee) and ((pa.designDate < :date and pa.designStatus != :status) or (pa.developmentDate < :date and pa.developmentStatus != :status) or (pa.endDate < :date and pa.endStatus != :status)) order by pa.designDate, pa.developmentDate, pa.endDate")
-    Page<ProjectApplication> findPendingsByFilter(String filter,  Employee employee, Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (pa.leader = :employee or pa.developer = :employee) and pa.startDate <= :date and ((pa.designDate >= :date and pa.developmentDate >= :date and pa.endDate >= :date) or ((pa.designDate < :date and pa.designStatus = :status) or (pa.developmentDate < :date and pa.developmentStatus = :status) or (pa.endDate < :date and pa.endStatus = :status))) order by pa.startDate")
-    Page<ProjectApplication> findCurrents(Employee employee, Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (lower(pa.project.key) like lower(concat('%', :filter,'%')) or lower(pa.application.name) like lower(concat('%', :filter,'%'))) and (pa.leader = :employee or pa.developer = :employee) and pa.startDate <= :date and ((pa.designDate >= :date and pa.developmentDate >= :date and pa.endDate >= :date) or ((pa.designDate < :date and pa.designStatus = :status) or (pa.developmentDate < :date and pa.developmentStatus = :status) or (pa.endDate < :date and pa.endStatus = :status))) order by pa.startDate")
-    Page<ProjectApplication> findCurrentsByFilter(String filter, Employee employee, Date date, Long status, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (pa.leader = :employee or pa.developer = :employee) and pa.startDate > :date order by pa.startDate")
-    Page<ProjectApplication> findFutures(Employee employee, Date date, Pageable pageable);
-
-    @Query("select pa from ProjectApplication pa where (lower(pa.project.key) like lower(concat('%', :filter,'%')) or lower(pa.application.name) like lower(concat('%', :filter,'%'))) and (pa.leader = :employee or pa.developer = :employee) and pa.startDate > :date order by pa.startDate")
-    Page<ProjectApplication> findFuturesByFilter(String filter,  Employee employee, Date date, Pageable pageable);
 
     @Transactional
     @Modifying

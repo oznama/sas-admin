@@ -231,14 +231,6 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                         installationDate, startDate, endDate, criteriaBuilder, root), pageable);
     }
 
-    private Long countByFilter(String filter, Company company, Long createdBy,
-                                       Long status, Long projectManagerId, Boolean active,
-                                       Date installationDate, Date startDate, Date endDate) {
-        return repository.count((Specification<Project>) (root, query, criteriaBuilder) ->
-                getPredicateDinamycFilter(filter, company, createdBy, status, projectManagerId, active,
-                        installationDate, startDate, endDate, criteriaBuilder, root));
-    }
-
     /**
      *
      * @param filter
