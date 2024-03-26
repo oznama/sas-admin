@@ -11,15 +11,15 @@ import { ApplicationRouter } from '../components/applicationsCatalog/Application
 import { AdminRouter } from '../components/admin/adminRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
-import { TablePendings } from '../components/applications/page/TablePendings';
 import { FormReport } from '../components/admin/FormReport';
+import { PagePendings } from '../components/applications/page/PagePendings';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
-        <Route path="pendings" element={ <TablePendings /> } />
+        <Route path="pendings" element={ <PagePendings /> } />
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         {/* <Route path="catalog" element={ <CatalogPage /> } /> */}

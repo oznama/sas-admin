@@ -122,7 +122,7 @@ export const getPendings = async(service, page=0, size=10, filter='') => {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlProjects = `${context}/application/${service}?page=${page}&size=${size}${ filterParam }`;
+    const urlProjects = `${context}/application/pendings/${service}?page=${page}&size=${size}${ filterParam }`;
     const response = await api( urlProjects, request );
     const projectApplication = await response.json();
     return projectApplication;

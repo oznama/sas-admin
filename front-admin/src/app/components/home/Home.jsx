@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { TableProject } from '../projects/TableProjects';
-import { TablePendings } from '../applications/page/TablePendings';
+import { PagePendings } from '../applications/page/PagePendings';
 
 export const Home = () => {
 
@@ -13,5 +13,5 @@ export const Home = () => {
         </div>
     )
 
-    return permissions.isAdminSas ? renderProjects() : <TablePendings />
+    return permissions.isAdminSas ? renderProjects() : <PagePendings />
 };

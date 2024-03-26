@@ -9,65 +9,42 @@ import { Pagination } from '../../custom/pagination/page/Pagination';
 import { setModalChild } from '../../../../store/modal/modalSlice';
 import { FormPending } from './FormPending';
 
+export const pendingType = {
+    nxt: 'futures',
+    crt: 'currents',
+    due: 'pendings'
+}
+
 export const TablePendings = ({
+    title,
+    styleTitle,
+    service,
     pageSize = 10
 }) => {
 
     const dispatch = useDispatch();
 
-    const { user, permissions } = useSelector( state => state.auth );
+    const { permissions } = useSelector( state => state.auth );
 
-    const nxt = 'futures';
-    const crt = 'currents';
-    const due = 'pendings'
+    const [currentPage, setCurrentPage] = useState(0);
+    const [projects, setProjects] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [filter, setFilter] = useState('');
 
-    const [currentPendPage, setCurrentPendPage] = useState(0);
-    const [pendings, setPendings] = useState([]);
-    const [totalPendings, setTotalPendings] = useState(0);
-    const [filterPending, setFilterPending] = useState('');
-
-    const [currentCurrPage, setCurrentCurrPage] = useState(0);
-    const [currents, setCurrents] = useState([]);
-    const [totalCurrents, setTotalCurrents] = useState(0);
-    const [filterCurrents, setFilterCurrents] = useState('');
-
-    const [currentNextPage, setCurrentNextPage] = useState(0);
-    const [nexts, setNexts] = useState([]);
-    const [totalNexts, setTotalNexts] = useState(0);
-    const [filterNexts, setFilterNexts] = useState('');
-
-    const onChangeFilterPending = ({ target }) => {
-        setCurrentPendPage(0)
-        setFilterPending(target.value);
-        fetchProjects(due, 0, target.value);
+    const onChangeFilter = ({ target }) => {
+        setCurrentPage(0)
+        setFilter(target.value);
+        fetchProjects(0, target.value);
     };
 
-    const onChangeFilterCurrents = ({ target }) => {
-        setCurrentCurrPage(0)
-        setFilterCurrents(target.value);
-        fetchProjects(crt, 0, target.value);
-    };
 
-    const onChangeFilterNexts = ({ target }) => {
-        setCurrentNextPage(0)
-        setFilterNexts(target.value);
-        fetchProjects(nxt, 0, target.value);
-    };
-
-    const fetchProjects = (service, page, filter) => {
+    const fetchProjects = (page, filter) => {
         getPendings(service, page, pageSize, filter).then( response => {
             if( response.code && response.code === 401 ) {
                 displayNotification(dispatch, response.message, alertType.error);
-            }
-            if( service === crt) {
-                setCurrents(response.content);
-                setTotalCurrents(response.totalElements);
-            } else if ( service === due ) {
-                setPendings(response.content);
-                setTotalPendings(response.totalElements);
-            } else if ( service === nxt ) {
-                setNexts(response.content);
-                setTotalNexts(response.totalElements);
+            } else {
+                setProjects(response.content);
+                setTotal(response.totalElements);
             }
         }).catch( error => {
             console.log(error);
@@ -76,42 +53,25 @@ export const TablePendings = ({
     }
 
     useEffect(() => {
-        fetchProjects(due, currentPendPage, filterPending);
-        fetchProjects(crt, currentPendPage, filterPending);
-        fetchProjects(nxt, currentPendPage, filterPending);
-    }, [currentPendPage, currentCurrPage, currentNextPage]);
+        fetchProjects(currentPage, filter);
+    }, [currentPage]);
 
-    const onPaginationClick = (page, service) => {
-        if( service === crt) {
-            setCurrentCurrPage(page);
-            fetchProjects(crt, currentPendPage, filterPending);
-        } else if ( service === due ) {
-            setCurrentPendPage(page);
-            fetchProjects(due, currentPendPage, filterPending);
-        } else if ( service === nxt ) {
-            setCurrentNextPage(page);
-            fetchProjects(nxt, currentNextPage, filterNexts);
-        }
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchProjects(currentPage, filter);
     }
 
-    const onClean = service => {
-        if( service === crt) {
-            setFilterCurrents('');
-            setCurrentCurrPage(0);
-            fetchProjects(crt, 0, '');
-        } else if ( service === due ) {
-            setFilterPending('');
-            setCurrentPendPage(0);
-            fetchProjects(due, 0, '');
-        } else if ( service === nxt ) {
-            setFilterNexts('');
-            setCurrentNextPage(0);
-            fetchProjects(nxt, 0, '');
-        }
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchProjects(0, '');
     }
 
-    const onCancelModal = () => {
+    const onCancelModal = refresh => {
         dispatch( setModalChild(null) );
+        if(refresh) {
+            fetchProjects(0, filter);
+        }
     }
 
     const handledSelect = application => {
@@ -119,27 +79,32 @@ export const TablePendings = ({
     }
 
     const renderStatus = status => {
-        const backColor = status ? 'bg-success' : 'bg-danger';
+        const backColor = status ? 'success' : 'danger';
         const desc = status ? 'Activo' : 'Inactivo';
-        return (<span className={ `w-50 px-2 m-3 rounded ${backColor} text-white` }>{ desc }</span>);
+        return (<span className={ `w-50 px-2 m-3 rounded bg-${backColor} text-white` }>{ desc }</span>);
     }
 
-    const renderRows = (service, projects) => projects.map((pa, index) => (
+    const renderDate = (status, desc) => {
+        const backColor = status === 2001000002 ? 'primary' : (status === 2001000001 ? 'danger' : ( status === 2001000003 ? 'success' : 'bg-warning' ));
+        return (<span className={ `w-50 px-2 m-3 rounded bg-${backColor} text-white` }>{ desc }</span>);
+    }
+
+    const renderRows = projects => projects.map((pa, index) => (
         <tr key={ index }>
             <th className="text-center" style={ styleTableRow } scope="row">{ pa.application }</th>
             <td className="text-center" style={ styleTableRow }>{ pa.projectKey }</td>
             <td className="text-center" style={ styleTableRow }>{ pa.hours }</td>
             <td className="text-center" style={ styleTableRow }>{ pa.startDate }</td>
-            <td className="text-center" style={ styleTableRow }>{ pa.designDate }</td>
-            <td className="text-center" style={ styleTableRow }>{ pa.developmentDate }</td>
-            <td className="text-center" style={ styleTableRow }>{ pa.endDate }</td>
+            <td className="text-center" style={ styleTableRow }>{ renderDate(pa.designStatus, pa.designDate) }</td>
+            <td className="text-center" style={ styleTableRow }>{ renderDate(pa.developmentStatus, pa.developmentDate) }</td>
+            <td className="text-center" style={ styleTableRow }>{ renderDate(pa.endStatus, pa.endDate) }</td>
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ pa.amount }</td>) }
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ pa.tax }</td>) }
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ pa.total }</td>) }
             <td className="text-start" style={ styleTableRow }>{ pa.leader }</td>
             <td className="text-start" style={ styleTableRow }>{ pa.developer }</td>
-            { service !== nxt && <td className="text-center">{ renderStatus(pa.active) }</td> }
-            { service !== nxt && <td className="text-center" style={ styleTableRow }>
+            { service !== pendingType.nxt && <td className="text-center">{ renderStatus(pa.active) }</td> }
+            { service !== pendingType.nxt && !permissions.isAdminSas && <td className="text-center" style={ styleTableRow }>
                 <button type="button" className="btn btn-success btn-sm" style={ styleTableRowBtn } onClick={ () => handledSelect(pa) }>
                     <span><i className="bi bi-pencil"></i></span>
                 </button>
@@ -147,32 +112,23 @@ export const TablePendings = ({
         </tr>
     ));
 
-    const renderTable = ({
-        title,
-        styleTitle,
-        service,
-        filterValue,
-        onChangeFilter,
-        projects,
-        currentPage,
-        totalCount
-    }) => (
+    const renderTable = () => (
         <div className="border rounded">
             <div className="d-flex justify-content-between align-items-center mx-2">
                 <h4 className={`card-title fw-bold text-${styleTitle}`}>Pendientes { title }</h4>
                 { projects.length > 0 && <InputSearcher
                     name={ 'filter' }
                     placeholder={ 'Escribe para filtrar...' }
-                    value={ filterValue }
+                    value={ filter }
                     onChange={ onChangeFilter }
-                    onClean={ () => onClean(service) }
+                    onClean={ () => onClean() }
                     width={ '25' }
                 />}
                 <Pagination
                     currentPage={ currentPage + 1 }
-                    totalCount={ totalCount }
+                    totalCount={ total }
                     pageSize={ pageSize }
-                    onPageChange={ page => onPaginationClick(page, service) } 
+                    onPageChange={ page => onPaginationClick(page) } 
                 />
             </div>
             <div className='table-responsive text-nowrap mx-2'>
@@ -191,79 +147,28 @@ export const TablePendings = ({
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Total</th>) }
                             <th className="text-center fs-6" scope="col">L&iacute;der SAS</th>
                             <th className="text-center fs-6" scope="col">Desarrollador SAS</th>
-                            { service !== nxt && <th className="text-center fs-6" scope="col">Estatus</th> }
-                            { service !== nxt && <th className="text-center fs-6" scope="col">Editar</th> }
+                            { service !== pendingType.nxt && <th className="text-center fs-6" scope="col">Estatus</th> }
+                            { service !== pendingType.nxt && !permissions.isAdminSas && <th className="text-center fs-6" scope="col">Editar</th> }
                         </tr>
                     </thead>
                     <tbody>
-                        { renderRows(service, projects) }
+                        { renderRows(projects) }
                     </tbody>
                 </table>
             </div>
         </div>
     )
 
-    const renderPendings = () => pendings && (
-        <div className='px-5'>
-            { 
-                user.role.id === 3 ? <div>Pendientes de Selene</div>
-                : renderTable({
-                    title: 'Vencidos',
-                    styleTitle: 'danger',
-                    service: due,
-                    filterValue: filterPending, 
-                    onChangeFilter: onChangeFilterPending, 
-                    projects: pendings, 
-                    currentPage: currentPendPage, 
-                    totalCount: totalPendings
-                })
-            }
-        </div>
-    )
-
-    const renderCurrents = () => !permissions.isAdminSas && currents && (
-        <div className='px-5'>
-            { 
-                renderTable({
-                    title: 'Vigentes',
-                    styleTitle: 'success',
-                    service: crt,
-                    filterValue: filterCurrents, 
-                    onChangeFilter: onChangeFilterCurrents, 
-                    projects: currents, 
-                    currentPage: currentCurrPage, 
-                    totalCount: totalCurrents
-                })
-            }
-        </div>
-    )
-
-    const renderNexts = () => !permissions.isAdminSas && nexts && (
-        <div className='px-5'>
-            { 
-                renderTable({
-                    title: 'Próximos',
-                    styleTitle: 'primary',
-                    service: nxt,
-                    filterValue: filterNexts, 
-                    onChangeFilter: onChangeFilterNexts, 
-                    projects: nexts, 
-                    currentPage: currentNextPage, 
-                    totalCount: totalNexts
-                })
-            }
-        </div>
-    )
-
     return (
-        <div className="d-flex flex-column gap-3 my-3">
-            { renderPendings() }
-            { renderCurrents() }
-            { renderNexts() }
+        projects && <div className='px-5'>
+            { renderTable() }
         </div>
     )
 }
 
 TablePendings.propTypes = {
+    title: PropTypes.string.isRequired,
+    styleTitle: PropTypes.string.isRequired,
+    service: PropTypes.string.isRequired,
     pageSize: PropTypes.number,
 }
