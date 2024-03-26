@@ -197,17 +197,17 @@ public class ChangeBeanUtils extends Utils {
         if( validateLongNoRequiredUpdate(projectApplication.getDesignStatus(), projectApplicationUpdateDto.getDesignStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de diseño",
                     projectApplication.getDesignStatus(), projectApplicationUpdateDto.getDesignStatus())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setDesignStatus(projectApplication.getDesignStatus());
+            projectApplication.setDesignStatus(projectApplicationUpdateDto.getDesignStatus());
         }
         if( validateLongNoRequiredUpdate(projectApplication.getDevelopmentStatus(), projectApplicationUpdateDto.getDevelopmentStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de desarrollo",
                     projectApplication.getDevelopmentStatus(), projectApplicationUpdateDto.getDevelopmentStatus())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setDevelopmentStatus(projectApplication.getDevelopmentStatus());
+            projectApplication.setDevelopmentStatus(projectApplicationUpdateDto.getDevelopmentStatus());
         }
         if( validateLongNoRequiredUpdate(projectApplication.getEndStatus(), projectApplicationUpdateDto.getEndStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de cierre",
                     projectApplication.getEndStatus(), projectApplicationUpdateDto.getEndStatus())).append(GeneralKeys.JUMP_LINE);
-            projectApplication.setEndStatus(projectApplication.getEndStatus());
+            projectApplication.setEndStatus(projectApplicationUpdateDto.getEndStatus());
         }
         return sb.toString().trim();
     }

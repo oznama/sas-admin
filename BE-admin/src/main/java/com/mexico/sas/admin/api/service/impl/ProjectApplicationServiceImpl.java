@@ -160,62 +160,38 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
     }
 
     @Override
-    public Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(String filter, Pageable pageable) {
+    public Page<ProjectApplicationPaggeableDto> findPendings(String type, String filter, Pageable pageable) throws CustomException {
         boolean hasFilter = filter != null && !filter.isEmpty();
         Long roleId = getCurrentUser().getRoleId();
         Long employeeId = getCurrentUser().getEmployeeId();
-        log.debug("Finding pedings for user: {} with role: {} and employeeId: {}{}", getCurrentUser().getUserId(), roleId, employeeId,
+        Date currentDate = stringToDate(dateToString(new Date(), GeneralKeys.FORMAT_DDMMYYYY, true), GeneralKeys.FORMAT_DDMMYYYY);
+        log.debug("Finding pedings of type {}, for user: {} with role: {} and employeeId: {}, currentDate: {}{}",
+                type, getCurrentUser().getUserId(), roleId, employeeId, currentDate,
                 ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
-        Page<ProjectApplication> projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) ||
+        Page<ProjectApplication> projectApplications = null;
+
+        if( type.equals(GeneralKeys.PENDING_TYPE_DUE) ) {
+            projectApplications = roleId.equals(CatalogKeys.ROLE_ROOT) ||
                 roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE) ?
                 (
-                        !hasFilter ? repository.findPendings(new Date(), pageable) :
-                                repository.findPendingsByFilter(filter, new Date(), pageable)
+                        !hasFilter ? repository.findPendings(currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable) :
+                                repository.findPendingsByFilter(filter, currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable)
                 ) :
                 (
-                        !hasFilter ? repository.findPendings(new Employee(employeeId), new Date(), pageable) :
-                                repository.findPendingsByFilter(filter, new Employee(employeeId), new Date(), pageable)
+                        !hasFilter ? repository.findPendings(new Employee(employeeId), currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable) :
+                                repository.findPendingsByFilter(filter, new Employee(employeeId), currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable)
                 );
-        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
-        projectApplications.forEach( pa -> {
-            try {
-                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
-            } catch (CustomException e) {
-                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
-            }
-        });
-        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
-    }
-
-    @Override
-    public Page<ProjectApplicationPaggeableDto> findCurrentsByEmployee(String filter, Pageable pageable) {
-        boolean hasFilter = filter != null && !filter.isEmpty();
-        Long employeeId = getCurrentUser().getEmployeeId();
-        log.debug("Finding currents for user: {} and employeeId: {}{}", getCurrentUser().getUserId(), employeeId,
-                ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
-        Page<ProjectApplication> projectApplications = !hasFilter ?
-                repository.findCurrents(new Employee(employeeId), new Date(), pageable) :
-                repository.findCurrentsByFilter(filter, new Employee(employeeId), new Date(), pageable);
-        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
-        projectApplications.forEach( pa -> {
-            try {
-                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
-            } catch (CustomException e) {
-                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
-            }
-        });
-        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
-    }
-
-    @Override
-    public Page<ProjectApplicationPaggeableDto> findFuturesByEmployee(String filter, Pageable pageable) {
-        boolean hasFilter = filter != null && !filter.isEmpty();
-        Long employeeId = getCurrentUser().getEmployeeId();
-        log.debug("Finding futures for user: {} and employeeId: {}{}", getCurrentUser().getUserId(), employeeId,
-                ( hasFilter ? String.format(" whit filter: %s", filter) : "" ) );
-        Page<ProjectApplication> projectApplications = !hasFilter ?
-                repository.findFutures(new Employee(employeeId), new Date(), pageable) :
-                repository.findFuturesByFilter(filter, new Employee(employeeId), new Date(), pageable);
+        } else if ( type.equals(GeneralKeys.PENDING_TYPE_CRT) ) {
+            projectApplications = !hasFilter ?
+                    repository.findCurrents(new Employee(employeeId), currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable) :
+                    repository.findCurrentsByFilter(filter, new Employee(employeeId), currentDate, CatalogKeys.PROJ_APP_STATUS_COMPLETE, pageable);
+        } else if ( type.equals(GeneralKeys.PEDNING_TYPE_NXT) ) {
+            projectApplications = !hasFilter ?
+                    repository.findFutures(new Employee(employeeId), currentDate, pageable) :
+                    repository.findFuturesByFilter(filter, new Employee(employeeId), currentDate, pageable);
+        } else {
+            throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_VALUE_INVALID), type);
+        }
         List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
         projectApplications.forEach( pa -> {
             try {

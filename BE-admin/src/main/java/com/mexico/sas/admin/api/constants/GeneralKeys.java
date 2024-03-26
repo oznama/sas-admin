@@ -39,4 +39,8 @@ public interface GeneralKeys {
 
     String FOOTER_TOTAL = "total";
     String ROW_TOTAL = "paid";
+
+    String PENDING_TYPE_DUE = "pendings";
+    String PENDING_TYPE_CRT = "currents";
+    String PEDNING_TYPE_NXT = "futures";
 }

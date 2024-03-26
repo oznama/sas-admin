@@ -94,40 +94,18 @@ public class ProjectApplicationController {
     return ResponseEntity.ok(service.findByProjectKeyAndId(projectKey, id));
   }
 
-  @GetMapping("/pendings")
+  @GetMapping("/pendings/{type}")
   @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar todos las aplicaciones de proyectos pendientes",
-          nickname = "/findPendingsByEmployee")
+          value = "Servicio para recuperar pendientes",
+          nickname = "/findPendings")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
   })
-  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendingsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
+  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findPendings(@PathVariable("type") String type,
+                                                                                     @RequestParam(required = false) String filter,
+                                                                                     Pageable pageable) throws CustomException {
     log.info("Finding all pendings");
-    return ResponseEntity.ok(service.findPendingsByEmployee(filter, pageable));
-  }
-
-  @GetMapping("/currents")
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar las aplicaciones de proyectos en curso",
-          nickname = "/findCurrentsByEmployee")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
-  })
-  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findCurrentsByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
-    log.info("Finding all currents");
-    return ResponseEntity.ok(service.findCurrentsByEmployee(filter, pageable));
-  }
-
-  @GetMapping("/futures")
-  @ApiOperation(httpMethod = "GET",
-          value = "Servicio para recuperar las aplicaciones de proyectos proximas",
-          nickname = "/findFuturesByEmployee")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = ProjectApplicationPaggeableDto.class, responseContainer = "List")
-  })
-  public ResponseEntity<Page<ProjectApplicationPaggeableDto>> findFuturesByEmployee(@RequestParam(required = false) String filter, Pageable pageable) {
-    log.info("Finding all currents");
-    return ResponseEntity.ok(service.findFuturesByEmployee(filter, pageable));
+    return ResponseEntity.ok(service.findPendings(type, filter, pageable));
   }
 
 }

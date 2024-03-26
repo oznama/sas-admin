@@ -23,8 +23,5 @@ public interface ProjectApplicationService {
     ProjectApplicationDto findByProjectKeyAndId(String projectKey, Long id) throws CustomException;
     ProjectApplicationDto findByProjectAndApplication(String projectKey, String application) throws CustomException;
 
-    Page<ProjectApplicationPaggeableDto> findPendingsByEmployee(String filter, Pageable pageable);
-    Page<ProjectApplicationPaggeableDto> findCurrentsByEmployee(String filter, Pageable pageable);
-    Page<ProjectApplicationPaggeableDto> findFuturesByEmployee(String filter, Pageable pageable);
-
+    Page<ProjectApplicationPaggeableDto> findPendings(String type, String filter, Pageable pageable) throws CustomException;
 }
