@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { getPendings } from '../../../services/ProjectService';
-import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
+import { displayNotification, genericErrorMsg, stringToDate, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
 import { alertType } from '../../custom/alerts/types/types';
 import { InputSearcher } from '../../custom/InputSearcher';
 import { Pagination } from '../../custom/pagination/page/Pagination';
@@ -23,6 +24,7 @@ export const TablePendings = ({
 }) => {
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { permissions } = useSelector( state => state.auth );
 
@@ -70,7 +72,7 @@ export const TablePendings = ({
     const onCancelModal = refresh => {
         dispatch( setModalChild(null) );
         if(refresh) {
-            fetchProjects(0, filter);
+            navigate( /*permissions.isAdminSas ? '/pendings' :*/ '/', { replace: true });
         }
     }
 
@@ -85,8 +87,14 @@ export const TablePendings = ({
     }
 
     const renderDate = (status, desc) => {
-        const backColor = status === 2001000002 ? 'primary' : (status === 2001000001 ? 'danger' : ( status === 2001000003 ? 'success' : 'bg-warning' ));
-        return (<span className={ `w-50 px-2 m-3 rounded bg-${backColor} text-white` }>{ desc }</span>);
+        const pDate = stringToDate(desc);
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        const dueDate = pDate < currentDate;
+        console.log('Render date', desc, pDate, currentDate, dueDate);
+        const backColor = status === 2001000003 || !dueDate && status === 2001000002 ? 'success' 
+        : (dueDate && status === 2001000001 ? 'danger' : ( dueDate && status === 2001000002 ? 'warning' : '') );
+        return (<span className={ `w-50 px-2 m-3 rounded bg-${backColor} text-${ backColor ? 'white' : 'dark'} }` }>{ desc }</span>);
     }
 
     const renderRows = projects => projects.map((pa, index) => (

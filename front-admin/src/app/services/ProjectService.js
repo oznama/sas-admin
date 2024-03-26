@@ -1,4 +1,5 @@
 import { api, getHeaders } from '../api/Api';
+import { pendingType } from '../components/applications/page/TablePendings';
 
 const context = 'projects';
 
@@ -122,7 +123,9 @@ export const getPendings = async(service, page=0, size=10, filter='') => {
         headers: getHeaders()
     }
     const filterParam = filter ? `&filter=${filter}` : ''
-    const urlProjects = `${context}/application/pendings/${service}?page=${page}&size=${size}${ filterParam }`;
+    const sortParam = (service === pendingType.nxt || service === pendingType.crt) ? '&sort=startDate,asc' : 
+    ( service === pendingType.due ? '&sort=designDate,asc&sort=developmentDate,asc&sort=endDate,asc' : '' );
+    const urlProjects = `${context}/application/pendings/${service}?page=${page}&size=${size}${ filterParam }${ sortParam }`;
     const response = await api( urlProjects, request );
     const projectApplication = await response.json();
     return projectApplication;
