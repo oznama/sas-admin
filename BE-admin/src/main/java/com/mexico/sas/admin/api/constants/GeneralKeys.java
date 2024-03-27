@@ -43,4 +43,5 @@ public interface GeneralKeys {
     String PENDING_TYPE_DUE = "pendings";
     String PENDING_TYPE_CRT = "currents";
     String PEDNING_TYPE_NXT = "futures";
+    String PENDING_TYPE_END = "completes";
 }

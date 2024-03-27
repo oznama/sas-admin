@@ -117,7 +117,7 @@ public class ChangeBeanUtils extends Utils {
     }
 
     public static String checkProjectApplication(ProjectApplication projectApplication, ProjectApplicationUpdateDto projectApplicationUpdateDto,
-                                                 EmployeeService employeeService) throws CustomException {
+                                                 EmployeeService employeeService, CatalogService catalogService) throws CustomException {
         StringBuilder sb = new StringBuilder();
         String currentDate = null;
         if( validateStringRequiredUpdate(projectApplication.getApplication().getName(), projectApplicationUpdateDto.getApplication()) ) {
@@ -196,17 +196,23 @@ public class ChangeBeanUtils extends Utils {
         }
         if( validateLongNoRequiredUpdate(projectApplication.getDesignStatus(), projectApplicationUpdateDto.getDesignStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de diseño",
-                    projectApplication.getDesignStatus(), projectApplicationUpdateDto.getDesignStatus())).append(GeneralKeys.JUMP_LINE);
+                    catalogService.findEntityById(projectApplication.getDesignStatus()).getValue(),
+                    catalogService.findEntityById(projectApplicationUpdateDto.getDesignStatus()).getValue()))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setDesignStatus(projectApplicationUpdateDto.getDesignStatus());
         }
         if( validateLongNoRequiredUpdate(projectApplication.getDevelopmentStatus(), projectApplicationUpdateDto.getDevelopmentStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de desarrollo",
-                    projectApplication.getDevelopmentStatus(), projectApplicationUpdateDto.getDevelopmentStatus())).append(GeneralKeys.JUMP_LINE);
+                    catalogService.findEntityById(projectApplication.getDevelopmentStatus()).getValue(),
+                    catalogService.findEntityById(projectApplicationUpdateDto.getDevelopmentStatus()).getValue()))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setDevelopmentStatus(projectApplicationUpdateDto.getDevelopmentStatus());
         }
         if( validateLongNoRequiredUpdate(projectApplication.getEndStatus(), projectApplicationUpdateDto.getEndStatus()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Estatus de cierre",
-                    projectApplication.getEndStatus(), projectApplicationUpdateDto.getEndStatus())).append(GeneralKeys.JUMP_LINE);
+                    catalogService.findEntityById(projectApplication.getEndStatus()).getValue(),
+                    catalogService.findEntityById(projectApplicationUpdateDto.getEndStatus()).getValue()))
+                    .append(GeneralKeys.JUMP_LINE);
             projectApplication.setEndStatus(projectApplicationUpdateDto.getEndStatus());
         }
         return sb.toString().trim();

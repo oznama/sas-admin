@@ -87,7 +87,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
                 throw e;
         }
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService);
+        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService, catalogService);
         if(!message.isEmpty()) {
             repository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -314,38 +314,52 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
             Predicate pDeveloper = builder.equal(root.get(ProjectApplication.Fields.developer).get(Employee.Fields.id), employeeId);
             predicates.add(builder.or(pLeader, pDeveloper));
         }
-
-        if( type.equals(GeneralKeys.PENDING_TYPE_DUE) ) {
-            Predicate pDesignDate = builder.lessThan(root.get(ProjectApplication.Fields.designDate), date);
-            Predicate pDesignStatus = builder.notEqual(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
-            Predicate pDevelopmentDate = builder.lessThan(root.get(ProjectApplication.Fields.developmentDate), date);
-            Predicate pDevelopmentStatus = builder.notEqual(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
-            Predicate pEndDate = builder.lessThan(root.get(ProjectApplication.Fields.endDate), date);
-            Predicate pEndStatus = builder.notEqual(root.get(ProjectApplication.Fields.endStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
-            Predicate pDesign = builder.and(pDesignDate, pDesignStatus);
-            Predicate pDevelopment = builder.and(pDevelopmentDate, pDevelopmentStatus);
-            Predicate pEnd = builder.and(pEndDate, pEndStatus);
+        // Fechas vencidas
+        Predicate pStartDueDate = builder.lessThanOrEqualTo(root.get(ProjectApplication.Fields.startDate), date);
+        Predicate pDesignDueDate = builder.lessThan(root.get(ProjectApplication.Fields.designDate), date);
+        Predicate pDevelopmentDueDate = builder.lessThan(root.get(ProjectApplication.Fields.developmentDate), date);
+        Predicate pEndDueDate = builder.lessThan(root.get(ProjectApplication.Fields.endDate), date);
+        // Estatus completos
+        Predicate pDesignStatus = builder.equal(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pDevelopmentStatus = builder.equal(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pEndStatus = builder.equal(root.get(ProjectApplication.Fields.endStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pEndStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.endStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        if( type.equals(GeneralKeys.PENDING_TYPE_DUE) ) { // Condiciones para pendientes
+            // Estatus no completos
+            Predicate pDesignStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+            Predicate pDevelopmentStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+            // Diseño vencido e incompleto
+            Predicate pDesign = builder.and(pDesignDueDate, pDesignStatusNoComplete);
+            // Desarrollo vencido e incompleto
+            Predicate pDevelopment = builder.and(pDevelopmentDueDate, pDevelopmentStatusNoComplete);
+            // Cierre vencido e incompleto
+            Predicate pEnd = builder.and(pEndDueDate, pEndStatusNoComplete);
+            // Condiciones para vencido e incompleto
             predicates.add(builder.or(pDesign, pDevelopment, pEnd));
-        } else if ( type.equals(GeneralKeys.PENDING_TYPE_CRT) ) {
-            predicates.add(builder.lessThanOrEqualTo(root.get(ProjectApplication.Fields.startDate), date));
-            Predicate pDesignDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.designDate), date);
-            Predicate pDevelopmentDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.developmentDate), date);
-            Predicate pEndDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.endDate), date);
-            Predicate pCurrentDate = builder.and(pDesignDate, pDevelopmentDate, pEndDate);
-
-//            Predicate pDevelopmentCurrentDate = builder.greaterThan(root.get(ProjectApplication.Fields.developmentDate), date);
-//            Predicate pEndCurrentDate = builder.greaterThan(root.get(ProjectApplication.Fields.endDate), date);
-//            Predicate pDesignStatus = builder.equal(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
-//            Predicate pDesign = builder.and(pDesignDate, pDesignStatus, pDevelopmentCurrentDate, pEndCurrentDate);
-//            Predicate pDevelopmentStatus = builder.equal(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
-//            Predicate pDevelopment = builder.and(pDevelopmentDate, pDevelopmentStatus, pEndCurrentDate);
-//            Predicate pEnd = builder.and(pEndDate, pDesignStatus, pDevelopmentStatus);
-//            Predicate pCompleteDate = builder.or(pDesign, pDevelopment, pEnd);
-
-            predicates.add(/*builder.or(*/pCurrentDate/*, pCompleteDate)*/);
-
-        } else if ( type.equals(GeneralKeys.PEDNING_TYPE_NXT) ) {
+        } else if ( type.equals(GeneralKeys.PENDING_TYPE_CRT) ) { // Condiciones para vigentes
+            // El proyecto ya arranco
+            predicates.add(pStartDueDate);
+            // Todas las fechas son vigentes
+            Predicate pDesignCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.designDate), date);
+            Predicate pDevelopmentCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.developmentDate), date);
+            Predicate pEndCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.endDate), date);
+            Predicate pCurrents = builder.and(pDesignCurrentNowDate, pDevelopmentCurrentNowDate, pEndCurrentNowDate);
+            // Diseño completado
+            Predicate pDesignComplete = builder.and(pDesignDueDate, pDesignStatus, pDevelopmentCurrentNowDate);
+            // Desarrollo completado
+            Predicate pDevelopmentComplete = builder.and(pDesignDueDate, pDesignStatus, pDevelopmentDueDate, pDevelopmentStatus, pEndCurrentNowDate, pEndStatusNoComplete);
+            // Diseño y desarrollo completo con cierre pendiente
+            Predicate pComplete = builder.or(pDesignComplete, pDevelopmentComplete);
+            // Vigente o completado parcial/totalmente
+            predicates.add(builder.or(pCurrents, pComplete));
+        } else if ( type.equals(GeneralKeys.PEDNING_TYPE_NXT) ) { // Condiciones para proximos
+            // Todos los proyectos con fecha vigente
             predicates.add(builder.greaterThan(root.get(ProjectApplication.Fields.startDate), date));
+        } else if ( type.equals(GeneralKeys.PENDING_TYPE_END)) {
+            // El proyecto ya arranco
+            predicates.add(pStartDueDate);
+            // Completado totalmente
+            predicates.add(builder.and(pDesignStatus, pDevelopmentStatus, pEndStatus));
         } else {
             log.warn("Type {} not supported!", type);
         }
