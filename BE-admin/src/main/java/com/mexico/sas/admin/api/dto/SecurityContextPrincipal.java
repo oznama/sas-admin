@@ -12,6 +12,7 @@ public class SecurityContextPrincipal {
     private String name;
     private Long roleId;
     private Long companyId;
+    private Long employeeId;
 
     public SecurityContextPrincipal(Long userId) {
         this.userId = userId;

@@ -7,15 +7,19 @@ import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { CompanyRouter } from '../components/company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
-import { adminRouter } from '../components/admin/adminRouter';
+//import { AdminRouter } from '../components/admin/AdminRouter';
+import { AdminRouter } from '../components/admin/adminRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
+import { FormReport } from '../components/admin/FormReport';
+import { PagePendings } from '../components/applications/page/PagePendings';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
+        <Route path="pendings" element={ <PagePendings /> } />
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         {/* <Route path="catalog" element={ <CatalogPage /> } /> */}
@@ -27,6 +31,7 @@ export const AppRouter = () => (
         <Route path="companyType/*" element={ <CatalogConexionRouter catalogId={1000000009}/> } />
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
         <Route  path="admin/*" element={ <adminRouter />} />
+        <Route path="reports/:reportName" element={ <FormReport /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

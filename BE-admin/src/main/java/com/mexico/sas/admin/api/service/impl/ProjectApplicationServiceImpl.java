@@ -9,6 +9,7 @@ import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.model.Application;
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.model.Project;
 import com.mexico.sas.admin.api.model.ProjectApplication;
 import com.mexico.sas.admin.api.repository.ProjectApplicationRepository;
@@ -17,10 +18,19 @@ import com.mexico.sas.admin.api.util.ChangeBeanUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -38,6 +48,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private CatalogService catalogService;
 
     @Override
     public void save(ProjectApplicationDto projectApplicationDto) throws CustomException {
@@ -74,7 +87,7 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
                 throw e;
         }
         ProjectApplication projectApplication = findEntityByApplicationId(projectApplicationId);
-        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService);
+        String message = ChangeBeanUtils.checkProjectApplication(projectApplication, projectApplicationUpdateDto, employeeService, catalogService);
         if(!message.isEmpty()) {
             repository.save(projectApplication);
             save(ProjectApplication.class.getSimpleName(), projectApplication.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
@@ -151,6 +164,21 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
                 .orElseThrow(() -> new NoContentException(I18nResolver.getMessage(I18nKeys.PROJECT_APPLICATION_NOT_FOUNT, application))));
     }
 
+    @Override
+    public Page<ProjectApplicationPaggeableDto> findPendings(String type, String filter, Pageable pageable) throws CustomException {
+        Date currentDate = stringToDate(dateToString(new Date(), GeneralKeys.FORMAT_DDMMYYYY, true), GeneralKeys.FORMAT_DDMMYYYY);
+        Page<ProjectApplication> projectApplications = findPendingsDinamyc(type, filter, currentDate, pageable);
+        List<ProjectApplicationPaggeableDto> projectApplicationPaggeableDtos = new ArrayList<>();
+        projectApplications.forEach( pa -> {
+            try {
+                projectApplicationPaggeableDtos.add(getProjectApplicationPaggeableDto(pa));
+            } catch (CustomException e) {
+                log.error("Impossible add project application {}, error: {}", pa.getId(), e.getMessage());
+            }
+        });
+        return new PageImpl<>(projectApplicationPaggeableDtos, pageable, projectApplications.getTotalElements());
+    }
+
     private ProjectApplicationDto parseFromEntity(ProjectApplication projectApplication) throws CustomException {
         ProjectApplicationDto projectApplicationDto = from_M_To_N(projectApplication, ProjectApplicationDto.class);
         projectApplicationDto.setProjectKey(projectApplication.getProject().getKey());
@@ -193,6 +221,15 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplicationPaggeableDto.setDesignDate(dateToString(projectApplication.getDesignDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setDevelopmentDate(dateToString(projectApplication.getDevelopmentDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectApplicationPaggeableDto.setEndDate(dateToString(projectApplication.getEndDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        if( projectApplication.getDesignStatus() != null ) {
+            projectApplicationPaggeableDto.setDesignStatusDesc(catalogService.findById(projectApplication.getDesignStatus()).getValue());
+        }
+        if( projectApplication.getDevelopmentStatus() != null ) {
+            projectApplicationPaggeableDto.setDevelopmentStatusDesc(catalogService.findById(projectApplication.getDevelopmentStatus()).getValue());
+        }
+        if( projectApplication.getEndStatus() != null ) {
+            projectApplicationPaggeableDto.setEndStatusDesc(catalogService.findById(projectApplication.getEndStatus()).getValue());
+        }
         return projectApplicationPaggeableDto;
     }
 
@@ -227,6 +264,9 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         projectApplication.setLeader(employeeService.findEntityById(projectApplicationDto.getLeaderId()));
         projectApplication.setDeveloper(employeeService.findEntityById(projectApplicationDto.getDeveloperId()));
         projectApplication.setCreatedBy(getCurrentUser().getUserId());
+        projectApplication.setDesignStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
+        projectApplication.setDevelopmentStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
+        projectApplication.setEndStatus(CatalogKeys.PROJ_APP_STATUS_PENDING);
     }
 
     private void updateProjectAmount(Project project) {
@@ -244,5 +284,86 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
                 .map( pa -> pa.getTotal() ).reduce(BigDecimal.ZERO, BigDecimal::add);
         log.debug(" :::::: Update project totals, AMOUNT: {} :::::: ", amount);
         projectService.updateAmounts(project.getKey(), amount, tax, total);
+    }
+
+    private Page<ProjectApplication> findPendingsDinamyc(String type, String filter, Date date, Pageable pageable) {
+        return repository.findAll( (Specification<ProjectApplication>) (root, query, criteriaBuilder) ->
+                getPredicatePendingsDinamyc(type, filter, date, criteriaBuilder, root), pageable);
+    }
+
+    private Predicate getPredicatePendingsDinamyc(String type, String filter, Date date, CriteriaBuilder builder, Root<ProjectApplication> root) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        Long roleId = getCurrentUser().getRoleId();
+        Long employeeId = getCurrentUser().getEmployeeId();
+
+        log.debug("Finding pedings of type {}, for user: {} with role: {} and employeeId: {}, currentDate: {}, filter: {}",
+                type, getCurrentUser().getUserId(), roleId, employeeId, date, filter );
+
+        // There is filter, add string filter
+        if(!StringUtils.isEmpty(filter)) {
+            String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+            Predicate pKey = builder.like(builder.lower(root.get(ProjectApplication.Fields.project).get(Project.Fields.key)), patternFilter);
+            Predicate pAppName = builder.like(builder.lower(root.get(ProjectApplication.Fields.application).get(Application.Fields.name)), patternFilter);
+            predicates.add(builder.or(pKey, pAppName));
+        }
+
+        // User is not admin, add employee filter
+        if(!(roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE))) {
+            Predicate pLeader = builder.equal(root.get(ProjectApplication.Fields.leader).get(Employee.Fields.id), employeeId);
+            Predicate pDeveloper = builder.equal(root.get(ProjectApplication.Fields.developer).get(Employee.Fields.id), employeeId);
+            predicates.add(builder.or(pLeader, pDeveloper));
+        }
+        // Fechas vencidas
+        Predicate pStartDueDate = builder.lessThanOrEqualTo(root.get(ProjectApplication.Fields.startDate), date);
+        Predicate pDesignDueDate = builder.lessThan(root.get(ProjectApplication.Fields.designDate), date);
+        Predicate pDevelopmentDueDate = builder.lessThan(root.get(ProjectApplication.Fields.developmentDate), date);
+        Predicate pEndDueDate = builder.lessThan(root.get(ProjectApplication.Fields.endDate), date);
+        // Estatus completos
+        Predicate pDesignStatus = builder.equal(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pDevelopmentStatus = builder.equal(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pEndStatus = builder.equal(root.get(ProjectApplication.Fields.endStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        Predicate pEndStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.endStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+        if( type.equals(GeneralKeys.PENDING_TYPE_DUE) ) { // Condiciones para pendientes
+            // Estatus no completos
+            Predicate pDesignStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.designStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+            Predicate pDevelopmentStatusNoComplete = builder.notEqual(root.get(ProjectApplication.Fields.developmentStatus), CatalogKeys.PROJ_APP_STATUS_COMPLETE);
+            // Diseño vencido e incompleto
+            Predicate pDesign = builder.and(pDesignDueDate, pDesignStatusNoComplete);
+            // Desarrollo vencido e incompleto
+            Predicate pDevelopment = builder.and(pDevelopmentDueDate, pDevelopmentStatusNoComplete);
+            // Cierre vencido e incompleto
+            Predicate pEnd = builder.and(pEndDueDate, pEndStatusNoComplete);
+            // Condiciones para vencido e incompleto
+            predicates.add(builder.or(pDesign, pDevelopment, pEnd));
+        } else if ( type.equals(GeneralKeys.PENDING_TYPE_CRT) ) { // Condiciones para vigentes
+            // El proyecto ya arranco
+            predicates.add(pStartDueDate);
+            // Todas las fechas son vigentes
+            Predicate pDesignCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.designDate), date);
+            Predicate pDevelopmentCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.developmentDate), date);
+            Predicate pEndCurrentNowDate = builder.greaterThanOrEqualTo(root.get(ProjectApplication.Fields.endDate), date);
+            Predicate pCurrents = builder.and(pDesignCurrentNowDate, pDevelopmentCurrentNowDate, pEndCurrentNowDate);
+            // Diseño completado
+            Predicate pDesignComplete = builder.and(pDesignDueDate, pDesignStatus, pDevelopmentCurrentNowDate);
+            // Desarrollo completado
+            Predicate pDevelopmentComplete = builder.and(pDesignDueDate, pDesignStatus, pDevelopmentDueDate, pDevelopmentStatus, pEndCurrentNowDate, pEndStatusNoComplete);
+            // Diseño y desarrollo completo con cierre pendiente
+            Predicate pComplete = builder.or(pDesignComplete, pDevelopmentComplete);
+            // Vigente o completado parcial/totalmente
+            predicates.add(builder.or(pCurrents, pComplete));
+        } else if ( type.equals(GeneralKeys.PEDNING_TYPE_NXT) ) { // Condiciones para proximos
+            // Todos los proyectos con fecha vigente
+            predicates.add(builder.greaterThan(root.get(ProjectApplication.Fields.startDate), date));
+        } else if ( type.equals(GeneralKeys.PENDING_TYPE_END)) {
+            // El proyecto ya arranco
+            predicates.add(pStartDueDate);
+            // Completado totalmente
+            predicates.add(builder.and(pDesignStatus, pDevelopmentStatus, pEndStatus));
+        } else {
+            log.warn("Type {} not supported!", type);
+        }
+
+        return builder.and(predicates.toArray(new Predicate[predicates.size()]));
     }
 }

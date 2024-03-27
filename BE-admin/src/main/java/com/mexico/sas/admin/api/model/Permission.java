@@ -31,7 +31,7 @@ public class Permission implements Serializable {
   private Date creationDate;
   private Long createdBy;
 
-  @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "permission")
   private List<RolePermission> permissions;
 
 }

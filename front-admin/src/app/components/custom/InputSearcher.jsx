@@ -6,11 +6,12 @@ export const InputSearcher = ({
     value,
     maxLength,
     onChange,
-    onClean
+    onClean,
+    width='50'
 }) => {
 
     return (
-        <div className="input-group w-50 py-1">
+        <div className={`input-group w-${width} py-1`}>
             <input name={ name } type="text" className="form-control padding-short" placeholder={ placeholder }
                 maxLength={ maxLength } autoComplete='off'
                 value={ value } onChange={ onChange }></input>

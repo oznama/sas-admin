@@ -6,6 +6,8 @@ import com.mexico.sas.admin.api.dto.project.ProjectApplicationPaggeableDto;
 import com.mexico.sas.admin.api.dto.project.ProjectApplicationUpdateDto;
 import com.mexico.sas.admin.api.exception.CustomException;
 import com.mexico.sas.admin.api.model.ProjectApplication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -21,4 +23,5 @@ public interface ProjectApplicationService {
     ProjectApplicationDto findByProjectKeyAndId(String projectKey, Long id) throws CustomException;
     ProjectApplicationDto findByProjectAndApplication(String projectKey, String application) throws CustomException;
 
+    Page<ProjectApplicationPaggeableDto> findPendings(String type, String filter, Pageable pageable) throws CustomException;
 }
