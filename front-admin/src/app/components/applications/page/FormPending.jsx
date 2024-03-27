@@ -64,12 +64,14 @@ export const FormPending = ({
     useEffect(() => {
         fetchSelects();
     }, [])
-    
+
     return (
         <div className='p-5 bg-white rounded-3'>
-            <h2>{ `Actualización de estatus para ${application.application}` }</h2>
+            <h2 className='text-center'>Actualizaci&oacute;n de estatus</h2>
+            <h4>{ `Clave: ${application.projectKey}` }</h4>
+            <h4>{ `Aplicación: ${application.application}` }</h4>
                 
-            <div className="row text-start">
+            <div className="row text-start py-2">
                 <div className='col-6'>
                     <DatePicker name="designDate" label="Analisis y dise&ntilde;o" value={ designDate } onChange={ (date) => onChangeDesignDate(date) } disabled={true} />
                 </div>

@@ -13,7 +13,8 @@ import { FormPending } from './FormPending';
 export const pendingType = {
     nxt: 'futures',
     crt: 'currents',
-    due: 'pendings'
+    due: 'pendings',
+    end: 'completes'
 }
 
 export const TablePendings = ({
@@ -32,6 +33,7 @@ export const TablePendings = ({
     const [projects, setProjects] = useState([]);
     const [total, setTotal] = useState(0);
     const [filter, setFilter] = useState('');
+    const [hasResult, setHasResult] = useState(false);
 
     const onChangeFilter = ({ target }) => {
         setCurrentPage(0)
@@ -47,6 +49,9 @@ export const TablePendings = ({
             } else {
                 setProjects(response.content);
                 setTotal(response.totalElements);
+                if( !hasResult ) {
+                    setHasResult(response.totalElements > 0);
+                }
             }
         }).catch( error => {
             console.log(error);
@@ -91,7 +96,6 @@ export const TablePendings = ({
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
         const dueDate = pDate < currentDate;
-        console.log('Render date', desc, pDate, currentDate, dueDate);
         const backColor = status === 2001000003 || !dueDate && status === 2001000002 ? 'success' 
         : (dueDate && status === 2001000001 ? 'danger' : ( dueDate && status === 2001000002 ? 'warning' : '') );
         return (<span className={ `w-50 px-2 m-3 rounded bg-${backColor} text-${ backColor ? 'white' : 'dark'} }` }>{ desc }</span>);
@@ -123,8 +127,7 @@ export const TablePendings = ({
     const renderTable = () => (
         <div className="border rounded">
             <div className="d-flex justify-content-between align-items-center mx-2">
-                <h4 className={`card-title fw-bold text-${styleTitle}`}>Pendientes { title }</h4>
-                { projects.length > 0 && <InputSearcher
+                { hasResult && <InputSearcher
                     name={ 'filter' }
                     placeholder={ 'Escribe para filtrar...' }
                     value={ filter }
@@ -132,6 +135,7 @@ export const TablePendings = ({
                     onClean={ () => onClean() }
                     width={ '25' }
                 />}
+                <h4 className={`card-title fw-bold text-${styleTitle}`}>{ title }</h4>
                 <Pagination
                     currentPage={ currentPage + 1 }
                     totalCount={ total }
