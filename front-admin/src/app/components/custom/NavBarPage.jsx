@@ -7,26 +7,33 @@ export const NavBarPage = () => {
 
   const dispatch = useDispatch();
   const refAdminTab = useRef();
+  const refReportTab = useRef();
 
   const navigate = useNavigate();
   const { user, permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(0);
   const [showTabAdmin, setShowTabAdmin] = useState(false);
+  const [showTabReport, setShowTabReport] = useState(false);
+
+  const userAdmin = user && user.role && user.role.id < 4;
 
   useEffect(() => {
     
-    const handleAdminTabOnBlur = event => {
+    const handleTabOnBlur = event => {
       if( refAdminTab.current && !refAdminTab.current.contains(event.target) ) {
         setShowTabAdmin(false);
       }
+      if( refReportTab.current && !refReportTab.current.contains(event.target) ) {
+        setShowTabReport(false);
+      }
     }
 
-    document.addEventListener('click', handleAdminTabOnBlur);
+    document.addEventListener('click', handleTabOnBlur);
   
     return () => {
-      document.removeEventListener('click', handleAdminTabOnBlur)
+      document.removeEventListener('click', handleTabOnBlur)
     }
-  }, [refAdminTab])
+  }, [refAdminTab, refReportTab])
   
 
   const onLogout = () => {
@@ -53,29 +60,56 @@ export const NavBarPage = () => {
     </li>
   );
 
+  // const renderTabPendings = () => permissions.isAdminSas && (
+  //   <li className="nav-item">
+  //     <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
+  //       onClick={ () => setCurrentTab(4) } to="pendings">
+  //       Pendientes
+  //     </NavLink>
+  //   </li>
+  // );
+
   const gotoAdminOption = urlRedirect => {
     setShowTabAdmin(!showTabAdmin);
     navigate(`/${urlRedirect}`, { replace: true })
     
   }
+
+  const gotoReportOption = report => {
+    setShowTabReport(!showTabReport);
+    navigate(`/reports/${report}`, { replace: true });
+  }
   
-  const renderTabAdmin = () => (
+  const renderTabAdmin = () => userAdmin && (
     <li className={ `nav-item dropdown ${ showTabAdmin ? 'show' : '' }` } ref={ refAdminTab }>
-        <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabAdmin } onClick={ () => setShowTabAdmin(!showTabAdmin) }>
-          Administraci&oacute;n
-        </a>
-        <div className={ `dropdown-menu bg-primary ${ showTabAdmin ? 'show' : '' }` } aria-labelledby="navbarDropdown">
-          { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
-          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('role') }>Puestos de trabajo</a>) }
-          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('companyType') }>Tipos de empresas</a>) }
-          { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('days') }>Dias Feriados</a>) }
-          <div className="dropdown-divider"></div>
-          { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }
-          { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
-          <div className="dropdown-divider"></div>
-          { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('admin') }>Administraci&oacute;n de Rol</a>) }
-        </div>
-      </li>
+      <a className="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabAdmin } onClick={ () => setShowTabAdmin(!showTabAdmin) }>
+        Administraci&oacute;n
+      </a>
+      <div className={ `dropdown-menu bg-primary ${ showTabAdmin ? 'show' : '' }` } aria-labelledby="adminMenu">
+        { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('application') }>Aplicaciones</a>) }
+        { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('role') }>Puestos de trabajo</a>) }
+        { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('companyType') }>Tipos de empresas</a>) }
+        { permissions.canAdminCat && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('days') }>Dias Feriados</a>) }
+        <div className="dropdown-divider"></div>
+        { permissions.canGetComp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('company') }>Empresas</a>) }
+        { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
+        <div className="dropdown-divider"></div>
+        { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('admin') }>Administraci&oacute;n de Rol</a>) }
+      </div>
+    </li>
+  )
+
+  const renderTabReports = () => userAdmin && (
+    <li className={ `nav-item dropdown ${ showTabReport ? 'show' : '' }` } ref={ refReportTab }>
+      <a className="nav-link dropdown-toggle" href="#" id="reportMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabReport } onClick={ () => setShowTabReport(!showTabReport) }>
+        Reportes
+      </a>
+      <div className={ `dropdown-menu bg-primary ${ showTabReport ? 'show' : '' }` } aria-labelledby="reportMenu">
+        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Pendientes</a>
+        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
+        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a>
+      </div>
+    </li>
   )
 
   return (
@@ -89,11 +123,13 @@ export const NavBarPage = () => {
             <li className="nav-item">
               <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
                 onClick={ () => setCurrentTab(0) } to="/">
-                Proyectos
+                { userAdmin ? 'Proyectos' : 'Dashboard' }
               </NavLink>
             </li>
             { renderTabOrders() }
             { renderTabInvoices() }
+            { /* renderTabPendings() */ }
+            { renderTabReports() }
             { renderTabAdmin() }
           </ul>
         </div>

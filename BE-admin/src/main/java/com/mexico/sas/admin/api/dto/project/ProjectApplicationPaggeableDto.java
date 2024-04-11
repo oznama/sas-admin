@@ -19,8 +19,14 @@ public class ProjectApplicationPaggeableDto implements Serializable {
     private Integer hours;
     private String startDate;
     private String designDate;
+    private Long designStatus;
+    private String designStatusDesc;
     private String developmentDate;
+    private Long developmentStatus;
+    private String developmentStatusDesc;
     private String endDate;
+    private Long endStatus;
+    private String endStatusDesc;
     private Boolean active;
     private Boolean eliminate;
     private Long userId;

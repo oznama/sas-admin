@@ -2,6 +2,7 @@ package com.mexico.sas.admin.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Date;
 @Table(name = "project_applications")
 @Data
 @NoArgsConstructor
+@FieldNameConstants
 @DynamicInsert
 public class ProjectApplication implements Serializable {
 
@@ -28,8 +30,11 @@ public class ProjectApplication implements Serializable {
     private Integer hours;
     private Date startDate;
     private Date designDate;
+    private Long designStatus;
     private Date developmentDate;
+    private Long developmentStatus;
     private Date endDate;
+    private Long endStatus;
     private String observations;
     @Column(columnDefinition = "boolean default true")
     private Boolean active;
