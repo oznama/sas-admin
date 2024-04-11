@@ -12,6 +12,7 @@ import com.mexico.sas.admin.api.model.*;
 import com.mexico.sas.admin.api.repository.RoleRepository;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.service.RolePermissionService;
 import com.mexico.sas.admin.api.service.RoleService;
 import com.mexico.sas.admin.api.service.UserService;
 import com.mexico.sas.admin.api.util.ChangeBeanUtils;
@@ -33,6 +34,8 @@ public class RoleServiceImpl extends LogMovementUtils implements RoleService {
 
   @Autowired
   private RoleRepository repository;
+  @Autowired
+  private RolePermissionService rolePermissionService;
 
   @Autowired
   private UserService userService;
@@ -90,6 +93,7 @@ public class RoleServiceImpl extends LogMovementUtils implements RoleService {
       Page<Role> roles = repository.findAll(pageable);
       roles.forEach( role -> {
         try {
+          role.setPermissions(rolePermissionService.findEntityByRole(role));
           RoleFindDto roleDto = from_M_To_N(role, RoleFindDto.class);
           roleDto.setPermissions(getPermissions(role.getPermissions()));
           roleDtos.add(roleDto);
