@@ -158,9 +158,8 @@ public class RolePermissionServiceImpl extends LogMovementUtils implements RoleP
       repository.deleteById(id);
       save(RolePermission.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE, "TODO");
     } catch (Exception e) {
-      e.printStackTrace();
-      //throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
-      throw new CustomException(e.getMessage());
+      log.warn("Ha ocurrido la siguiente excepcion", e);
+      //throw new CustomException(e.getMessage());
     }
   }
 

@@ -69,11 +69,12 @@ export const DetailAdmin = () => {
     
     const onSubmit = event => {
         event.preventDefault()
-        // const data = new FormData(event.target)
-        // const request = Object.fromEntries(data.entries());
+        const data = new FormData(event.target)
+        const request = { ...Object.fromEntries(data.entries()), id: role.id };
         deleteMissingIds();
         printMissingSelected();
-        //updateRole(request);
+        updateRole(request);
+        dispatch(setRole(request));
         navigate('/admin');
     }
     
@@ -118,7 +119,7 @@ export const DetailAdmin = () => {
                 }
             }).catch(error => {
                 console.log(error);
-                displayNotification(dispatch, genericErrorMsg, alertType.error);
+                //displayNotification(dispatch, genericErrorMsg, alertType.error);
             });
         }
         
