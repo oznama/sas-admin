@@ -309,7 +309,8 @@ public class ProjectApplicationServiceImpl extends LogMovementUtils implements P
         }
 
         // User is not admin, add employee filter
-        if(!(roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) || roleId.equals(CatalogKeys.ROLE_SELENE))) {
+        // Selene will never view project application because she is not leader or developer
+        if(!(roleId.equals(CatalogKeys.ROLE_ROOT) || roleId.equals(CatalogKeys.ROLE_JAIME) /* || roleId.equals(CatalogKeys.ROLE_SELENE) */)) {
             Predicate pLeader = builder.equal(root.get(ProjectApplication.Fields.leader).get(Employee.Fields.id), employeeId);
             Predicate pDeveloper = builder.equal(root.get(ProjectApplication.Fields.developer).get(Employee.Fields.id), employeeId);
             predicates.add(builder.or(pLeader, pDeveloper));
