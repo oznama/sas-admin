@@ -2,6 +2,9 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
+import { getPendings } from '../../services/ProjectService';
+import { pendingType } from '../applications/page/TablePendings';
+import { handleDateStr } from '../../helpers/utils';
 
 export const NavBarPage = () => {
 
@@ -18,35 +21,35 @@ export const NavBarPage = () => {
   const [notifications, setNotifications] = useState();
   const [showNotif, setShowNotif] = useState(false);
 
+  const fetchProjectAppPendings = () => {
+    getPendings(pendingType.due, 0, 20).then( response => {
+      if( response.content ) {
+        const pendings = [];
+        response.content.map( item => {
+          const now = new Date();
+          const dateSubtitle = item.designStatus != 2001000003 && handleDateStr(item.designDate) < now ? `Diseño: ${ item.designDate } ${ item.designStatusDesc }` 
+          : ( item.developmentStatus != 2001000003 && handleDateStr(item.developmentDate) < now ? `Desarrollo: ${ item.developmentDate } ${ item.developmentStatusDesc}` 
+          : ( item.endStatus != 2001000003 && handleDateStr(item.endDate) < now ? `Cierre: ${ item.endDate } ${ item.endStatusDesc }` : '') );
+          if( dateSubtitle !== '' ) {
+            pendings.push({
+              id:  item.id,
+              title: `${ item.projectKey } - ${ item.application }`,
+              detail: `${dateSubtitle}, Responsables [Líder: ${ item.leader }, Desarrollador: ${ item.developer }]`
+            });
+          }
+        });
+        setNotifications(pendings);
+      }
+  }).catch( error => {
+      console.log(error);
+  });
+  }
+
   const fetchNotifications = () => {
     // TODO Call services for get notifications
-    setNotifications([
-      {
-        id: 1,
-        title: 'Proyecto vencido',
-        detail: 'C-00-0000-01 Pendiente entregar diseño'
-      },
-      {
-        id: 2,
-        title: 'Orden pendiente',
-        detail: 'Generar Orden de compra para proyecto N-00-0000-04'
-      },
-      {
-        id: 3,
-        title: 'Factura pendiente',
-        detail: 'Generar Factura para orden de compra 45367895'
-      },
-      {
-        id: 4,
-        title: 'Factura pendiente',
-        detail: 'Pago pendiente de factura B785421'
-      },
-      {
-        id: 5,
-        title: 'Proyecto pendiente',
-        detail: 'D-00-0000-45 Proxima entrega analisis'
-      }
-    ]);
+    // Project pendings
+    fetchProjectAppPendings();
+    // Orders and invoices pendings
   }
 
   useEffect(() => {
@@ -157,10 +160,10 @@ export const NavBarPage = () => {
       </a>
       <div className={ `dropdown-menu bg-primary p-2 w-50 ${ showNotif ? 'show' : ''}` } aria-labelledby="notiDialog">
           <h4>Notificaciones</h4>
-          <div className="d-grid gap-3 overflow-auto" style={{ height: '30rem' }}>
+          <div className="d-grid gap-3 overflow-auto" style={ notifications.length > 4 ? { height: '26rem' } : {}}>
             {
               notifications.map((n, index) => ( 
-                  <div index={ index } className="card bg-primary mx-2">
+                  <div key={ index } className="card bg-primary mx-2">
                     <div className="card-body">
                       <h5 className="card-title">{ n.title }</h5>
                       <p className="card-text">{ n.detail }</p>
