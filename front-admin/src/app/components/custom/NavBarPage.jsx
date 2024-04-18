@@ -8,17 +8,48 @@ export const NavBarPage = () => {
   const dispatch = useDispatch();
   const refAdminTab = useRef();
   const refReportTab = useRef();
+  const refNotifications = useRef();
 
   const navigate = useNavigate();
   const { user, permissions } = useSelector( state => state.auth );
   const [currentTab, setCurrentTab] = useState(0);
   const [showTabAdmin, setShowTabAdmin] = useState(false);
   const [showTabReport, setShowTabReport] = useState(false);
+  const [notifications, setNotifications] = useState();
+  const [showNotif, setShowNotif] = useState(false);
 
-  const userAdmin = user && user.role && user.role.id < 4;
+  const fetchNotifications = () => {
+    // TODO Call services for get notifications
+    setNotifications([
+      {
+        id: 1,
+        title: 'Proyecto vencido',
+        detail: 'C-00-0000-01 Pendiente entregar diseño'
+      },
+      {
+        id: 2,
+        title: 'Orden pendiente',
+        detail: 'Generar Orden de compra para proyecto N-00-0000-04'
+      },
+      {
+        id: 3,
+        title: 'Factura pendiente',
+        detail: 'Generar Factura para orden de compra 45367895'
+      },
+      {
+        id: 4,
+        title: 'Factura pendiente',
+        detail: 'Pago pendiente de factura B785421'
+      },
+      {
+        id: 5,
+        title: 'Proyecto pendiente',
+        detail: 'D-00-0000-45 Proxima entrega analisis'
+      }
+    ]);
+  }
 
   useEffect(() => {
-    
     const handleTabOnBlur = event => {
       if( refAdminTab.current && !refAdminTab.current.contains(event.target) ) {
         setShowTabAdmin(false);
@@ -26,15 +57,19 @@ export const NavBarPage = () => {
       if( refReportTab.current && !refReportTab.current.contains(event.target) ) {
         setShowTabReport(false);
       }
+      if( refNotifications.current && !refNotifications.current.contains(event.target) ) {
+        setShowNotif(false);
+      }
     }
 
     document.addEventListener('click', handleTabOnBlur);
+
+    fetchNotifications();
   
     return () => {
       document.removeEventListener('click', handleTabOnBlur)
     }
-  }, [refAdminTab, refReportTab])
-  
+  }, [refAdminTab, refReportTab, refNotifications]);  
 
   const onLogout = () => {
     localStorage.removeItem('token');
@@ -80,7 +115,7 @@ export const NavBarPage = () => {
     navigate(`/reports/${report}`, { replace: true });
   }
   
-  const renderTabAdmin = () => userAdmin && (
+  const renderTabAdmin = () => permissions.isAdminSas && (
     <li className={ `nav-item dropdown ${ showTabAdmin ? 'show' : '' }` } ref={ refAdminTab }>
       <a className="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabAdmin } onClick={ () => setShowTabAdmin(!showTabAdmin) }>
         Administraci&oacute;n
@@ -99,7 +134,7 @@ export const NavBarPage = () => {
     </li>
   )
 
-  const renderTabReports = () => userAdmin && (
+  const renderTabReports = () => permissions.isAdminSas && (
     <li className={ `nav-item dropdown ${ showTabReport ? 'show' : '' }` } ref={ refReportTab }>
       <a className="nav-link dropdown-toggle" href="#" id="reportMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded={ showTabReport } onClick={ () => setShowTabReport(!showTabReport) }>
         Reportes
@@ -108,6 +143,32 @@ export const NavBarPage = () => {
         <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Pendientes</a>
         <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
         <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a>
+      </div>
+    </li>
+  )
+
+  const renderNotifications = () => notifications && notifications.length > 0 && (
+    <li className="nav-item mr-3" ref={ refNotifications }>
+      <a className="nav-link nav-icon position-relative" href="#" id="notiDialog" onClick={ () => setShowNotif(true) }>
+        <span><i className="bi bi-bell-fill"></i></span>
+        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          { notifications.length > 10 ? '10+' : notifications.length }
+        </span>
+      </a>
+      <div className={ `dropdown-menu bg-primary p-2 w-50 ${ showNotif ? 'show' : ''}` } aria-labelledby="notiDialog">
+          <h4>Notificaciones</h4>
+          <div className="d-grid gap-3 overflow-auto" style={{ height: '30rem' }}>
+            {
+              notifications.map((n, index) => ( 
+                  <div index={ index } className="card bg-primary mx-2">
+                    <div className="card-body">
+                      <h5 className="card-title">{ n.title }</h5>
+                      <p className="card-text">{ n.detail }</p>
+                    </div>
+                  </div>
+              ))
+            }
+          </div>
       </div>
     </li>
   )
@@ -123,7 +184,7 @@ export const NavBarPage = () => {
             <li className="nav-item">
               <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
                 onClick={ () => setCurrentTab(0) } to="/">
-                { userAdmin ? 'Proyectos' : 'Dashboard' }
+                { permissions.isAdminSas ? 'Proyectos' : 'Dashboard' }
               </NavLink>
             </li>
             { renderTabOrders() }
@@ -131,6 +192,7 @@ export const NavBarPage = () => {
             { /* renderTabPendings() */ }
             { renderTabReports() }
             { renderTabAdmin() }
+            { renderNotifications() }
           </ul>
         </div>
 
