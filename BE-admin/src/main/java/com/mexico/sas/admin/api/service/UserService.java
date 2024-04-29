@@ -21,4 +21,6 @@ public interface UserService {
   Page<UserPaggeableDto> findAll(String filter, Boolean active, Pageable pageable) throws CustomException;
   UserFindDto setActive(Long id, Boolean lock) throws CustomException;
   void deleteLogic(Long id) throws CustomException;
+
+  void resetPswd(Long id) throws CustomException;
 }

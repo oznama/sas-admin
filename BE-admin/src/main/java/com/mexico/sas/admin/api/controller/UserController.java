@@ -1,7 +1,10 @@
 package com.mexico.sas.admin.api.controller;
 
+import com.mexico.sas.admin.api.dto.ResponseDto;
 import com.mexico.sas.admin.api.dto.user.*;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.i18n.I18nKeys;
+import com.mexico.sas.admin.api.i18n.I18nResolver;
 import com.mexico.sas.admin.api.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -56,7 +59,10 @@ public class UserController {
   @ApiOperation(httpMethod = "PATCH",
           value = "Servicio para bloquear/desbloquear usuario",
           nickname = "lock")
-  public ResponseEntity<?> lock(@PathVariable("id") Long id, @RequestBody UserEnaDisDto userEnaDisDto) throws CustomException {
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
+  })
+  public ResponseEntity<UserFindDto> lock(@PathVariable("id") Long id, @RequestBody UserEnaDisDto userEnaDisDto) throws CustomException {
     log.info("Changing user status");
     return ResponseEntity.ok().body(service.setActive(id, userEnaDisDto.getLock()));
   }
@@ -96,6 +102,18 @@ public class UserController {
                                                         Pageable pageable) throws CustomException {
     log.info("Finding all users");
     return ResponseEntity.ok(service.findAll(filter, active, pageable));
+  }
+
+  @PatchMapping(path = "/{id}/resetPswd")
+  @ResponseStatus(code = HttpStatus.OK)
+  @ApiOperation(httpMethod = "PATCH", value = "Servicio para resetear password", nickname = "resetPswd")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
+  })
+  public ResponseEntity<ResponseDto> resetPswd(@PathVariable("id") Long id) throws CustomException {
+    log.info("Reset password");
+    service.resetPswd(id);
+    return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
 }

@@ -347,4 +347,42 @@ public class Utils {
         }
     }
 
+    protected String generateRandomPswd() {
+        StringBuilder randomPswd = new StringBuilder();
+        Random random = new Random();
+        int max = 0, min = 0;
+        for( int i = 0; i < 8; i++ ) {
+            if( i == 5 ) { // Special
+                if( random.nextInt(2) == 0 ) { // 33 - 47
+                    max = 47;
+                    min = 33;
+                } else { // 58 - 64
+                    max = 64;
+                    min = 58;
+                }
+            } else if( i < 5) { // Character
+                if( random.nextInt(2) == 0 ) { // Upper: 65 - 90
+                    // System.out.printf("Random upper char :: ");
+                    max = 90;
+                    min = 65;
+                } else { // Lower: 97 - 122
+                    // System.out.printf("Random lower char :: ");
+                    max = 122;
+                    min = 97;
+                }
+            } else { // Numbers: 48 - 57
+                // System.out.printf("Random number :: ");
+                max = 57;
+                min = 48;
+            }
+            int randomNumber = random.nextInt(max - min + 1) + min;
+            // System.out.printf("number: %d ::: ", randomNumber);
+            char randomChar = (char) randomNumber;
+            // System.out.printf("char: %c :::", randomChar);
+            randomPswd.append(randomChar);
+            // System.out.printf("Random word %s\n", randomPswd);
+        }
+        return randomPswd.toString();
+    }
+
 }

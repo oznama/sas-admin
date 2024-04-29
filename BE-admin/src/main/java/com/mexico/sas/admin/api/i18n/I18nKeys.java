@@ -33,6 +33,7 @@ public interface I18nKeys {
     String VALIDATION_PSWD_UPPERCASE = "validation.pswd.upper";
     String VALIDATION_PSWD_NUMBER = "validation.pswd.number";
     String VALIDATION_PSWD_SPECIAL = "validation.pswd.special";
+    String VALIDATION_PSWD_CURT_BAD = "validation.pswd.bad";
 
     String CATALOG_NOT_CREATED = "catalog.not.created";
     String CATALOG_NOT_UPDATED = "catalog.not.updated";
