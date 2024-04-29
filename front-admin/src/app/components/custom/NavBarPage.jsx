@@ -67,7 +67,9 @@ export const NavBarPage = () => {
 
     document.addEventListener('click', handleTabOnBlur);
 
-    fetchNotifications();
+    if( permissions.isAdminSas ) {
+      fetchNotifications();
+    }
   
     return () => {
       document.removeEventListener('click', handleTabOnBlur)
