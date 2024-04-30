@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailUtils {
 
-    @Value("${api.email.from}")
-    private String emailFrom;
+    @Value("${spring.mail.username}")
+    private String username;
 
     @Autowired
     private JavaMailSender emailSender;
@@ -21,7 +21,7 @@ public class EmailUtils {
         log.debug("Sending simple message {} to {}", subject, to);
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(emailFrom);
+            message.setFrom(username);
             message.setTo(to);
             message.setSubject(subject);
             message.setText(text);

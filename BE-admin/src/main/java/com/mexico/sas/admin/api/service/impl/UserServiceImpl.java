@@ -68,9 +68,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
       throw new CustomException(msgError);
     }
     log.debug("User for employe {} created with id {} and pswd: {}", userDto.getEmployeeId(), user.getId(), userDto.getPassword());
-    emailUtils.sendSimpleMessage(
-            /*employeeFindDto.getEmail()*/ "oziel.naranjo@sas-mexico.com",
-            "Alta de usuario",
+    emailUtils.sendSimpleMessage(employeeFindDto.getEmail(), "Alta de usuario",
             String.format("Tu usuario ha sido creado correctamente\nTu contraseña temporal es: %s", userDto.getPassword()));
     return findById(user.getId());
   }
@@ -184,9 +182,8 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     repository.save(user);
     save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, "TODO");
     log.debug("User {}'s password reset for: {}", user.getId(), randomPasword);
-    emailUtils.sendSimpleMessage(
-            /*employeeFindDto.getEmail()*/ "oziel.naranjo@sas-mexico.com",
-            "Password reseteado",
+    EmployeeFindDto employeeFindDto = employeeService.findById(user.getEmployeeId());
+    emailUtils.sendSimpleMessage(employeeFindDto.getEmail(), "Password reseteado",
             String.format("Tu contraseña ha sido resetada correctamente\n Tu contraseña temporal es: %s", randomPasword));
   }
 
