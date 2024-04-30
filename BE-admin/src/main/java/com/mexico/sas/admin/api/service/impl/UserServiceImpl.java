@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.user.*;
@@ -15,6 +16,7 @@ import com.mexico.sas.admin.api.security.Crypter;
 import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.util.EmailUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -49,11 +51,14 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   @Autowired
   private Crypter crypter;
 
+  @Autowired
+  private EmailUtils emailUtils;
+
   @Override
   public UserFindDto save(UserDto userDto) throws CustomException {
     log.debug("Saving user {} ...", userDto);
     User user = from_M_To_N(userDto, User.class);
-    validationSave(userDto, user);
+    EmployeeFindDto employeeFindDto = validationSave(userDto, user);
     try {
       repository.save(user);
       save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_INSERT, "TODO");
@@ -63,6 +68,10 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
       throw new CustomException(msgError);
     }
     log.debug("User for employe {} created with id {} and pswd: {}", userDto.getEmployeeId(), user.getId(), userDto.getPassword());
+    emailUtils.sendSimpleMessage(
+            /*employeeFindDto.getEmail()*/ "oziel.naranjo@sas-mexico.com",
+            "Alta de usuario",
+            String.format("Tu usuario ha sido creado correctamente\nTu contraseña temporal es: %s", userDto.getPassword()));
     return findById(user.getId());
   }
 
@@ -175,6 +184,10 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     repository.save(user);
     save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, "TODO");
     log.debug("User {}'s password reset for: {}", user.getId(), randomPasword);
+    emailUtils.sendSimpleMessage(
+            /*employeeFindDto.getEmail()*/ "oziel.naranjo@sas-mexico.com",
+            "Password reseteado",
+            String.format("Tu contraseña ha sido resetada correctamente\n Tu contraseña temporal es: %s", randomPasword));
   }
 
   public User getUser(Long id) throws NoContentException {
@@ -219,15 +232,16 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
 
-  private void validationSave(UserDto userDto, User user) throws CustomException {
+  private EmployeeFindDto validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion empleado
-    employeeService.findById(user.getEmployeeId());
+    EmployeeFindDto employeeDto = employeeService.findById(user.getEmployeeId());
     // Validacion de rol
     user.setRole(roleService.findEntityById(userDto.getRole()));
     user.setCreatedBy(getCurrentUser().getUserId());
     String randomPasword = generateRandomPswd();
     userDto.setPassword(randomPasword);
     user.setPassword(crypter.encrypt(randomPasword));
+    return employeeDto;
   }
 
   private void validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
