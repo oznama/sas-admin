@@ -47,35 +47,24 @@ public class UserController {
       value = "Servicio para actualizar usuario",
       nickname = "update")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
+          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
   })
-  public ResponseEntity<UserFindDto> update(@PathVariable("id") Long id, @Valid @RequestBody UserUpdateDto userUpdateDto) throws CustomException {
+  public ResponseEntity<ResponseDto> update(@PathVariable("id") Long id, @RequestBody UserUpdateDto userUpdateDto) throws CustomException {
     log.info("Updating user");
-    return ResponseEntity.ok().body(service.update(id, userUpdateDto));
-  }
-
-  @PatchMapping("/{id}/lock")
-  @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "PATCH",
-          value = "Servicio para bloquear/desbloquear usuario",
-          nickname = "lock")
-  @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Success", response = UserFindDto.class)
-  })
-  public ResponseEntity<UserFindDto> lock(@PathVariable("id") Long id, @RequestBody UserEnaDisDto userEnaDisDto) throws CustomException {
-    log.info("Changing user status");
-    return ResponseEntity.ok().body(service.setActive(id, userEnaDisDto.getLock()));
+    service.update(id, userUpdateDto);
+    return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(code = HttpStatus.OK)
-  @ApiOperation(httpMethod = "DELETE",
-          value = "Servicio para eliminar usuario",
-          nickname = "delete")
-  public ResponseEntity<Long> deleteLogic(@PathVariable("id") Long id) throws CustomException {
+  @ApiOperation(httpMethod = "DELETE", value = "Servicio para eliminar usuario", nickname = "delete")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = ResponseDto.class)
+  })
+  public ResponseEntity<ResponseDto> delete(@PathVariable("id") Long id) throws CustomException {
     log.info("Deleting user");
     service.deleteLogic(id);
-    return ResponseEntity.ok(id);
+    return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), I18nResolver.getMessage(I18nKeys.GENERIC_MSG_OK), null));
   }
 
   @GetMapping("/{id}")

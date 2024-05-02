@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 @Getter
@@ -18,9 +17,7 @@ public class UserUpdateDto implements Serializable {
 
   @JsonIgnore
   private Long id;
-  @NotBlank(message = "{validation.field.required}")
   private String currentPassword;
-  @NotBlank(message = "{validation.field.required}")
   private String newPassword;
   @ApiModelProperty(notes = "Roles (1 Administrador", example = "1")
   private Long role;

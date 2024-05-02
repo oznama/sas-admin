@@ -12,14 +12,13 @@ import java.util.List;
 public interface UserService {
 
   UserFindDto save(UserDto userDto) throws CustomException;
-  UserFindDto update(Long id, UserUpdateDto userUpdateDtos) throws CustomException;
+  void update(Long id, UserUpdateDto userUpdateDtos) throws CustomException;
   UserFindDto findById(Long id) throws CustomException;
   User findEntityById(Long id) throws CustomException;
   User findEntityByEmployeeId(Long employeeId) throws CustomException;
   User getUser(Long id) throws CustomException;
   UserDto findByEmployeeAndPassword(Employee employee, String password) throws CustomException;
   Page<UserPaggeableDto> findAll(String filter, Boolean active, Pageable pageable) throws CustomException;
-  UserFindDto setActive(Long id, Boolean lock) throws CustomException;
   void deleteLogic(Long id) throws CustomException;
 
   void resetPswd(Long id) throws CustomException;

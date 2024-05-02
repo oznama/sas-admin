@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SpringBootTest
 @TestPropertySource(locations = "/env-test.properties")
 public class EmailTest {
@@ -20,7 +23,15 @@ public class EmailTest {
     @DisplayName("Send email test")
     @Test
     public void sendEmailSimple() {
-        emailUtils.sendSimpleMessage(to, subject, "Este es un correo de prueba ejecutado con SpringBoot Mail");
+        emailUtils.sendMessage(to, subject, "Este es un correo de prueba ejecutado con SpringBoot Mail");
+    }
+
+    @DisplayName("Send email html test")
+    @Test
+    public void sendEmailHtml() {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("message", "Este es el mensaje de prueba creado desde sendEmailHtml");
+        emailUtils.sendMessage(to, subject, "email-test", variables);
     }
 
 }

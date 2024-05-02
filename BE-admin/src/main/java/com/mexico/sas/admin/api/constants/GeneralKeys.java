@@ -44,4 +44,8 @@ public interface GeneralKeys {
     String PENDING_TYPE_CRT = "currents";
     String PEDNING_TYPE_NXT = "futures";
     String PENDING_TYPE_END = "completes";
+
+    // Email subjects
+    String EMAIL_SUBJECT_USER_CREATED = "Alta de usuario";
+    String EMAIL_SUBJECT_PSWD_RESET = "Password reseteado";
 }

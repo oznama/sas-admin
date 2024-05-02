@@ -24,6 +24,7 @@ public interface I18nKeys {
     String USER_SECURITY_TOKEN_NOT_FOUND = "user.security.token.not.found";
     String USER_SECURITY_TOKEN_EXPIRED = "user.security.token.expired";
     String USER_SECURITY_TOKEN_USED = "user.security.token.used";
+    String USER_SECURITY_PSWD_RESET = "user.security.pswd.reset";
     String ROLE_NOT_CREATED = "role.not.created";
     String ROLE_NOT_FOUND = "role.not.found";
     String PERMISSION_NOT_CREATED = "permission.not.created";
