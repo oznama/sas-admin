@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.constants.TemplateKeys;
+import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.user.*;
@@ -133,6 +134,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
       users.forEach( user -> {
         try {
           UserPaggeableDto userDto = from_M_To_N(user, UserPaggeableDto.class);
+          userDto.setEmployee(from_M_To_N(employeeService.findEntityById(user.getEmployeeId()), EmployeeDto.class));
           userDto.setRole(from_M_To_N(user.getRole(), RoleDto.class));
           userDtos.add(userDto);
         } catch (Exception e) {
