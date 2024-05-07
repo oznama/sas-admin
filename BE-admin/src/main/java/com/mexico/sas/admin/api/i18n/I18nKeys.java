@@ -24,6 +24,7 @@ public interface I18nKeys {
     String USER_SECURITY_TOKEN_NOT_FOUND = "user.security.token.not.found";
     String USER_SECURITY_TOKEN_EXPIRED = "user.security.token.expired";
     String USER_SECURITY_TOKEN_USED = "user.security.token.used";
+    String USER_SECURITY_PSWD_RESET = "user.security.pswd.reset";
     String ROLE_NOT_CREATED = "role.not.created";
     String ROLE_NOT_FOUND = "role.not.found";
     String PERMISSION_NOT_CREATED = "permission.not.created";
@@ -33,6 +34,7 @@ public interface I18nKeys {
     String VALIDATION_PSWD_UPPERCASE = "validation.pswd.upper";
     String VALIDATION_PSWD_NUMBER = "validation.pswd.number";
     String VALIDATION_PSWD_SPECIAL = "validation.pswd.special";
+    String VALIDATION_PSWD_CURT_BAD = "validation.pswd.bad";
 
     String CATALOG_NOT_CREATED = "catalog.not.created";
     String CATALOG_NOT_UPDATED = "catalog.not.updated";

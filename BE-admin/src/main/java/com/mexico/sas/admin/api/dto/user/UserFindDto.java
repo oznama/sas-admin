@@ -1,16 +1,12 @@
 package com.mexico.sas.admin.api.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
-import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -24,8 +20,5 @@ public class UserFindDto implements Serializable {
   private Boolean active;
 
   private EmployeeFindDto employee;
-
-  @JsonIgnore
-  private List<PermissionDto> actions;
 
 }

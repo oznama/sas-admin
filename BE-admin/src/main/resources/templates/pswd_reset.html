@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAS</title>
+    <style>
+        * {
+          box-sizing: border-box;
+          padding: 0;
+          margin: auto;
+        }
+
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        header {
+          background-color: #6DD7C5;
+          padding-left: 5px;
+          padding-top: 5px;
+          text-align: start;
+          font-size: 35px;
+          color: white;
+        }
+
+        footer {
+          bottom: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 60px;
+          padding-left: 10%;
+          padding-right: 10%;
+        }
+
+        .section-item {
+          margin: 3% 10%;
+        }
+
+        hr.solid {
+          border-top: 1px solid MediumSeaGreen;
+          margin-top: 3%;
+        }
+
+        .title-setup {
+          margin-bottom: 3%;
+        }
+
+        .title-font {
+          font-style: normal;
+          font-weight: bold;
+          font-size: 30px;
+          line-height: 143%;
+          letter-spacing: 0.17px;
+          color: #2C4154;
+        }
+
+        .text-font {
+          font-style: normal;
+          font-weight: 400;
+          font-size: 25px;
+          line-height: 143%;
+          letter-spacing: 0.17px;
+          color: #2C4154;
+        }
+
+        .text-setup {
+          margin-bottom: 2%;
+        }
+
+        .img-header {
+          width: 12%;
+          height: 12%;
+          background-color: #F9FCFF;
+        }
+
+        .password-container {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            background-color: #6DD7C5;
+        }
+
+        .password-font {
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <img class="img-header" src="https://sas-mexico.com/wp-content/uploads/2020/10/sas.png" alt="logo-sas" />
+</header>
+<div>
+    <section class="section-item">
+        <h2 class="title-font title-setup">¡[[${employeeName}]] tu password ha sido reseteado correctamente!</h2>
+        <p class="text-font text-setup">Tu contrase&ntilde;a temporal es la siguiente:</p>
+        <div class="password-container">
+            <label class="password-font">[[${passwordTmp}]]</label>
+        </div>
+        <hr class="solid"/>
+    </section>
+</div>
+<footer>
+</footer>
+</body>
+</html>

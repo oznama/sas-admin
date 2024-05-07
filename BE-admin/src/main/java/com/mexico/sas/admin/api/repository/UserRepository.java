@@ -30,7 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> , JpaSpecifica
   void setActive(@Param(value = "id") Long id, @Param(value = "active") Boolean active);
   @Transactional
   @Modifying
-  @Query("update User u set u.eliminate = true where u.id = :id")
-  void deleteLogic(@Param(value = "id") Long id);
+  @Query("update User u set u.eliminate = :eliminate, u.active = :active where u.id = :id")
+  void deleteLogic(@Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 
 }

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
+import com.mexico.sas.admin.api.constants.TemplateKeys;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.user.*;
@@ -15,6 +16,7 @@ import com.mexico.sas.admin.api.security.Crypter;
 import com.mexico.sas.admin.api.service.*;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
+import com.mexico.sas.admin.api.util.EmailUtils;
 import com.mexico.sas.admin.api.util.LogMovementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -47,38 +49,46 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   private RolePermissionService rolePermissionService;
 
   @Autowired
-  private CatalogService catalogService;
+  private Crypter crypter;
 
   @Autowired
-  private Crypter crypter;
+  private EmailUtils emailUtils;
 
   @Override
   public UserFindDto save(UserDto userDto) throws CustomException {
     log.debug("Saving user {} ...", userDto);
     User user = from_M_To_N(userDto, User.class);
-    validationSave(userDto, user);
+    Employee employee = validationSave(userDto, user);
     try {
       repository.save(user);
-      save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_INSERT, "TODO");
+      save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_INSERT, I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
     } catch (Exception e) {
       String msgError = I18nResolver.getMessage(I18nKeys.USER_NOT_CREATED, userDto.getEmployeeId());
       log.error(msgError, e);
       throw new CustomException(msgError);
     }
-    log.debug("User {} created with id {}", userDto.getEmployeeId(), user.getId());
+    log.debug("User for employe {} created with id {} and pswd: {}", userDto.getEmployeeId(), user.getId(), userDto.getPassword());
+
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("employeeName", buildFullname(employee));
+    variables.put("userName", employee.getEmail());
+    variables.put("passwordTmp", userDto.getPassword());
+    emailUtils.sendMessage(employee.getEmail(), GeneralKeys.EMAIL_SUBJECT_USER_CREATED, TemplateKeys.USER_CREATED, variables);
+
     return findById(user.getId());
   }
 
   @Override
-  public UserFindDto update(Long id, UserUpdateDto userUpdateDto) throws CustomException {
+  public void update(Long id, UserUpdateDto userUpdateDto) throws CustomException {
     userUpdateDto.setId(id);
     User user = getUser(userUpdateDto.getId());
     BeanUtils.copyProperties(userUpdateDto, user, "id");
-    validationUpdate(userUpdateDto, user);
-    repository.save(user);
-    save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, "TODO");
-    log.debug("User {} updated!", user.getId());
-    return findById(user.getId());
+    String message = validationUpdate(userUpdateDto, user);
+    if(!message.isEmpty()) {
+      repository.save(user);
+      save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, message);
+      log.debug("User {} updated!", user.getId());
+    }
   }
 
   @Override
@@ -88,9 +98,6 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     UserFindDto userDto = from_M_To_N(user, UserFindDto.class);
     userDto.setEmployee(employeeService.findById(user.getEmployeeId()));
     userDto.setRole(from_M_To_N(user.getRole(), RoleDto.class));
-    userDto.setActions(parsingPermissions(user.getRole().getPermissions()).stream()
-            .filter(p -> !p.getName().equals(GeneralKeys.PERMISSION_SPECIAL))
-            .collect(Collectors.toList()));
     log.debug("User Finded: {}", userDto.getId());
     return userDto;
   }
@@ -127,7 +134,6 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
         try {
           UserPaggeableDto userDto = from_M_To_N(user, UserPaggeableDto.class);
           userDto.setRole(from_M_To_N(user.getRole(), RoleDto.class));
-          userDto.setActions(parsingPermissions(user.getRole().getPermissions()));
           userDtos.add(userDto);
         } catch (Exception e) {
           log.warn("User with id {} not added to list, error parsing: {}", user.getId(), e.getMessage());
@@ -144,34 +150,28 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
   @Override
-  public UserFindDto setActive(Long id, Boolean lock) throws CustomException {
-    Boolean currentActive = repository.findById(id).orElseThrow(() ->
-                    new CustomException(I18nResolver.getMessage(I18nKeys.USER_NOT_FOUND)))
-            .getActive();
-    log.debug("Checking if status equals\nbloqued: {}\nblock? {}", !currentActive, lock);
-    if( !currentActive.equals(lock) ) {
-      String msgError = I18nResolver.getMessage(lock ? I18nKeys.USER_UPDATE_NOT_ENABLED : I18nKeys.USER_UPDATE_NOT_DISABLED, id);
-      throw new CustomException(msgError);
-    }
-    try {
-      repository.setActive(id, !lock);
-      save(User.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_STATUS, "TODO");
-      return findById(id);
-    } catch (Exception e) {
-      throw new CustomException(e.getMessage());
-    }
+  public void deleteLogic(Long id) throws CustomException {
+    log.debug("Delete logic: {}", id);
+    User user = getUser(id);
+    repository.deleteLogic(id, !user.getEliminate(), user.getEliminate());
+    save(User.class.getSimpleName(), id,
+            !user.getEliminate() ? CatalogKeys.LOG_DETAIL_DELETE_LOGIC : CatalogKeys.LOG_DETAIL_STATUS,
+            I18nResolver.getMessage(!user.getEliminate() ? I18nKeys.LOG_GENERAL_DELETE : I18nKeys.LOG_GENERAL_REACTIVE));
   }
 
   @Override
-  public void deleteLogic(Long id) throws CustomException {
-    try {
-      getUser(id);
-      repository.deleteLogic(id);
-      save(User.class.getSimpleName(), id, CatalogKeys.LOG_DETAIL_DELETE_LOGIC, "TODO");
-    } catch (Exception e) {
-      log.error("Error deleting user", e);
-      throw new CustomException(e.getMessage());
-    }
+  public void resetPswd(Long id) throws CustomException {
+    User user = getUser(id);
+    String randomPasword = generateRandomPswd();
+    user.setPassword(crypter.encrypt(randomPasword));
+    repository.save(user);
+    save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, I18nResolver.getMessage(I18nKeys.USER_SECURITY_PSWD_RESET));
+    log.debug("User {}'s password reset for: {}", user.getId(), randomPasword);
+    Employee employee = employeeService.findEntityById(user.getEmployeeId());
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("employeeName", buildFullname(employee));
+    variables.put("passwordTmp", randomPasword);
+    emailUtils.sendMessage(employee.getEmail(), GeneralKeys.EMAIL_SUBJECT_PSWD_RESET, TemplateKeys.PSWD_RESET, variables);
   }
 
   public User getUser(Long id) throws NoContentException {
@@ -216,16 +216,40 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
 
-  private void validationSave(UserDto userDto, User user) throws CustomException {
+  private Employee validationSave(UserDto userDto, User user) throws CustomException {
+    // Validacion empleado
+    Employee employee = employeeService.findEntityById(user.getEmployeeId());
     // Validacion de rol
     user.setRole(roleService.findEntityById(userDto.getRole()));
     user.setCreatedBy(getCurrentUser().getUserId());
+    String randomPasword = generateRandomPswd();
+    userDto.setPassword(randomPasword);
+    user.setPassword(crypter.encrypt(randomPasword));
+    return employee;
   }
 
-  private void validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
-
+  private String validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
+    StringBuilder sb = new StringBuilder();
+    String passwordDecrypted = crypter.decrypt(user.getPassword());
+    // Validation currentPassword
+    if(!StringUtils.isEmpty(userDto.getCurrentPassword()) && !userDto.getCurrentPassword().equals(passwordDecrypted) ) {
+      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_PSWD_CURT_BAD), null);
+    } else if(!StringUtils.isEmpty(userDto.getCurrentPassword()) && userDto.getCurrentPassword().equals(passwordDecrypted) && !userDto.getNewPassword().equals(passwordDecrypted) ) {
+      user.setPassword(crypter.encrypt(userDto.getNewPassword()));
+      final String masked = "*****%s";
+      sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Password",
+              String.format(masked, passwordDecrypted.substring(passwordDecrypted.length() - 3)),
+              String.format(masked, userDto.getNewPassword().substring(userDto.getNewPassword().length() - 3))
+      )).append(GeneralKeys.JUMP_LINE);
+    }
     // Validacion de rol
-    user.setRole(roleService.findEntityById(userDto.getRole()));
+    if( userDto.getRole() != null && !user.getRole().equals(user.getRole().getId()) ) {
+      Role role = roleService.findEntityById(userDto.getRole());
+      sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Rol",
+              user.getRole().getName(), role.getName())).append(GeneralKeys.JUMP_LINE);
+      user.setRole(role);
+    }
+    return sb.toString().trim();
   }
 
 //  private Page<User> findByFilter(String filter, Boolean active, Pageable pageable) {
