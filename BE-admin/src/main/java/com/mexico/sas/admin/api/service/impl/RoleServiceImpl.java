@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.service.impl;
 
 import com.mexico.sas.admin.api.constants.CatalogKeys;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionFindDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.role.RoleFindDto;
@@ -140,6 +141,21 @@ public class RoleServiceImpl extends LogMovementUtils implements RoleService {
     } catch (Exception e) {
       throw new CustomException(I18nResolver.getMessage(I18nKeys.CATALOG_NOT_DELETED, id));
     }
+  }
+
+  @Override
+  public List<SelectDto> getForSelect() {
+    List<SelectDto> rolesFindSelectDto = new ArrayList<>();
+    List<Role> roles = repository.findAll();
+    roles.forEach( role -> {
+      try {
+        SelectDto selectDto = from_M_To_N(role, SelectDto.class);
+        rolesFindSelectDto.add(selectDto);
+      } catch (CustomException e2) {
+        log.error("Impossible add role {}", role.getId());
+      }
+    });
+    return rolesFindSelectDto;
   }
 
   private Collection<PermissionFindDto> getPermissions(List<RolePermission> permissionsDto) {
