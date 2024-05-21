@@ -93,6 +93,18 @@ public class UserController {
     return ResponseEntity.ok(service.findAll(filter, active, pageable));
   }
 
+  @GetMapping("/select")
+  @ApiOperation(httpMethod = "GET",
+          value = "Servicio para recuperar todos los usuarios con solo ids",
+          nickname = "getUsers")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = UserPaggeableDto.class, responseContainer = "List")
+  })
+  public ResponseEntity<List<UserIdsDto>> getUsers() throws CustomException {
+    log.info("Get all users ids");
+    return ResponseEntity.ok(service.getUsersIds());
+  }
+
   @PatchMapping(path = "/{id}/resetPswd")
   @ResponseStatus(code = HttpStatus.OK)
   @ApiOperation(httpMethod = "PATCH", value = "Servicio para resetear password", nickname = "resetPswd")

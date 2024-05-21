@@ -152,6 +152,14 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
   @Override
+  public List<UserIdsDto> getUsersIds() throws CustomException {
+    List<User> users = repository.findAll();
+    List<UserIdsDto> userIdsDtos = new ArrayList<>();
+    users.forEach( u -> userIdsDtos.add(new UserIdsDto(u.getId(), u.getEmployeeId(), u.getRole().getId())));
+    return userIdsDtos;
+  }
+
+  @Override
   public void deleteLogic(Long id) throws CustomException {
     log.debug("Delete logic: {}", id);
     User user = getUser(id);
@@ -221,13 +229,25 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   private Employee validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion empleado
     Employee employee = employeeService.findEntityById(user.getEmployeeId());
-    // Validacion de rol
-    user.setRole(roleService.findEntityById(userDto.getRole()));
-    user.setCreatedBy(getCurrentUser().getUserId());
-    String randomPasword = generateRandomPswd();
-    userDto.setPassword(randomPasword);
-    user.setPassword(crypter.encrypt(randomPasword));
-    return employee;
+    boolean isValid = false;
+    try {
+      findEntityByEmployeeId(user.getEmployeeId());
+    } catch (CustomException e) {
+      if(e instanceof NoContentException) {
+        isValid = true;
+      }
+    }
+    if(isValid) {
+      // Validacion de rol
+      user.setRole(roleService.findEntityById(userDto.getRole()));
+      user.setCreatedBy(getCurrentUser().getUserId());
+      String randomPasword = generateRandomPswd();
+      userDto.setPassword(randomPasword);
+      user.setPassword(crypter.encrypt(randomPasword));
+      return employee;
+    } else {
+      throw new BadRequestException(I18nResolver.getMessage(I18nKeys.EMPLOYEE_USER_EXIST, buildFullname(employee)), null);
+    }
   }
 
   private String validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
