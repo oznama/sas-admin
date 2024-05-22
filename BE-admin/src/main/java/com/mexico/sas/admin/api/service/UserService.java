@@ -18,7 +18,7 @@ public interface UserService {
   User findEntityByEmployee(Employee employee) throws CustomException;
   User getUser(Long id) throws CustomException;
   UserDto findByEmployeeAndPassword(Employee employee, String password) throws CustomException;
-  Page<UserPaggeableDto> findAll(String filter, Boolean active, Pageable pageable) throws CustomException;
+  Page<UserPaggeableDto> findAll(String filter, Pageable pageable) throws CustomException;
   List<UserIdsDto> getUsersIds() throws CustomException;
   void deleteLogic(Long id) throws CustomException;
 

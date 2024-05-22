@@ -124,11 +124,11 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
   @Override
-  public Page<UserPaggeableDto> findAll(String filter, Boolean active, Pageable pageable) throws CustomException {
-    log.debug("Finding all, active: {}, filter: {}", active, filter);
+  public Page<UserPaggeableDto> findAll(String filter, Pageable pageable) throws CustomException {
+    log.debug("Finding all, filter: {}", filter);
     final List<UserPaggeableDto> userDtos = new ArrayList<>();
     try {
-      Page<User> users = findByFilter(filter, active, pageable);
+      Page<User> users = findByFilter(filter, null, pageable);
       users.forEach( user -> {
         try {
           UserPaggeableDto userDto = from_M_To_N(user, UserPaggeableDto.class);

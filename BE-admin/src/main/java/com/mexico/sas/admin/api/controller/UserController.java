@@ -87,10 +87,9 @@ public class UserController {
           @ApiResponse(code = 200, message = "Success", response = UserPaggeableDto.class, responseContainer = "List")
   })
   public ResponseEntity<Page<UserPaggeableDto>> findAll(@RequestParam(required = false) String filter,
-                                                        @RequestParam(required = false, defaultValue = "true") Boolean active,
                                                         Pageable pageable) throws CustomException {
     log.info("Finding all users");
-    return ResponseEntity.ok(service.findAll(filter, active, pageable));
+    return ResponseEntity.ok(service.findAll(filter, pageable));
   }
 
   @GetMapping("/select")
