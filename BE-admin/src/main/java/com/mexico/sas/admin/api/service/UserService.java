@@ -15,7 +15,7 @@ public interface UserService {
   void update(Long id, UserUpdateDto userUpdateDtos) throws CustomException;
   UserFindDto findById(Long id) throws CustomException;
   User findEntityById(Long id) throws CustomException;
-  User findEntityByEmployeeId(Long employeeId) throws CustomException;
+  User findEntityByEmployee(Employee employee) throws CustomException;
   User getUser(Long id) throws CustomException;
   UserDto findByEmployeeAndPassword(Employee employee, String password) throws CustomException;
   Page<UserPaggeableDto> findAll(String filter, Boolean active, Pageable pageable) throws CustomException;

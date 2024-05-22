@@ -7,6 +7,7 @@ import com.mexico.sas.admin.api.constants.CatalogKeys;
 import com.mexico.sas.admin.api.constants.GeneralKeys;
 import com.mexico.sas.admin.api.constants.TemplateKeys;
 import com.mexico.sas.admin.api.dto.employee.EmployeeDto;
+import com.mexico.sas.admin.api.dto.employee.EmployeeFindDto;
 import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.user.*;
@@ -97,7 +98,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     log.debug("Finding user with id: {}", id);
     User user = getUser(id);
     UserFindDto userDto = from_M_To_N(user, UserFindDto.class);
-    userDto.setEmployee(employeeService.findById(user.getEmployeeId()));
+    userDto.setEmployee(from_M_To_N(user.getEmployee(), EmployeeFindDto.class));
     userDto.setRole(from_M_To_N(user.getRole(), RoleDto.class));
     log.debug("User Finded: {}", userDto.getId());
     return userDto;
@@ -110,9 +111,9 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
   @Override
-  public User findEntityByEmployeeId(Long employeeId) throws CustomException {
-    return repository.findByEmployeeId(employeeId).orElseThrow(() ->
-            new NoContentException(I18nResolver.getMessage(I18nKeys.USER_EMPLOYEE_NOT_FOUND, employeeId)));
+  public User findEntityByEmployee(Employee employee) throws CustomException {
+    return repository.findByEmployee(employee).orElseThrow(() ->
+            new NoContentException(I18nResolver.getMessage(I18nKeys.USER_EMPLOYEE_NOT_FOUND, employee.getId())));
   }
 
   @Override
@@ -127,25 +128,18 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     log.debug("Finding all, active: {}, filter: {}", active, filter);
     final List<UserPaggeableDto> userDtos = new ArrayList<>();
     try {
-      Page<User> users = /*StringUtils.isEmpty(filter) ?
-              ( active != null ?*/ repository.findByActiveAndEliminateFalse(active, pageable)/* :
-                      repository.findByEliminateFalse(pageable)) :
-              findByFilter(filter, active, pageable)*/;
+      Page<User> users = findByFilter(filter, active, pageable);
       users.forEach( user -> {
         try {
           UserPaggeableDto userDto = from_M_To_N(user, UserPaggeableDto.class);
-          userDto.setEmployee(from_M_To_N(employeeService.findEntityById(user.getEmployeeId()), EmployeeDto.class));
+          userDto.setEmployee(from_M_To_N(user.getEmployee(), EmployeeDto.class));
           userDto.setRole(from_M_To_N(user.getRole(), RoleDto.class));
           userDtos.add(userDto);
         } catch (Exception e) {
           log.warn("User with id {} not added to list, error parsing: {}", user.getId(), e.getMessage());
         }
       });
-      long total = /*StringUtils.isEmpty(filter) ?
-              ( active != null ?*/ repository.countByActiveAndEliminateFalse(active)/* :
-                      repository.countByEliminateFalse()) :
-              countByFilter(filter, active)*/;
-      return new PageImpl<>(userDtos, pageable, total);
+      return new PageImpl<>(userDtos, pageable, users.getTotalElements());
     } catch (Exception e) {
       throw new BadRequestException(e.getMessage(), pageable.toString());
     }
@@ -155,7 +149,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   public List<UserIdsDto> getUsersIds() throws CustomException {
     List<User> users = repository.findAll();
     List<UserIdsDto> userIdsDtos = new ArrayList<>();
-    users.forEach( u -> userIdsDtos.add(new UserIdsDto(u.getId(), u.getEmployeeId(), u.getRole().getId())));
+    users.forEach( u -> userIdsDtos.add(new UserIdsDto(u.getId(), u.getEmployee().getId(), u.getRole().getId())));
     return userIdsDtos;
   }
 
@@ -177,21 +171,20 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     repository.save(user);
     save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, I18nResolver.getMessage(I18nKeys.USER_SECURITY_PSWD_RESET));
     log.debug("User {}'s password reset for: {}", user.getId(), randomPasword);
-    Employee employee = employeeService.findEntityById(user.getEmployeeId());
     Map<String, Object> variables = new HashMap<>();
-    variables.put("employeeName", buildFullname(employee));
+    variables.put("employeeName", buildFullname(user.getEmployee()));
     variables.put("passwordTmp", randomPasword);
-    emailUtils.sendMessage(employee.getEmail(), GeneralKeys.EMAIL_SUBJECT_PSWD_RESET, TemplateKeys.PSWD_RESET, variables);
+    emailUtils.sendMessage(user.getEmployee().getEmail(), GeneralKeys.EMAIL_SUBJECT_PSWD_RESET, TemplateKeys.PSWD_RESET, variables);
   }
 
   public User getUser(Long id) throws NoContentException {
-    return repository.findByIdAndEliminateFalse(id).orElseThrow(() ->
+    return repository.findById(id).orElseThrow(() ->
             new NoContentException(I18nResolver.getMessage(I18nKeys.USER_NOT_FOUND, id)));
   }
 
   private User getUser(Employee employee, String password) throws CustomException {
     log.debug("Finding user {} ...", employee.getEmail());
-    User user = repository.findByEmployeeIdAndPasswordAndEliminateFalse(employee.getId(), password).orElseThrow(() ->
+    User user = repository.findByEmployeeAndPassword(employee, password).orElseThrow(() ->
             new LoginException(I18nResolver.getMessage(I18nKeys.LOGIN_USER_NOT_AUTHORIZED)));
 
     user.getRole().setPermissions( rolePermissionService.findEntityByRole(user.getRole()) );
@@ -228,10 +221,10 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
 
   private Employee validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion empleado
-    Employee employee = employeeService.findEntityById(user.getEmployeeId());
+    Employee employee = employeeService.findEntityById(userDto.getEmployeeId());
     boolean isValid = false;
     try {
-      findEntityByEmployeeId(user.getEmployeeId());
+      findEntityByEmployee(employee);
     } catch (CustomException e) {
       if(e instanceof NoContentException) {
         isValid = true;
@@ -274,38 +267,28 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     return sb.toString().trim();
   }
 
-//  private Page<User> findByFilter(String filter, Boolean active, Pageable pageable) {
-//    return repository.findAll((Specification<User>) (root, query, criteriaBuilder) -> getPredicateDinamycFilter(filter, active, criteriaBuilder, root), pageable);
-//  }
-//
-//  private Long countByFilter(String filter, Boolean active) {
-//    return repository.count((Specification<User>) (root, query, criteriaBuilder) -> getPredicateDinamycFilter(filter, active, criteriaBuilder, root));
-//  }
+  private Page<User> findByFilter(String filter, Boolean active, Pageable pageable) {
+    return repository.findAll((Specification<User>) (root, query, criteriaBuilder) -> getPredicateDinamycFilter(filter, active, criteriaBuilder, root), pageable);
+  }
 
-//  private Predicate getPredicateDinamycFilter(String filter, Boolean active, CriteriaBuilder builder, Root<User> root) {
-//
-//    Predicate pEliminated = builder.isFalse(root.get(User.Fields.eliminate));
-//
-//    String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
-//    Predicate pName = builder.like(builder.lower(root.get(User.Fields.name)), patternFilter);
-//    Predicate pSurname = builder.like(builder.lower(root.get(User.Fields.surname)), patternFilter);
-//    Predicate pSecondSurname = builder.like(builder.lower(root.get(User.Fields.secondSurname)), patternFilter);
-//    Predicate pEmail = builder.like(builder.lower(root.get(User.Fields.email)), patternFilter);
-//    Predicate pPhone = builder.like(builder.lower(root.get(User.Fields.phone)), patternFilter);
-//    Predicate pNameA = builder.like(
-//            builder.function(GeneralKeys.PG_FUNCTION_ACCENT,String.class, builder.lower(root.get(User.Fields.name))), patternFilter);
-//    Predicate pSurnameA = builder.like(
-//            builder.function(GeneralKeys.PG_FUNCTION_ACCENT,String.class, builder.lower(root.get(User.Fields.surname))), patternFilter);
-//    Predicate pSecondSurnameA = builder.like(
-//            builder.function(GeneralKeys.PG_FUNCTION_ACCENT,String.class, builder.lower(root.get(User.Fields.secondSurname))), patternFilter);
-//
-//    Predicate pFilter = builder.or(pName, pSurname, pSecondSurname, pNameA, pSurnameA, pSecondSurnameA, pEmail, pPhone);
-//    if(active == null)
-//      return builder.and(pEliminated, pFilter);
-//    else {
-//      Predicate pActive = builder.equal(root.get(User.Fields.active), active);
-//      return builder.and(pEliminated, pActive, pFilter);
-//    }
-//  }
+  private Predicate getPredicateDinamycFilter(String filter, Boolean active, CriteriaBuilder builder, Root<User> root) {
+
+    List<Predicate> predicates = new ArrayList<>();
+
+    if(!StringUtils.isEmpty(filter)) {
+      String patternFilter = String.format(GeneralKeys.PATTERN_LIKE, filter.toLowerCase());
+      Predicate pName = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(User.Fields.employee).get(Employee.Fields.name))), patternFilter);
+      Predicate pSecondName = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(User.Fields.employee).get(Employee.Fields.secondName))), patternFilter);
+      Predicate pSurname = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(User.Fields.employee).get(Employee.Fields.surname))), patternFilter);
+      Predicate pSecondSurname = builder.like(builder.function(GeneralKeys.PG_FUNCTION_ACCENT, String.class, builder.lower(root.get(User.Fields.employee).get(Employee.Fields.secondSurname))), patternFilter);
+      predicates.add(builder.or(pName, pSecondName, pSurname, pSecondSurname));
+    }
+
+    if(active != null) {
+      predicates.add(builder.equal(root.get(User.Fields.active), active));
+    }
+
+    return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+  }
 
 }

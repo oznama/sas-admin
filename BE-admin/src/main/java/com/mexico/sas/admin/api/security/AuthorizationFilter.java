@@ -72,7 +72,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
       String email = claims.getSubject();
       try {
         Employee employee = employeeService.findEntityByEmail(email);
-        User user = userService.findEntityByEmployeeId(employee.getId());
+        User user = userService.findEntityByEmployee(employee);
         SecurityContextPrincipal principal = new SecurityContextPrincipal();
         principal.setUserId(user.getId());
         principal.setName(Utils.getFullname(employee));
