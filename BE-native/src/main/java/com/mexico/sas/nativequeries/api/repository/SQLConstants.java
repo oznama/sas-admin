@@ -8,5 +8,6 @@ public interface SQLConstants {
     String FILTER_PARAMETER = ":filter";
     String PROJECT_APP_STATUS_PARAMETER = ":paStatus";
     String LIKE_REGEX = "'%%%s%%'";
+
     String WHERE_CONDITION_PATTER = " %s (%s) ";
 }

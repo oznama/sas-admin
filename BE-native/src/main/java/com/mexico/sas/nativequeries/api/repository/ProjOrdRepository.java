@@ -29,23 +29,32 @@ public class ProjOrdRepository extends Utils {
 
     public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
         log.debug("findProjectsWithoutOrders...");
+
+        // Procesar si hay filtros para crear las condiciones del query
         List<String> conditions = projectsWithoutOdersFilter(filter, paStatus);
+
+        // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutOrders
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+
         log.debug("Query: {}", query);
+
+        // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return jdbcTemplate.query(query, new ProjectWihtoutOrdersMapper());
     }
 
     private List<String> projectsWithoutOdersFilter(String filter, Long paStatus) {
         log.debug("Checking filters, filter: {}, paStatus: {}", filter, paStatus);
         List<String> conditions = new ArrayList<>();
-        // If has string filter, add to condition array
+
+        // Si hay valor en filtro
         if( !StringUtils.isEmpty(filter) ) {
             String filterCondition = cond01ProjectWithoutOrders
                     .replaceAll(SQLConstants.FILTER_PARAMETER, String.format(SQLConstants.LIKE_REGEX, filter.toLowerCase()));
             conditions.add(filterCondition);
         }
-        // If has project application status filter, add to condition array
+
+        // Si hay valor en filtro paStatus
         if( paStatus != null ) {
             String paStatusCondition = condO2ProjectWithoutOrders
                     .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
