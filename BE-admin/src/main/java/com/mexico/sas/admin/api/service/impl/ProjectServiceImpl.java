@@ -60,14 +60,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                         null, null, null, pageable)
                 : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
                 null, null, null, null, null, pageable);
-
-//        long total = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.count()
-//                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
-//                ? repository.countByCompany(new Company(companyId))
-//                : repository.countByCompanyAndCreatedBy(new Company(companyId), getCurrentUser().getUserId()));
-
         List<ProjectPageableDto> projectsPageableDto = new ArrayList<>();
-
         projects.forEach( project -> {
             try {
                 projectsPageableDto.add(parseProjectPagged(project));

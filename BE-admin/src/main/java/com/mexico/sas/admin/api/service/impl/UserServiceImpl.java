@@ -60,7 +60,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   public UserFindDto save(UserDto userDto) throws CustomException {
     log.debug("Saving user {} ...", userDto);
     User user = from_M_To_N(userDto, User.class);
-    Employee employee = validationSave(userDto, user);
+    validationSave(userDto, user);
     try {
       repository.save(user);
       save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_INSERT, I18nResolver.getMessage(I18nKeys.LOG_GENERAL_CREATION));
@@ -72,10 +72,10 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     log.debug("User for employe {} created with id {} and pswd: {}", userDto.getEmployeeId(), user.getId(), userDto.getPassword());
 
     Map<String, Object> variables = new HashMap<>();
-    variables.put("employeeName", buildFullname(employee));
-    variables.put("userName", employee.getEmail());
+    variables.put("employeeName", buildFullname(user.getEmployee()));
+    variables.put("userName", user.getEmployee().getEmail());
     variables.put("passwordTmp", userDto.getPassword());
-    emailUtils.sendMessage(employee.getEmail(), GeneralKeys.EMAIL_SUBJECT_USER_CREATED, TemplateKeys.USER_CREATED, variables);
+    emailUtils.sendMessage(user.getEmployee().getEmail(), GeneralKeys.EMAIL_SUBJECT_USER_CREATED, TemplateKeys.USER_CREATED, variables);
 
     return findById(user.getId());
   }
@@ -219,7 +219,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   }
 
 
-  private Employee validationSave(UserDto userDto, User user) throws CustomException {
+  private void validationSave(UserDto userDto, User user) throws CustomException {
     // Validacion empleado
     Employee employee = employeeService.findEntityById(userDto.getEmployeeId());
     boolean isValid = false;
@@ -233,11 +233,11 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
     if(isValid) {
       // Validacion de rol
       user.setRole(roleService.findEntityById(userDto.getRole()));
+      user.setEmployee(employee);
       user.setCreatedBy(getCurrentUser().getUserId());
       String randomPasword = generateRandomPswd();
       userDto.setPassword(randomPasword);
       user.setPassword(crypter.encrypt(randomPasword));
-      return employee;
     } else {
       throw new BadRequestException(I18nResolver.getMessage(I18nKeys.EMPLOYEE_USER_EXIST, buildFullname(employee)), null);
     }
