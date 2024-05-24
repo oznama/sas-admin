@@ -16,5 +16,5 @@ public class ProjectWithoutOrders {
     private String bossMail;
     private String bossName;
     private Long numOrders;
-    private BigDecimal projectAmount;
+    private String projectAmount;
 }
