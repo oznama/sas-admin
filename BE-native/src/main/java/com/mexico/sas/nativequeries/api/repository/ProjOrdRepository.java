@@ -30,29 +30,39 @@ public class ProjOrdRepository extends Utils {
     @Value("${query.project.without.orders.where02}")
     private String condO2ProjectWithoutOrders;
 
+    @Value("${query.project.without.orders.where03}")
+    private String condO3ProjectWithoutOrders;
+
     public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
         log.debug("findProjectsWithoutOrders...");
-
         // Procesar si hay filtros para crear las condiciones del query
-        List<String> conditions = projectsWithoutOdersFilter(filter, paStatus);
+        List<String> conditions = projectsWithoutOdersFilter(true, filter, paStatus, null);
+        return execute(conditions);
+    }
 
+    public List<ProjectWithoutOrders> findProjectsWithoutOrders(List<String> pKeys) {
+        log.debug("findProjectsWithoutOrders with pKeys...");
+        return execute(projectsWithoutOdersFilter(false, null, null, pKeys));
+    }
+
+    private List<ProjectWithoutOrders> execute(List<String> conditions) {
         // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutOrders
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
-
         log.debug("Query: {}", query);
-
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return jdbcTemplate.query(query, new ProjectWihtoutOrdersMapper());
     }
 
-    private List<String> projectsWithoutOdersFilter(String filter, Long paStatus) {
+    private List<String> projectsWithoutOdersFilter(boolean reqConditions, String filter, Long paStatus, List<String> pKeys) {
         log.debug("Checking filters, filter: {}, paStatus: {}", filter, paStatus);
         List<String> conditions = new ArrayList<>();
 
         // Condiciones obligatorias
-        // Esta no lleva parametro asi que no se reemplaza nada
-        conditions.add(cond00ProjectWithoutOrders);
+        if( reqConditions ) {
+            // Esta no lleva parametro asi que no se reemplaza nada
+            conditions.add(cond00ProjectWithoutOrders);
+        }
 
         // Si hay valor en filtro
         if( !StringUtils.isEmpty(filter) ) {
@@ -67,6 +77,13 @@ public class ProjOrdRepository extends Utils {
                     .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
             conditions.add(paStatusCondition);
         }
+
+        if( pKeys != null ) {
+            String paInCondition = condO3ProjectWithoutOrders
+                    .replaceAll(SQLConstants.PROJECT_PKEYS_PARAMETER, inClauseBuilder(pKeys));
+            conditions.add(paInCondition);
+        }
+
         log.debug("Conditions generated? {}", conditions.size());
         return conditions;
     }
