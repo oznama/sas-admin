@@ -6,6 +6,7 @@ import com.mexico.sas.nativequeries.api.repository.ProjOrdRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,5 +26,15 @@ public class ProjOrdService {
 
     public byte[] exportProjectsWithoutOrders(List<String> pKeys) {
         return excelExporter.build(projOrdRepository.findProjectsWithoutOrders(pKeys));
+    }
+
+    // TODO Add Async
+    public void sendNotificationProjectsWithoutOrders(Boolean sendBoss, String bossEmail, List<String> pKeys) {
+        List<ProjectWithoutOrders> projects = projOrdRepository.findProjectsWithoutOrders(pKeys);
+        projects.forEach( p ->
+                log.debug("Sending email notification Project {} without order to PM: {} - {}, boss: {}, and ownBoss: {}",
+                        p.getProjectKey(), p.getProjectName(), p.getPmMail(),
+                        (sendBoss && p.getBossMail() != null ? p.getBossMail() : null), bossEmail)
+        );
     }
 }

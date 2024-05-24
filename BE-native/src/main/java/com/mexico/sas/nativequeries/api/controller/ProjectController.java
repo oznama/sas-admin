@@ -43,5 +43,15 @@ public class ProjectController {
         return ResponseEntity.ok().headers(headers).body(arrayOuput);
     }
 
+    @GetMapping("withoutorders/notification")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
+    public ResponseEntity<?> sendProjectsWithoutOrders(@RequestParam(required = false, defaultValue = "false") Boolean sendBoss,
+                                                            @RequestParam(required = false) String bossEmail,
+                                                            @RequestParam(required = false) List<String> pKeys) {
+        log.info("Sending notificaton email projects without orders");
+        projOrdService.sendNotificationProjectsWithoutOrders(sendBoss, bossEmail, pKeys);
+        return ResponseEntity.ok().build();
+    }
+
 
 }
