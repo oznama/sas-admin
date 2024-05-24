@@ -91,7 +91,7 @@ public class SSOServiceImpl extends Utils implements SSOService {
     if( employee.getBossId() != null ) {
       try {
         Employee boss = employeeService.findEntityById(employee.getBossId());
-        ssoUserDto.setBoosEmail(boss.getEmail());
+        ssoUserDto.setBossEmail(boss.getEmail());
         ssoUserDto.setBossName(buildFullname(boss));
       } catch (NoContentException e) {
         log.warn("Current user not has boss");
