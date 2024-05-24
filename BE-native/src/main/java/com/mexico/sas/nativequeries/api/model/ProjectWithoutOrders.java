@@ -13,7 +13,8 @@ public class ProjectWithoutOrders {
     private String projectName;
     private String pmMail;
     private String pmName;
+    private String bossMail;
+    private String bossName;
     private Long numOrders;
     private BigDecimal projectAmount;
-
 }

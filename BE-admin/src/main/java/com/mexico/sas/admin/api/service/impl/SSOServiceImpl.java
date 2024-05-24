@@ -10,6 +10,7 @@ import com.mexico.sas.admin.api.dto.permission.PermissionDto;
 import com.mexico.sas.admin.api.dto.sso.*;
 import com.mexico.sas.admin.api.dto.user.UserDto;
 import com.mexico.sas.admin.api.exception.CustomException;
+import com.mexico.sas.admin.api.exception.NoContentException;
 import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.security.CustomJWT;
 import com.mexico.sas.admin.api.service.*;
@@ -87,6 +88,15 @@ public class SSOServiceImpl extends Utils implements SSOService {
       ssoUserDto.setPosition(catalogService.findById(employee.getPositionId()).getValue());
     ssoUserDto.setRole(from_M_To_N(userDto.getRoleDto(), SSORoleDto.class));
     ssoUserDto.getRole().setPermissions(getPermissions(userDto.getPermissions()));
+    if( employee.getBossId() != null ) {
+      try {
+        Employee boss = employeeService.findEntityById(employee.getBossId());
+        ssoUserDto.setBoosEmail(boss.getEmail());
+        ssoUserDto.setBossName(buildFullname(boss));
+      } catch (NoContentException e) {
+        log.warn("Current user not has boss");
+      }
+    }
     return ssoUserDto;
   }
 

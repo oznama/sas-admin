@@ -10,12 +10,14 @@ public class ProjectWihtoutOrdersMapper implements RowMapper<ProjectWithoutOrder
     @Override
     public ProjectWithoutOrders mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new ProjectWithoutOrders(
-                rs.getString("clave"),
-                rs.getString("proyecto"),
-                rs.getString("pm_correo"),
-                rs.getString("pm_nombre"),
-                rs.getLong("ordenes"),
-                rs.getBigDecimal("costo_proyecto")
+                rs.getString("project_key"),
+                rs.getString("project_name"),
+                rs.getString("pm_mail"),
+                rs.getString("pm_name"),
+                rs.getString("boss_mail"),
+                rs.getString("boss_name"),
+                rs.getLong("num_orders"),
+                rs.getBigDecimal("project_amount")
         );
     }
 }

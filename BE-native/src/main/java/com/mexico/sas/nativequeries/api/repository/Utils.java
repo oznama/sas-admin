@@ -1,6 +1,9 @@
 package com.mexico.sas.nativequeries.api.repository;
 
+import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
+import com.mexico.sas.nativequeries.api.model.mapper.ProjectWihtoutOrdersMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -16,4 +19,12 @@ public class Utils {
         }
         return conditionBuilder;
     }
+
+    protected String inClauseBuilder(List<String> ids) {
+        log.debug("Building in clause with {} ids...", ids.size());
+        StringBuilder inBuilder = new StringBuilder();
+        ids.forEach( id -> inBuilder.append(String.format(SQLConstants.IN_REGEX, id)).append(","));
+        return inBuilder.length() > 0 ? inBuilder.toString().substring(0, inBuilder.length()-1) : "";
+    }
+
 }
