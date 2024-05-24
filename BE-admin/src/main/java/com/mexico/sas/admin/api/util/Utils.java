@@ -11,7 +11,6 @@ import com.mexico.sas.admin.api.security.AuthorizationFilter;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -252,16 +251,6 @@ public class Utils {
             String msgError = String.format("Error to download file from %s", url);
             log.error(msgError, e);
             return null;
-        }
-    }
-
-    public void deleteFile(String filePath) {
-        if(!StringUtils.isEmpty(filePath)) {
-            final File file = new File(filePath);
-            if (file.exists()) {
-                boolean deleted = FileUtils.deleteQuietly(file);
-                log.debug("File {} deleted? {}", filePath, deleted);
-            }
         }
     }
 
