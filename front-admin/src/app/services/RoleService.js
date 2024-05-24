@@ -32,6 +32,16 @@ export const getRoles = async() => {
     return await response.json();
 };
 
+export const getRolesS = async() => {
+    const request = {
+        headers: getHeaders()
+    }
+    const url = `${context}/select`;
+    const response = await api( url, request );
+    return await response.json();
+};
+
+
 export const update = async(id, data) => {
     const request = {
         method: "PUT",

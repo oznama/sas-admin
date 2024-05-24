@@ -8,6 +8,7 @@ import { companySlice } from "./company/companySlice";
 import { catalogSlice } from "./catalog/catalogSlice";
 import { applicationSlice } from "./application/applicationSlice";
 import { adminSlice } from "./admin/adminSlice";
+import { userSlice } from "./user/userSlice";
 
 export const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
         catalogReducer: catalogSlice.reducer,
         applicationReducer: applicationSlice.reducer,
         adminReducer: adminSlice.reducer,
+        userReducer: userSlice.reducer,
     }
 });
 
