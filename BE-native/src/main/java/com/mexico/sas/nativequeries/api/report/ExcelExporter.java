@@ -18,16 +18,39 @@ public class ExcelExporter {
 
     public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
 
+        String title = "Proyectos sin ordenes de compra";
+
+        int numRow = 0;
+
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Proyectos sin ordenes de compra");
+        Sheet sheet = workbook.createSheet(title);
 
-        Row row = sheet.createRow(0);
+        Row row = sheet.createRow(numRow);
+        row.createCell(1).setCellValue(title);
 
-        row.createCell(0).setCellValue("Gerar");
-        row.createCell(1).setCellValue("De Jesus");
-        row = sheet.createRow(1);
-        row.createCell(0).setCellValue("Arellano");
-        row.createCell(1).setCellValue(30);
+        numRow++;
+        numRow++;
+
+        row = sheet.createRow(numRow);
+        row.createCell(1).setCellValue("Clave");
+        row.createCell(2).setCellValue("Proyecto");
+        row.createCell(3).setCellValue("PM");
+        row.createCell(4).setCellValue("Correo");
+        row.createCell(5).setCellValue("Jefe");
+        row.createCell(6).setCellValue("Correo");
+        row.createCell(7).setCellValue("Monto");
+
+        numRow++;
+        for( ProjectWithoutOrders p : projectWithoutOrders ) {
+            row = sheet.createRow(numRow);
+            row.createCell(1).setCellValue(p.getProjectKey());
+            row.createCell(2).setCellValue(p.getProjectName());
+            row.createCell(3).setCellValue(p.getPmName());
+            row.createCell(4).setCellValue(p.getPmMail());
+            row.createCell(5).setCellValue(p.getBossName());
+            row.createCell(6).setCellValue(p.getBossMail());
+            row.createCell(7).setCellValue(String.valueOf(p.getProjectAmount()));
+        }
 
         // Write the workbook to a ByteArrayOutputStream
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
