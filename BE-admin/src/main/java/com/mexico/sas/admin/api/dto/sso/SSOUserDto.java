@@ -24,7 +24,7 @@ public class SSOUserDto implements Serializable {
   private String position;
   private SSORoleDto role;
   private String bossName;
-  private String boosEmail;
+  private String bossEmail;
 
   public SSOUserDto(Long id) {
     this.id = id;
