@@ -17,7 +17,7 @@ public class ProjectWihtoutOrdersMapper implements RowMapper<ProjectWithoutOrder
                 rs.getString("boss_mail"),
                 rs.getString("boss_name"),
                 rs.getLong("num_orders"),
-                rs.getBigDecimal("project_amount")
+                rs.getString("project_amount")
         );
     }
 }
