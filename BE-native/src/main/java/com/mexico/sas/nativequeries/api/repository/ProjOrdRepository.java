@@ -21,6 +21,9 @@ public class ProjOrdRepository extends Utils {
 
     @Value("${query.project.without.orders}")
     private String queryProjectWithoutOrders;
+
+    @Value("${query.project.without.orders.where00}")
+    private String cond00ProjectWithoutOrders;
     @Value("${query.project.without.orders.where01}")
     private String cond01ProjectWithoutOrders;
 
@@ -46,6 +49,10 @@ public class ProjOrdRepository extends Utils {
     private List<String> projectsWithoutOdersFilter(String filter, Long paStatus) {
         log.debug("Checking filters, filter: {}, paStatus: {}", filter, paStatus);
         List<String> conditions = new ArrayList<>();
+
+        // Condiciones obligatorias
+        // Esta no lleva parametro asi que no se reemplaza nada
+        conditions.add(cond00ProjectWithoutOrders);
 
         // Si hay valor en filtro
         if( !StringUtils.isEmpty(filter) ) {
