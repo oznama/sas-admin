@@ -6,6 +6,9 @@ import com.mexico.sas.nativequeries.api.report.ProjectWithoutODCXls;
 import com.mexico.sas.nativequeries.api.repository.ProjOrdRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,6 +27,12 @@ public class ProjOrdService {
 
     @Autowired
     private EmailUtils emailUtils;
+
+    public Page<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        log.debug("Finding Projects without orders pagged {}", pageable);
+        return projOrdRepository.findProjectsWithoutOrders(filter, paStatus, pageable);
+    }
 
     public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
         return projOrdRepository.findProjectsWithoutOrders(filter, paStatus);

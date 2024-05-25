@@ -5,6 +5,9 @@ import com.mexico.sas.nativequeries.api.model.mapper.ProjectWihtoutOrdersMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -32,6 +35,23 @@ public class ProjOrdRepository extends Utils {
 
     @Value("${query.project.without.orders.where03}")
     private String condO3ProjectWithoutOrders;
+
+    public Page<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus, Pageable pageable) {
+        log.debug("findProjectsWithoutOrders Pagged...");
+        List<ProjectWithoutOrders> list = new ArrayList<>();
+        // Procesar si hay filtros para crear las condiciones del query
+        List<String> conditions = projectsWithoutOdersFilter(true, filter, paStatus, null);
+        String query = queryProjectWithoutOrders
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+        Long total = jdbcTemplate.queryForObject(queryCount(query), Long.class);
+        log.debug("{} row found!", total);
+        if( total > 0 ) {
+            query = queryPagged(query, pageable.getPageSize(), pageable.getPageNumber());
+            log.debug("Query: {}", query);
+            list = jdbcTemplate.query(query, new ProjectWihtoutOrdersMapper());
+        }
+        return new PageImpl<>(list, pageable, total);
+    }
 
     public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
         log.debug("findProjectsWithoutOrders...");
