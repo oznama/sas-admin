@@ -1,12 +1,18 @@
 package com.mexico.sas.nativequeries.api.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
 
 @Slf4j
-public class Utils {
+public class BaseRepository {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Value("${query.count}")
     private String queryCount;
@@ -43,6 +49,14 @@ public class Utils {
         StringBuilder inBuilder = new StringBuilder();
         ids.forEach( id -> inBuilder.append(String.format(SQLConstants.IN_REGEX, id)).append(","));
         return inBuilder.length() > 0 ? inBuilder.toString().substring(0, inBuilder.length()-1) : "";
+    }
+
+    protected <T> T queryForObject(String query, Class<T> clazz) {
+        return jdbcTemplate.queryForObject(query, clazz);
+    }
+
+    protected <T> List<T> query(String query, RowMapper<T> rowMapper) {
+        return jdbcTemplate.query(query, rowMapper);
     }
 
 }

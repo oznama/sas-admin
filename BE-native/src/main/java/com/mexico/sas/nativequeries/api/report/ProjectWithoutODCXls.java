@@ -13,6 +13,7 @@ import java.util.List;
 public class ProjectWithoutODCXls extends ExcelExporter {
 
     public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
+        log.debug("Building excel with {} projects", projectWithoutOrders.size());
 
         final String title = "Proyectos sin ordenes de compra";
 
@@ -20,14 +21,29 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         Sheet sheet = workbook.createSheet(title);
 
         int numRow = 1;
+        title(sheet, numRow, workbook, title);
 
+        numRow = headers(workbook, numRow, sheet);
+        rows(projectWithoutOrders, workbook, numRow, sheet);
+
+        autoSizeColumn(sheet, 20);
+
+        return getReportByteArray(workbook);
+    }
+
+    private void title(Sheet sheet, int numRow, Workbook workbook, String title) {
+        log.debug("Creating title ...");
         Row row = sheet.createRow(numRow);
         Cell cellTitle = row.createCell(1);
         cellTitle.setCellStyle(getTitleStyle(workbook));
         cellTitle.setCellValue(title);
-
         mergeCells(sheet, numRow, numRow, 1, 7);
+        log.debug("Title added!");
+    }
 
+    private int headers(Workbook workbook, int numRow, Sheet sheet) {
+        log.debug("Creating headers ...");
+        Row row;
         CellStyle cellStyle = getTableHeaderStyle(workbook);
         numRow++;
         numRow++;
@@ -53,10 +69,17 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         Cell cellHeaderMount = row.createCell(7);
         cellHeaderMount.setCellValue("Monto");
         cellHeaderMount.setCellStyle(cellStyle);
+        log.debug("Headers added!");
+        return numRow;
+    }
 
-        cellStyle = getTableRowStyle(workbook);
+    private void rows(List<ProjectWithoutOrders> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
+        log.debug("Creatingn rows ...");
+        Row row;
+        CellStyle cellStyle = getTableRowStyle(workbook);
         numRow++;
-        for( ProjectWithoutOrders p : projectWithoutOrders ) {
+        for( ProjectWithoutOrders p : projectWithoutOrders) {
+            numRow++;
             row = sheet.createRow(numRow);
             Cell cell01 = row.createCell(1);
             cell01.setCellValue(p.getProjectKey());
@@ -79,10 +102,8 @@ public class ProjectWithoutODCXls extends ExcelExporter {
             Cell cell07 = row.createCell(7);
             cell07.setCellValue(String.valueOf(p.getProjectAmount()));
             cell01.setCellStyle(cellStyle);
+            log.debug("Row {} for {} project added!", numRow, p.getProjectKey());
         }
-
-        autoSizeColumn(sheet, 20);
-
-        return getReportByteArray(workbook);
+        log.debug("Rows added!");
     }
 }
