@@ -1,57 +1,20 @@
 package com.mexico.sas.nativequeries.api.report;
 
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Component;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 
-@Component
+/**
+ * docker exec -u 0 native-service bash -c "apt-get update && apt-get install fontconfig ttf-dejavu -y"
+ */
+
 @Slf4j
 public class ExcelExporter {
 
-    public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
-
-        String title = "Proyectos sin ordenes de compra";
-
-        int numRow = 0;
-
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet(title);
-
-        Row row = sheet.createRow(numRow);
-        row.createCell(1).setCellValue(title);
-
-        numRow++;
-        numRow++;
-
-        row = sheet.createRow(numRow);
-        row.createCell(1).setCellValue("Clave");
-        row.createCell(2).setCellValue("Proyecto");
-        row.createCell(3).setCellValue("PM");
-        row.createCell(4).setCellValue("Correo");
-        row.createCell(5).setCellValue("Jefe");
-        row.createCell(6).setCellValue("Correo");
-        row.createCell(7).setCellValue("Monto");
-
-        numRow++;
-        for( ProjectWithoutOrders p : projectWithoutOrders ) {
-            row = sheet.createRow(numRow);
-            row.createCell(1).setCellValue(p.getProjectKey());
-            row.createCell(2).setCellValue(p.getProjectName());
-            row.createCell(3).setCellValue(p.getPmName());
-            row.createCell(4).setCellValue(p.getPmMail());
-            row.createCell(5).setCellValue(p.getBossName());
-            row.createCell(6).setCellValue(p.getBossMail());
-            row.createCell(7).setCellValue(String.valueOf(p.getProjectAmount()));
-        }
-
+    protected byte[] getReportByteArray(Workbook workbook) {
         // Write the workbook to a ByteArrayOutputStream
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try {
@@ -61,5 +24,50 @@ public class ExcelExporter {
         }
 
         return stream.toByteArray();
+    }
+
+    protected CellStyle getTitleStyle(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setFont(createFont(workbook, (short) 20, true));
+        return cellStyle;
+    }
+
+    protected CellStyle getTableHeaderStyle(Workbook workbook) {
+        Font font = createFont(workbook, (short) 14, false);
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setFont(font);
+        cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        cellStyle.setFont(font);
+        return cellStyle;
+    }
+
+    protected CellStyle getTableRowStyle(Workbook workbook) {
+        Font font = createFont(workbook, (short) 12, false);
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFont(font);
+        cellStyle.setFont(font);
+        return cellStyle;
+    }
+
+    private Font createFont(Workbook workbook, short size, boolean bold) {
+        Font font = workbook.createFont();
+        font.setBold(bold);
+        font.setFontHeightInPoints(size);
+        return font;
+    }
+
+    protected void mergeCells(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol ) {
+        sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
+    }
+
+    protected void autoSizeColumn(Sheet sheet, int columns) {
+        for(int i=0; i<columns; i++) {
+            sheet.autoSizeColumn(i);
+        }
     }
 }

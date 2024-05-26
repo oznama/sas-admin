@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +27,12 @@ public class ProjectController {
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos sin ordenes", nickname = "findProjectsWithoutOrders")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectWithoutOrders.class, responseContainer = "List") })
-    public ResponseEntity<List<ProjectWithoutOrders>> findProjectsWithoutOrders(@RequestParam(required = false) String filter,
-                                                                                @RequestParam(required = false) Long paStatus) {
+    public ResponseEntity<Page<ProjectWithoutOrders>> findProjectsWithoutOrders(@RequestParam(required = false) String filter,
+                                                                                @RequestParam(required = false) Long paStatus,
+                                                                                @RequestParam(defaultValue = "0") int page,
+                                                                                @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without orders");
-        return ResponseEntity.ok(projOrdService.findProjectsWithoutOrders(filter, paStatus));
+        return ResponseEntity.ok(projOrdService.findProjectsWithoutOrders(filter, paStatus, page, size));
     }
 
     @GetMapping("withoutorders/export")
