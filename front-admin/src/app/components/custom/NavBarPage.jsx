@@ -18,7 +18,6 @@ export const NavBarPage = () => {
   const userAdmin = user && user.role && user.role.id < 4;
 
   useEffect(() => {
-    
     const handleTabOnBlur = event => {
       if( refAdminTab.current && !refAdminTab.current.contains(event.target) ) {
         setShowTabAdmin(false);
@@ -106,9 +105,9 @@ export const NavBarPage = () => {
         Reportes
       </a>
       <div className={ `dropdown-menu bg-primary ${ showTabReport ? 'show' : '' }` } aria-labelledby="reportMenu">
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Pendientes</a>
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a>
+        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Proyectos sin ODC</a>
+        {/* <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
+        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a> */}
       </div>
     </li>
   )

@@ -25,8 +25,8 @@ export const TableUser = ({
     const [users, setUsers] = useState([]);
     const [totalUsers, setTotalUsers] = useState(0);
     console.log('employeesObj',employeesObj)
-    // const [filter, setFilter] = useState(employeesObj.employee ? employeesObj.employee.name:''); 
-    const [filter, setFilter] = useState(''); 
+    const [filter, setFilter] = useState(employeesObj.employee ? employeesObj.employee.name:''); 
+    // const [filter, setFilter] = useState(''); 
     // const [companyId, setCompanyId] = useState(0) ;
     // const [companies, setCompanies] = useState([]);
 

@@ -83,13 +83,13 @@ export const DetailUser = () => {
         event.preventDefault()
         const data = new FormData(event.target)
         const request = Object.fromEntries(data.entries());
-        // saveUser(request);
+        saveUser(request);
         console.log(request);
         const leaderObj = catEmployees.find(element => element.id == request.employeeId);
         request.employee={};
         request.employee.name = leaderObj.value.split(' ')[0];
-        // dispatch(setEmployeesObj(request));
-        // navigate('/users');
+        dispatch(setEmployeesObj(request));
+        navigate('/users');
     }
 
     const onClickBack = () => {

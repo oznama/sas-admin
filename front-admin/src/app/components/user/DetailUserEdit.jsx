@@ -116,7 +116,7 @@ export const DetailUserEdit = () => {
     useEffect(() => {
         fetchSelects();
         getEmployee();
-    }, [ ])
+    }, [employeesObj, name ])
     
     const renderDetail = () => {
         return (<div className='d-grid gap-2 col-6 mx-auto'>
