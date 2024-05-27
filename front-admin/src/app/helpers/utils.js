@@ -111,4 +111,12 @@ export const isNumDec = value => {
     return result;
 }
 
+export const linkQueryBuilder = (arr, paramName) => {
+    let linkQuery='?';
+    for (let i = 0; i < arr.length; i++) {
+        linkQuery+= (i===0 ? '' : '&') + paramName + '=' + arr[i];
+    }
+    return linkQuery;
+}
+
 export const removeCurrencyFormat = value => Number(value.replaceAll(/[^0-9\.-]+/g,""));

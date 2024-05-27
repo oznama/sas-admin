@@ -55,7 +55,7 @@ public class ProjOrdService {
             variables.put("pKey", p.getProjectKey());
             variables.put("pName", p.getProjectName());
             variables.put("pmName", p.getPmName());
-            emailUtils.sendMessage("oznama27@gmail.com", subject, htlmTemplate, variables,
+            emailUtils.sendMessage("danterencon@gmail.com", subject, htlmTemplate, variables,
                     sendBoss && p.getBossMail() != null ? p.getBossMail() : null,
                     bossEmail);
                 }

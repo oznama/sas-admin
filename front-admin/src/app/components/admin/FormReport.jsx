@@ -9,10 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from "../custom/pagination/page/Pagination";
 
-export const FormReport = (
-    pageSize = 10,
-    sort = 'name,asc',
-) => {
+export const FormReport = () => {
     const REPORT_MAP = [
         {
             reportName: 'projects_orders',
@@ -43,6 +40,7 @@ export const FormReport = (
     const [filter, setFilter] = useState('');
     const [keys, setKeys] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
+    const pageSize = 10;
     const [totalUsers, setTotalUsers] = useState(0);
 
     const onPaginationClick = page => {
@@ -53,7 +51,7 @@ export const FormReport = (
         if (reportName) {
             fetchOrders();
         }
-    }, [reportName, pageSize, currentPage]);
+    }, [reportName]);
 
     const isCheck = keys.length > 0;
 
@@ -88,7 +86,11 @@ export const FormReport = (
     }
 
     const download = () => {
-        const downloadKeys = allChecked ? [] : keys;
+        let downloadKeys = [];
+        if (keys.length!=data.length) {
+            downloadKeys=[ ...keys];
+        }
+        console.log('downloadKeys',downloadKeys)
         getPWoOExl(downloadKeys).then(response => response.blob()
         ).then(blob => {
             const url = window.URL.createObjectURL(blob);
@@ -115,12 +117,6 @@ export const FormReport = (
     const renderHeader = () => (
         <div className="d-flex justify-content-between align-items-center">
             { renderSearcher() }
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalUsers }
-                pageSize={ pageSize }
-                onPageChange={  page => onPaginationClick(page)  } 
-            />
         </div>
     )
 
@@ -191,13 +187,17 @@ export const FormReport = (
                     </label>
                     <br /> 
                     {/* <input className="form-check-input" type="checkbox" value="" id="ownBoss" /> */}
-                    <input type="checkbox" value="" id="ownBoss"/>
-                    <label className="form-check-label" htmlFor="ownBoss">
-                        ¿Copiar a&nbsp;
-                        {
-                            `${user.bossName} al correo ${user.bossEmail}?`
-                        }
-                    </label>
+                    {user.bossName? 
+                    <div>
+                        <input type="checkbox" value="" id="ownBoss"/>
+                        <label className="form-check-label" htmlFor="ownBoss">
+                            ¿Copiar a&nbsp;
+                            {
+                                `${user.bossName} al correo ${user.bossEmail}?`
+                            }
+                        </label>
+                    </div>
+                    : ''}
                 </div>
             </div>
             
@@ -238,6 +238,14 @@ export const FormReport = (
             <h4 className="card-title fw-bold">Reporte: {report.title}</h4>
             {/* {report && renderFilter()} */}
             { report && renderHeader() }
+            <div className='align-items-center'>
+                <Pagination
+                    currentPage={ currentPage + 1 }
+                    totalCount={ totalUsers }
+                    pageSize={ pageSize }
+                    onPageChange={  page => onPaginationClick(page)  } 
+                />
+            </div>
             <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
@@ -263,16 +271,6 @@ export const FormReport = (
                     </tbody>
                 </table>
             </div>
-            <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalUsers }
-                pageSize={ pageSize }
-                onPageChange={  page => onPaginationClick(page)  } 
-            />
         </div>
     )
-}
-
-FormReport.propTypes = {
-    pageSize: PropTypes.number,
 }
