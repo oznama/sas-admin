@@ -77,7 +77,6 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         log.debug("Creatingn rows ...");
         Row row;
         CellStyle cellStyle = getTableRowStyle(workbook);
-        numRow++;
         for( ProjectWithoutOrders p : projectWithoutOrders) {
             numRow++;
             row = sheet.createRow(numRow);
