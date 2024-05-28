@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getPWoO, getPWoOExl, naODCNotification } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
-import { displayNotification } from "../../helpers/utils";
+import { displayNotification, styleCheckBox } from "../../helpers/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from "../custom/pagination/page/Pagination";
@@ -29,12 +29,17 @@ export const FormReport = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { user } = useSelector( state => state.auth );
-    const ownBoss = user.bossEmail;
-    const {reportName} = useParams();
-    const report = (REPORT_MAP.find(rc => rc.reportName === reportName))
 
-    const [filterDate, setFilterDate] = useState(new Date())
+    //const { user } = useSelector(state => state.auth);
+    // const ownBoss = user.bossEmail;
+    // const ownEmail = user.email;
+    const ownBoss = 'jaime.carreno@sas-mexico.com';
+    const ownEmail = 'selene.pascalis@sas-mexico.com';
+    
+    const { reportName } = useParams();
+    const report = REPORT_MAP.find(rc => rc.reportName === reportName);
+
+    const [filterDate, setFilterDate] = useState(new Date());
     const [data, setData] = useState([]);
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
@@ -43,46 +48,61 @@ export const FormReport = () => {
 
     const [allChecked, setAllChecked] = useState(true);
     const [keys, setKeys] = useState([]);
-    const [isCheck, setIsCheck] = useState();
+    const [allKeys, setAllKeys] = useState([]);
+    const [isCheck, setIsCheck] = useState(true);
 
-    const onPaginationClick = page => {
-        setCurrentPage(page);
-        fetchOrders(page, filter);
-    }
-
-    useEffect(() => {
-        if (reportName) {
-            fetchOrders(currentPage, filter);
-        }
-        setIsCheck(allChecked || keys.length > 0);
-    }, [reportName]);
-
-    const fetchOrders = (currentPage, filter) => {
-        getPWoO(currentPage, pageSize,filter).then(resp => {
-            let data = [];
-            resp.content.map( (r) => {
-                data.push( { ...r, checked: keys.length > 0 ? keys.find( k => k === r.projectKey ) : false } )
-            })
-            setData(data);
-            setTotalUsers(resp.totalElements);
+    const allKeysGet = () => {
+        getPWoO(0, 2147483647).then(resp => {
+            setAllKeys(resp.content.map(item => item.projectKey));
+            console.log('Todas las llaves', resp.content);
         })
         .catch(err => {
             console.error('Error fetching data:', err);
         });
     }
 
+    const onPaginationClick = page => {
+        setCurrentPage(page);
+        fetchOrders(page, filter);
+    };
+
+    useEffect(() => {
+        if (reportName) {
+            fetchOrders(currentPage, filter);
+            allKeysGet();
+        }
+    }, [reportName]);
+
+    useEffect(() => {
+        if (data.length > 0 && allChecked) {
+            setKeys(allKeys);  // Select all keys when allChecked is true
+        }
+        setIsCheck(allChecked || keys.length > 0);
+    }, [allChecked, data]);
+
+    const fetchOrders = (currentPage, filter) => {
+        getPWoO(currentPage, pageSize, filter).then(resp => {
+            const data = resp.content.map(r => ({
+                ...r,
+                checked: allChecked || keys.includes(r.projectKey)
+            }));
+            setData(data);
+            setTotalUsers(resp.totalElements);
+        })
+        .catch(err => {
+            console.error('Error fetching data:', err);
+        });
+    };
+
     const onChangeFilter = ({ target }) => {
-        setCurrentPage(0)
+        setCurrentPage(0);
         setFilter(target.value);
         fetchOrders(0, target.value);
-    }
+    };
 
     const download = () => {
-        let downloadKeys = [];
-        if (keys.length!=data.length) {
-            downloadKeys=[ ...keys];
-        }
-        console.log('downloadKeys',downloadKeys)
+        let downloadKeys = keys.length === allKeys.length ? [] : [...keys];
+        console.log('downloadKeys', downloadKeys);
         getPWoOExl(downloadKeys).then(response => response.blob()
         ).then(blob => {
             const url = window.URL.createObjectURL(blob);
@@ -92,11 +112,11 @@ export const FormReport = () => {
             document.body.appendChild(a);
             a.click();
             a.remove();
-        })
-    }
+        });
+    };
 
     const email = () => {
-        naODCNotification(keys, ownBoss)
+        naODCNotification(keys, ownBoss, ownEmail)
         .then(resp => {
             console.log(resp);
             displayNotification(dispatch, '¡Correo enviado!', alertType.success);
@@ -104,55 +124,52 @@ export const FormReport = () => {
         .catch(err => {
             console.error('Error fetching data:', err);
         });
-    }
-    
+    };
+
     const renderHeader = () => (
         <div className="d-flex justify-content-between align-items-center">
-            { renderSearcher() }
+            {renderSearcher()}
         </div>
-    )
+    );
 
     const toggleAllCheckboxes = () => {
         const newAllChecked = !allChecked;
         setAllChecked(newAllChecked);
+        const updatedKeys = newAllChecked ? allKeys : [];
+        setKeys(updatedKeys);
         const updatedData = data.map(item => ({ ...item, checked: newAllChecked }));
         setData(updatedData);
-        setKeys(newAllChecked ? updatedData.map(item => item.projectKey) : []);
-        if( newAllChecked ) {
-            setKeys([]);
-        }
     };
 
     const toggleCheckbox = (pKey, index) => {
-        const checked = keys.find( k => k === pKey );
-        
-        const keySelecteds = checked || allChecked ? keys.filter( k => k !== pKey) : [ ...keys, pKey ];
-        
-        const dataUpdated = [ ...data ];
-        dataUpdated[index].checked = allChecked ? false : !dataUpdated[index].checked;
+        const dataUpdated = [...data];
+        dataUpdated[index].checked = !dataUpdated[index].checked;
+
+        const keySelecteds = dataUpdated[index].checked
+            ? [...keys, pKey]
+            : keys.filter(k => k !== pKey);
+
         setData(dataUpdated);
-        if( totalUsers === keySelecteds.length ) {
-            console.log('All checkeds, keys clean');
+        setKeys(keySelecteds);
+
+        if (dataUpdated.every(item => item.checked)) {
             setAllChecked(true);
-            setKeys([]);
         } else {
-            console.log('No all checkeds, keys', keySelecteds);
             setAllChecked(false);
-            setKeys(keySelecteds);
         }
     };
 
     const onClean = () => {
         setFilter('');
         setCurrentPage(0);
-        fetchOrders();
-    }
+        fetchOrders(0, '');
+    };
 
     const projectSelected = pKey => {
-        const found = keys.find( k => k === pKey );
+        const found = keys.includes(pKey);
         console.log(pKey, 'exist in', keys, found);
         return found;
-    }
+    };
 
     const renderRows = () => data && data.map(({
         projectKey,
@@ -169,9 +186,9 @@ export const FormReport = () => {
     }, index) => (
         <tr key={projectKey} onClick={() => console.log('Click en row')}>
             <td className="text-center">
-                <input
+                <input style={styleCheckBox}
                     type="checkbox"
-                    checked={ allChecked || checked }
+                    checked={checked}
                     onChange={() => toggleCheckbox(projectKey, index)}
                 />
             </td>
@@ -190,8 +207,7 @@ export const FormReport = () => {
     return (
         <div className='px-5'>
             <h4 className="card-title fw-bold">Reporte: {report.title}</h4>
-            {/* {report && renderFilter()} */}
-            <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } />
+            <InputSearcher name={'filter'} placeholder={'Escribe para filtrar...'} value={filter} onChange={onChangeFilter} onClean={onClean} />
             <div className="py-2 d-flex flex-row-reverse bd-highlight">
                 <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-success' : 'btn-secondary'}`} onClick={email}>
                     Enviar Correo &nbsp;
@@ -203,7 +219,7 @@ export const FormReport = () => {
                 <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-primary' : 'btn-secondary'}`} onClick={download}>
                     Exportar &nbsp;
                     <span>
-                    <i className="bi bi-arrow-bar-down"></i>
+                        <i className="bi bi-arrow-bar-down"></i>
                     </span>
                 </button>
             </div>
@@ -212,7 +228,7 @@ export const FormReport = () => {
                     <thead className="thead-dark">
                         <tr>
                             <th className="text-center fs-6" scope="col">
-                                <input
+                                <input  style={styleCheckBox}
                                     type="checkbox"
                                     checked={allChecked}
                                     onChange={toggleAllCheckboxes}

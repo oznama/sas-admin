@@ -7,6 +7,7 @@ export const taxRate = 0.16;
 export const styleTable = { height: '345px' };
 export const styleTableRow = { padding: '1px' };
 export const styleTableRowBtn = { ...styleTableRow, width: '35px' };
+export const styleCheckBox = { height: '16px', width: '16px' };
 
 export const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
 
@@ -111,9 +112,10 @@ export const isNumDec = value => {
     return result;
 }
 
-export const linkQueryBuilder = (arr, paramName, boss) => {
+export const linkQueryBuilder = (arr, paramName, boss, own) => {
     let linkQuery='?';
     boss ? linkQuery+='bossEmail='+boss.replaceAll('@', '%40')+'&' : linkQuery;
+    own ? linkQuery+='currentUserEmail='+own.replaceAll('@', '%40')+'&' : linkQuery;
     for (let i = 0; i < arr.length; i++) {
         linkQuery+= (i===0 ? '' : '&') + paramName + '=' + arr[i];
     }
