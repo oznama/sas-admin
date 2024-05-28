@@ -55,7 +55,7 @@ public class ProjectInvoiceService {
             variables.put("pName", p.getProjectName());
             variables.put("pmName", p.getPmName());
             emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables,
-                    currentUserEmail, bossEmail/*,p.getBossMail()*/);
+                    currentUserEmail, bossEmail, p.getBossMail());
         });
     }
 }

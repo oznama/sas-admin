@@ -52,8 +52,8 @@ public class ProjectOrderService {
             String subject = String.format("%s %s orden de compra pendiente - SAS", p.getProjectKey(), p.getProjectName());
             Map<String, Object> variables = new HashMap<>();
             variables.put("pmName", p.getPmName());
-            emailUtils.sendMessage("danterencon@gmail.com", subject, htlmTemplate, variables,
-                    currentUserEmail, bossEmail/*, p.getPmMail(), p.getBossMail()*/);
+            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables,
+                    currentUserEmail, bossEmail, p.getBossMail());
         });
     }
 }
