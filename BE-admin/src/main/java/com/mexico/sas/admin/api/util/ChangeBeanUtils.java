@@ -134,6 +134,19 @@ public class ChangeBeanUtils extends Utils {
             projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
             projectApplication.setTax(projectApplicationUpdateDto.getTax());
             projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+        } else {
+            if( projectApplication.getTax() != projectApplicationUpdateDto.getTax() ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Iva",
+                                formatCurrency(projectApplication.getTax()), formatCurrency(projectApplicationUpdateDto.getTax())))
+                        .append(GeneralKeys.JUMP_LINE);
+                projectApplication.setTax(projectApplicationUpdateDto.getTax());
+            }
+            if( projectApplication.getTotal() != projectApplicationUpdateDto.getTotal() ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Total",
+                                formatCurrency(projectApplication.getTotal()), formatCurrency(projectApplicationUpdateDto.getTotal())))
+                        .append(GeneralKeys.JUMP_LINE);
+                projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+            }
         }
         if( validateLongRequiredUpdate(projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Líder",
