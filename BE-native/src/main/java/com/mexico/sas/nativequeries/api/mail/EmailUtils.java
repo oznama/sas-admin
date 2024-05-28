@@ -52,7 +52,7 @@ public class EmailUtils {
         try {
             helper.setFrom(username);
             helper.setTo(to);
-            // helper.setCc(cc);
+            helper.setCc(cc);
             helper.setSubject(subject);
             String htmlContent = templateEngine.process(templateName, context);
             helper.setText(htmlContent, true);
