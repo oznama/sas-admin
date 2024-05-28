@@ -36,31 +36,34 @@ export const FormReport = () => {
 
     const [filterDate, setFilterDate] = useState(new Date())
     const [data, setData] = useState([]);
-    const [allChecked, setAllChecked] = useState(false);
     const [filter, setFilter] = useState('');
-    const [keys, setKeys] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 10;
     const [totalUsers, setTotalUsers] = useState(0);
 
+    const [allChecked, setAllChecked] = useState(true);
+    const [keys, setKeys] = useState([]);
+    const [isCheck, setIsCheck] = useState();
+
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchOrders();
+        fetchOrders(page, filter);
     }
 
     useEffect(() => {
         if (reportName) {
-            fetchOrders();
+            fetchOrders(currentPage, filter);
         }
+        setIsCheck(allChecked || keys.length > 0);
     }, [reportName]);
 
-    const isCheck = keys.length > 0;
-
-    const fetchOrders = () => {
-        getPWoO(currentPage,filter)
-        .then(resp => {
-            console.log('resp', resp)
-            setData(resp.content);
+    const fetchOrders = (currentPage, filter) => {
+        getPWoO(currentPage, pageSize,filter).then(resp => {
+            let data = [];
+            resp.content.map( (r) => {
+                data.push( { ...r, checked: keys.length > 0 ? keys.find( k => k === r.projectKey ) : false } )
+            })
+            setData(data);
             setTotalUsers(resp.totalElements);
         })
         .catch(err => {
@@ -68,23 +71,10 @@ export const FormReport = () => {
         });
     }
 
-    const onSubmit = event => {
-        event.preventDefault();
-        const data = new FormData(event.target);
-        const request = Object.fromEntries(data.entries());
-        console.log('Execute report', reportName, request);
-        getPWoO(currentPage,filter ? filter : '').then(resp => {
-            setData(resp);
-            console.log('resp', resp);
-        }).catch(err => {
-            console.log('err', err);
-        });
-    }
-
-    const onChangeFilter = (event) => {
+    const onChangeFilter = ({ target }) => {
         setCurrentPage(0)
-        setFilter(event.target.value);
-        fetchOrders();
+        setFilter(target.value);
+        fetchOrders(0, target.value);
     }
 
     const download = () => {
@@ -128,19 +118,28 @@ export const FormReport = () => {
         const updatedData = data.map(item => ({ ...item, checked: newAllChecked }));
         setData(updatedData);
         setKeys(newAllChecked ? updatedData.map(item => item.projectKey) : []);
+        if( newAllChecked ) {
+            setKeys([]);
+        }
     };
 
-    const toggleCheckbox = (index) => {
-        const updatedData = [...data];
-        updatedData[index].checked = !updatedData[index].checked;
-        setData(updatedData);
-
-        const updatedKeys = updatedData[index].checked
-            ? [...keys, updatedData[index].projectKey]
-            : keys.filter(key => key !== updatedData[index].projectKey);
+    const toggleCheckbox = (pKey, index) => {
+        const checked = keys.find( k => k === pKey );
         
-        setKeys(updatedKeys);
-        setAllChecked(updatedData.every(item => item.checked));
+        const keySelecteds = checked || allChecked ? keys.filter( k => k !== pKey) : [ ...keys, pKey ];
+        
+        const dataUpdated = [ ...data ];
+        dataUpdated[index].checked = allChecked ? false : !dataUpdated[index].checked;
+        setData(dataUpdated);
+        if( totalUsers === keySelecteds.length ) {
+            console.log('All checkeds, keys clean');
+            setAllChecked(true);
+            setKeys([]);
+        } else {
+            console.log('No all checkeds, keys', keySelecteds);
+            setAllChecked(false);
+            setKeys(keySelecteds);
+        }
     };
 
     const onClean = () => {
@@ -149,50 +148,11 @@ export const FormReport = () => {
         fetchOrders();
     }
 
-    const renderSearcher = () => (
-        <form className='d-grid gap-2 col-6 mx-auto' onSubmit={onSubmit}>
-            {report.filterType === 1 && (
-                <div className='mb-3'>
-                    <select className="form-select">
-                        <option value="1">Todos</option>
-                        <option value="2">Con ordenes</option>
-                        <option value="3">Sin ordenes</option>
-                    </select>
-                </div>
-            )}
-            <div className='mb-3'>
-                <div className="pt-3 d-flex flex-row">
-                    {/* <input
-                        type="text"
-                        name="filter"
-                        value={filter}
-                        onChange={onChangeFilter}
-                        placeholder="Escribe para filtrar..."
-                        className="form-control"
-                        onKeyDown={printHi()}
-                    /> */}
-                    { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
-                </div>
-                
-                <div className="pt-3 d-flex flex-row flex-row-reverse"> 
-                        <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-success' : 'btn-secondary'}`} onClick={email}>
-                            Enviar Correo &nbsp;
-                            <span>
-                                <i className="bi bi-envelope"></i>
-                            </span>
-                        </button>
-                        &nbsp;
-                        <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-primary' : 'btn-secondary'}`} onClick={download}>
-                            Exportar &nbsp;
-                            <span>
-                            <i className="bi bi-arrow-bar-down"></i>
-                            </span>
-                        </button>
-                </div>
-            </div>
-            
-        </form>
-    )
+    const projectSelected = pKey => {
+        const found = keys.find( k => k === pKey );
+        console.log(pKey, 'exist in', keys, found);
+        return found;
+    }
 
     const renderRows = () => data && data.map(({
         projectKey,
@@ -211,8 +171,8 @@ export const FormReport = () => {
             <td className="text-center">
                 <input
                     type="checkbox"
-                    checked={checked || false}
-                    onChange={() => toggleCheckbox(index)}
+                    checked={ allChecked || checked }
+                    onChange={() => toggleCheckbox(projectKey, index)}
                 />
             </td>
             <td className="text-start">{projectKey}</td>
@@ -231,16 +191,23 @@ export const FormReport = () => {
         <div className='px-5'>
             <h4 className="card-title fw-bold">Reporte: {report.title}</h4>
             {/* {report && renderFilter()} */}
-            { report && renderHeader() }
-            <div className='align-items-center'>
-                <Pagination
-                    currentPage={ currentPage + 1 }
-                    totalCount={ totalUsers }
-                    pageSize={ pageSize }
-                    onPageChange={  page => onPaginationClick(page)  } 
-                />
+            <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } />
+            <div className="py-2 d-flex flex-row-reverse bd-highlight">
+                <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-success' : 'btn-secondary'}`} onClick={email}>
+                    Enviar Correo &nbsp;
+                    <span>
+                        <i className="bi bi-envelope"></i>
+                    </span>
+                </button>
+                &nbsp;
+                <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-primary' : 'btn-secondary'}`} onClick={download}>
+                    Exportar &nbsp;
+                    <span>
+                    <i className="bi bi-arrow-bar-down"></i>
+                    </span>
+                </button>
             </div>
-            <div className='table-responsive text-nowrap' style={{ height: '350px' }}>
+            <div className='table-responsive text-nowrap'>
                 <table className="table table-sm table-bordered table-striped table-hover">
                     <thead className="thead-dark">
                         <tr>
@@ -266,6 +233,12 @@ export const FormReport = () => {
                         {renderRows()}
                     </tbody>
                 </table>
+                <Pagination
+                    currentPage={ currentPage + 1 }
+                    totalCount={ totalUsers }
+                    pageSize={ pageSize }
+                    onPageChange={  page => onPaginationClick(page)  } 
+                />
             </div>
         </div>
     )

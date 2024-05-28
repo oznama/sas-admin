@@ -3,13 +3,12 @@ import { linkQueryBuilder } from '../helpers/utils';
 
 const context = 'projects/withoutorders';
 
-export const getPWoO = async(page='',filter='') => {
+export const getPWoO = async(page=0, size=10,filter='') => {
     const request = {
         headers: getHeadersSimple()
     }
-    const pageParam = page?`?page=${page}`:'?';
-    const filterParam = filter ? `filter=${filter}` : ''
-    const urlProjectsNa = `${context}${pageParam}${ filterParam }`;
+    const filterParam = filter ? `&filter=${filter}` : ''
+    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }`;
     const response = await apiNative( urlProjectsNa, request );
     const projects = await response.json();
     return projects;
