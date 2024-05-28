@@ -15,21 +15,16 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ProjOrdRepository extends BaseRepository {
+public class ProjectOrderRepository extends BaseRepository {
 
     @Value("${query.project.without.orders}")
     private String queryProjectWithoutOrders;
 
-    @Value("${query.project.without.orders.where00}")
-    private String cond00ProjectWithoutOrders;
-    @Value("${query.project.without.orders.where01}")
-    private String cond01ProjectWithoutOrders;
+    @Value("${query.project.application.startdate.expired}")
+    private String filterStartDateExpired;
 
-    @Value("${query.project.without.orders.where02}")
-    private String condO2ProjectWithoutOrders;
-
-    @Value("${query.project.without.orders.where03}")
-    private String condO3ProjectWithoutOrders;
+    @Value("${query.project.application.status}")
+    private String filterApplicationStatus;
 
     public Page<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus, Pageable pageable) {
         log.debug("findProjectsWithoutOrders Pagged...");
@@ -76,28 +71,19 @@ public class ProjOrdRepository extends BaseRepository {
         // Condiciones obligatorias
         if( reqConditions ) {
             // Esta no lleva parametro asi que no se reemplaza nada
-            conditions.add(cond00ProjectWithoutOrders);
+            conditions.add(filterStartDateExpired);
         }
 
-        // Si hay valor en filtro
-        if( !StringUtils.isEmpty(filter) ) {
-            String filterCondition = cond01ProjectWithoutOrders
-                    .replaceAll(SQLConstants.FILTER_PARAMETER, String.format(SQLConstants.LIKE_REGEX, filter.toLowerCase()));
-            conditions.add(filterCondition);
-        }
+        addGeneralFilter(filter, conditions);
 
         // Si hay valor en filtro paStatus
         if( paStatus != null ) {
-            String paStatusCondition = condO2ProjectWithoutOrders
+            String paStatusCondition = filterApplicationStatus
                     .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
             conditions.add(paStatusCondition);
         }
 
-        if( pKeys != null ) {
-            String paInCondition = condO3ProjectWithoutOrders
-                    .replaceAll(SQLConstants.PROJECT_PKEYS_PARAMETER, inClauseBuilder(pKeys));
-            conditions.add(paInCondition);
-        }
+        addPKeysIn(pKeys, conditions);
 
         log.debug("Conditions generated? {}", conditions.size());
         return conditions;

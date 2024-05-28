@@ -1,7 +1,7 @@
 package com.mexico.sas.nativequeries.api.controller;
 
 import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
-import com.mexico.sas.nativequeries.api.service.ProjOrdService;
+import com.mexico.sas.nativequeries.api.service.ProjectOrderService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ProjectController {
 
     @Autowired
-    private ProjOrdService projOrdService;
+    private ProjectOrderService projectOrderService;
 
     @GetMapping("withoutorders")
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos sin ordenes", nickname = "findProjectsWithoutOrders")
@@ -32,7 +32,7 @@ public class ProjectController {
                                                                                 @RequestParam(defaultValue = "0") int page,
                                                                                 @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without orders");
-        return ResponseEntity.ok(projOrdService.findProjectsWithoutOrders(filter, paStatus, page, size));
+        return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter, paStatus, page, size));
     }
 
     @GetMapping("withoutorders/export")
@@ -42,17 +42,17 @@ public class ProjectController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDispositionFormData("attachment", "report.xlsx");
-        byte[] arrayOuput = projOrdService.exportProjectsWithoutOrders(pKeys);
+        byte[] arrayOuput = projectOrderService.exportProjectsWithoutOrders(pKeys);
         return ResponseEntity.ok().headers(headers).body(arrayOuput);
     }
 
     @GetMapping("withoutorders/notification")
     @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
-    public ResponseEntity<?> sendProjectsWithoutOrders(@RequestParam(required = false, defaultValue = "false") Boolean sendBoss,
+    public ResponseEntity<?> sendProjectsWithoutOrders(@RequestParam(required = false) String currentUserEmail,
                                                             @RequestParam(required = false) String bossEmail,
                                                             @RequestParam(required = false) List<String> pKeys) {
         log.info("Sending notificaton email projects without orders");
-        projOrdService.sendNotificationProjectsWithoutOrders(sendBoss, bossEmail, pKeys);
+        projectOrderService.sendNotificationProjectsWithoutOrders(currentUserEmail, bossEmail, pKeys);
         return ResponseEntity.ok().build();
     }
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,6 +20,12 @@ public class BaseRepository {
 
     @Value("${query.condition.limit}")
     private String conditionLimit;
+
+    @Value("${query.project.general.filter}")
+    private String filterGeneral;
+
+    @Value("${query.project.pkeys.list.in}")
+    private String filterPkeysListIn;
 
     protected String queryCount(String query) {
         log.debug("Creating query counter ...");
@@ -49,6 +56,23 @@ public class BaseRepository {
         StringBuilder inBuilder = new StringBuilder();
         ids.forEach( id -> inBuilder.append(String.format(SQLConstants.IN_REGEX, id)).append(","));
         return inBuilder.length() > 0 ? inBuilder.toString().substring(0, inBuilder.length()-1) : "";
+    }
+
+    protected void addGeneralFilter(String filter, List<String> conditions) {
+        // Si hay valor en filtro
+        if( !StringUtils.isEmpty(filter) ) {
+            String filterCondition = filterGeneral
+                    .replaceAll(SQLConstants.FILTER_PARAMETER, String.format(SQLConstants.LIKE_REGEX, filter.toLowerCase()));
+            conditions.add(filterCondition);
+        }
+    }
+
+    protected void addPKeysIn(List<String> pKeys, List<String> conditions) {
+        if( pKeys != null ) {
+            String paInCondition = filterPkeysListIn
+                    .replaceAll(SQLConstants.PROJECT_PKEYS_PARAMETER, inClauseBuilder(pKeys));
+            conditions.add(paInCondition);
+        }
     }
 
     protected <T> T queryForObject(String query, Class<T> clazz) {

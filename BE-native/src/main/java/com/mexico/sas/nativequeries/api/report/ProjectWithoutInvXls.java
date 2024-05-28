@@ -1,5 +1,6 @@
 package com.mexico.sas.nativequeries.api.report;
 
+import com.mexico.sas.nativequeries.api.model.ProjectWithoutInvoices;
 import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -10,12 +11,12 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ProjectWithoutODCXls extends ExcelExporter {
+public class ProjectWithoutInvXls extends ExcelExporter {
 
-    public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
-        log.debug("Building excel with {} projects", projectWithoutOrders.size());
+    public byte[] build(List<ProjectWithoutInvoices> projectWithoutInvoices) {
+        log.debug("Building excel with {} projects", projectWithoutInvoices.size());
 
-        final String title = "Proyectos sin ordenes de compra";
+        final String title = "Reporte de Proyectos sin Factura";
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(title);
@@ -24,7 +25,7 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         title(sheet, numRow, workbook, title);
 
         numRow = headers(workbook, numRow, sheet);
-        rows(projectWithoutOrders, workbook, numRow, sheet);
+        rows(projectWithoutInvoices, workbook, numRow, sheet);
 
         autoSizeColumn(sheet, 20);
 
@@ -79,11 +80,11 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         return numRow;
     }
 
-    private void rows(List<ProjectWithoutOrders> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
+    private void rows(List<ProjectWithoutInvoices> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
         log.debug("Creatingn rows ...");
         Row row;
         CellStyle cellStyle = getTableRowStyle(workbook);
-        for( ProjectWithoutOrders p : projectWithoutOrders) {
+        for( ProjectWithoutInvoices p : projectWithoutOrders) {
             numRow++;
             row = sheet.createRow(numRow);
             Cell cell01 = row.createCell(1);
@@ -106,11 +107,11 @@ public class ProjectWithoutODCXls extends ExcelExporter {
             cell06.setCellStyle(cellStyle);
             Cell cell07 = row.createCell(7);
             cell07.setCellValue(String.valueOf(p.getProjectAmount()));
-            cell01.setCellStyle(cellStyle);
+            cell07.setCellStyle(cellStyle);
             Cell cell08 = row.createCell(8);
             cell08.setCellValue(String.valueOf(p.getTax()));
             cell08.setCellStyle(cellStyle);
-            Cell cell09 = row.createCell(9);
+            Cell cell09 = row.createCell(7);
             cell09.setCellValue(String.valueOf(p.getTotal()));
             cell09.setCellStyle(cellStyle);
             log.debug("Row {} for {} project added!", numRow, p.getProjectKey());
