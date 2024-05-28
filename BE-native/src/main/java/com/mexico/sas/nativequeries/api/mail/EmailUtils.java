@@ -13,6 +13,8 @@ import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -43,8 +45,9 @@ public class EmailUtils {
         }
     }
 
-    public void sendMessage(String to, String subject, String templateName, Map<String, Object> variables, String... cc) {
-        log.debug("Sending HTML message {} with template {}, to {} with cc: {}", subject, templateName, to, cc);
+    public void sendMessage(String to, String subject, String templateName, Map<String, Object> variables,
+                            String currentUserEmail, String bossEmail, String pmBossEmal) {
+        log.debug("Sending HTML message {} with template {}, to {}", subject, templateName, to);
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
         Context context = new Context();
@@ -52,7 +55,7 @@ public class EmailUtils {
         try {
             helper.setFrom(username);
             helper.setTo(to);
-            helper.setCc(cc);
+            helper.setCc(listToArray(currentUserEmail, bossEmail, pmBossEmal));
             helper.setSubject(subject);
             String htmlContent = templateEngine.process(templateName, context);
             helper.setText(htmlContent, true);
@@ -61,5 +64,16 @@ public class EmailUtils {
         } catch (MessagingException e) {
             log.error("Error sending htlm message email", e);
         }
+    }
+
+    private String[] listToArray(String currentUserEmail, String bossEmail, String pmBossEmal) {
+        List<String> cc = new ArrayList<>();
+        cc.add(currentUserEmail);
+        cc.add(bossEmail);
+        if(pmBossEmal != null ) {
+            cc.add(pmBossEmal);
+        }
+        log.debug("CC to mail: {}", cc);
+        return cc.toArray(new String[cc.size()]);
     }
 }
