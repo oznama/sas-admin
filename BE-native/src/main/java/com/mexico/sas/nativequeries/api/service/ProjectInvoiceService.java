@@ -54,8 +54,8 @@ public class ProjectInvoiceService {
             variables.put("pKey", p.getProjectKey());
             variables.put("pName", p.getProjectName());
             variables.put("pmName", p.getPmName());
-            emailUtils.sendMessage("danterencon@gmail.com", subject, htlmTemplate, variables,
-                    currentUserEmail, bossEmail/*, p.getPmMail(), p.getBossMail()*/);
+            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables,
+                    currentUserEmail, bossEmail/*,p.getBossMail()*/);
         });
     }
 }
