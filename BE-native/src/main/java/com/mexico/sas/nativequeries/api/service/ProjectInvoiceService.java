@@ -39,7 +39,7 @@ public class ProjectInvoiceService {
         return projectInvoiceRepository.findProjectsWithoutInvoices(filter, paStatus);
     }
 
-    public byte[] findProjectsWithoutInvoices(List<String> pKeys) {
+    public byte[] exportProjectsWithoutInvoices(List<String> pKeys) {
         return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(pKeys));
     }
 

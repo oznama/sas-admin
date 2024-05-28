@@ -17,13 +17,13 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("projects")
-public class ProjectController {
+@RequestMapping("projects/withoutorders")
+public class ProjectOrderController {
 
     @Autowired
     private ProjectOrderService projectOrderService;
 
-    @GetMapping("withoutorders")
+    @GetMapping
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos sin ordenes", nickname = "findProjectsWithoutOrders")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectWithoutOrders.class, responseContainer = "List") })
@@ -35,7 +35,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter, paStatus, page, size));
     }
 
-    @GetMapping("withoutorders/export")
+    @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
     public ResponseEntity<byte[]> exportProjectsWithoutOrders(@RequestParam(required = false) List<String> pKeys) {
         log.info("Exporting projects without orders");
@@ -46,7 +46,7 @@ public class ProjectController {
         return ResponseEntity.ok().headers(headers).body(arrayOuput);
     }
 
-    @GetMapping("withoutorders/notification")
+    @GetMapping("notification")
     @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
     public ResponseEntity<?> sendProjectsWithoutOrders(@RequestParam(required = false) String currentUserEmail,
                                                             @RequestParam(required = false) String bossEmail,
