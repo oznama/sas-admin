@@ -111,8 +111,9 @@ export const isNumDec = value => {
     return result;
 }
 
-export const linkQueryBuilder = (arr, paramName) => {
+export const linkQueryBuilder = (arr, paramName, boss) => {
     let linkQuery='?';
+    boss ? linkQuery+='bossEmail='+boss.replaceAll('@', '%40')+'&' : linkQuery;
     for (let i = 0; i < arr.length; i++) {
         linkQuery+= (i===0 ? '' : '&') + paramName + '=' + arr[i];
     }

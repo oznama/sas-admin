@@ -1,6 +1,4 @@
-import PropTypes from 'prop-types';
 import { useNavigate, useParams } from "react-router-dom";
-import DatePicker from 'react-datepicker';
 import { useState, useEffect } from "react";
 import { getPWoO, getPWoOExl, naODCNotification } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -8,6 +6,7 @@ import { displayNotification } from "../../helpers/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from "../custom/pagination/page/Pagination";
+import { InputSearcher } from "../custom/InputSearcher";
 
 export const FormReport = () => {
     const REPORT_MAP = [
@@ -31,6 +30,7 @@ export const FormReport = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { user } = useSelector( state => state.auth );
+    const ownBoss = user.bossEmail;
     const {reportName} = useParams();
     const report = (REPORT_MAP.find(rc => rc.reportName === reportName))
 
@@ -45,6 +45,7 @@ export const FormReport = () => {
 
     const onPaginationClick = page => {
         setCurrentPage(page);
+        fetchOrders();
     }
 
     useEffect(() => {
@@ -56,7 +57,7 @@ export const FormReport = () => {
     const isCheck = keys.length > 0;
 
     const fetchOrders = () => {
-        getPWoO(filter)
+        getPWoO(currentPage,filter)
         .then(resp => {
             console.log('resp', resp)
             setData(resp.content);
@@ -72,7 +73,7 @@ export const FormReport = () => {
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
         console.log('Execute report', reportName, request);
-        getPWoO(filter ? filter : '').then(resp => {
+        getPWoO(currentPage,filter ? filter : '').then(resp => {
             setData(resp);
             console.log('resp', resp);
         }).catch(err => {
@@ -81,6 +82,7 @@ export const FormReport = () => {
     }
 
     const onChangeFilter = (event) => {
+        setCurrentPage(0)
         setFilter(event.target.value);
         fetchOrders();
     }
@@ -104,7 +106,7 @@ export const FormReport = () => {
     }
 
     const email = () => {
-        naODCNotification(keys)
+        naODCNotification(keys, ownBoss)
         .then(resp => {
             console.log(resp);
             displayNotification(dispatch, '¡Correo enviado!', alertType.success);
@@ -141,6 +143,12 @@ export const FormReport = () => {
         setAllChecked(updatedData.every(item => item.checked));
     };
 
+    const onClean = () => {
+        setFilter('');
+        setCurrentPage(0);
+        fetchOrders();
+    }
+
     const renderSearcher = () => (
         <form className='d-grid gap-2 col-6 mx-auto' onSubmit={onSubmit}>
             {report.filterType === 1 && (
@@ -154,14 +162,16 @@ export const FormReport = () => {
             )}
             <div className='mb-3'>
                 <div className="pt-3 d-flex flex-row">
-                    <input
+                    {/* <input
                         type="text"
                         name="filter"
                         value={filter}
                         onChange={onChangeFilter}
                         placeholder="Escribe para filtrar..."
                         className="form-control"
-                    />
+                        onKeyDown={printHi()}
+                    /> */}
+                    { <InputSearcher name={ 'filter' } placeholder={ 'Escribe para filtrar...' } value={ filter } onChange={ onChangeFilter } onClean={ onClean } /> }
                 </div>
                 
                 <div className="pt-3 d-flex flex-row flex-row-reverse"> 
@@ -179,26 +189,6 @@ export const FormReport = () => {
                             </span>
                         </button>
                 </div>
-                <div className="form-check">
-                    {/* <input className="form-check-input" type="checkbox" value="" id="ownBoss" /> */}
-                    <input type="checkbox" value="" id="boss"/>
-                    <label className="form-check-label" htmlFor="boss">
-                        ¿Copiar a jefes en correo?
-                    </label>
-                    <br /> 
-                    {/* <input className="form-check-input" type="checkbox" value="" id="ownBoss" /> */}
-                    {user.bossName? 
-                    <div>
-                        <input type="checkbox" value="" id="ownBoss"/>
-                        <label className="form-check-label" htmlFor="ownBoss">
-                            ¿Copiar a&nbsp;
-                            {
-                                `${user.bossName} al correo ${user.bossEmail}?`
-                            }
-                        </label>
-                    </div>
-                    : ''}
-                </div>
             </div>
             
         </form>
@@ -211,6 +201,8 @@ export const FormReport = () => {
         pmName,
         bossMail,
         bossName,
+        tax,
+        total,
         numOrders,
         projectAmount,
         checked
@@ -230,6 +222,8 @@ export const FormReport = () => {
             <td className="text-start">{bossName}</td>
             <td className="text-start">{bossMail}</td>
             <td className="text-center">{projectAmount}</td>
+            <td className="text-center">{tax}</td>
+            <td className="text-center">{total}</td>
         </tr>
     ));
 
@@ -264,6 +258,8 @@ export const FormReport = () => {
                             <th className="text-center fs-6" scope="col">Jefe</th>
                             <th className="text-center fs-6" scope="col">Correo</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
+                            <th className="text-center fs-6" scope="col">IVA</th>
+                            <th className="text-center fs-6" scope="col">Total</th>
                         </tr>
                     </thead>
                     <tbody>
