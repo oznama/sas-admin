@@ -2,7 +2,6 @@ package com.mexico.sas.nativequeries.api.service;
 
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
 import com.mexico.sas.nativequeries.api.model.ProjectWithoutInvoices;
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
 import com.mexico.sas.nativequeries.api.report.ProjectWithoutInvXls;
 import com.mexico.sas.nativequeries.api.repository.ProjectInvoiceRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +42,6 @@ public class ProjectInvoiceService {
         return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(pKeys));
     }
 
-    // TODO Add Async
     public void sendNotificationProjectsWithoutInvoices(String currentUserEmail, String bossEmail, List<String> pKeys) {
         final String htlmTemplate = "pending_orders";
         List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(pKeys);

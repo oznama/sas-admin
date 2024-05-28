@@ -42,7 +42,6 @@ public class ProjectOrderService {
         return projectWithoutODCXls.build(projectOrderRepository.findProjectsWithoutOrders(pKeys));
     }
 
-    // TODO Add Async
     public void sendNotificationProjectsWithoutOrders(String currentUserEmail, String bossEmail, List<String> pKeys) {
         final String htlmTemplate = "pending_orders";
         List<ProjectWithoutOrders> projects = projectOrderRepository.findProjectsWithoutOrders(pKeys);
@@ -50,8 +49,6 @@ public class ProjectOrderService {
             log.debug("Sending email notification Project {} - {} without order", p.getProjectKey(), p.getProjectName());
             String subject = String.format("%s %s orden de compra pendiente - SAS", p.getProjectKey(), p.getProjectName());
             Map<String, Object> variables = new HashMap<>();
-            variables.put("pKey", p.getProjectKey());
-            variables.put("pName", p.getProjectName());
             variables.put("pmName", p.getPmName());
             emailUtils.sendMessage("danterencon@gmail.com", subject, htlmTemplate, variables,
                     currentUserEmail, bossEmail/*, p.getPmMail(), p.getBossMail()*/);
