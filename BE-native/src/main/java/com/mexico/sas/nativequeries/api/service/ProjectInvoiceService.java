@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -42,6 +43,7 @@ public class ProjectInvoiceService {
         return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(pKeys));
     }
 
+    @Async("ExecutorAsync")
     public void sendNotificationProjectsWithoutInvoices(String currentUserEmail, String bossEmail, List<String> pKeys) {
         final String htlmTemplate = "pending_orders";
         List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(pKeys);
