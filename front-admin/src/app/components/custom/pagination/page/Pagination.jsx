@@ -51,7 +51,9 @@ export const Pagination = ({
         
         return (
             <li key={ index } className={ classPageItemWithDisabled( pageNumber === currentPage ) } onClick={ () => onPageChange(pageNumber - 1) }>
-                <a className="page-link">{ pageNumber }</a>
+                <a className="page-link" href="#">
+                    <span aria-hidden="true">{ pageNumber }</span>
+                </a>
             </li>
         )
     });

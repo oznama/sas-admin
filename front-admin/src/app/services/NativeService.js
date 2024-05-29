@@ -1,13 +1,13 @@
 import { apiNative, getHeadersSimple } from '../api/Api';
 import { linkQueryBuilder } from '../helpers/utils'; 
 
-export const getPWoO = async(context, page=0, size=10,filter='', report, paStatus) => {
+export const getPWoO = async(context, page=0, size=10,filter='', customFilter) => {
     const request = {
         headers: getHeadersSimple()
     }
     const filterParam = filter ? `&filter=${filter}` : '';
-    const reportParam = report ? `&report=${report}` : ''
-    const paStatusParam = paStatus ? `&paStatus=${paStatus}` : ''
+    const reportParam = customFilter && customFilter.report ? `&report=${customFilter.report}` : ''
+    const paStatusParam = customFilter && customFilter.paStatus ? `&paStatus=${customFilter.paStatus}` : ''
     const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }${ paStatusParam }${ reportParam }`;
     const response = await apiNative( urlProjectsNa, request );
     const projects = await response.json();

@@ -60,15 +60,6 @@ export const NavBarPage = () => {
     </li>
   );
 
-  // const renderTabPendings = () => permissions.isAdminSas && (
-  //   <li className="nav-item">
-  //     <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-  //       onClick={ () => setCurrentTab(4) } to="pendings">
-  //       Pendientes
-  //     </NavLink>
-  //   </li>
-  // );
-
   const gotoAdminOption = urlRedirect => {
     setShowTabAdmin(!showTabAdmin);
     navigate(`/${urlRedirect}`, { replace: true })
@@ -131,7 +122,6 @@ export const NavBarPage = () => {
             </li>
             { renderTabOrders() }
             { renderTabInvoices() }
-            { /* renderTabPendings() */ }
             { renderTabReports() }
             { renderTabAdmin() }
           </ul>

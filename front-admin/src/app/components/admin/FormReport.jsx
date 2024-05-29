@@ -34,10 +34,7 @@ export const FormReport = () => {
     const [isCheck, setIsCheck] = useState(true);
 
     const allKeysGet = () => {
-        getPWoO(report.context, 0, 2147483647, null,
-            report.filter && report.filter.paStatus ? report.filter.paStatus : null,
-            report.filter && report.filter.report ? report.filter.report : null
-        ).then(resp => {
+        getPWoO(report.context, 0, 2147483647, null, report.filter).then(resp => {
             setAllKeys(resp.content.map(item => item.projectKey));
             console.log('Todas las llaves', resp.content);
         })
@@ -66,10 +63,7 @@ export const FormReport = () => {
     }, [allChecked, data]);
 
     const fetchOrders = (currentPage, filter) => {
-        getPWoO(report.context, currentPage, pageSize, filter, 
-            report.filter && report.filter.paStatus ? report.filter.paStatus : null,
-            report.filter && report.filter.report ? report.filter.report : null
-        ).then(resp => {
+        getPWoO(report.context, currentPage, pageSize, filter, report.filter).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,
                 checked: allChecked || keys.includes(r.projectKey)

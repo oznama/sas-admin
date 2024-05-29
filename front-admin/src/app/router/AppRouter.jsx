@@ -7,20 +7,17 @@ import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { CompanyRouter } from '../components/company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
-//import { AdminRouter } from '../components/admin/AdminRouter';
 import { AdminRouter } from '../components/admin/adminRouter';
 import { UserRouter } from '../components/user/userRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
 import { FormReport } from '../components/admin/FormReport';
-import { PagePendings } from '../components/applications/page/PagePendings';
 
 
 export const AppRouter = () => (
     <Routes>
         <Route path="home" element={ <Home /> } />
         <Route path="project/*" element={ <ProjectRouter /> } />
-        <Route path="pendings" element={ <PagePendings /> } />
         <Route path="orders" element={ <TableOrders /> } />
         <Route path="invoices" element={ <TableInvoices /> } />
         {/* <Route path="catalog" element={ <CatalogPage /> } /> */}
