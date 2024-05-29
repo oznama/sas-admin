@@ -37,7 +37,6 @@ public class ProjectOrderRepository extends BaseRepository {
         log.debug("{} row found!", total);
         if( total > 0 ) {
             query = queryPagged(query, pageable.getPageSize(), pageable.getPageNumber() * pageable.getPageSize());
-            log.debug("Query: {}", query);
             list = query(query, new ProjectWihtoutOrdersMapper());
         }
         return new PageImpl<>(list, pageable, total);
@@ -52,7 +51,6 @@ public class ProjectOrderRepository extends BaseRepository {
         // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutOrders
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
-        log.debug("Query: {}", query);
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return query(query, new ProjectWihtoutOrdersMapper());
     }

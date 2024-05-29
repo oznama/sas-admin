@@ -76,14 +76,17 @@ public class BaseRepository {
     }
 
     protected <T> T queryForObject(String query, Class<T> clazz) {
+        log.debug("Query for Object: {}", query);
         return jdbcTemplate.queryForObject(query, clazz);
     }
 
     protected <T> List<T> query(String query, RowMapper<T> rowMapper) {
+        log.debug("Query: {}", query);
         return jdbcTemplate.query(query, rowMapper);
     }
 
     protected <T> List<T> getForList(String query, Class<T> clazz) {
+        log.debug("Query for List: {}", query);
         return jdbcTemplate.queryForList(query, clazz);
     }
 
