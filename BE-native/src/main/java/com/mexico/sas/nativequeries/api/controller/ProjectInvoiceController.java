@@ -31,11 +31,12 @@ public class ProjectInvoiceController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectWithoutInvoices.class, responseContainer = "List") })
     public ResponseEntity<Page<ProjectWithoutInvoices>> findProjectsWithoutInvoices(@RequestParam(required = false) String filter,
-                                                                                  @RequestParam(required = false) Long paStatus,
-                                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                                  @RequestParam(defaultValue = "10") int size) {
+                                                                                    @RequestParam(required = false) Long report,
+                                                                                    @RequestParam(required = false) Long paStatus,
+                                                                                    @RequestParam(defaultValue = "0") int page,
+                                                                                    @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without orders");
-        return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, paStatus, page, size));
+        return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, report, paStatus, page, size));
     }
 
     @GetMapping("export")

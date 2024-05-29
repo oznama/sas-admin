@@ -43,13 +43,6 @@ public class ProjectOrderRepository extends BaseRepository {
         return new PageImpl<>(list, pageable, total);
     }
 
-    public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
-        log.debug("findProjectsWithoutOrders...");
-        // Procesar si hay filtros para crear las condiciones del query
-        List<String> conditions = projectsWithoutOdersFilter(true, filter, paStatus, null);
-        return execute(conditions);
-    }
-
     public List<ProjectWithoutOrders> findProjectsWithoutOrders(List<String> pKeys) {
         log.debug("findProjectsWithoutOrders with pKeys...");
         return execute(projectsWithoutOdersFilter(false, null, null, pKeys));

@@ -36,10 +36,6 @@ public class ProjectOrderService {
         return projectOrderRepository.findProjectsWithoutOrders(filter, paStatus, pageable);
     }
 
-    public List<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus) {
-        return projectOrderRepository.findProjectsWithoutOrders(filter, paStatus);
-    }
-
     public byte[] exportProjectsWithoutOrders(List<String> pKeys) {
         return projectWithoutODCXls.build(projectOrderRepository.findProjectsWithoutOrders(pKeys));
     }

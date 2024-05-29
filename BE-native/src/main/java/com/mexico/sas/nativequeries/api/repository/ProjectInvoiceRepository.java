@@ -24,10 +24,13 @@ public class ProjectInvoiceRepository extends BaseRepository {
     @Value("${query.project.application.developed.complete}")
     private String filterApplicationDevelopStatus;
 
-    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long paStatus, Pageable pageable) {
+    @Value("${query.project.application.instalation.expired}")
+    private String filterApplicationInstalation;
+
+    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long report, Long paStatus, Pageable pageable) {
         log.debug("findProjectsWithoutInvoice Pagged...");
         List<ProjectWithoutInvoices> list = new ArrayList<>();
-        List<String> conditions = projectsWithoutInvoiceFilter(filter, paStatus, null);
+        List<String> conditions = projectsWithoutInvoiceFilter(filter, report, paStatus, null);
         String query = queryProjectWithoutInvoice
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
         Long total = queryForObject(queryCount(query), Long.class);
@@ -40,16 +43,9 @@ public class ProjectInvoiceRepository extends BaseRepository {
         return new PageImpl<>(list, pageable, total);
     }
 
-    public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long paStatus) {
-        log.debug("findProjectsWithoutInvoce...");
-        // Procesar si hay filtros para crear las condiciones del query
-        List<String> conditions = projectsWithoutInvoiceFilter(filter, paStatus, null);
-        return execute(conditions);
-    }
-
     public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(List<String> pKeys) {
         log.debug("findProjectsWithoutInvoce with pKeys...");
-        return execute(projectsWithoutInvoiceFilter( null, null, pKeys));
+        return execute(projectsWithoutInvoiceFilter( null, null, null, pKeys));
     }
 
     private List<ProjectWithoutInvoices> execute(List<String> conditions) {
@@ -61,16 +57,22 @@ public class ProjectInvoiceRepository extends BaseRepository {
         return query(query, new ProjectWihtoutInvoicesMapper());
     }
 
-    private List<String> projectsWithoutInvoiceFilter(String filter, Long paStatus, List<String> pKeys) {
+    private List<String> projectsWithoutInvoiceFilter(String filter, Long report, Long paStatus, List<String> pKeys) {
         log.debug("Checking filters, filter: {}, paStatus: {}", filter, paStatus);
         List<String> conditions = new ArrayList<>();
 
         addGeneralFilter(filter, conditions);
 
-        // Si hay valor en filtro paStatus
-        if( paStatus != null ) {
+        // Si es reporte construccion y hay valor en filtro paStatus
+        if( report != null && report == 1 && paStatus != null ) {
             String paStatusCondition = filterApplicationDevelopStatus
-                    .replace(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
+                    .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
+            conditions.add(paStatusCondition);
+        }
+        // Si es reporte instalacion y hay valor en filtro paStatus
+        else if( report != null && report == 2 && paStatus != null ) {
+            String paStatusCondition = filterApplicationInstalation
+                    .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
             conditions.add(paStatusCondition);
         }
 

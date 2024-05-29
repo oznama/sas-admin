@@ -29,14 +29,10 @@ public class ProjectInvoiceService {
     @Autowired
     private EmailUtils emailUtils;
 
-    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long paStatus, int page, int size) {
+    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long report, Long paStatus, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         log.debug("Finding Projects without orders pagged {}", pageable);
-        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, paStatus, pageable);
-    }
-
-    public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long paStatus) {
-        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, paStatus);
+        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, report, paStatus, pageable);
     }
 
     public byte[] exportProjectsWithoutInvoices(List<String> pKeys) {
