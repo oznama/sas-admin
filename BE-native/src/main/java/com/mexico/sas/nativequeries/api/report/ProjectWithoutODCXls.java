@@ -13,7 +13,7 @@ import java.util.List;
 public class ProjectWithoutODCXls extends ExcelExporter {
 
     public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
-        log.debug("Building excel with {} projects", projectWithoutOrders.size());
+        log.debug("Building excel with {} projects orders", projectWithoutOrders.size());
 
         final String title = "Proyectos sin ordenes de compra";
 

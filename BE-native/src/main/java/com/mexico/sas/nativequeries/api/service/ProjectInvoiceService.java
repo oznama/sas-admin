@@ -31,7 +31,7 @@ public class ProjectInvoiceService {
 
     public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long report, Long paStatus, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        log.debug("Finding Projects without orders pagged {}", pageable);
+        log.debug("Finding Projects without invoices pagged {}", pageable);
         return projectInvoiceRepository.findProjectsWithoutInvoices(filter, report, paStatus, pageable);
     }
 
@@ -41,7 +41,7 @@ public class ProjectInvoiceService {
 
     @Async("ExecutorAsync")
     public void sendNotificationProjectsWithoutInvoices(String currentUserEmail, String bossEmail, List<String> pKeys) {
-        final String htlmTemplate = "pending_orders";
+        final String htlmTemplate = "pending_invoices";
         List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(pKeys);
         projects.forEach( p -> {
             log.debug("Sending email notification Project {} - {} without invoice", p.getProjectKey(), p.getProjectName());

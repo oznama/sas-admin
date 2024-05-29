@@ -14,7 +14,7 @@ import java.util.List;
 public class ProjectWithoutInvXls extends ExcelExporter {
 
     public byte[] build(List<ProjectWithoutInvoices> projectWithoutInvoices) {
-        log.debug("Building excel with {} projects", projectWithoutInvoices.size());
+        log.debug("Building excel with {} projects invoices", projectWithoutInvoices.size());
 
         final String title = "Reporte de Proyectos sin Factura";
 

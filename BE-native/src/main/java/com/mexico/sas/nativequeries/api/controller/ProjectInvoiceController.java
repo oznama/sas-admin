@@ -35,14 +35,14 @@ public class ProjectInvoiceController {
                                                                                     @RequestParam(required = false) Long paStatus,
                                                                                     @RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size) {
-        log.info("Finding projects without orders");
+        log.info("Finding projects without invoices");
         return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, report, paStatus, page, size));
     }
 
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin facturas", nickname = "exportProjectsWithoutInvoices")
     public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(required = false) List<String> pKeys) {
-        log.info("Exporting projects without orders");
+        log.info("Exporting projects without invoices");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDispositionFormData("attachment", "report.xlsx");
@@ -55,7 +55,7 @@ public class ProjectInvoiceController {
     public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(required = false) String currentUserEmail,
                                                             @RequestParam(required = false) String bossEmail,
                                                             @RequestParam(required = false) List<String> pKeys) {
-        log.info("Sending notificaton email projects without orders");
+        log.info("Sending notificaton email projects without invoices");
         projectOrderService.sendNotificationProjectsWithoutInvoices(currentUserEmail, bossEmail, pKeys);
         return ResponseEntity.ok().build();
     }
