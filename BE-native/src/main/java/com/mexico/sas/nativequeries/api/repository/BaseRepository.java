@@ -83,4 +83,8 @@ public class BaseRepository {
         return jdbcTemplate.query(query, rowMapper);
     }
 
+    protected <T> List<T> getForList(String query, Class<T> clazz) {
+        return jdbcTemplate.queryForList(query, clazz);
+    }
+
 }

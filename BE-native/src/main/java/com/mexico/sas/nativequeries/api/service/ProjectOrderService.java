@@ -41,7 +41,7 @@ public class ProjectOrderService {
     }
 
     @Async("ExecutorAsync")
-    public void sendNotificationProjectsWithoutOrders(String currentUserEmail, String bossEmail, List<String> pKeys) {
+    public void sendNotificationProjectsWithoutOrders(List<String> pKeys) {
         final String htlmTemplate = "pending_orders";
         List<ProjectWithoutOrders> projects = projectOrderRepository.findProjectsWithoutOrders(pKeys);
         projects.forEach( p -> {
@@ -49,8 +49,7 @@ public class ProjectOrderService {
             String subject = String.format("%s %s orden de compra pendiente - SAS", p.getProjectKey(), p.getProjectName());
             Map<String, Object> variables = new HashMap<>();
             variables.put("pmName", p.getPmName());
-            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables,
-                    currentUserEmail, bossEmail, p.getBossMail());
+            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables, p.getBossMail());
         });
     }
 }

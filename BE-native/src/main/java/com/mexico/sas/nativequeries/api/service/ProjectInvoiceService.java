@@ -40,7 +40,7 @@ public class ProjectInvoiceService {
     }
 
     @Async("ExecutorAsync")
-    public void sendNotificationProjectsWithoutInvoices(String currentUserEmail, String bossEmail, List<String> pKeys) {
+    public void sendNotificationProjectsWithoutInvoices(List<String> pKeys) {
         final String htlmTemplate = "pending_invoices";
         List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(pKeys);
         projects.forEach( p -> {
@@ -50,8 +50,7 @@ public class ProjectInvoiceService {
             variables.put("pKey", p.getProjectKey());
             variables.put("pName", p.getProjectName());
             variables.put("pmName", p.getPmName());
-            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables,
-                    currentUserEmail, bossEmail, p.getBossMail());
+            emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables, p.getBossMail());
         });
     }
 }

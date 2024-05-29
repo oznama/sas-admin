@@ -52,11 +52,9 @@ public class ProjectInvoiceController {
 
     @GetMapping("notification")
     @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin facturas", nickname = "sendNotificationProjectsWithoutInvoices")
-    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(required = false) String currentUserEmail,
-                                                            @RequestParam(required = false) String bossEmail,
-                                                            @RequestParam(required = false) List<String> pKeys) {
+    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(required = false) List<String> pKeys) {
         log.info("Sending notificaton email projects without invoices");
-        projectOrderService.sendNotificationProjectsWithoutInvoices(currentUserEmail, bossEmail, pKeys);
+        projectOrderService.sendNotificationProjectsWithoutInvoices(pKeys);
         return ResponseEntity.ok().build();
     }
 
