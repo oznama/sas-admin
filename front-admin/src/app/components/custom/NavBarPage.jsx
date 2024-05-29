@@ -61,12 +61,14 @@ export const NavBarPage = () => {
   );
 
   const gotoAdminOption = urlRedirect => {
+    setCurrentTab(null);
     setShowTabAdmin(!showTabAdmin);
     navigate(`/${urlRedirect}`, { replace: true })
     
   }
 
   const gotoReportOption = report => {
+    setCurrentTab(null);
     setShowTabReport(!showTabReport);
     navigate(`/reports/${report}`, { replace: true });
   }

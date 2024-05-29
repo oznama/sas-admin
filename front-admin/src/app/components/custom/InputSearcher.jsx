@@ -15,9 +15,9 @@ export const InputSearcher = ({
             <input name={ name } type="text" className="form-control padding-short" placeholder={ placeholder }
                 maxLength={ maxLength } autoComplete='off'
                 value={ value } onChange={ onChange }></input>
-            <span className="input-group-text" onClick={ onClean }>
+            <button className="input-group-text" onClick={ onClean }>
                 <i className="bi bi-x-lg"></i>
-            </span>
+            </button>
         </div>   
     )
 }
