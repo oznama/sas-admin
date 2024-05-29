@@ -4,6 +4,35 @@ export const mountMax = 99999999;
 export const numberMaxLength = 3;
 export const taxRate = 0.16;
 
+export const REPORT_MAP = [
+    {
+        reportName: "project_withoutorders",
+        title: 'Proyectos sin ODC',
+        context: 'projects/withoutorders',
+        excel: 'report_ODC'
+    },
+    {
+        reportName: "project_withoutinvoice_development",
+        title: 'Reporte de Proyectos sin Factura - Desarrollo completado',
+        context: 'projects/withoutinvoices',
+        excel: 'report_invoices',
+        filter: {
+            report: 1,
+            paStatus: 2001000003
+        }
+    },
+    {
+        reportName: "project_withoutinvoice_instalation",
+        title: 'Reporte de Proyectos sin Factura - Instalación',
+        context: 'projects/withoutinvoices',
+        excel: 'report_invoices',
+        filter: {
+            report: 2,
+            paStatus: 2001000003
+        }
+    }
+]
+
 export const styleTable = { height: '345px' };
 export const styleTableRow = { padding: '1px' };
 export const styleTableRowBtn = { ...styleTableRow, width: '35px' };

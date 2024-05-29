@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
+import { REPORT_MAP } from '../../helpers/utils';
 
 export const NavBarPage = () => {
 
@@ -105,9 +106,11 @@ export const NavBarPage = () => {
         Reportes
       </a>
       <div className={ `dropdown-menu bg-primary ${ showTabReport ? 'show' : '' }` } aria-labelledby="reportMenu">
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Proyectos sin ODC</a>
-        {/* <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a> */}
+        {
+          REPORT_MAP.map( (report, index) => (
+            <a className="dropdown-item" href="#" onClick={ () => gotoReportOption(report.reportName) }>{report.title}</a>
+          ))
+        }
       </div>
     </li>
   )

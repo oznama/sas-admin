@@ -1,20 +1,20 @@
 import { apiNative, getHeadersSimple } from '../api/Api';
 import { linkQueryBuilder } from '../helpers/utils'; 
 
-const context = 'projects/withoutorders';
-
-export const getPWoO = async(page=0, size=10,filter='') => {
+export const getPWoO = async(context, page=0, size=10,filter='', report, paStatus) => {
     const request = {
         headers: getHeadersSimple()
     }
-    const filterParam = filter ? `&filter=${filter}` : ''
-    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }`;
+    const filterParam = filter ? `&filter=${filter}` : '';
+    const reportParam = report ? `&report=${report}` : ''
+    const paStatusParam = paStatus ? `&paStatus=${paStatus}` : ''
+    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }${ paStatusParam }${ reportParam }`;
     const response = await apiNative( urlProjectsNa, request );
     const projects = await response.json();
     return projects;
 };
 
-export const naODCNotification = async(list = [],boss='', own='') => {
+export const naODCNotification = async(context, list = [],boss='', own='') => {
     const request = {
         headers: getHeadersSimple()
     }
@@ -24,7 +24,7 @@ export const naODCNotification = async(list = [],boss='', own='') => {
     return response;
 };
 
-export const getPWoOExl = async(list = []) => {
+export const getPWoOExl = async(context, list = []) => {
     const request = {
         headers: getHeadersSimple()
     }

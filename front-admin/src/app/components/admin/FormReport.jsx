@@ -1,33 +1,15 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getPWoO, getPWoOExl, naODCNotification } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
-import { displayNotification, styleCheckBox } from "../../helpers/utils";
+import { REPORT_MAP, displayNotification, styleCheckBox } from "../../helpers/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from "../custom/pagination/page/Pagination";
 import { InputSearcher } from "../custom/InputSearcher";
 
 export const FormReport = () => {
-    const REPORT_MAP = [
-        {
-            reportName: 'projects_orders',
-            title: 'Proyecto - Número de ordenes',
-            filterType: 1
-        },
-        {
-            reportName: 'orders_invoices',
-            title: 'Orden - Facturas',
-            filterType: 1
-        },
-        {
-            reportName: 'application_pending',
-            title: 'Proyectos sin ODC',
-            filterType: 2
-        }
-    ]
 
-    const navigate = useNavigate();
     const dispatch = useDispatch();
 
     //const { user } = useSelector(state => state.auth);
@@ -52,7 +34,10 @@ export const FormReport = () => {
     const [isCheck, setIsCheck] = useState(true);
 
     const allKeysGet = () => {
-        getPWoO(0, 2147483647).then(resp => {
+        getPWoO(report.context, 0, 2147483647, null,
+            report.filter && report.filter.paStatus ? report.filter.paStatus : null,
+            report.filter && report.filter.report ? report.filter.report : null
+        ).then(resp => {
             setAllKeys(resp.content.map(item => item.projectKey));
             console.log('Todas las llaves', resp.content);
         })
@@ -67,11 +52,11 @@ export const FormReport = () => {
     };
 
     useEffect(() => {
-        if (reportName) {
+        if (report) {
             fetchOrders(currentPage, filter);
             allKeysGet();
         }
-    }, [reportName]);
+    }, [report]);
 
     useEffect(() => {
         if (data.length > 0 && allChecked) {
@@ -81,7 +66,10 @@ export const FormReport = () => {
     }, [allChecked, data]);
 
     const fetchOrders = (currentPage, filter) => {
-        getPWoO(currentPage, pageSize, filter).then(resp => {
+        getPWoO(report.context, currentPage, pageSize, filter, 
+            report.filter && report.filter.paStatus ? report.filter.paStatus : null,
+            report.filter && report.filter.report ? report.filter.report : null
+        ).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,
                 checked: allChecked || keys.includes(r.projectKey)
@@ -103,12 +91,12 @@ export const FormReport = () => {
     const download = () => {
         let downloadKeys = keys.length === allKeys.length ? [] : [...keys];
         console.log('downloadKeys', downloadKeys);
-        getPWoOExl(downloadKeys).then(response => response.blob()
+        getPWoOExl(report.context, downloadKeys).then(response => response.blob()
         ).then(blob => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'report.xlsx';
+            a.download = `${report.excel}.xlsx`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -116,12 +104,10 @@ export const FormReport = () => {
     };
 
     const email = () => {
-        naODCNotification(keys, ownBoss, ownEmail)
-        .then(resp => {
+        naODCNotification(report.context, keys, ownBoss, ownEmail).then(resp => {
             console.log(resp);
             displayNotification(dispatch, '¡Correo enviado!', alertType.success);
-        })
-        .catch(err => {
+        }).catch(err => {
             console.error('Error fetching data:', err);
         });
     };
@@ -176,11 +162,8 @@ export const FormReport = () => {
         projectName,
         pmMail,
         pmName,
-        bossMail,
-        bossName,
         tax,
         total,
-        numOrders,
         projectAmount,
         checked
     }, index) => (
@@ -196,8 +179,6 @@ export const FormReport = () => {
             <td className="text-start">{projectName}</td>
             <td className="text-start">{pmName}</td>
             <td className="text-start">{pmMail}</td>
-            <td className="text-start">{bossName}</td>
-            <td className="text-start">{bossMail}</td>
             <td className="text-center">{projectAmount}</td>
             <td className="text-center">{tax}</td>
             <td className="text-center">{total}</td>
@@ -237,8 +218,6 @@ export const FormReport = () => {
                             <th className="text-center fs-6" scope="col">Clave</th>
                             <th className="text-center fs-6" scope="col">Proyecto</th>
                             <th className="text-center fs-6" scope="col">PM</th>
-                            <th className="text-center fs-6" scope="col">Correo</th>
-                            <th className="text-center fs-6" scope="col">Jefe</th>
                             <th className="text-center fs-6" scope="col">Correo</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             <th className="text-center fs-6" scope="col">IVA</th>
