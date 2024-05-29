@@ -14,11 +14,11 @@ export const getPWoO = async(context, page=0, size=10,filter='', customFilter) =
     return projects;
 };
 
-export const naODCNotification = async(context, list = [],boss='', own='') => {
+export const naODCNotification = async(context, list = []) => {
     const request = {
         headers: getHeadersSimple()
     }
-    const filterParam = linkQueryBuilder(list, 'pKeys',boss, own) ; //&currentUserEmail=selene.pascalis%40sas-mexico.com
+    const filterParam = linkQueryBuilder(list, 'pKeys') ; //&currentUserEmail=selene.pascalis%40sas-mexico.com
     const urlProjectsNa = `${context}/notification${ filterParam }`;
     const response = await apiNative( urlProjectsNa, request );
     return response;

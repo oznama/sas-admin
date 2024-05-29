@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { getPWoO, getPWoOExl, naODCNotification } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
 import { REPORT_MAP, displayNotification, styleCheckBox } from "../../helpers/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { alertType } from "../custom/alerts/types/types";
 import { Pagination } from "../custom/pagination/page/Pagination";
 import { InputSearcher } from "../custom/InputSearcher";
@@ -11,12 +11,6 @@ import { InputSearcher } from "../custom/InputSearcher";
 export const FormReport = () => {
 
     const dispatch = useDispatch();
-
-    //const { user } = useSelector(state => state.auth);
-    // const ownBoss = user.bossEmail;
-    // const ownEmail = user.email;
-    const ownBoss = 'jaime.carreno@sas-mexico.com';
-    const ownEmail = 'selene.pascalis@sas-mexico.com';
     
     const { reportName } = useParams();
     const report = REPORT_MAP.find(rc => rc.reportName === reportName);
@@ -98,7 +92,7 @@ export const FormReport = () => {
     };
 
     const email = () => {
-        naODCNotification(report.context, keys, ownBoss, ownEmail).then(resp => {
+        naODCNotification(report.context, keys).then(resp => {
             console.log(resp);
             displayNotification(dispatch, '¡Correo enviado!', alertType.success);
         }).catch(err => {
