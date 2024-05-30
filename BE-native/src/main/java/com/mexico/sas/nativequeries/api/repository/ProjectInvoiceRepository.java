@@ -1,9 +1,7 @@
 package com.mexico.sas.nativequeries.api.repository;
 
 import com.mexico.sas.nativequeries.api.model.ProjectWithoutInvoices;
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
 import com.mexico.sas.nativequeries.api.model.mapper.ProjectWihtoutInvoicesMapper;
-import com.mexico.sas.nativequeries.api.model.mapper.ProjectWihtoutOrdersMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -21,18 +19,28 @@ public class ProjectInvoiceRepository extends BaseRepository {
     @Value("${query.project.without.invoice}")
     private String queryProjectWithoutInvoice;
 
-    @Value("${query.project.application.developed.complete}")
-    private String filterApplicationDevelopStatus;
+    @Value("${query.project.application.invoice.developed}")
+    private String filterApplicationInvoceDeveloped;
 
-    @Value("${query.project.application.instalation.expired}")
-    private String filterApplicationInstalation;
+    @Value("${query.project.order.status.canceled}")
+    private String filterOrderCanceled;
 
-    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long report, Long paStatus, Pageable pageable) {
+    @Value("${query.project.order.status.not.canceled}")
+    private String filterOrderNotCanceled;
+
+    @Value("${query.project.invoice.installed}")
+    private String filterProjectInvoiceInstalled;
+
+    @Value("${query.project.invoice.monitoring}")
+    private String filterProjectInvoiceMonitoring;
+
+    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Integer report, Boolean orderCanceled, Integer percentage, Pageable pageable) {
         log.debug("findProjectsWithoutInvoice Pagged...");
         List<ProjectWithoutInvoices> list = new ArrayList<>();
-        List<String> conditions = projectsWithoutInvoiceFilter(filter, report, paStatus, null);
+        List<String> conditions = projectsWithoutInvoiceFilter(filter, report, orderCanceled, null);
         String query = queryProjectWithoutInvoice
-                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .replace(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage));
         Long total = queryForObject(queryCount(query), Long.class);
         log.debug("{} row found!", total);
         if( total > 0 ) {
@@ -42,36 +50,34 @@ public class ProjectInvoiceRepository extends BaseRepository {
         return new PageImpl<>(list, pageable, total);
     }
 
-    public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(List<String> pKeys) {
+    public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
         log.debug("findProjectsWithoutInvoce with pKeys...");
-        return execute(projectsWithoutInvoiceFilter( null, null, null, pKeys));
+        return execute(percentage, projectsWithoutInvoiceFilter( null, report, orderCanceled, pKeys));
     }
 
-    private List<ProjectWithoutInvoices> execute(List<String> conditions) {
+    private List<ProjectWithoutInvoices> execute(Integer percentage, List<String> conditions) {
         // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutInvoice
-                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .replace(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage));
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return query(query, new ProjectWihtoutInvoicesMapper());
     }
 
-    private List<String> projectsWithoutInvoiceFilter(String filter, Long report, Long paStatus, List<String> pKeys) {
-        log.debug("Checking filters, filter: {}, paStatus: {}", filter, paStatus);
+    private List<String> projectsWithoutInvoiceFilter(String filter, Integer report, Boolean orderCanceled, List<String> pKeys) {
+        log.debug("Checking filters, filter: {}, orderCanceled: {}", filter, orderCanceled);
         List<String> conditions = new ArrayList<>();
 
         addGeneralFilter(filter, conditions);
 
-        // Si es reporte construccion y hay valor en filtro paStatus
-        if( report != null && report == 1 && paStatus != null ) {
-            String paStatusCondition = filterApplicationDevelopStatus
-                    .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
-            conditions.add(paStatusCondition);
-        }
-        // Si es reporte instalacion y hay valor en filtro paStatus
-        else if( report != null && report == 2 && paStatus != null ) {
-            String paStatusCondition = filterApplicationInstalation
-                    .replaceAll(SQLConstants.PROJECT_APP_STATUS_PARAMETER, String.valueOf(paStatus));
-            conditions.add(paStatusCondition);
+        conditions.add( orderCanceled ? filterOrderCanceled : filterOrderNotCanceled );
+
+        if( report == 1 ) { // Construccion pendiente de pago
+            conditions.add(filterApplicationInvoceDeveloped);
+        } else if( report == 2 ){ // Instalacion pendiente de pago
+            conditions.add(filterProjectInvoiceInstalled);
+        } else if( report == 3 ) { // Monitoreo pendiente de pago
+            conditions.add(filterProjectInvoiceMonitoring);
         }
 
         addPKeysIn(pKeys, conditions);

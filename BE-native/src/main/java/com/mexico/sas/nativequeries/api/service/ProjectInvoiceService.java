@@ -29,20 +29,21 @@ public class ProjectInvoiceService {
     @Autowired
     private EmailUtils emailUtils;
 
-    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Long report, Long paStatus, int page, int size) {
+    public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Integer report, Boolean orderCanceled, Integer percentage, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         log.debug("Finding Projects without invoices pagged {}", pageable);
-        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, report, paStatus, pageable);
+        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage, pageable);
     }
 
-    public byte[] exportProjectsWithoutInvoices(List<String> pKeys) {
-        return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(pKeys));
+    public byte[] exportProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
+//        return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys));
+        return null;
     }
 
     @Async("ExecutorAsync")
-    public void sendNotificationProjectsWithoutInvoices(List<String> pKeys) {
-        final String htlmTemplate = "pending_invoices";
-        List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(pKeys);
+    public void sendNotificationProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
+        final String htlmTemplate = "pending_invoices"; // Depende of report
+        List<ProjectWithoutInvoices> projects = projectInvoiceRepository.findProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
         projects.forEach( p -> {
             log.debug("Sending email notification Project {} - {} without invoice", p.getProjectKey(), p.getProjectName());
             String subject = String.format("%s %s factura  pendiente - SAS", p.getProjectKey(), p.getProjectName());

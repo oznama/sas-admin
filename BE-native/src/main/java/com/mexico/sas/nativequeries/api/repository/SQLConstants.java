@@ -13,6 +13,7 @@ public interface SQLConstants {
     String FILTER_PARAMETER = ":filter";
     String PROJECT_APP_STATUS_PARAMETER = ":paStatus";
     String PROJECT_PKEYS_PARAMETER = ":pKeys";
+    String PERCENTAGE_PARAMETER = ":percent";
     String LIKE_REGEX = "'%%%s%%'";
     String IN_REGEX = "'%s'";
 

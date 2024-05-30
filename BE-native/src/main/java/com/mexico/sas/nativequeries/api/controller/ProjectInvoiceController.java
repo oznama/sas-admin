@@ -31,30 +31,37 @@ public class ProjectInvoiceController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectWithoutInvoices.class, responseContainer = "List") })
     public ResponseEntity<Page<ProjectWithoutInvoices>> findProjectsWithoutInvoices(@RequestParam(required = false) String filter,
-                                                                                    @RequestParam(required = false) Long report,
-                                                                                    @RequestParam(required = false) Long paStatus,
+                                                                                    @RequestParam(defaultValue = "1") int report,
+                                                                                    @RequestParam(defaultValue = "false") Boolean orderCanceled,
+                                                                                    @RequestParam(defaultValue = "30") int percentage,
                                                                                     @RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without invoices");
-        return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, report, paStatus, page, size));
+        return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage, page, size));
     }
 
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin facturas", nickname = "exportProjectsWithoutInvoices")
-    public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(required = false) List<String> pKeys) {
+    public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(defaultValue = "4") int report,
+                                                                @RequestParam(required = false) Boolean orderCanceled,
+                                                                @RequestParam(defaultValue = "30") int percentage,
+                                                                @RequestParam(required = false) List<String> pKeys) {
         log.info("Exporting projects without invoices");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDispositionFormData("attachment", "report.xlsx");
-        byte[] arrayOuput = projectOrderService.exportProjectsWithoutInvoices(pKeys);
+        byte[] arrayOuput = projectOrderService.exportProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
         return ResponseEntity.ok().headers(headers).body(arrayOuput);
     }
 
     @GetMapping("notification")
     @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin facturas", nickname = "sendNotificationProjectsWithoutInvoices")
-    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(required = false) List<String> pKeys) {
+    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(defaultValue = "4") int report,
+                                                                     @RequestParam(required = false) Boolean orderCanceled,
+                                                                     @RequestParam(defaultValue = "30") int percentage,
+                                                                     @RequestParam(required = false) List<String> pKeys) {
         log.info("Sending notificaton email projects without invoices");
-        projectOrderService.sendNotificationProjectsWithoutInvoices(pKeys);
+        projectOrderService.sendNotificationProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
         return ResponseEntity.ok().build();
     }
 
