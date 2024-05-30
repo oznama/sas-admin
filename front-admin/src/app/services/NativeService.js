@@ -1,20 +1,35 @@
 import { apiNative, getHeadersSimple } from '../api/Api';
 import { linkQueryBuilder } from '../helpers/utils'; 
 
-export const getPWoO = async(context, page=0, size=10,filter='', customFilter) => {
+export const getReport = async(context, page=0, size=10, filter='', params) => {
+    // console.log("Get Report with", context, page, size, filter, params);
     const request = {
         headers: getHeadersSimple()
     }
     const filterParam = filter ? `&filter=${filter}` : '';
-    const reportParam = customFilter && customFilter.report ? `&report=${customFilter.report}` : ''
-    const paStatusParam = customFilter && customFilter.paStatus ? `&paStatus=${customFilter.paStatus}` : ''
-    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }${ paStatusParam }${ reportParam }`;
+    let dinamicParams = '';
+    if( params && params.id ) {
+        dinamicParams += `&report=${params.id}`;
+    }
+    if( params && params.orderCanceled ) {
+        dinamicParams += `&orderCanceled=${params.orderCanceled}`;
+    }
+    if( params && params.percentage ) {
+        dinamicParams += `&percentage=${params.percentage}`;
+    }
+    if( params && params.installation ) {
+        dinamicParams += `&installation=${params.installation}`;
+    }
+    if( params && params.monitoring ) {
+        dinamicParams += `&monitoring=${params.monitoring}`;
+    }
+    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }${ dinamicParams }`;
     const response = await apiNative( urlProjectsNa, request );
     const projects = await response.json();
     return projects;
 };
 
-export const naODCNotification = async(context, list = []) => {
+export const sendNotification = async(context, list = []) => {
     const request = {
         headers: getHeadersSimple()
     }
@@ -24,7 +39,7 @@ export const naODCNotification = async(context, list = []) => {
     return response;
 };
 
-export const getPWoOExl = async(context, list = []) => {
+export const downloadExcel = async(context, list = []) => {
     const request = {
         headers: getHeadersSimple()
     }

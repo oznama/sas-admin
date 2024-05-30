@@ -12,15 +12,85 @@ export const REPORT_MAP = [
         excel: 'report_ODC'
     },
     {
-        reportName: "project_withoutinvoice_development",
+        reportName: "project_withoutinvoice",
         title: 'Proyectos Pendientes de cobro',
         context: 'projects/withoutinvoices',
-        excel: 'report_invoices',
-        filter: {
-            report: 1,
-            paStatus: 2001000003
+        excel: 'invoice_pedings',
+        labels: [
+            { id: '1', value: "Construcción" },
+            { id: '2', value: "Instalación" },
+            { id: '3', value: "Monitoreo" }
+        ],
+        options: [
+            {
+                value: "Construcción",
+                id: '1',
+                orderCanceled: false,
+                percentage: 30,
+
+            },
+            {
+                value: "Instalación",
+                id: '2',
+                orderCanceled: false,
+                percentage: 60,
+
+            },
+            {
+                value: "Monitoreo",
+                id: '3',
+                orderCanceled: false,
+                percentage: 100,
+
+            },
+            {
+                value: "Todas",
+                id: '4'
+            
+            }
+        ]
+    },
+    {
+        reportName: "project_withinvoice_canceled",
+        title: 'Proyectos con ordenes canceladas',
+        context: 'projects/withoutinvoices',
+        excel: 'invoice_pedings',
+        params: {
+            id: 1,
+            orderCanceled: true,
+            percentage: 100,
+
         }
-    }
+    },
+    {
+        reportName: "project_withoutdates",
+        title: 'Proyectos sin fechas',
+        context: 'projects',
+        excel: 'projects_dates',
+        labels: [
+            { id: '1', value: "Sin fecha de instalación" },
+            { id: '2', value: "Sin fecha de monitoreo" }
+        ],
+        options: [
+            {
+                id: '1',
+                value: "Sin fecha de instalación",
+                installation: true
+            },
+            {
+                value: "Sin fecha de monitoreo",
+                id: '2',
+                monitoring: true
+
+            },
+            {
+                value: "Todas",
+                id: '3',
+                installation: true,
+                monitoring: true
+            }
+        ]
+    },
 ]
 
 export const styleTable = { height: '345px' };

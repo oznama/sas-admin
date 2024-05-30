@@ -11,7 +11,7 @@ import { AdminRouter } from '../components/admin/adminRouter';
 import { UserRouter } from '../components/user/userRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
-import { FormReport } from '../components/admin/FormReport';
+import { PageReport } from '../components/reports/PageReport';
 
 
 export const AppRouter = () => (
@@ -30,7 +30,7 @@ export const AppRouter = () => (
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
         <Route  path="admin/*" element={ <AdminRouter />} />
         <Route  path="users/*" element={ <UserRouter />} />
-        <Route path="reports/:reportName" element={ <FormReport /> } />
+        <Route path="reports/:reportName/:repotTypeDefault" element={ <PageReport /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

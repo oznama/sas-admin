@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
 import { REPORT_MAP } from '../../helpers/utils';
-import { clean } from '../../../store/report/reportSlice';
 
 export const NavBarPage = () => {
 
@@ -72,8 +71,7 @@ export const NavBarPage = () => {
   const gotoReportOption = report => {
     setCurrentTab(null);
     setShowTabReport(!showTabReport);
-    navigate(`/reports/${report}`, { replace: true });
-    dispatch(clean);
+    navigate(`/reports/${report.reportName}/${report.options ? report.options.length : '0'}`, { replace: true });
   }
   
   const renderTabAdmin = () => userAdmin && (
@@ -104,7 +102,7 @@ export const NavBarPage = () => {
       <div className={ `dropdown-menu bg-primary ${ showTabReport ? 'show' : '' }` } aria-labelledby="reportMenu">
         {
           REPORT_MAP.map( (report, index) => (
-            <a className="dropdown-item" href="#" onClick={ () => gotoReportOption(report.reportName) }>{report.title}</a>
+            <a key={ index } className="dropdown-item" href="#" onClick={ () => gotoReportOption(report) }>{report.title}</a>
           ))
         }
       </div>
@@ -117,8 +115,8 @@ export const NavBarPage = () => {
         
         <a className="navbar-brand">SAS Administrador</a>
 
-        <button class="navbar-toggler" type="button" onClick={ () => setMenuCollapsed(!menuCollapsed) }>
-          <span class="navbar-toggler-icon"></span>
+        <button className="navbar-toggler" type="button" onClick={ () => setMenuCollapsed(!menuCollapsed) }>
+          <span className="navbar-toggler-icon"></span>
         </button>
         
         <div className={ `collapse navbar-collapse ${ menuCollapsed ? 'show' : '' }` } >
