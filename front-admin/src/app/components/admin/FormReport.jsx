@@ -44,6 +44,7 @@ export const FormReport = () => {
 
     useEffect(() => {
         if (report) {
+			resetCheckboxes();				  
             fetchOrders(currentPage, filter);
             allKeysGet();
         }
@@ -56,7 +57,16 @@ export const FormReport = () => {
         setIsCheck(allChecked || keys.length > 0);
     }, [allChecked, data]);
 
-    const fetchOrders = (currentPage, filter) => {
+	const resetCheckboxes = () => {
+        setFilter('');
+        allKeysGet();
+        setAllChecked(allKeys);
+        setKeys([]);
+        setIsCheck(true);
+        fetchOrders(currentPage, '');
+    };
+	
+	const fetchOrders = (currentPage, filter) => {
         getPWoO(report.context, currentPage, pageSize, filter, report.filter).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,

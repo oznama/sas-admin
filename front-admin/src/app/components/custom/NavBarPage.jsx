@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
 import { REPORT_MAP } from '../../helpers/utils';
+import { clean } from '../../../store/report/reportSlice';
 
 export const NavBarPage = () => {
 
@@ -71,6 +72,7 @@ export const NavBarPage = () => {
     setCurrentTab(null);
     setShowTabReport(!showTabReport);
     navigate(`/reports/${report}`, { replace: true });
+    dispatch(clean);
   }
   
   const renderTabAdmin = () => userAdmin && (

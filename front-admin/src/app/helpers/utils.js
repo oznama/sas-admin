@@ -13,21 +13,11 @@ export const REPORT_MAP = [
     },
     {
         reportName: "project_withoutinvoice_development",
-        title: 'Reporte de Proyectos sin Factura - Desarrollo completado',
+        title: 'Proyectos Pendientes de cobro',
         context: 'projects/withoutinvoices',
         excel: 'report_invoices',
         filter: {
             report: 1,
-            paStatus: 2001000003
-        }
-    },
-    {
-        reportName: "project_withoutinvoice_instalation",
-        title: 'Reporte de Proyectos sin Factura - Instalación',
-        context: 'projects/withoutinvoices',
-        excel: 'report_invoices',
-        filter: {
-            report: 2,
             paStatus: 2001000003
         }
     }
