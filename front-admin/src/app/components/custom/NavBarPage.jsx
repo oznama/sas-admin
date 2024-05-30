@@ -16,6 +16,7 @@ export const NavBarPage = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [showTabAdmin, setShowTabAdmin] = useState(false);
   const [showTabReport, setShowTabReport] = useState(false);
+  const [menuCollapsed, setMenuCollapsed] = useState(false);
 
   const userAdmin = user && user.role && user.role.id < 4;
 
@@ -111,12 +112,16 @@ export const NavBarPage = () => {
   )
 
   return (
-    <nav className="navbar navbar-expand-lg bg-primary" style={{ padding: '0'}} data-bs-theme="dark">
+    <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
       <div className="container-fluid">
         
-        <Link className="navbar-brand">SAS Administrador</Link>
+        <a className="navbar-brand">SAS Administrador</a>
+
+        <button class="navbar-toggler" type="button" onClick={ () => setMenuCollapsed(!menuCollapsed) }>
+          <span class="navbar-toggler-icon"></span>
+        </button>
         
-        <div className="collapse navbar-collapse">
+        <div className={ `collapse navbar-collapse ${ menuCollapsed ? 'show' : '' }` } >
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
@@ -129,20 +134,20 @@ export const NavBarPage = () => {
             { renderTabReports() }
             { renderTabAdmin() }
           </ul>
-        </div>
 
-        <div className="d-flex flex-row-reverse bd-highlight">
-          <div className="p-1 bd-highlight">
-            <button className="btn btn-danger" onClick={ onLogout }>
-              <span><i className="bi bi-power"></i></span>
-            </button>
+          <div className="d-flex flex-row-reverse bd-highlight">
+            <div className="p-1 bd-highlight">
+              <button className="btn btn-danger" onClick={ onLogout }>
+                <span><i className="bi bi-power"></i></span>
+              </button>
+            </div>
+            <div className="p-1 bd-highlight">
+              <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
+              <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
+            </div>
           </div>
-          <div className="p-1 bd-highlight">
-            <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
-            <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
-          </div>
-        </div>
 
+        </div>
       </div>
     </nav>
   )

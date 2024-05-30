@@ -19,4 +19,5 @@ public class ProjectWithoutInvoices {
     private String projectAmount;
     private String tax;
     private String total;
+    private Integer percentage;
 }

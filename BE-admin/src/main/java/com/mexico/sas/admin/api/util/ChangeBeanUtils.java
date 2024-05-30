@@ -107,6 +107,17 @@ public class ChangeBeanUtils extends Utils {
             log.error("Error checking project installation dates, error: {}", e.getMessage());
         }
 
+        try {
+            String currentDate = dateToString(project.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if ( validateStringNoRequiredUpdate(currentDate, projectUpdateDto.getMonitoringDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de monitoreo",
+                        currentDate, projectUpdateDto.getMonitoringDate())).append(GeneralKeys.JUMP_LINE);
+                project.setMonitoringDate(stringToDate(projectUpdateDto.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking project installation dates, error: {}", e.getMessage());
+        }
+
         if( validateStringNoRequiredUpdate(project.getObservations(), projectUpdateDto.getObservations()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
             project.setObservations(projectUpdateDto.getObservations());
