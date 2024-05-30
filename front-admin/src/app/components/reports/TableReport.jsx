@@ -7,7 +7,8 @@ import { Pagination } from "../custom/pagination/page/Pagination";
 
 export const TableReport = ({
     filter,
-    params
+    params,
+    setIsCheck
 }) => {
     
     const { reportName } = useParams();
@@ -21,7 +22,6 @@ export const TableReport = ({
     const [allChecked, setAllChecked] = useState(true);
     const [keys, setKeys] = useState([]);
     const [allKeys, setAllKeys] = useState([]);
-    const [isCheck, setIsCheck] = useState(true);
 
     const fetchOrders = (currentPage, filter) => {
         getReport(report.context, currentPage, pageSize, filter, params)

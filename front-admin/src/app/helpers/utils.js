@@ -17,9 +17,9 @@ export const REPORT_MAP = [
         context: 'projects/withoutinvoices',
         excel: 'invoice_pedings',
         labels: [
-            { id: '1', value: "Construcción" },
-            { id: '2', value: "Instalación" },
-            { id: '3', value: "Monitoreo" }
+            { id: '1', value: "Construcción", styleTitle: 'danger' },
+            { id: '2', value: "Instalación", styleTitle: 'warning' },
+            { id: '3', value: "Monitoreo", styleTitle: 'primary' }
         ],
         options: [
             {

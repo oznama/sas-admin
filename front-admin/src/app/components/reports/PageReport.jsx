@@ -107,11 +107,11 @@ export const PageReport = () => {
                     </span>
                 </button>
             </div>
-            { report && !report.labels && <TableReport filter={ filter } params={ report.params } /> }
+            { report && !report.labels && <TableReport filter={ filter } params={ report.params } setIsCheck={ setIsCheck } /> }
             { report && report.labels && reports && reports.map( (l, index) => (
                 <div key={ index } className="border rounded">
-                    <h4 className={`card-title fw-bold`}>{ l.value }</h4>
-                    { <TableReport filter={ filter } params={ report.options.find( o => o.id === l.id ) } /> }
+                    <h4 className={`card-title fw-bold text-${l.styleTitle}`}>{ l.value }</h4>
+                    { <TableReport filter={ filter } params={ report.options.find( o => o.id === l.id ) } setIsCheck={ setIsCheck } /> }
                 </div>
             )) }
         </div>
