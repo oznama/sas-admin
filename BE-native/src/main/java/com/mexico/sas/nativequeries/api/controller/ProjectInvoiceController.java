@@ -24,7 +24,7 @@ import java.util.List;
 public class ProjectInvoiceController {
 
     @Autowired
-    private ProjectInvoiceService projectOrderService;
+    private ProjectInvoiceService projectInvoiceService;
 
     @GetMapping
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos sin facturas", nickname = "findProjectsWithoutInvoices")
@@ -37,31 +37,31 @@ public class ProjectInvoiceController {
                                                                                     @RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without invoices");
-        return ResponseEntity.ok(projectOrderService.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage, page, size));
+        return ResponseEntity.ok(projectInvoiceService.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage, page, size));
     }
 
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin facturas", nickname = "exportProjectsWithoutInvoices")
-    public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(defaultValue = "4") int report,
-                                                                @RequestParam(required = false) Boolean orderCanceled,
+    public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(defaultValue = "1") int report,
+                                                                @RequestParam(defaultValue = "false") Boolean orderCanceled,
                                                                 @RequestParam(defaultValue = "30") int percentage,
                                                                 @RequestParam(required = false) List<String> pKeys) {
         log.info("Exporting projects without invoices");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDispositionFormData("attachment", "report.xlsx");
-        byte[] arrayOuput = projectOrderService.exportProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
+        byte[] arrayOuput = projectInvoiceService.exportProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
         return ResponseEntity.ok().headers(headers).body(arrayOuput);
     }
 
     @GetMapping("notification")
     @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin facturas", nickname = "sendNotificationProjectsWithoutInvoices")
-    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(defaultValue = "4") int report,
-                                                                     @RequestParam(required = false) Boolean orderCanceled,
+    public ResponseEntity<?> sendNotificationProjectsWithoutInvoices(@RequestParam(defaultValue = "1") int report,
+                                                                     @RequestParam(defaultValue = "false") Boolean orderCanceled,
                                                                      @RequestParam(defaultValue = "30") int percentage,
                                                                      @RequestParam(required = false) List<String> pKeys) {
         log.info("Sending notificaton email projects without invoices");
-        projectOrderService.sendNotificationProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
+        projectInvoiceService.sendNotificationProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys);
         return ResponseEntity.ok().build();
     }
 

@@ -4,6 +4,7 @@ public interface SQLConstants {
     String PG_FUNCTION_ACCENT = "f_unaccent";
     String WHERE = "where";
     String AND = "and";
+    String UNION = "union";
 
     String SUBQUERY_PARAMETER = ":subquery";
     String CONCAT_LIMIT_PATTERN = "%s %s";

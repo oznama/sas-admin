@@ -20,6 +20,9 @@ public class ProjectOrderRepository extends BaseRepository {
     @Value("${query.project.without.orders}")
     private String queryProjectWithoutOrders;
 
+    @Value("${query.project.order.general}")
+    private String orderGeneral;
+
     @Value("${query.project.application.startdate.expired}")
     private String filterStartDateExpired;
 
@@ -32,7 +35,8 @@ public class ProjectOrderRepository extends BaseRepository {
         // Procesar si hay filtros para crear las condiciones del query
         List<String> conditions = projectsWithoutOdersFilter(true, filter, paStatus, null);
         String query = queryProjectWithoutOrders
-                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .concat(" ").concat(orderGeneral);
         Long total = queryForObject(queryCount(query), Long.class);
         log.debug("{} row found!", total);
         if( total > 0 ) {
@@ -50,7 +54,8 @@ public class ProjectOrderRepository extends BaseRepository {
     private List<ProjectWithoutOrders> execute(List<String> conditions) {
         // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutOrders
-                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "");
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .concat(" ").concat(orderGeneral);
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return query(query, new ProjectWihtoutOrdersMapper());
     }

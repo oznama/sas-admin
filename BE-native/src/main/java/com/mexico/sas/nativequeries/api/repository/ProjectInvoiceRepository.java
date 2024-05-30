@@ -9,8 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -19,14 +18,20 @@ public class ProjectInvoiceRepository extends BaseRepository {
     @Value("${query.project.without.invoice}")
     private String queryProjectWithoutInvoice;
 
-    @Value("${query.project.application.invoice.developed}")
-    private String filterApplicationInvoceDeveloped;
+    @Value("${query.project.order.general}")
+    private String orderGeneral;
+
+    @Value("${query.project.order.union}")
+    private String orderUnion;
 
     @Value("${query.project.order.status.canceled}")
     private String filterOrderCanceled;
 
     @Value("${query.project.order.status.not.canceled}")
     private String filterOrderNotCanceled;
+
+    @Value("${query.project.application.invoice.developed}")
+    private String filterApplicationInvoceDeveloped;
 
     @Value("${query.project.invoice.installed}")
     private String filterProjectInvoiceInstalled;
@@ -35,12 +40,14 @@ public class ProjectInvoiceRepository extends BaseRepository {
     private String filterProjectInvoiceMonitoring;
 
     public Page<ProjectWithoutInvoices> findProjectsWithoutInvoices(String filter, Integer report, Boolean orderCanceled, Integer percentage, Pageable pageable) {
-        log.debug("findProjectsWithoutInvoice Pagged...");
+        log.debug("findProjectsWithoutInvoice Pagged of report: {} with percentage: {} and orderCanceled?: {}...",
+                report, percentage, orderCanceled);
         List<ProjectWithoutInvoices> list = new ArrayList<>();
         List<String> conditions = projectsWithoutInvoiceFilter(filter, report, orderCanceled, null);
         String query = queryProjectWithoutInvoice
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
-                .replace(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage));
+                .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage))
+                .concat(" ").concat(orderGeneral);
         Long total = queryForObject(queryCount(query), Long.class);
         log.debug("{} row found!", total);
         if( total > 0 ) {
@@ -51,33 +58,64 @@ public class ProjectInvoiceRepository extends BaseRepository {
     }
 
     public List<ProjectWithoutInvoices> findProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
-        log.debug("findProjectsWithoutInvoce with pKeys...");
-        return execute(percentage, projectsWithoutInvoiceFilter( null, report, orderCanceled, pKeys));
+        log.debug("findProjectsWithoutInvoce List with pKeys of report: {} and orderCanceled?: {}...", report, orderCanceled);
+        if( report >= 1 && report <= 3 ) {
+            return execute(percentage, projectsWithoutInvoiceFilter( null, report, orderCanceled, pKeys));
+        } else if ( report == 4 ) {
+            return buildAndExceuteUnion(orderCanceled, pKeys);
+        } else {
+            log.warn("Report {} not supported", report);
+            return Collections.emptyList();
+        }
     }
 
     private List<ProjectWithoutInvoices> execute(Integer percentage, List<String> conditions) {
-        // Si hay filtros, se agregan al query si no, no queda vacio
         String query = queryProjectWithoutInvoice
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
-                .replace(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage));
-        // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
+                .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage))
+                .concat(" ").concat(orderGeneral);
         return query(query, new ProjectWihtoutInvoicesMapper());
     }
 
+    private List<ProjectWithoutInvoices> buildAndExceuteUnion(Boolean orderCanceled, List<String> pKeys) {
+        log.debug("Building union query ...");
+        Map<Integer, Integer> reports = new HashMap<>();
+        reports.put(1, 30);
+        reports.put(2, 60);
+        reports.put(3, 100);
+        StringBuilder queryBuilder = new StringBuilder();
+        reports.forEach((report, percentage) -> {
+            log.debug("Loop in report {} with percentage {}", report, percentage);
+            List<String> conditions = projectsWithoutInvoiceFilter(null, report, orderCanceled, pKeys);
+            queryBuilder.append(queryProjectWithoutInvoice
+                    .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                    .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage)));
+            if( report < 3 ) {
+                log.debug("Appending union word");
+                queryBuilder.append(" ").append(SQLConstants.UNION).append(" ");
+            }
+        });
+        queryBuilder.append(" ").append(orderUnion);
+        return query(queryBuilder.toString(), new ProjectWihtoutInvoicesMapper());
+    }
+
     private List<String> projectsWithoutInvoiceFilter(String filter, Integer report, Boolean orderCanceled, List<String> pKeys) {
-        log.debug("Checking filters, filter: {}, orderCanceled: {}", filter, orderCanceled);
+        log.debug("Checking filters, filter: {}, report: {}, orderCanceled: {}", filter, report, orderCanceled);
         List<String> conditions = new ArrayList<>();
 
         addGeneralFilter(filter, conditions);
 
-        conditions.add( orderCanceled ? filterOrderCanceled : filterOrderNotCanceled );
-
-        if( report == 1 ) { // Construccion pendiente de pago
-            conditions.add(filterApplicationInvoceDeveloped);
-        } else if( report == 2 ){ // Instalacion pendiente de pago
-            conditions.add(filterProjectInvoiceInstalled);
-        } else if( report == 3 ) { // Monitoreo pendiente de pago
-            conditions.add(filterProjectInvoiceMonitoring);
+        if( orderCanceled ) {
+            conditions.add( filterOrderCanceled );
+        } else {
+            conditions.add( filterOrderNotCanceled );
+            if( report == 1 ) { // Construccion pendiente de pago
+                conditions.add(filterApplicationInvoceDeveloped);
+            } else if( report == 2 ){ // Instalacion pendiente de pago
+                conditions.add(filterProjectInvoiceInstalled);
+            } else if( report == 3 ) { // Monitoreo pendiente de pago
+                conditions.add(filterProjectInvoiceMonitoring);
+            }
         }
 
         addPKeysIn(pKeys, conditions);

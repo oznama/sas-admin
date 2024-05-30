@@ -19,7 +19,8 @@ public class ProjectWihtoutInvoicesMapper implements RowMapper<ProjectWithoutInv
                 rs.getLong("num_invoices"),
                 rs.getString("project_amount"),
                 rs.getString("tax"),
-                rs.getString("total")
+                rs.getString("total"),
+                rs.getInt("percentage")
         );
     }
 }
