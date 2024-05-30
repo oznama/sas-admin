@@ -1,5 +1,11 @@
 ## Comando para resolver problema de fuentes en contenedor
 ## docker exec -u 0 api-service bash -c "apt-get update && apt-get install fontconfig ttf-dejavu -y"
+## Comando para exportar base de datos desde la consola del contenedor
+## pg_dump -U sas -W sas > tmp/backup.sql
+## Comando para copiar del contenedor al host
+## docker cp <containerId>:/file/path/within/container /host/path/target
+## Copiando backup a host
+## docker cp postgres-database:/tmp/backup.sql C:\Users\oziel\Documents\Administrador\BD_Backup
 version: "3.7"
 services:
 
@@ -15,12 +21,12 @@ services:
     ports:
       - 5432:5432
 
-  adminer:
-    container_name: 'php-my-admin'
-    image: adminer
-    ##restart: always
-    ports:
-      - 8080:8080
+  # adminer:
+    # container_name: 'php-my-admin'
+    # image: adminer
+    #restart: always
+    # ports:
+      # - 8080:8080
 
   api-service:
     container_name: 'api-service'
@@ -53,6 +59,7 @@ services:
       EMAIL_DEBUG_ENABLED: ${EMAIL_DEBUG_ENABLED}
     ports:
       - ${REST_SERVER_PORT}:${REST_SERVER_PORT}
+
   native-service:
     container_name: 'native-service'
     depends_on:
