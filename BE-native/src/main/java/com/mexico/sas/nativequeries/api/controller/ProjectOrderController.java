@@ -1,6 +1,6 @@
 package com.mexico.sas.nativequeries.api.controller;
 
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
+import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import com.mexico.sas.nativequeries.api.service.ProjectOrderService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -26,13 +26,12 @@ public class ProjectOrderController {
     @GetMapping
     @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar proyectos sin ordenes", nickname = "findProjectsWithoutOrders")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success", response = ProjectWithoutOrders.class, responseContainer = "List") })
-    public ResponseEntity<Page<ProjectWithoutOrders>> findProjectsWithoutOrders(@RequestParam(required = false) String filter,
-                                                                                @RequestParam(required = false) Long paStatus,
-                                                                                @RequestParam(defaultValue = "0") int page,
-                                                                                @RequestParam(defaultValue = "10") int size) {
+            @ApiResponse(code = 200, message = "Success", response = ProjectWithApplication.class, responseContainer = "List") })
+    public ResponseEntity<Page<ProjectWithApplication>> findProjectsWithoutOrders(@RequestParam(required = false) String filter,
+                                                                                  @RequestParam(defaultValue = "0") int page,
+                                                                                  @RequestParam(defaultValue = "10") int size) {
         log.info("Finding projects without orders");
-        return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter, paStatus, page, size));
+        return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter, page, size));
     }
 
     @GetMapping("export")
@@ -47,7 +46,7 @@ public class ProjectOrderController {
     }
 
     @GetMapping("notification")
-    @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para enviar correo de proyectos sin ordenes", nickname = "sendProjectsWithoutOrders")
     public ResponseEntity<?> sendProjectsWithoutOrders(@RequestParam(required = false) List<String> pKeys) {
         log.info("Sending notificaton email projects without orders");
         projectOrderService.sendNotificationProjectsWithoutOrders(pKeys);

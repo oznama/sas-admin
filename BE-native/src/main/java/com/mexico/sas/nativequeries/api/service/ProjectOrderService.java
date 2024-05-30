@@ -1,8 +1,8 @@
 package com.mexico.sas.nativequeries.api.service;
 
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
-import com.mexico.sas.nativequeries.api.report.ProjectWithoutODCXls;
+import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
+import com.mexico.sas.nativequeries.api.report.ProjectWithApplicationXls;
 import com.mexico.sas.nativequeries.api.repository.ProjectOrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +25,25 @@ public class ProjectOrderService {
     private ProjectOrderRepository projectOrderRepository;
 
     @Autowired
-    private ProjectWithoutODCXls projectWithoutODCXls;
+    private ProjectWithApplicationXls projectWithApplicationXls;
 
     @Autowired
     private EmailUtils emailUtils;
 
-    public Page<ProjectWithoutOrders> findProjectsWithoutOrders(String filter, Long paStatus, int page, int size) {
+    public Page<ProjectWithApplication> findProjectsWithoutOrders(String filter, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         log.debug("Finding Projects without orders pagged {}", pageable);
-        return projectOrderRepository.findProjectsWithoutOrders(filter, paStatus, pageable);
+        return projectOrderRepository.findProjectsWithoutOrders(filter, pageable);
     }
 
     public byte[] exportProjectsWithoutOrders(List<String> pKeys) {
-        return projectWithoutODCXls.build(projectOrderRepository.findProjectsWithoutOrders(pKeys));
+        return projectWithApplicationXls.build("Proyectos sin ordenes de compra", projectOrderRepository.findProjectsWithoutOrders(pKeys));
     }
 
     @Async("ExecutorAsync")
     public void sendNotificationProjectsWithoutOrders(List<String> pKeys) {
         final String htlmTemplate = "pending_orders";
-        List<ProjectWithoutOrders> projects = projectOrderRepository.findProjectsWithoutOrders(pKeys);
+        List<ProjectWithApplication> projects = projectOrderRepository.findProjectsWithoutOrders(pKeys);
         projects.forEach( p -> {
             log.debug("Sending email notification Project {} - {} without order", p.getProjectKey(), p.getProjectName());
             String subject = String.format("%s %s orden de compra pendiente - SAS", p.getProjectKey(), p.getProjectName());

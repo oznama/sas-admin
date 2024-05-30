@@ -14,23 +14,26 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ProjectOrderRepository extends BaseRepository {
+public class ProjectRepository extends BaseRepository {
 
-    @Value("${query.project.without.orders}")
-    private String queryProjectWithoutOrders;
+    @Value("${query.project.with.applications}")
+    private String queryProjectWithApplications;
 
     @Value("${query.project.order.general}")
     private String orderGeneral;
 
-    @Value("${query.project.application.startdate.expired}")
-    private String filterStartDateExpired;
+    @Value("${query.project.installed.isnull}")
+    private String filterInstalledIsNull;
 
-    public Page<ProjectWithApplication> findProjectsWithoutOrders(String filter, Pageable pageable) {
-        log.debug("findProjectsWithoutOrders Pagged...");
+    @Value("${query.project.monitoring.isnull}")
+    private String filterMonitoringIsNull;
+
+    public Page<ProjectWithApplication> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring, Pageable pageable) {
+        log.debug("findProjectsWithApplication Pagged...");
         List<ProjectWithApplication> list = new ArrayList<>();
         // Procesar si hay filtros para crear las condiciones del query
-        List<String> conditions = projectsWithoutOdersFilter(true, filter, null);
-        String query = queryProjectWithoutOrders
+        List<String> conditions = projectsWithApplicationFilter(filter, installed, monitoring, null);
+        String query = queryProjectWithApplications
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .concat(" ").concat(orderGeneral);
         Long total = queryForObject(queryCount(query), Long.class);
@@ -42,30 +45,33 @@ public class ProjectOrderRepository extends BaseRepository {
         return new PageImpl<>(list, pageable, total);
     }
 
-    public List<ProjectWithApplication> findProjectsWithoutOrders(List<String> pKeys) {
-        log.debug("findProjectsWithoutOrders with pKeys...");
-        return execute(projectsWithoutOdersFilter(false, null, pKeys));
+    public List<ProjectWithApplication> findProjectsWithApplication(Boolean installed, Boolean monitoring, List<String> pKeys) {
+        log.debug("findProjectsWithApplication with pKeys...");
+        return execute(projectsWithApplicationFilter(null, installed, monitoring, pKeys));
     }
 
     private List<ProjectWithApplication> execute(List<String> conditions) {
         // Si hay filtros, se agregan al query si no, no queda vacio
-        String query = queryProjectWithoutOrders
+        String query = queryProjectWithApplications
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .concat(" ").concat(orderGeneral);
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper
         return query(query, new ProjectWihtApplicationMapper());
     }
 
-    private List<String> projectsWithoutOdersFilter(boolean reqConditions, String filter, List<String> pKeys) {
-        log.debug("Checking filters, filter: {}", filter);
+    private List<String> projectsWithApplicationFilter(String filter, Boolean installed, Boolean monitoring, List<String> pKeys) {
+        log.debug("Checking filters, filter: {}, installed: {}, monitoring: {}", filter, installed, monitoring);
         List<String> conditions = new ArrayList<>();
 
-        // Condiciones obligatorias
-        if( reqConditions ) {
-            // Esta no lleva parametro asi que no se reemplaza nada
-            conditions.add(filterStartDateExpired);
-        }
         addGeneralFilter(filter, conditions);
+
+        if( installed ) {
+            conditions.add(filterInstalledIsNull);
+        }
+        if( monitoring ) {
+            conditions.add(filterMonitoringIsNull);
+        }
+
         addPKeysIn(pKeys, conditions);
 
         log.debug("Conditions generated? {}", conditions.size());

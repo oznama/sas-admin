@@ -1,7 +1,6 @@
 package com.mexico.sas.nativequeries.api.report;
 
 import com.mexico.sas.nativequeries.api.model.ProjectWithoutInvoices;
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,7 +12,7 @@ import java.util.List;
 @Slf4j
 public class ProjectWithoutInvXls extends ExcelExporter {
 
-    public byte[] build(List<ProjectWithoutInvoices> projectWithoutInvoices) {
+    public byte[] build(List<ProjectWithoutInvoices> projectWithoutInvoices, Boolean orderCanceled) {
         log.debug("Building excel with {} projects invoices", projectWithoutInvoices.size());
 
         final String title = "Reporte de Proyectos sin Factura";
@@ -22,27 +21,27 @@ public class ProjectWithoutInvXls extends ExcelExporter {
         Sheet sheet = workbook.createSheet(title);
 
         int numRow = 1;
-        title(sheet, numRow, workbook, title);
+        title(sheet, numRow, workbook, title, orderCanceled);
 
-        numRow = headers(workbook, numRow, sheet);
-        rows(projectWithoutInvoices, workbook, numRow, sheet);
+        numRow = headers(workbook, numRow, sheet, orderCanceled);
+        rows(projectWithoutInvoices, workbook, numRow, sheet, orderCanceled);
 
         autoSizeColumn(sheet, 20);
 
         return getReportByteArray(workbook);
     }
 
-    private void title(Sheet sheet, int numRow, Workbook workbook, String title) {
+    private void title(Sheet sheet, int numRow, Workbook workbook, String title, Boolean orderCanceled) {
         log.debug("Creating title ...");
         Row row = sheet.createRow(numRow);
         Cell cellTitle = row.createCell(1);
         cellTitle.setCellStyle(getTitleStyle(workbook));
         cellTitle.setCellValue(title);
-        mergeCells(sheet, numRow, numRow, 1, 7);
+        mergeCells(sheet, numRow, numRow, 1, orderCanceled ? 7 : 8);
         log.debug("Title added!");
     }
 
-    private int headers(Workbook workbook, int numRow, Sheet sheet) {
+    private int headers(Workbook workbook, int numRow, Sheet sheet, Boolean orderCanceled) {
         log.debug("Creating headers ...");
         Row row;
         CellStyle cellStyle = getTableHeaderStyle(workbook);
@@ -70,11 +69,16 @@ public class ProjectWithoutInvXls extends ExcelExporter {
         Cell cellHeaderTotal = row.createCell(7);
         cellHeaderTotal.setCellValue("Total");
         cellHeaderTotal.setCellStyle(cellStyle);
+        if( !orderCanceled ) {
+            Cell cellHeaderStage = row.createCell(8);
+            cellHeaderStage.setCellValue("Etapa");
+            cellHeaderStage.setCellStyle(cellStyle);
+        }
         log.debug("Headers added!");
         return numRow;
     }
 
-    private void rows(List<ProjectWithoutInvoices> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
+    private void rows(List<ProjectWithoutInvoices> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet, Boolean orderCanceled) {
         log.debug("Creatingn rows ...");
         Row row;
         CellStyle cellStyle = getTableRowStyle(workbook);
@@ -102,8 +106,21 @@ public class ProjectWithoutInvXls extends ExcelExporter {
             Cell cell07 = row.createCell(7);
             cell07.setCellValue(String.valueOf(p.getTotal()));
             cell07.setCellStyle(cellStyle);
+            if( !orderCanceled ) {
+                Cell cell08 = row.createCell(8);
+                cell08.setCellValue(getStage(p.getPercentage()));
+                cell08.setCellStyle(cellStyle);
+            }
             log.debug("Row {} for {} project added!", numRow, p.getProjectKey());
         }
         log.debug("Rows added!");
+    }
+
+    private String getStage(Integer percentage) {
+        return percentage == 30 ? "Construccion" : (
+                percentage == 60 ? "Instalación" : (
+                        percentage == 100 ? "Monitoreo" : ""
+                        )
+                );
     }
 }

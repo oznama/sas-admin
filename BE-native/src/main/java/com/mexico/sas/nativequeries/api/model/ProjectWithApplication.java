@@ -2,12 +2,10 @@ package com.mexico.sas.nativequeries.api.model;
 
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Data
 @AllArgsConstructor
 @ToString
-public class ProjectWithoutOrders {
+public class ProjectWithApplication {
 
     private String projectKey;
     private String projectName;
@@ -19,4 +17,6 @@ public class ProjectWithoutOrders {
     private String projectAmount;
     private String tax;
     private String total;
+    private String installationDate;
+    private String monitoringDate;
 }

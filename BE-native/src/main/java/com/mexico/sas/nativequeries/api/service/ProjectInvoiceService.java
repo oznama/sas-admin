@@ -41,7 +41,7 @@ public class ProjectInvoiceService {
     }
 
     public byte[] exportProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
-        return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys));
+        return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys), orderCanceled);
     }
 
     @Async("ExecutorAsync")

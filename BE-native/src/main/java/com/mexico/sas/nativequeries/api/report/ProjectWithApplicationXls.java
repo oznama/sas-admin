@@ -1,6 +1,6 @@
 package com.mexico.sas.nativequeries.api.report;
 
-import com.mexico.sas.nativequeries.api.model.ProjectWithoutOrders;
+import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -10,12 +10,10 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ProjectWithoutODCXls extends ExcelExporter {
+public class ProjectWithApplicationXls extends ExcelExporter {
 
-    public byte[] build(List<ProjectWithoutOrders> projectWithoutOrders) {
+    public byte[] build(String title, List<ProjectWithApplication> projectWithoutOrders) {
         log.debug("Building excel with {} projects orders", projectWithoutOrders.size());
-
-        final String title = "Proyectos sin ordenes de compra";
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(title);
@@ -73,11 +71,11 @@ public class ProjectWithoutODCXls extends ExcelExporter {
         return numRow;
     }
 
-    private void rows(List<ProjectWithoutOrders> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
+    private void rows(List<ProjectWithApplication> projectWithoutOrders, Workbook workbook, int numRow, Sheet sheet) {
         log.debug("Creatingn rows ...");
         Row row;
         CellStyle cellStyle = getTableRowStyle(workbook);
-        for( ProjectWithoutOrders p : projectWithoutOrders) {
+        for( ProjectWithApplication p : projectWithoutOrders) {
             numRow++;
             row = sheet.createRow(numRow);
             Cell cell01 = row.createCell(1);
