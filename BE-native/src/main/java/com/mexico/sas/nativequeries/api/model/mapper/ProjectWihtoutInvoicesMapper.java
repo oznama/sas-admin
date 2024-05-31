@@ -16,6 +16,7 @@ public class ProjectWihtoutInvoicesMapper implements RowMapper<ProjectWithoutInv
                 rs.getString("pm_name"),
                 rs.getString("boss_mail"),
                 rs.getString("boss_name"),
+                rs.getString("order_num"),
                 rs.getLong("num_invoices"),
                 rs.getString("project_amount"),
                 rs.getString("tax"),

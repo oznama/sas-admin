@@ -15,6 +15,7 @@ public class ProjectWithoutInvoices {
     private String pmName;
     private String bossMail;
     private String bossName;
+    private String orderNum;
     private Long numInvoices;
     private String projectAmount;
     private String tax;
