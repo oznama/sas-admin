@@ -16,6 +16,10 @@ import java.util.List;
 @Slf4j
 public class ProjectRepository extends BaseRepository {
 
+    @Value("${query.project.field.key}")
+    private String fieldProjectKey;
+    @Value("${query.project.with.applications.fields}")
+    private String fieldsProjectWithApplications;
     @Value("${query.project.with.applications}")
     private String queryProjectWithApplications;
 
@@ -33,7 +37,8 @@ public class ProjectRepository extends BaseRepository {
         List<ProjectWithApplication> list = new ArrayList<>();
         // Procesar si hay filtros para crear las condiciones del query
         List<String> conditions = projectsWithApplicationFilter(filter, installed, monitoring, null);
-        String query = queryProjectWithApplications
+        String query = fieldsProjectWithApplications.concat(" ")
+                .concat(queryProjectWithApplications)
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .concat(" ").concat(orderGeneral);
         Long total = queryForObject(queryCount(query), Long.class);
@@ -50,9 +55,20 @@ public class ProjectRepository extends BaseRepository {
         return execute(projectsWithApplicationFilter(null, installed, monitoring, pKeys));
     }
 
+    public List<String> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring) {
+        log.debug("findProjectsWithApplication keys...");
+        List<String> conditions = projectsWithApplicationFilter(filter, installed, monitoring, null);
+        String query = fieldProjectKey.concat(" ")
+                .concat(queryProjectWithApplications)
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .concat(" ").concat(orderGeneral);
+        return getForList(query, String.class);
+    }
+
     private List<ProjectWithApplication> execute(List<String> conditions) {
         // Si hay filtros, se agregan al query si no, no queda vacio
-        String query = queryProjectWithApplications
+        String query = fieldsProjectWithApplications.concat(" ")
+                .concat(queryProjectWithApplications)
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .concat(" ").concat(orderGeneral);
         // Executa el query y lo mapea en el objeto ProjectWihtoutOrdersMapper

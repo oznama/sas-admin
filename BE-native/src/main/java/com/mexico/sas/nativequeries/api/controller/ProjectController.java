@@ -39,6 +39,17 @@ public class ProjectController {
         return ResponseEntity.ok(projectOrder.findProjectsWithApplication(filter, installation, monitoring, page, size));
     }
 
+    @GetMapping("keys")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar claves de proyectos con aplicaciones", nickname = "findProjectsKeysWithApplications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = String.class, responseContainer = "List") })
+    public ResponseEntity<List<String>> findProjectsKeysWithApplications(@RequestParam(required = false) String filter,
+                                                                                     @RequestParam(defaultValue = "false") Boolean installation,
+                                                                                     @RequestParam(defaultValue = "false") Boolean monitoring) {
+        log.info("Finding projects keys with applications");
+        return ResponseEntity.ok(projectOrder.findProjectsWithApplication(filter, installation, monitoring));
+    }
+
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos con aplicaciones", nickname = "exportProjectsWithApplications")
     public ResponseEntity<byte[]> exportProjectsWithApplications(@RequestParam(defaultValue = "false") Boolean installation,

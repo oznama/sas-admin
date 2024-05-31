@@ -34,6 +34,15 @@ public class ProjectOrderController {
         return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter, page, size));
     }
 
+    @GetMapping("keys")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar claves de proyectos sin ordenes", nickname = "findProjectsKeysWithoutOrders")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = String.class, responseContainer = "List") })
+    public ResponseEntity<List<String>> findProjectsKeysWithoutOrders(@RequestParam(required = false) String filter) {
+        log.info("Finding projects keys without orders");
+        return ResponseEntity.ok(projectOrderService.findProjectsWithoutOrders(filter));
+    }
+
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin ordenes", nickname = "exportProjectsWithoutOrders")
     public ResponseEntity<byte[]> exportProjectsWithoutOrders(@RequestParam(required = false) List<String> pKeys) {

@@ -37,6 +37,11 @@ public class ProjectService {
         return projectRepository.findProjectsWithApplication(filter, installed, monitoring, pageable);
     }
 
+    public List<String> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring) {
+        log.debug("Finding Projects keys with applications");
+        return projectRepository.findProjectsWithApplication(filter, installed, monitoring);
+    }
+
     public byte[] exportProjectsWithApplication(Boolean installed, Boolean monitoring, List<String> pKeys) {
         return projectWithApplicationXls.build("Proyectos sin fecha", projectRepository.findProjectsWithApplication(installed, monitoring, pKeys));
     }

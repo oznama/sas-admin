@@ -15,6 +15,10 @@ import java.util.*;
 @Slf4j
 public class ProjectInvoiceRepository extends BaseRepository {
 
+    @Value("${query.project.field.key}")
+    private String fieldProjectKey;
+    @Value("${query.project.without.invoice.fields}")
+    private String fieldsProjectWithoutInvoice;
     @Value("${query.project.without.invoice}")
     private String queryProjectWithoutInvoice;
 
@@ -44,7 +48,8 @@ public class ProjectInvoiceRepository extends BaseRepository {
                 report, percentage, orderCanceled);
         List<ProjectWithoutInvoices> list = new ArrayList<>();
         List<String> conditions = projectsWithoutInvoiceFilter(filter, report, orderCanceled, null);
-        String query = queryProjectWithoutInvoice
+        String query = fieldsProjectWithoutInvoice.concat(" ")
+                .concat(queryProjectWithoutInvoice)
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage))
                 .concat(" ").concat(orderGeneral);
@@ -69,12 +74,35 @@ public class ProjectInvoiceRepository extends BaseRepository {
         }
     }
 
+    public List<String> findProjectsWithoutInvoices(String filter, Integer report, Boolean orderCanceled, Integer percentage) {
+        log.debug("findProjectsWithoutInvoce keys of report: {} and orderCanceled?: {}...", report, orderCanceled);
+        if( report >= 1 && report <= 3 ) {
+            return execute(filter, report, orderCanceled, percentage);
+        } else if ( report == 4 ) {
+            return buildAndExceuteUnion(filter, orderCanceled);
+        } else {
+            log.warn("Report {} not supported", report);
+            return Collections.emptyList();
+        }
+    }
+
     private List<ProjectWithoutInvoices> execute(Integer percentage, List<String> conditions) {
-        String query = queryProjectWithoutInvoice
+        String query = fieldsProjectWithoutInvoice.concat(" ")
+                .concat(queryProjectWithoutInvoice)
                 .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                 .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage))
                 .concat(" ").concat(orderGeneral);
         return query(query, new ProjectWihtoutInvoicesMapper());
+    }
+
+    private List<String> execute(String filter, Integer report, Boolean orderCanceled, Integer percentage) {
+        List<String> conditions = projectsWithoutInvoiceFilter(filter, report, orderCanceled, null);
+        String query = fieldProjectKey.concat(" ")
+                .concat(queryProjectWithoutInvoice)
+                .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage))
+                .concat(" ").concat(orderGeneral);
+        return getForList(query, String.class);
     }
 
     private List<ProjectWithoutInvoices> buildAndExceuteUnion(Boolean orderCanceled, List<String> pKeys) {
@@ -87,7 +115,7 @@ public class ProjectInvoiceRepository extends BaseRepository {
         reports.forEach((report, percentage) -> {
             log.debug("Loop in report {} with percentage {}", report, percentage);
             List<String> conditions = projectsWithoutInvoiceFilter(null, report, orderCanceled, pKeys);
-            queryBuilder.append(queryProjectWithoutInvoice
+            queryBuilder.append(fieldsProjectWithoutInvoice.concat("").concat(queryProjectWithoutInvoice)
                     .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
                     .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage)));
             if( report < 3 ) {
@@ -97,6 +125,28 @@ public class ProjectInvoiceRepository extends BaseRepository {
         });
         queryBuilder.append(" ").append(orderUnion);
         return query(queryBuilder.toString(), new ProjectWihtoutInvoicesMapper());
+    }
+
+    private List<String> buildAndExceuteUnion(String filter, Boolean orderCanceled) {
+        log.debug("Building union query ...");
+        Map<Integer, Integer> reports = new HashMap<>();
+        reports.put(1, 30);
+        reports.put(2, 60);
+        reports.put(3, 100);
+        StringBuilder queryBuilder = new StringBuilder();
+        reports.forEach((report, percentage) -> {
+            log.debug("Loop in report {} with percentage {}", report, percentage);
+            List<String> conditions = projectsWithoutInvoiceFilter(filter, report, orderCanceled, null);
+            queryBuilder.append(fieldProjectKey.concat(" ").concat(queryProjectWithoutInvoice)
+                    .replace(SQLConstants.WHERE_CLAUSE_PARAMETER, !conditions.isEmpty() ? whereClauseBuilder(conditions) : "")
+                    .replaceAll(SQLConstants.PERCENTAGE_PARAMETER, String.valueOf(percentage)));
+            if( report < 3 ) {
+                log.debug("Appending union word");
+                queryBuilder.append(" ").append(SQLConstants.UNION).append(" ");
+            }
+        });
+        queryBuilder.append(" ").append(orderUnion);
+        return getForList(queryBuilder.toString(), String.class);
     }
 
     private List<String> projectsWithoutInvoiceFilter(String filter, Integer report, Boolean orderCanceled, List<String> pKeys) {

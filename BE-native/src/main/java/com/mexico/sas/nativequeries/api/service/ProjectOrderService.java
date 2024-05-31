@@ -36,6 +36,11 @@ public class ProjectOrderService {
         return projectOrderRepository.findProjectsWithoutOrders(filter, pageable);
     }
 
+    public List<String> findProjectsWithoutOrders(String filter) {
+        log.debug("Finding Projects keys without orders");
+        return projectOrderRepository.findProjectsWithoutOrders(filter);
+    }
+
     public byte[] exportProjectsWithoutOrders(List<String> pKeys) {
         return projectWithApplicationXls.build("Proyectos sin ordenes de compra", projectOrderRepository.findProjectsWithoutOrders(pKeys));
     }

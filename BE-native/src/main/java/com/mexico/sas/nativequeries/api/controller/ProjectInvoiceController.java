@@ -40,6 +40,18 @@ public class ProjectInvoiceController {
         return ResponseEntity.ok(projectInvoiceService.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage, page, size));
     }
 
+    @GetMapping("keys")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar claves de proyectos sin facturas", nickname = "findProjectsKeysWithoutInvoices")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = String.class, responseContainer = "List") })
+    public ResponseEntity<List<String>> findProjectsKeysWithoutInvoices(@RequestParam(required = false) String filter,
+                                                                                    @RequestParam(defaultValue = "1") int report,
+                                                                                    @RequestParam(defaultValue = "false") Boolean orderCanceled,
+                                                                                    @RequestParam(defaultValue = "30") int percentage) {
+        log.info("Finding projects keys without invoices");
+        return ResponseEntity.ok(projectInvoiceService.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage));
+    }
+
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos sin facturas", nickname = "exportProjectsWithoutInvoices")
     public ResponseEntity<byte[]> exportProjectsWithoutInvoices(@RequestParam(defaultValue = "1") int report,

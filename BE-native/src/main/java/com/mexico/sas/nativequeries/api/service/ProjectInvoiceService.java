@@ -40,6 +40,11 @@ public class ProjectInvoiceService {
         }
     }
 
+    public List<String> findProjectsWithoutInvoices(String filter, Integer report, Boolean orderCanceled, Integer percentage) {
+        log.debug("Finding Projects keys without invoices");
+        return projectInvoiceRepository.findProjectsWithoutInvoices(filter, report, orderCanceled, percentage);
+    }
+
     public byte[] exportProjectsWithoutInvoices(Integer report, Boolean orderCanceled, Integer percentage, List<String> pKeys) {
         return projectWithoutInvXls.build(projectInvoiceRepository.findProjectsWithoutInvoices(report, orderCanceled, percentage, pKeys), orderCanceled);
     }
