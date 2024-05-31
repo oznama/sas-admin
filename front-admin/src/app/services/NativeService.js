@@ -2,7 +2,7 @@ import { apiNative, getHeadersSimple } from '../api/Api';
 import { linkQueryBuilder } from '../helpers/utils';
 
 const buildDinamycParams = ( filter='', params, isTernary) => {
-    let dinamicParams = filter ? `?filter=${filter}` : '';
+    let dinamicParams = filter ? `${ isTernary ? '?' : '&'}filter=${filter}` : '';
     if( params && params.id ) {
         dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}report=${params.id}`;
     }
