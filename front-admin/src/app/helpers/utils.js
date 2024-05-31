@@ -42,11 +42,6 @@ export const REPORT_MAP = [
                 orderCanceled: false,
                 percentage: 100,
 
-            },
-            {
-                value: "Todas",
-                id: '4'
-            
             }
         ]
     },
@@ -82,12 +77,6 @@ export const REPORT_MAP = [
                 id: '2',
                 monitoring: true
 
-            },
-            {
-                value: "Todas",
-                id: '3',
-                installation: true,
-                monitoring: true
             }
         ]
     },

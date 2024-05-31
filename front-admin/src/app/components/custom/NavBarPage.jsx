@@ -71,7 +71,7 @@ export const NavBarPage = () => {
   const gotoReportOption = report => {
     setCurrentTab(null);
     setShowTabReport(!showTabReport);
-    navigate(`/reports/${report.reportName}/${report.options ? report.options.length : '0'}`, { replace: true });
+    navigate(`/reports/${report.reportName}/1`, { replace: true });
   }
   
   const renderTabAdmin = () => userAdmin && (
