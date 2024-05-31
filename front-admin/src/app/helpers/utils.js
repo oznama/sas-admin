@@ -17,9 +17,9 @@ export const REPORT_MAP = [
         context: 'projects/withoutinvoices',
         excel: 'invoice_pedings',
         labels: [
-            { id: '1', value: "Construcción", styleTitle: 'danger' },
-            { id: '2', value: "Instalación", styleTitle: 'warning' },
-            { id: '3', value: "Monitoreo", styleTitle: 'primary' }
+            { id: '1', value: "Fecha de construcción vencida", styleTitle: 'danger' },
+            { id: '2', value: "Fecha de instalación vencida", styleTitle: 'danger' },
+            { id: '3', value: "Fecha de monitoreo vencida", styleTitle: 'danger' }
         ],
         options: [
             {
@@ -68,8 +68,8 @@ export const REPORT_MAP = [
         context: 'projects',
         excel: 'projects_dates',
         labels: [
-            { id: '1', value: "Sin fecha de instalación" },
-            { id: '2', value: "Sin fecha de monitoreo" }
+            { id: '1', value: "Sin fecha de instalación", styleTitle: 'danger' },
+            { id: '2', value: "Sin fecha de monitoreo", styleTitle: 'danger' }
         ],
         options: [
             {

@@ -1,32 +1,45 @@
 import { apiNative, getHeadersSimple } from '../api/Api';
-import { linkQueryBuilder } from '../helpers/utils'; 
+import { linkQueryBuilder } from '../helpers/utils';
+
+const buildDinamycParams = ( filter='', params, isTernary) => {
+    let dinamicParams = filter ? `?filter=${filter}` : '';
+    if( params && params.id ) {
+        dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}report=${params.id}`;
+    }
+    if( params && params.orderCanceled ) {
+        dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}orderCanceled=${params.orderCanceled}`;
+    }
+    if( params && params.percentage ) {
+        dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}percentage=${params.percentage}`;
+    }
+    if( params && params.installation ) {
+        dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}installation=${params.installation}`;
+    }
+    if( params && params.monitoring ) {
+        dinamicParams += `${ dinamicParams === '' && isTernary ? '?' : '&'}monitoring=${params.monitoring}`;
+    }
+    return dinamicParams;
+}
 
 export const getReport = async(context, page=0, size=10, filter='', params) => {
     // console.log("Get Report with", context, page, size, filter, params);
     const request = {
         headers: getHeadersSimple()
     }
-    const filterParam = filter ? `&filter=${filter}` : '';
-    let dinamicParams = '';
-    if( params && params.id ) {
-        dinamicParams += `&report=${params.id}`;
+    const url = `${context}?page=${page}&size=${size}${ buildDinamycParams(filter, params) }`;
+    const response = await apiNative( url, request );
+    const json = await response.json();
+    return json;
+};
+
+export const getReportKeys = async(context, filter='', params) => {
+    const request = {
+        headers: getHeadersSimple()
     }
-    if( params && params.orderCanceled ) {
-        dinamicParams += `&orderCanceled=${params.orderCanceled}`;
-    }
-    if( params && params.percentage ) {
-        dinamicParams += `&percentage=${params.percentage}`;
-    }
-    if( params && params.installation ) {
-        dinamicParams += `&installation=${params.installation}`;
-    }
-    if( params && params.monitoring ) {
-        dinamicParams += `&monitoring=${params.monitoring}`;
-    }
-    const urlProjectsNa = `${context}?page=${page}&size=${size}${ filterParam }${ dinamicParams }`;
-    const response = await apiNative( urlProjectsNa, request );
-    const projects = await response.json();
-    return projects;
+    const url = `${context}/keys${ buildDinamycParams(filter, params, true) }`;
+    const response = await apiNative( url, request );
+    const json = await response.json();
+    return json;
 };
 
 export const sendNotification = async(context, list = []) => {
@@ -46,5 +59,5 @@ export const downloadExcel = async(context, list = []) => {
     const filterParam = linkQueryBuilder(list, 'pKeys') ;
     const urlProjectsNa = `${context}/export${filterParam}`;
     const response = await apiNative( urlProjectsNa, request );
-    return response
+    return response;
 };

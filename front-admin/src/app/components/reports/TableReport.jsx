@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getReport } from "../../services/NativeService";
+import { getReport, getReportKeys } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
 import { REPORT_MAP, styleCheckBox } from "../../helpers/utils";
 import { Pagination } from "../custom/pagination/page/Pagination";
@@ -17,33 +17,29 @@ export const TableReport = ({
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 10;
-    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalReports, setTotalReports] = useState(0);
 
     const [allChecked, setAllChecked] = useState(true);
     const [keys, setKeys] = useState([]);
     const [allKeys, setAllKeys] = useState([]);
 
     const fetchOrders = (currentPage, filter) => {
-        getReport(report.context, currentPage, pageSize, filter, params)
-        .then(resp => {
+        getReport(report.context, currentPage, pageSize, filter, params).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,
                 checked: allChecked || keys.includes(r.projectKey)
             }));
             setData(data);
-            setTotalUsers(resp.totalElements);
-        })
-        .catch(err => {
+            setTotalReports(resp.totalElements);
+        }).catch(err => {
             console.error('Error fetching data:', err);
         });
     };
 
     const allKeysGet = () => {
-        getReport(report.context, 0, 2147483647, null, params)
-        .then(resp => {
-            setAllKeys(resp.content.map(item => item.projectKey));
-        })
-        .catch(err => {
+        getReportKeys(report.context, filter, params).then(resp => {
+            setAllKeys(resp);
+        }).catch(err => {
             console.error('Error fetching data:', err);
         });
     }
@@ -149,7 +145,7 @@ export const TableReport = ({
             </table>
             <Pagination
                 currentPage={ currentPage + 1 }
-                totalCount={ totalUsers }
+                totalCount={ totalReports }
                 pageSize={ pageSize }
                 onPageChange={  page => onPaginationClick(page)  } 
             />
