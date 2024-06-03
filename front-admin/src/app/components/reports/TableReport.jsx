@@ -4,16 +4,16 @@ import { getReport, getReportKeys } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
 import { REPORT_MAP, styleCheckBox } from "../../helpers/utils";
 import { Pagination } from "../custom/pagination/page/Pagination";
+import { addStack, setTrueById, setFalseById, setKeysToPrint, pushKey, pullKey } from "../../../store/report/reportSlice";
+import { useDispatch, useSelector } from "react-redux";
 
-export const TableReport = ({
-    filter,
-    params,
-    setIsCheck
-}) => {
-    
+export const TableReport = ({ params, setIsCheck }) => {
+    const { stack, keysToPrint } = useSelector(state => state.reportReducer);
+    console.log('llaves pa imprimir: ',keysToPrint);
+    const dispatch = useDispatch();
     const { reportName } = useParams();
     const report = REPORT_MAP.find(rc => rc.reportName === reportName);
-    
+
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 10;
@@ -21,10 +21,29 @@ export const TableReport = ({
 
     const [allChecked, setAllChecked] = useState(true);
     const [keys, setKeys] = useState([]);
-    const [allKeys, setAllKeys] = useState([]);
+    const [allKeysT, setAllKeysT] = useState([]);
 
-    const fetchOrders = (currentPage, filter) => {
-        getReport(report.context, currentPage, pageSize, filter, params).then(resp => {
+    const { currentFilter } = useSelector(state => state.reportReducer);
+
+    const handleAddStack = () => {
+        const id = params ? params.id : 1;
+        let bool = keys.length > 0 || allChecked;
+        const isInStack = stack.some(item => item.id === params.id);
+        if (!isInStack) {
+            dispatch(addStack({ id, bool }));
+        }
+    };
+
+    const handleSetTrueById = (id) => {
+        dispatch(setTrueById(id));
+    };
+
+    const handleSetFalseById = (id) => {
+        dispatch(setFalseById(id));
+    };
+
+    const fetchOrders = (currentPage) => {
+        getReport(report.context, currentPage, pageSize, currentFilter, params).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,
                 checked: allChecked || keys.includes(r.projectKey)
@@ -37,39 +56,63 @@ export const TableReport = ({
     };
 
     const allKeysGet = () => {
-        getReportKeys(report.context, filter, params).then(resp => {
-            setAllKeys(resp);
+        getReportKeys(report.context, currentFilter, params).then(resp => {
+            setAllKeysT(resp);
         }).catch(err => {
             console.error('Error fetching data:', err);
         });
     }
 
+    const anyCheck = () => {
+        if (allChecked || keys.length > 0) {
+        }
+    }
+
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchOrders(page, filter);
+        fetchOrders(page);
     };
 
     useEffect(() => {
         if (report) {
-            fetchOrders(currentPage, filter);
+            fetchOrders(currentPage);
             allKeysGet();
+            handleAddStack();
         }
-    }, [report, filter, params]);
+    }, [report, currentFilter, params]);
+
+    useEffect(() => {
+        if (allKeysT.length > 0) {
+            if (keysToPrint.length === 0) {
+                dispatch(setKeysToPrint(allKeysT));
+            } else {
+                allKeysT.forEach(key => {
+                    dispatch(pushKey(key));
+                });
+            }
+        }
+    }, [allKeysT]);
 
     useEffect(() => {
         if (data.length > 0 && allChecked) {
-            setKeys(allKeys);  // Select all keys when allChecked is true
+            setKeys(allKeysT);  // Select all keys when allChecked is true
         }
+        anyCheck();
         setIsCheck(allChecked || keys.length > 0);
     }, [allChecked, data]);
 
     const toggleAllCheckboxes = () => {
         const newAllChecked = !allChecked;
         setAllChecked(newAllChecked);
-        const updatedKeys = newAllChecked ? allKeys : [];
+        const updatedKeys = newAllChecked ? allKeysT : [];
         setKeys(updatedKeys);
         const updatedData = data.map(item => ({ ...item, checked: newAllChecked }));
         setData(updatedData);
+        if (newAllChecked) {
+            allKeysT.forEach(key => dispatch(pushKey(key)));
+        } else {
+            allKeysT.forEach(key => dispatch(pullKey(key)));
+        }
     };
 
     const toggleCheckbox = (pKey, index) => {
@@ -85,8 +128,16 @@ export const TableReport = ({
 
         if (dataUpdated.every(item => item.checked)) {
             setAllChecked(true);
+            dispatch(setTrueById(params.id));
         } else {
             setAllChecked(false);
+            dispatch(setFalseById(params.id));
+        }
+
+        if (dataUpdated[index].checked) {
+            dispatch(pushKey(pKey));
+        } else {
+            dispatch(pullKey(pKey));
         }
     };
 
@@ -124,7 +175,7 @@ export const TableReport = ({
                 <thead className="thead-dark">
                     <tr>
                         <th className="text-center fs-6" scope="col">
-                            <input  style={styleCheckBox}
+                            <input style={styleCheckBox}
                                 type="checkbox"
                                 checked={allChecked}
                                 onChange={toggleAllCheckboxes}
@@ -144,11 +195,11 @@ export const TableReport = ({
                 </tbody>
             </table>
             <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalReports }
-                pageSize={ pageSize }
-                onPageChange={  page => onPaginationClick(page)  } 
+                currentPage={currentPage + 1}
+                totalCount={totalReports}
+                pageSize={pageSize}
+                onPageChange={page => onPaginationClick(page)}
             />
         </div>
-    )
+    );
 }

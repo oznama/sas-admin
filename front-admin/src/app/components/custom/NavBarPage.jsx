@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
 import { REPORT_MAP } from '../../helpers/utils';
+import { clean, clearKeys } from '../../../store/report/reportSlice';
 
 export const NavBarPage = () => {
 
@@ -71,6 +72,8 @@ export const NavBarPage = () => {
   const gotoReportOption = report => {
     setCurrentTab(null);
     setShowTabReport(!showTabReport);
+    dispatch(clean());
+    dispatch(clearKeys());
     navigate(`/reports/${report.reportName}/${report.options ? report.options.length : '0'}`, { replace: true });
   }
   
