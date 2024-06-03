@@ -5,34 +5,35 @@ import { REPORT_MAP } from "../../helpers/utils";
 import { InputSearcher } from "../custom/InputSearcher";
 import { TableReport } from "./TableReport";
 import { Select } from "../custom/Select";
+import { setCurrentFilter, setReportType } from "../../../store/report/reportSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 export const PageReport = () => {
     
-    const { reportName, repotTypeDefault } = useParams();
+    const dispatch = useDispatch();
+    const { reportName } = useParams();
     const report = REPORT_MAP.find(rc => rc.reportName === reportName);
 
-    const [filter, setFilter] = useState('');
-    const [reportType, setReportType] = useState(`${repotTypeDefault}`);
+    const {currentFilter, reportType} = useSelector(state => state.reportReducer);
 
     const onChangeFilter = ({ target }) => {
-        setFilter(target.value);
+        dispatch(setCurrentFilter(target.value));
     };
 
     const onChangeReportType = ({ target }) => {
         const reportType = target.value;
         if( reportType !== '' ) {
-            setReportType(reportType);
-            const r = report.labels.find( l => l.id === reportType);
+            dispatch(setReportType(reportType));
         }
-    }
+    };
 
     const onClean = () => {
-        setFilter('');
+        dispatch(setCurrentFilter(''));
     };
 
     const renderFilter = () => (
         <div>
-            <InputSearcher name={'filter'} placeholder={'Escribe para filtrar...'} value={filter} onChange={onChangeFilter} onClean={onClean} />
+            <InputSearcher name={'filter'} placeholder={'Escribe para filtrar...'} value={currentFilter} onChange={onChangeFilter} onClean={onClean} />
             {
                 report && report.labels && reportType &&
                 <div className='col-6'>
@@ -41,21 +42,21 @@ export const PageReport = () => {
                 </div>
             }
         </div>
-    )
+    );
 
     return (
         <div className='px-5'>
             <h4 className="card-title fw-bold">Reporte: {report.title}</h4>
             { renderFilter() }
-            { report && !report.labels && <TableReport filter={ filter } params={ report.params } /> }
+            { report && !report.labels && <TableReport key={reportType} params={ report.params } /> }
             { report && report.labels && (
-                <div >
+                <div>
                     <h4 className={`card-title fw-bold text-${report.labels.find( l => l.id === reportType ).styleTitle}`}>
                         { report.labels.find( l => l.id === reportType ).value }
                     </h4>
-                    { <TableReport filter={ filter } params={ report.options.find( o => o.id === reportType ) } /> }
+                    { <TableReport key={reportType} params={ report.options.find( o => o.id === reportType ) } /> }
                 </div>
             ) }
         </div>
-    )
-}
+    );
+};

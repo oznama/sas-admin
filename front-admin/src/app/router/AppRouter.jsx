@@ -30,7 +30,7 @@ export const AppRouter = () => (
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
         <Route  path="admin/*" element={ <AdminRouter />} />
         <Route  path="users/*" element={ <UserRouter />} />
-        <Route path="reports/:reportName/:repotTypeDefault" element={ <PageReport /> } />
+        <Route path="reports/:reportName" element={ <PageReport /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>
