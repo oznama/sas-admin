@@ -23,6 +23,8 @@ public class SSOUserDto implements Serializable {
   private String emailDomain;
   private String position;
   private SSORoleDto role;
+  private String bossName;
+  private String bossEmail;
 
   public SSOUserDto(Long id) {
     this.id = id;

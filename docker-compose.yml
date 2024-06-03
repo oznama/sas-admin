@@ -1,5 +1,11 @@
 ## Comando para resolver problema de fuentes en contenedor
 ## docker exec -u 0 api-service bash -c "apt-get update && apt-get install fontconfig ttf-dejavu -y"
+## Comando para exportar base de datos desde la consola del contenedor
+## pg_dump -U sas -W sas > tmp/backup.sql
+## Comando para copiar del contenedor al host
+## docker cp <containerId>:/file/path/within/container /host/path/target
+## Copiando backup a host
+## docker cp postgres-database:/tmp/backup.sql C:\Users\oziel\Documents\Administrador\BD_Backup
 version: "3.7"
 services:
 
@@ -15,12 +21,12 @@ services:
     ports:
       - 5432:5432
 
-  adminer:
-    container_name: 'php-my-admin'
-    image: adminer
-    ##restart: always
-    ports:
-      - 8080:8080
+  # adminer:
+    # container_name: 'php-my-admin'
+    # image: adminer
+    #restart: always
+    # ports:
+      # - 8080:8080
 
   api-service:
     container_name: 'api-service'
@@ -44,5 +50,38 @@ services:
       LOGGER_LEVEL: ${LOGGER_LEVEL}
       JPA_BATCH_SIZE: ${JPA_BATCH_SIZE}
       SECURITY_CIPHER_SECRET: ${SECURITY_CIPHER_SECRET}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_SMTP_AUTH: ${EMAIL_SMTP_AUTH}
+      EMAIL_SMTP_STARTTLS: ${EMAIL_SMTP_STARTTLS}
+      EMAIL_DEBUG_ENABLED: ${EMAIL_DEBUG_ENABLED}
     ports:
       - ${REST_SERVER_PORT}:${REST_SERVER_PORT}
+
+  native-service:
+    container_name: 'native-service'
+    depends_on:
+      - db
+    image: ${IMAGE_SAS_NATIVE_API}
+    environment:
+      TZ: ${TZ}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: ${DB_URL}
+      REST_NATIVE_SERVER_PORT: ${REST_NATIVE_SERVER_PORT}
+      CONTEXT_PATH: ${CONTEXT_PATH}
+      JPA_SHOW_SQL: ${JPA_SHOW_SQL}
+      JPA_FORMAT_SQL: ${JPA_FORMAT_SQL}
+      JPA_GENERATE_SCHEMA: ${JPA_GENERATE_SCHEMA}
+      LOGGER_LEVEL: ${LOGGER_LEVEL_NATIVE}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_SMTP_AUTH: ${EMAIL_SMTP_AUTH}
+      EMAIL_SMTP_STARTTLS: ${EMAIL_SMTP_STARTTLS}
+      EMAIL_DEBUG_ENABLED: ${EMAIL_DEBUG_ENABLED}
+    ports:
+      - ${REST_NATIVE_SERVER_PORT}:${REST_NATIVE_SERVER_PORT}

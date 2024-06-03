@@ -20,7 +20,6 @@ import com.mexico.sas.admin.api.service.CompanyService;
 import com.mexico.sas.admin.api.service.EmployeeService;
 import com.mexico.sas.admin.api.service.RoleService;
 import com.mexico.sas.admin.api.service.impl.EmployeeServiceImpl;
-import com.mexico.sas.admin.api.service.impl.RoleServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -108,6 +107,17 @@ public class ChangeBeanUtils extends Utils {
             log.error("Error checking project installation dates, error: {}", e.getMessage());
         }
 
+        try {
+            String currentDate = dateToString(project.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY, true);
+            if ( validateStringNoRequiredUpdate(currentDate, projectUpdateDto.getMonitoringDate()) ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Fecha de monitoreo",
+                        currentDate, projectUpdateDto.getMonitoringDate())).append(GeneralKeys.JUMP_LINE);
+                project.setMonitoringDate(stringToDate(projectUpdateDto.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY));
+            }
+        } catch (CustomException e) {
+            log.error("Error checking project installation dates, error: {}", e.getMessage());
+        }
+
         if( validateStringNoRequiredUpdate(project.getObservations(), projectUpdateDto.getObservations()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_OBSERVATION_UPDATE)).append(GeneralKeys.JUMP_LINE);
             project.setObservations(projectUpdateDto.getObservations());
@@ -135,6 +145,19 @@ public class ChangeBeanUtils extends Utils {
             projectApplication.setAmount(projectApplicationUpdateDto.getAmount());
             projectApplication.setTax(projectApplicationUpdateDto.getTax());
             projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+        } else {
+            if( projectApplication.getTax() != projectApplicationUpdateDto.getTax() ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Iva",
+                                formatCurrency(projectApplication.getTax()), formatCurrency(projectApplicationUpdateDto.getTax())))
+                        .append(GeneralKeys.JUMP_LINE);
+                projectApplication.setTax(projectApplicationUpdateDto.getTax());
+            }
+            if( projectApplication.getTotal() != projectApplicationUpdateDto.getTotal() ) {
+                sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Total",
+                                formatCurrency(projectApplication.getTotal()), formatCurrency(projectApplicationUpdateDto.getTotal())))
+                        .append(GeneralKeys.JUMP_LINE);
+                projectApplication.setTotal(projectApplicationUpdateDto.getTotal());
+            }
         }
         if( validateLongRequiredUpdate(projectApplication.getLeader().getId(), projectApplicationUpdateDto.getLeaderId()) ) {
             sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Líder",

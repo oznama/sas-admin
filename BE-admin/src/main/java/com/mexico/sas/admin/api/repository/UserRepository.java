@@ -3,6 +3,7 @@ package com.mexico.sas.admin.api.repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.mexico.sas.admin.api.model.Employee;
 import com.mexico.sas.admin.api.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,21 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> , JpaSpecificationExecutor<User> {
-  Optional<User> findByIdAndEliminateFalse(Long id);
-  Optional<User> findByEmployeeId(Long employeeId);
-  Optional<User> findByEmployeeIdAndPasswordAndEliminateFalse(Long employeId, String password);
-  List<User> findByRoleIdAndActiveIsTrueAndEliminateFalse(Long roleId);
-  Page<User> findByEliminateFalse(Pageable pageable);
-  Page<User> findByActiveAndEliminateFalse(Boolean active, Pageable pageable);
-  Long countByActiveAndEliminateFalse(Boolean active);
-  Long countByEliminateFalse();
+  Optional<User> findByEmployee(Employee employee);
+  Optional<User> findByEmployeeAndPassword(Employee employee, String password);
   @Transactional
   @Modifying
   @Query("update User u set u.active = :active where u.id = :id")
   void setActive(@Param(value = "id") Long id, @Param(value = "active") Boolean active);
   @Transactional
   @Modifying
-  @Query("update User u set u.eliminate = true where u.id = :id")
-  void deleteLogic(@Param(value = "id") Long id);
+  @Query("update User u set u.eliminate = :eliminate, u.active = :active where u.id = :id")
+  void deleteLogic(@Param(value = "id") Long id, @Param(value = "eliminate") Boolean eliminate, @Param(value = "active") Boolean active);
 
 }

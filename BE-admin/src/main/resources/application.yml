@@ -34,6 +34,20 @@ spring:
       enabled: true
       settings:
         web-allow-others: true
+  mail:
+    host: "${EMAIL_HOST}"
+    port: "${EMAIL_PORT}"
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"
+    properties:
+      mail:
+        smtp:
+          auth: "${EMAIL_SMTP_AUTH}"
+          starttls:
+            enable: "${EMAIL_SMTP_STARTTLS}"
+          ssl:
+            trust: "${EMAIL_HOST}"
+    debug: "${EMAIL_DEBUG_ENABLED}"
 server:
   port: ${REST_SERVER_PORT}
   servlet:

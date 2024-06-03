@@ -2,9 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../../store/auth/authSlice';
 import { useEffect, useRef, useState } from 'react';
-import { getPendings } from '../../services/ProjectService';
-import { pendingType } from '../applications/page/TablePendings';
-import { handleDateStr } from '../../helpers/utils';
+import { REPORT_MAP } from '../../helpers/utils';
 
 export const NavBarPage = () => {
 
@@ -18,8 +16,7 @@ export const NavBarPage = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [showTabAdmin, setShowTabAdmin] = useState(false);
   const [showTabReport, setShowTabReport] = useState(false);
-  const [notifications, setNotifications] = useState();
-  const [showNotif, setShowNotif] = useState(false);
+  const [menuCollapsed, setMenuCollapsed] = useState(false);
 
   const fetchProjectAppPendings = () => {
     getPendings(pendingType.due, 0, 20).then( response => {
@@ -100,24 +97,17 @@ export const NavBarPage = () => {
     </li>
   );
 
-  // const renderTabPendings = () => permissions.isAdminSas && (
-  //   <li className="nav-item">
-  //     <NavLink className={ `nav-item nav-link ${ (currentTab === 4) ? 'active' : '' }` }
-  //       onClick={ () => setCurrentTab(4) } to="pendings">
-  //       Pendientes
-  //     </NavLink>
-  //   </li>
-  // );
-
   const gotoAdminOption = urlRedirect => {
+    setCurrentTab(null);
     setShowTabAdmin(!showTabAdmin);
     navigate(`/${urlRedirect}`, { replace: true })
     
   }
 
   const gotoReportOption = report => {
+    setCurrentTab(null);
     setShowTabReport(!showTabReport);
-    navigate(`/reports/${report}`, { replace: true });
+    navigate(`/reports/${report.reportName}/${report.options ? report.options.length : '0'}`, { replace: true });
   }
   
   const renderTabAdmin = () => permissions.isAdminSas && (
@@ -135,6 +125,7 @@ export const NavBarPage = () => {
         { permissions.canGetEmp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('employee') }>Empleados</a>) }
         <div className="dropdown-divider"></div>
         { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('admin') }>Administraci&oacute;n de Rol</a>) }
+        { permissions.canAdminApp && (<a className="dropdown-item" href="#" onClick={ () => gotoAdminOption('users') }>Administraci&oacute;n de Usuarios</a>) }
       </div>
     </li>
   )
@@ -145,9 +136,11 @@ export const NavBarPage = () => {
         Reportes
       </a>
       <div className={ `dropdown-menu bg-primary ${ showTabReport ? 'show' : '' }` } aria-labelledby="reportMenu">
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('application_pending') }>Pendientes</a>
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('projects_orders') }>Ordenes pendientes</a>
-        <a className="dropdown-item" href="#" onClick={ () => gotoReportOption('orders_invoices') }>Facturas pendientes</a>
+        {
+          REPORT_MAP.map( (report, index) => (
+            <a key={ index } className="dropdown-item" href="#" onClick={ () => gotoReportOption(report) }>{report.title}</a>
+          ))
+        }
       </div>
     </li>
   )
@@ -179,12 +172,16 @@ export const NavBarPage = () => {
   )
 
   return (
-    <nav className="navbar navbar-expand-lg bg-primary" style={{ padding: '0'}} data-bs-theme="dark">
+    <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
       <div className="container-fluid">
         
-        <Link className="navbar-brand">SAS Administrador</Link>
+        <a className="navbar-brand">SAS Administrador</a>
+
+        <button className="navbar-toggler" type="button" onClick={ () => setMenuCollapsed(!menuCollapsed) }>
+          <span className="navbar-toggler-icon"></span>
+        </button>
         
-        <div className="collapse navbar-collapse">
+        <div className={ `collapse navbar-collapse ${ menuCollapsed ? 'show' : '' }` } >
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <NavLink className={ `nav-item nav-link ${ (currentTab === 1) ? 'active' : '' }` }
@@ -194,25 +191,24 @@ export const NavBarPage = () => {
             </li>
             { renderTabOrders() }
             { renderTabInvoices() }
-            { /* renderTabPendings() */ }
             { renderTabReports() }
             { renderTabAdmin() }
             { renderNotifications() }
           </ul>
-        </div>
 
-        <div className="d-flex flex-row-reverse bd-highlight">
-          <div className="p-1 bd-highlight">
-            <button className="btn btn-danger" onClick={ onLogout }>
-              <span><i className="bi bi-power"></i></span>
-            </button>
+          <div className="d-flex flex-row-reverse bd-highlight">
+            <div className="p-1 bd-highlight">
+              <button className="btn btn-danger" onClick={ onLogout }>
+                <span><i className="bi bi-power"></i></span>
+              </button>
+            </div>
+            <div className="p-1 bd-highlight">
+              <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
+              <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
+            </div>
           </div>
-          <div className="p-1 bd-highlight">
-            <span className="d-block text-end text-white">Bienvenid@ { user?.name } [{user?.role?.name}]</span>
-            <span className="d-block text-end text-white">{ user?.position } { (user?.position) && '-' } { user?.company }</span>
-          </div>
-        </div>
 
+        </div>
       </div>
     </nav>
   )

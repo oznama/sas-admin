@@ -11,7 +11,6 @@ import com.mexico.sas.admin.api.security.AuthorizationFilter;
 import com.mexico.sas.admin.api.i18n.I18nKeys;
 import com.mexico.sas.admin.api.i18n.I18nResolver;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -255,16 +254,6 @@ public class Utils {
         }
     }
 
-    public void deleteFile(String filePath) {
-        if(!StringUtils.isEmpty(filePath)) {
-            final File file = new File(filePath);
-            if (file.exists()) {
-                boolean deleted = FileUtils.deleteQuietly(file);
-                log.debug("File {} deleted? {}", filePath, deleted);
-            }
-        }
-    }
-
     protected SecurityContextPrincipal getCurrentUser() {
         log.debug("Getting CURRENT USER ID In security context ...!");
         SecurityContextPrincipal user = null;
@@ -345,6 +334,44 @@ public class Utils {
             log.warn("Catalog {} not be parse because value is null or empty", id);
             return value;
         }
+    }
+
+    protected String generateRandomPswd() {
+        StringBuilder randomPswd = new StringBuilder();
+        Random random = new Random();
+        int max = 0, min = 0;
+        for( int i = 0; i < 8; i++ ) {
+            if( i == 5 ) { // Special
+                if( random.nextInt(2) == 0 ) { // 33 - 47
+                    max = 47;
+                    min = 33;
+                } else { // 58 - 64
+                    max = 64;
+                    min = 58;
+                }
+            } else if( i < 5) { // Character
+                if( random.nextInt(2) == 0 ) { // Upper: 65 - 90
+                    // System.out.printf("Random upper char :: ");
+                    max = 90;
+                    min = 65;
+                } else { // Lower: 97 - 122
+                    // System.out.printf("Random lower char :: ");
+                    max = 122;
+                    min = 97;
+                }
+            } else { // Numbers: 48 - 57
+                // System.out.printf("Random number :: ");
+                max = 57;
+                min = 48;
+            }
+            int randomNumber = random.nextInt(max - min + 1) + min;
+            // System.out.printf("number: %d ::: ", randomNumber);
+            char randomChar = (char) randomNumber;
+            // System.out.printf("char: %c :::", randomChar);
+            randomPswd.append(randomChar);
+            // System.out.printf("Random word %s\n", randomPswd);
+        }
+        return randomPswd.toString();
     }
 
 }

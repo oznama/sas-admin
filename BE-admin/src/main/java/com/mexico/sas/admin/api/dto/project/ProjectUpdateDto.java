@@ -3,7 +3,6 @@ package com.mexico.sas.admin.api.dto.project;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ public class ProjectUpdateDto implements Serializable {
     private Long companyId;
     private Long projectManagerId;
     private String installationDate;
+    private String monitoringDate;
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;

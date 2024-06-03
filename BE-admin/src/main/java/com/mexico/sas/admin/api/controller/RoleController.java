@@ -1,6 +1,7 @@
 package com.mexico.sas.admin.api.controller;
 
 import com.mexico.sas.admin.api.dto.ResponseDto;
+import com.mexico.sas.admin.api.dto.SelectDto;
 import com.mexico.sas.admin.api.dto.employee.EmployeeUpdateDto;
 import com.mexico.sas.admin.api.dto.role.RoleDto;
 import com.mexico.sas.admin.api.dto.role.RoleFindDto;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -86,6 +88,15 @@ public class RoleController {
           @PathVariable("id") Long id, @Valid @RequestBody RoleUpdateDto roleUpdateDto) throws CustomException {
     log.info("Updating catalog");
     return ResponseEntity.ok().body(service.update(id, roleUpdateDto));
+  }
+
+  @GetMapping("/select")
+  @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar roles para select", nickname = "/select")
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Success", response = SelectDto.class, responseContainer = "List") })
+  public ResponseEntity<List<SelectDto>> getForSelect() throws CustomException {
+    log.info("Getting catalog role");
+    return ResponseEntity.ok(service.getForSelect());
   }
 
 }

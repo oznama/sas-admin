@@ -60,14 +60,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                         null, null, null, pageable)
                 : findByFilter(filter, new Company(companyId), getCurrentUser().getUserId(), null,
                 null, null, null, null, null, pageable);
-
-//        long total = roleId.equals(CatalogKeys.ROLE_ROOT) ? repository.count()
-//                : (roleId.equals(CatalogKeys.ROLE_ADMIN)
-//                ? repository.countByCompany(new Company(companyId))
-//                : repository.countByCompanyAndCreatedBy(new Company(companyId), getCurrentUser().getUserId()));
-
         List<ProjectPageableDto> projectsPageableDto = new ArrayList<>();
-
         projects.forEach( project -> {
             try {
                 projectsPageableDto.add(parseProjectPagged(project));
@@ -167,6 +160,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectFindDto.setMonitoringDate(dateToString(project.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setAmountStr(formatCurrency(project.getAmount()));
         projectFindDto.setTaxStr(formatCurrency(project.getTax()));
         projectFindDto.setTotalStr(formatCurrency(project.getTotal()));
@@ -182,6 +176,7 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
         projectPageableDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectPageableDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
+        projectPageableDto.setMonitoringDate(dateToString(project.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectPageableDto.setAmount(formatCurrency(project.getAmount()));
         projectPageableDto.setTax(formatCurrency(project.getTax()));
         projectPageableDto.setTotal(formatCurrency(project.getTotal()));
@@ -206,6 +201,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
     private void validationSave(ProjectDto projectDto, Project project) throws CustomException {
         if( projectDto.getInstallationDate() != null && !projectDto.getInstallationDate().isEmpty() )
             project.setInstallationDate(stringToDate(projectDto.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY));
+        if( projectDto.getMonitoringDate() != null && !projectDto.getInstallationDate().isEmpty() )
+            project.setMonitoringDate(stringToDate(projectDto.getMonitoringDate(), GeneralKeys.FORMAT_DDMMYYYY));
         validateKey(projectDto.getKey());
         project.setCompany(new Company( projectDto.getCompanyId() == null ? getCurrentUser().getCompanyId() : projectDto.getCompanyId()));
         project.setProjectManager(employeeService.findEntityById(projectDto.getProjectManagerId()));

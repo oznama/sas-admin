@@ -24,6 +24,7 @@ hs_err_pid*
 
 .gradle
 BE-admin/build/
+BE-native/build/
 
 .idea
 *.iws

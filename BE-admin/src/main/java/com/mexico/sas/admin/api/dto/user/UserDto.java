@@ -24,7 +24,7 @@ public class UserDto implements Serializable {
 
   private Long id;
 
-  @NotBlank(message = "{validation.field.required}")
+  @JsonIgnore
   private String password;
 
   private Long employeeId;
