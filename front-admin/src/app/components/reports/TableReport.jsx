@@ -1,18 +1,18 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getReport, getReportKeys } from "../../services/NativeService";
+import { downloadExcel, getReport, getReportKeys, sendNotification } from "../../services/NativeService";
 import 'react-datepicker/dist/react-datepicker.css';
-import { REPORT_MAP, styleCheckBox } from "../../helpers/utils";
+import { REPORT_MAP, displayNotification, styleCheckBox } from "../../helpers/utils";
 import { Pagination } from "../custom/pagination/page/Pagination";
+import { useDispatch, useSelector } from "react-redux";
+import { alertType } from "../custom/alerts/types/types";
 
-export const TableReport = ({
-    filter,
-    params,
-    setIsCheck
-}) => {
-    
+export const TableReport = ({ params }) => {
+    const { currentFilter, reportType } = useSelector(state => state.reportReducer);
+    const { permissions } = useSelector(state => state.auth);
     const { reportName } = useParams();
     const report = REPORT_MAP.find(rc => rc.reportName === reportName);
+    const dispatch = useDispatch();
     
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
@@ -22,9 +22,10 @@ export const TableReport = ({
     const [allChecked, setAllChecked] = useState(true);
     const [keys, setKeys] = useState([]);
     const [allKeys, setAllKeys] = useState([]);
+    const [isCheck, setIsCheck] = useState(true);
 
-    const fetchOrders = (currentPage, filter) => {
-        getReport(report.context, currentPage, pageSize, filter, params).then(resp => {
+    const fetchOrders = (currentPage) => {
+        getReport(report.context, currentPage, pageSize, currentFilter, params).then(resp => {
             const data = resp.content.map(r => ({
                 ...r,
                 checked: allChecked || keys.includes(r.projectKey)
@@ -37,31 +38,56 @@ export const TableReport = ({
     };
 
     const allKeysGet = () => {
-        getReportKeys(report.context, filter, params).then(resp => {
+        getReportKeys(report.context, currentFilter, params).then(resp => {
             setAllKeys(resp);
         }).catch(err => {
             console.error('Error fetching data:', err);
         });
-    }
+    };
 
-    const onPaginationClick = page => {
+    const onPaginationClick = (page) => {
         setCurrentPage(page);
-        fetchOrders(page, filter);
+        fetchOrders(page);
     };
 
     useEffect(() => {
         if (report) {
-            fetchOrders(currentPage, filter);
             allKeysGet();
+            setAllChecked(true);
+            setIsCheck(true);
+            setKeys([]);
+            fetchOrders(currentPage);
         }
-    }, [report, filter, params]);
+    }, [reportType, report, currentFilter, params]);
 
     useEffect(() => {
-        if (data.length > 0 && allChecked) {
-            setKeys(allKeys);  // Select all keys when allChecked is true
+        if (allChecked) {
+            setKeys(allKeys);
         }
         setIsCheck(allChecked || keys.length > 0);
-    }, [allChecked, data]);
+    }, [allChecked, allKeys, data]);
+
+    const onClickDownload = () => {
+        let downloadKeys = keys.length === allKeys.length ? [] : [...keys];
+        downloadExcel(report.context, downloadKeys).then(response => response.blob()
+        ).then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${report.excel}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        });
+    };
+
+    const onClickSendEmail = () => {
+        sendNotification(report.context, keys).then(resp => {
+            displayNotification(dispatch, '¡Correo enviado!', alertType.success);
+        }).catch(err => {
+            console.error('Error fetching data:', err);
+        });
+    };
 
     const toggleAllCheckboxes = () => {
         const newAllChecked = !allChecked;
@@ -90,11 +116,31 @@ export const TableReport = ({
         }
     };
 
+    const renderButtons = () => (
+        <div className="py-2 d-flex flex-row-reverse bd-highlight">
+            <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-success' : 'btn-secondary'}`} onClick={onClickSendEmail}>
+                Enviar Correo &nbsp;
+                <span>
+                    <i className="bi bi-envelope"></i>
+                </span>
+            </button>
+            &nbsp;
+            <button type="button" disabled={!isCheck} className={`btn ${isCheck ? 'btn-primary' : 'btn-secondary'}`} onClick={onClickDownload}>
+                Exportar &nbsp;
+                <span>
+                    <i className="bi bi-arrow-bar-down"></i>
+                </span>
+            </button>
+        </div>
+    );
+
     const renderRows = () => data && data.map(({
         projectKey,
         projectName,
         pmMail,
         pmName,
+        bossName,
+        bossMail,
         tax,
         total,
         projectAmount,
@@ -112,19 +158,21 @@ export const TableReport = ({
             <td className="text-start">{projectName}</td>
             <td className="text-start">{pmName}</td>
             <td className="text-start">{pmMail}</td>
+            {permissions.isAdminRoot && (<td className="text-start">{bossName}</td>)}
+            {permissions.isAdminRoot && (<td className="text-center">{bossMail}</td>)}
             <td className="text-center">{projectAmount}</td>
             <td className="text-center">{tax}</td>
             <td className="text-center">{total}</td>
         </tr>
     ));
 
-    return (
+    const renderTable = () => (
         <div className='table-responsive text-nowrap'>
             <table className="table table-sm table-bordered table-striped table-hover">
                 <thead className="thead-dark">
                     <tr>
                         <th className="text-center fs-6" scope="col">
-                            <input  style={styleCheckBox}
+                            <input style={styleCheckBox}
                                 type="checkbox"
                                 checked={allChecked}
                                 onChange={toggleAllCheckboxes}
@@ -134,6 +182,8 @@ export const TableReport = ({
                         <th className="text-center fs-6" scope="col">Proyecto</th>
                         <th className="text-center fs-6" scope="col">PM</th>
                         <th className="text-center fs-6" scope="col">Correo</th>
+                        {permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Jefe</th>)}
+                        {permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Correo</th>)}
                         <th className="text-center fs-6" scope="col">Monto</th>
                         <th className="text-center fs-6" scope="col">IVA</th>
                         <th className="text-center fs-6" scope="col">Total</th>
@@ -144,11 +194,18 @@ export const TableReport = ({
                 </tbody>
             </table>
             <Pagination
-                currentPage={ currentPage + 1 }
-                totalCount={ totalReports }
-                pageSize={ pageSize }
-                onPageChange={  page => onPaginationClick(page)  } 
+                currentPage={currentPage + 1}
+                totalCount={totalReports}
+                pageSize={pageSize}
+                onPageChange={page => onPaginationClick(page)}
             />
         </div>
-    )
-}
+    );
+
+    return (
+        <div>
+            {renderButtons()}
+            {renderTable()}
+        </div>
+    );
+};
