@@ -39,6 +39,10 @@ spring:
           ssl:
             trust: "${EMAIL_HOST}"
     debug: "${EMAIL_DEBUG_ENABLED}"
+  servlet:
+    multipart:
+      max-file-size: "10MB"
+      max-request-size: "10MB"
 server:
   port: ${REST_NATIVE_SERVER_PORT}
   servlet:

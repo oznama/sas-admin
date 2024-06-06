@@ -1,6 +1,7 @@
 package com.mexico.sas.nativequeries.api.service;
 
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
+import com.mexico.sas.nativequeries.api.model.ProjectPlan;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import com.mexico.sas.nativequeries.api.report.ProjectWithApplicationXls;
 import com.mexico.sas.nativequeries.api.repository.ProjectRepository;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,5 +65,22 @@ public class ProjectService {
             variables.put("message", message);
             emailUtils.sendMessage(p.getPmMail(), subject, htlmTemplate, variables, p.getBossMail());
         });
+    }
+
+    public List<ProjectPlan> checkProjectPlan(String pKey) {
+        log.debug("Checking applications of project {}", pKey);
+        // TODO Query
+        return null;
+    }
+
+    @Async("ExecutorAsync")
+    public void sendProjectPlan(String username, String password, String pKey, String apps, String fileName, InputStream inputStream) {
+        final String htlmTemplate = "project_plan";
+        log.debug("Seding project plan of {}", pKey);
+        // TODO Query
+        String subject = String.format("%s - %s de plan con fechas", "", "");
+        Map<String, Object> variables = new HashMap<>();
+        String[] cc = {"oznama28@gmail.com", "oznama29@gmail.com"};
+        emailUtils.sendMessage(username, password, "oznama27@gmail.com", subject, htlmTemplate, variables, fileName, inputStream, cc);
     }
 }
