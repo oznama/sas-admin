@@ -5,6 +5,7 @@ public interface SQLConstants {
     String WHERE = "where";
     String AND = "and";
     String UNION = "union";
+    String COMMA = ",";
 
     String SUBQUERY_PARAMETER = ":subquery";
     String CONCAT_LIMIT_PATTERN = "%s %s";
@@ -12,9 +13,11 @@ public interface SQLConstants {
     String LIMIT_PAGE_PARAMETER = ":page";
     String WHERE_CLAUSE_PARAMETER = ":where_clause";
     String FILTER_PARAMETER = ":filter";
-    String PROJECT_APP_STATUS_PARAMETER = ":paStatus";
+    String PROJECT_PKEY_PARAMETER = ":pKey";
     String PROJECT_PKEYS_PARAMETER = ":pKeys";
+    String PROJECT_APPNAMES_PARAMETER = ":pApps";
     String PERCENTAGE_PARAMETER = ":percent";
+    String EQUAL_REGEX = "'%s'";
     String LIKE_REGEX = "'%%%s%%'";
     String IN_REGEX = "'%s'";
 

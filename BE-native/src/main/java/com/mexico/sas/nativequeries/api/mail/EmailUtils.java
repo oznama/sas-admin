@@ -74,12 +74,13 @@ public class EmailUtils {
     public void sendMessage(String to, String subject, String templateName, Map<String, Object> variables,
                             String pmBossEmal) {
         log.debug("Sending HTML message {} with template {}, to {}", subject, templateName, to);
-        sendMessage(username, emailSender, to, subject, templateName, variables, null, null, listToArray(pmBossEmal));
+        List<String> cc = getListCc(pmBossEmal);
+        sendMessage(username, emailSender, to, subject, templateName, variables, null, null, cc.toArray(new String[0]));
     }
 
     public void sendMessage(String from, String password, String to, String subject, String templateName,
                             Map<String, Object> variables, String fileName, InputStream inputStream, String... cc) {
-        log.debug("Sending HTML message {} with template {}, from {}, to {}", subject, templateName, from, to);
+        log.debug("Sending HTML message {} with template {}, from {}, to {}, with cc {}", subject, templateName, from, to, cc);
         JavaMailSenderImpl emailSender = new JavaMailSenderImpl();
         emailSender.setHost(host);
         emailSender.setPort(Integer.parseInt(port));
@@ -97,6 +98,7 @@ public class EmailUtils {
 
     private void sendMessage(String username, JavaMailSender emailSender, String to, String subject, String templateName,
                              Map<String, Object> variables, String fileName, InputStream inputStream, String... cc) {
+        log.debug("Building email message ...");
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = null;
         if (!StringUtils.isEmpty(fileName) && inputStream != null) {
@@ -124,6 +126,7 @@ public class EmailUtils {
                 } catch (IOException e) {
                     log.error("Error to add attachment to email", e);
                 }
+                log.debug("File {} attached successfully!", fileName);
             }
             String htmlContent = templateEngine.process(templateName, context);
             helper.setText(htmlContent, true);
@@ -134,14 +137,14 @@ public class EmailUtils {
         }
     }
 
-    private String[] listToArray(String pmBossEmal) {
+    public List<String> getListCc(String pmBossEmal) {
         List<String> cc = catalogRepository.getEmails();
         if( cc != null && pmBossEmal != null ) {
             cc.add(pmBossEmal);
-        } else {
+        } else if( cc == null ) {
             cc = new ArrayList<>();
         }
         log.debug("CC to mail: {}", cc);
-        return cc.toArray(new String[cc.size()]);
+        return cc;
     }
 }

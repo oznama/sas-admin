@@ -7,12 +7,14 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @ToString
-public class ProjectPlan {
+public class ProjectPlanDetail {
     private String appName;
     private String leader;
     private String leaderMail;
     private String developer;
     private String developerMail;
-    private String pm;
-    private String pmMail;
+    private String startDate;
+    private String designDate;
+    private String developmentDate;
+    private String endDate;
 }

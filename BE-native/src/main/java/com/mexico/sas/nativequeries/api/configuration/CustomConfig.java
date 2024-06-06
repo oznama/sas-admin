@@ -16,7 +16,8 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @PropertySources({
-        @PropertySource(value = "classpath:/queries/base.properties")
+        @PropertySource(value = "classpath:/queries/base.properties"),
+        @PropertySource(value = "classpath:/queries/project_plan.properties")
 })
 @EnableWebMvc
 @EnableAsync

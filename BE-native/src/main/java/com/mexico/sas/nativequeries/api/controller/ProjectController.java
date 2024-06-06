@@ -91,8 +91,10 @@ public class ProjectController {
                                              @RequestParam String apps,
                                              @RequestParam("file") MultipartFile file) throws IOException {
         log.info("Sending project plan with file {}", file.getOriginalFilename());
-        projectOrder.sendProjectPlan(username, password, pKey, apps, file.getOriginalFilename(), file.getInputStream());
-        return ResponseEntity.ok().build();
+        if( projectOrder.sendProjectPlan(username, password, pKey, apps, file.getOriginalFilename(), file.getInputStream()) )
+            return ResponseEntity.ok().build();
+        else
+            return ResponseEntity.badRequest().build();
     }
 
 

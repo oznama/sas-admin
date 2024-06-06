@@ -2,9 +2,13 @@ package com.mexico.sas.nativequeries.api.service;
 
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
 import com.mexico.sas.nativequeries.api.model.ProjectPlan;
+import com.mexico.sas.nativequeries.api.model.ProjectPlanDetail;
+import com.mexico.sas.nativequeries.api.model.ProjectPlanHeader;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import com.mexico.sas.nativequeries.api.report.ProjectWithApplicationXls;
+import com.mexico.sas.nativequeries.api.repository.ProjectPlanRepository;
 import com.mexico.sas.nativequeries.api.repository.ProjectRepository;
+import com.mexico.sas.nativequeries.api.repository.SQLConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,6 +33,9 @@ public class ProjectService {
 
     @Autowired
     private ProjectWithApplicationXls projectWithApplicationXls;
+
+    @Autowired
+    private ProjectPlanRepository projectPlanRepository;
 
     @Autowired
     private EmailUtils emailUtils;
@@ -69,18 +76,34 @@ public class ProjectService {
 
     public List<ProjectPlan> checkProjectPlan(String pKey) {
         log.debug("Checking applications of project {}", pKey);
-        // TODO Query
-        return null;
+        return projectPlanRepository.getProjectPlanApps(pKey);
     }
 
-    @Async("ExecutorAsync")
-    public void sendProjectPlan(String username, String password, String pKey, String apps, String fileName, InputStream inputStream) {
-        final String htlmTemplate = "project_plan";
-        log.debug("Seding project plan of {}", pKey);
-        // TODO Query
-        String subject = String.format("%s - %s de plan con fechas", "", "");
-        Map<String, Object> variables = new HashMap<>();
-        String[] cc = {"oznama28@gmail.com", "oznama29@gmail.com"};
-        emailUtils.sendMessage(username, password, "oznama27@gmail.com", subject, htlmTemplate, variables, fileName, inputStream, cc);
+    public boolean sendProjectPlan(String username, String password, String pKey, String apps, String fileName, InputStream inputStream) {
+        try {
+            final String htlmTemplate = "project_plan";
+            log.debug("Seding project plan of {}", pKey);
+            ProjectPlanHeader projectPlanHeader = projectPlanRepository.getProjectPlanHeader(pKey);
+            List<ProjectPlanDetail> projectPlanDetail = projectPlanRepository.getProjectPlanDetail(pKey, List.of(apps.split(SQLConstants.COMMA)));
+            if( projectPlanDetail.isEmpty() ) {
+                log.error("Applications {} in project {} not found", apps, pKey);
+                return false;
+            }
+            String subject = String.format("%s - %s de plan con fechas", projectPlanHeader.getPKey(), projectPlanHeader.getPDescription());
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("pmName", projectPlanHeader.getPmName());
+            variables.put("detail", projectPlanDetail);
+            List<String> cc = emailUtils.getListCc(null);
+            projectPlanDetail.forEach( d -> {
+                cc.add(d.getLeaderMail());
+                cc.add(d.getDeveloperMail());
+            });
+            emailUtils.sendMessage(username, password, projectPlanHeader.getPmMail(), subject, htlmTemplate, variables, fileName, inputStream, cc.toArray(new String[0]));
+            projectPlanRepository.updateDate(pKey);
+            return true;
+        } catch (Exception e) {
+            log.error("Error to send project plan", e);
+            return false;
+        }
     }
 }
