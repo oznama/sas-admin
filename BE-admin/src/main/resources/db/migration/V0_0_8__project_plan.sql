@@ -1,0 +1,1 @@
+ALTER TABLE projects ADD COLUMN project_plan_date timestamp;
