@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Footer } from '../custom/Footer';
-import { alertType } from '../custom/alerts/types/types';
 import { login } from '../../../store/auth/authSlice';
 import { doLogin } from '../../services/AuthService';
-import { genericErrorMsg } from '../../helpers/utils';
+import { encrypt, genericErrorMsg } from '../../helpers/utils';
 import logo from '../../../assets/img/SAS_logo.png';
 import { setProject } from '../../../store/project/projectSlice';
 import { useState } from 'react';
@@ -21,7 +20,9 @@ export const LoginPage = () => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        doLogin(request).then( response => {
+        const passwordEncryp = encrypt(request.password);
+        const jsonRequest = { ...request, password: passwordEncryp};
+        doLogin(jsonRequest).then( response => {
             if( response.code ) {
                 setErrorMessage(response.message);
             } else {

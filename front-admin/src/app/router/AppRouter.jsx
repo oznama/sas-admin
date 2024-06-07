@@ -4,7 +4,7 @@ import { ProjectRouter } from '../components/projects/ProjectRouter';
 // import { CatalogPage } from '../components/Catalogs/CatalogPage';
 import { UserPage } from '../components/auth/UserPage';
 import { EmployeeRouter } from '../components/employee/EmployeeRouter';
-import { CompanyRouter } from '../components/company/CompanyRouter';
+import { CompanyRouter } from '../components/Company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
 import { AdminRouter } from '../components/admin/adminRouter';
