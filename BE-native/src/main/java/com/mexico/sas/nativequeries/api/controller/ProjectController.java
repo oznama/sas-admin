@@ -2,6 +2,7 @@ package com.mexico.sas.nativequeries.api.controller;
 
 import com.mexico.sas.nativequeries.api.model.ProjectPlan;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
+import com.mexico.sas.nativequeries.api.model.ProjectPlanData;
 import com.mexico.sas.nativequeries.api.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -74,7 +75,7 @@ public class ProjectController {
     }
 
 
-    @GetMapping("check/project-plan")
+    @GetMapping("project-plan/check")
     @ApiOperation(httpMethod = "GET", value = "Servicio para checar las aplicaciones de plan de trabajo", nickname = "checkProjectPlan")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectPlan.class, responseContainer = "List") })
@@ -83,18 +84,24 @@ public class ProjectController {
         return ResponseEntity.ok(projectOrder.checkProjectPlan(pKey));
     }
 
-    @PostMapping("send/project-plan")
+    @PostMapping(path = "project-plan/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(httpMethod = "POST", value = "Servicio para enviar correo de plan de trabajo", nickname = "sendProjectsWithApplications")
-    public ResponseEntity<?> sendProjectPlan(@RequestParam String username,
-                                             @RequestParam String password,
-                                             @RequestParam String pKey,
-                                             @RequestParam String apps,
-                                             @RequestParam("file") MultipartFile file) throws IOException {
-        log.info("Sending project plan with file {}", file.getOriginalFilename());
-        if( projectOrder.sendProjectPlan(username, password, pKey, apps, file.getOriginalFilename(), file.getInputStream()) )
+    public ResponseEntity<?> sendProjectPlan(@ModelAttribute ProjectPlanData projectPlanData) {
+        log.info("Sending project plan with file {}", projectPlanData.getFile().getOriginalFilename());
+        if( projectOrder.sendProjectPlan(projectPlanData) )
             return ResponseEntity.ok().build();
         else
             return ResponseEntity.badRequest().build();
+    }
+
+    // REMOVE When is finished
+    @PostMapping(path = "send/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiOperation(httpMethod = "POST", value = "Servicio prueba enviar archivo", nickname = "sendFile")
+    public ResponseEntity<?> sendFile(@ModelAttribute ProjectPlanData projectPlanData) {
+        log.info("Sending file {} with user data: {}",
+                projectPlanData.getFile().getOriginalFilename(), projectPlanData.getUsername());
+        projectOrder.sendFile(projectPlanData);
+        return ResponseEntity.ok().build();
     }
 
 

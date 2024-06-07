@@ -66,6 +66,10 @@ logging:
   file:
     name: /tmp/sas-native/logs/api-service.log
 
+api:
+  security:
+    cipher-secret: ${SECURITY_CIPHER_SECRET}
+
 management:
   endpoints:
     web:

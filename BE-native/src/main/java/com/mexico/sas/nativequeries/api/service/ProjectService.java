@@ -1,10 +1,8 @@
 package com.mexico.sas.nativequeries.api.service;
 
+import com.mexico.sas.nativequeries.api.crypt.Crypter;
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
-import com.mexico.sas.nativequeries.api.model.ProjectPlan;
-import com.mexico.sas.nativequeries.api.model.ProjectPlanDetail;
-import com.mexico.sas.nativequeries.api.model.ProjectPlanHeader;
-import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
+import com.mexico.sas.nativequeries.api.model.*;
 import com.mexico.sas.nativequeries.api.report.ProjectWithApplicationXls;
 import com.mexico.sas.nativequeries.api.repository.ProjectPlanRepository;
 import com.mexico.sas.nativequeries.api.repository.ProjectRepository;
@@ -17,8 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +37,9 @@ public class ProjectService {
 
     @Autowired
     private EmailUtils emailUtils;
+
+    @Autowired
+    private Crypter crypter;
 
     public Page<ProjectWithApplication> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -79,14 +80,15 @@ public class ProjectService {
         return projectPlanRepository.getProjectPlanApps(pKey);
     }
 
-    public boolean sendProjectPlan(String username, String password, String pKey, String apps, String fileName, InputStream inputStream) {
+    public boolean sendProjectPlan(ProjectPlanData projectPlanData) {
         try {
             final String htlmTemplate = "project_plan";
-            log.debug("Seding project plan of {}", pKey);
-            ProjectPlanHeader projectPlanHeader = projectPlanRepository.getProjectPlanHeader(pKey);
-            List<ProjectPlanDetail> projectPlanDetail = projectPlanRepository.getProjectPlanDetail(pKey, List.of(apps.split(SQLConstants.COMMA)));
+            log.debug("Seding project plan of {}", projectPlanData.getPKey());
+            ProjectPlanHeader projectPlanHeader = projectPlanRepository.getProjectPlanHeader(projectPlanData.getPKey());
+            List<ProjectPlanDetail> projectPlanDetail = projectPlanRepository
+                    .getProjectPlanDetail(projectPlanData.getPKey(), List.of(projectPlanData.getApps().split(SQLConstants.COMMA)));
             if( projectPlanDetail.isEmpty() ) {
-                log.error("Applications {} in project {} not found", apps, pKey);
+                log.error("Applications {} in project {} not found", projectPlanData.getPKey(), projectPlanData.getApps());
                 return false;
             }
             String subject = String.format("%s - %s de plan con fechas", projectPlanHeader.getPKey(), projectPlanHeader.getPDescription());
@@ -98,12 +100,25 @@ public class ProjectService {
                 cc.add(d.getLeaderMail());
                 cc.add(d.getDeveloperMail());
             });
-            emailUtils.sendMessage(username, password, projectPlanHeader.getPmMail(), subject, htlmTemplate, variables, fileName, inputStream, cc.toArray(new String[0]));
-            projectPlanRepository.updateDate(pKey);
+//            emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
+//                    projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
+//                    projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream(),
+//                    cc.toArray(new String[0]));
+            projectPlanRepository.updateDate(projectPlanHeader.getPKey());
             return true;
         } catch (Exception e) {
             log.error("Error to send project plan", e);
             return false;
+        }
+    }
+
+    public void sendFile(ProjectPlanData projectPlanData) {
+        try {
+        emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
+                "oznama27@gmail.com", "prueba envia archivo", "test-email", new HashMap<>(),
+                projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream());
+        } catch (Exception e) {
+            log.error("Error to send file", e);
         }
     }
 }
