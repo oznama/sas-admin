@@ -100,10 +100,10 @@ public class ProjectService {
                 cc.add(d.getLeaderMail());
                 cc.add(d.getDeveloperMail());
             });
-//            emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
-//                    projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
-//                    projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream(),
-//                    cc.toArray(new String[0]));
+            emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
+                    projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
+                    projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream(),
+                    cc.toArray(new String[0]));
             projectPlanRepository.updateDate(projectPlanHeader.getPKey());
             return true;
         } catch (Exception e) {
