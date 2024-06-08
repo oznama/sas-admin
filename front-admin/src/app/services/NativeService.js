@@ -89,11 +89,7 @@ export const projectPlanSendEmail = async(formData) => {
         method: "POST",
         body: formData
     }
-    console.log(formData);
-    //const response = await apiNative(`${projectPlanContext}/send`, request );
-    //const jsonResponse = await response.json();
-    //return jsonResponse;
-    return {
-        code: 200
-    }
+    const response = await apiNative(`${projectPlanContext}/send`, request );
+    const jsonResponse = await response.json();
+    return jsonResponse;
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setModalChild } from '../../../store/modal/modalSlice';
-import { displayNotification, encrypt, styleCheckBox, styleTableRow } from '../../helpers/utils';
+import { displayNotification, encrypt, replaceAccents, styleCheckBox, styleTableRow } from '../../helpers/utils';
 import { projectPlanCheck, projectPlanPreview, projectPlanSendEmail } from '../../services/NativeService';
 import { alertType } from '../custom/alerts/types/types';
 
@@ -108,17 +108,23 @@ export const ProjectPlanModal = () => {
 
     const onChangeFile = ({target}) => setFile(target.files[0]);
 
-    const onSubmit = () => {
-        const passwordEncrypted = encrypt(password);
-        // TODO Remove accents in fileName
+    const buildFormData = () => {
         const formData = new FormData();
         formData.append('username', user.email);
+        const passwordEncrypted = encrypt(password);
         formData.append('password', passwordEncrypted);
         formData.append('pKey', project.key);
         formData.append('apps', keys);
-        formData.append('fileName', file.name);
+        const fileName = replaceAccents(file.name);
+        console.log('fileName', fileName);
+        formData.append('fileName', fileName);
         formData.append('file', file);
-        projectPlanSendEmail(formData).then(response => {
+        return formData;
+    }
+
+    const onSubmit = () => {
+        projectPlanSendEmail(buildFormData()).then(response => {
+            console.log('Response', response)
             if(response.code && response.code !== 200) {
                 displayNotification(dispatch, 'El correo no ha sido envíado', alertType.error);
             } else {
@@ -249,11 +255,13 @@ export const ProjectPlanModal = () => {
             <h4>El correo ser&aacute; env&iacute;ado con la cuenta</h4>
             <h5 className='text-center text-success'>{ user.email }</h5>
             <label>Contrase&ntilde;a de tu correo</label>
-            <div class="input-group mb-3">
+            <div className="input-group mb-3">
                 <input ref={pswRef} className="form-control" name="password" required
                     type={ showPswd ? 'text' : 'password' }
                     value={ password } onChange={ onChangePassword } />
-                <span class="input-group-text" onClick={ onClickShowPassword }><i className={`bi bi-eye${ showPswd ? '-slash-fill' : '-fill'}`}></i></span>
+                <span className="input-group-text" onClick={ onClickShowPassword }>
+                    <i className={`bi bi-eye${ showPswd ? '-slash-fill' : '-fill'}`}></i>
+                </span>
             </div>
         </div>
     )

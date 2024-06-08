@@ -224,3 +224,14 @@ export const decrypt = input => {
     const inputDecr = inputByte.toString(CryptoJS.enc.Utf8);
     return inputDecr;
 }
+
+export const replaceAccents = input => {
+    let r = input.replace(/\s/g,"_");
+    r = r.replace(/ñ/g,"n");
+    r = r.replace(/á/g,"a").replace(/Á/g,"A");
+    r = r.replace(/é/g,"e").replace(/É/g,"E");
+    r = r.replace(/í/g,"i").replace(/Í/g,"I");
+    r = r.replace(/ó/g,"o").replace(/Ó/g,"O");
+    r = r.replace(/ú/g,"u").replace(/Ú/g,"U");
+    return r;
+}
