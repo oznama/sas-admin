@@ -3,9 +3,16 @@ const lang = import.meta.env.VITE_LANG;
 const urlNative = import.meta.env.VITE_API_URLNATIVE;
 
 export const getHeadersSimple = () => {
-    return {    
+    return {
         "Accept-Language": lang,
         "Content-Type": "application/json",
+    };
+}
+
+export const getHeaderFormData = () => {
+    return {
+        "Accept-Language": lang,
+        "Content-Type": "multipart/form-data",
     };
 }
 

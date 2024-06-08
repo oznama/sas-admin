@@ -17,7 +17,8 @@ export const projectSlice = createSlice({
             amount: 0,
             tax: 0,
             total: 0
-        }
+        },
+        numApps: 0
     },
     reducers: {
         setCurrentTab: (state, action) => {
@@ -40,6 +41,9 @@ export const projectSlice = createSlice({
         },
         setOrderPaid: (state, action) => {
             state.orderPaid = action.payload
+        },
+        setNumApps: (state, action) => {
+            state.numApps = action.payload
         }
     }
 })
@@ -51,5 +55,6 @@ export const {
     setProject,
     setOrder,
     setProjectPaid,
-    setOrderPaid
+    setOrderPaid,
+    setNumApps
 } = projectSlice.actions;

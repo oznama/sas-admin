@@ -23,7 +23,7 @@ export const DetailProject = () => {
     const navigate = useNavigate();
     const { key } = useParams();
     const { permissions } = useSelector( state => state.auth );
-    const {currentTab, project, projectPaid} = useSelector( state => state.projectReducer );
+    const {currentTab, project, projectPaid, numApps} = useSelector( state => state.projectReducer );
 
     const [pKey, setPKey] = useState('');
     const [keyError, setKeyError] = useState('');
@@ -186,7 +186,7 @@ export const DetailProject = () => {
             <button type="button" className="btn btn-primary" onClick={ handleAddApplication }>
                 <span className="bi bi-plus"></span>
             </button>
-            <button type="button" className="btn btn-success" onClick={ handleCheckPlan }>
+            <button type="button" className="btn btn-success" disabled={ numApps === 0 } onClick={ handleCheckPlan }>
                 Env&iacute;ar plan de trabajo&nbsp;<span className="bi bi-file-earmark"></span>
             </button>
         </div>
