@@ -1,6 +1,7 @@
 package com.mexico.sas.nativequeries.api.controller;
 
 import com.mexico.sas.nativequeries.api.model.ProjectPlan;
+import com.mexico.sas.nativequeries.api.model.ProjectPlanDetail;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import com.mexico.sas.nativequeries.api.model.ProjectPlanData;
 import com.mexico.sas.nativequeries.api.service.ProjectService;
@@ -14,9 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -79,9 +78,18 @@ public class ProjectController {
     @ApiOperation(httpMethod = "GET", value = "Servicio para checar las aplicaciones de plan de trabajo", nickname = "checkProjectPlan")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = ProjectPlan.class, responseContainer = "List") })
-    public ResponseEntity<List<ProjectPlan>> checkProjectPlan(@RequestParam String pKey ) {
+    public ResponseEntity<List<ProjectPlan>> checkProjectPlan(@RequestParam String pKey) {
         log.info("Checking project plan aplications status");
         return ResponseEntity.ok(projectOrder.checkProjectPlan(pKey));
+    }
+
+    @GetMapping("project-plan/preview")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar vista previa del correo de plan de trabajo", nickname = "getPreviewProjectPlan")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = ProjectPlanDetail.class, responseContainer = "List") })
+    public ResponseEntity<List<ProjectPlanDetail>> getPreviewProjectPlan(@RequestParam String pKey, @RequestParam String apps) {
+        log.info("Getting project plan email preview");
+        return ResponseEntity.ok(projectOrder.getProjectPlanDetail(pKey, apps));
     }
 
     @PostMapping(path = "project-plan/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

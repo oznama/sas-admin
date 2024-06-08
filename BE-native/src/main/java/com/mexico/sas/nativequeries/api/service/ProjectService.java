@@ -80,9 +80,13 @@ public class ProjectService {
         return projectPlanRepository.getProjectPlanApps(pKey);
     }
 
+    public List<ProjectPlanDetail> getProjectPlanDetail(String pKey, String apps) {
+        log.debug("Getting preview applications of project {}", pKey);
+        return projectPlanRepository.getProjectPlanDetail(pKey, List.of(apps.split(SQLConstants.COMMA)));
+    }
+
     public boolean sendProjectPlan(ProjectPlanData projectPlanData) {
         try {
-            final String htlmTemplate = "project_plan";
             log.debug("Seding project plan of {}", projectPlanData.getPKey());
             ProjectPlanHeader projectPlanHeader = projectPlanRepository.getProjectPlanHeader(projectPlanData.getPKey());
             List<ProjectPlanDetail> projectPlanDetail = projectPlanRepository
@@ -91,25 +95,30 @@ public class ProjectService {
                 log.error("Applications {} in project {} not found", projectPlanData.getPKey(), projectPlanData.getApps());
                 return false;
             }
-            String subject = String.format("%s - %s de plan con fechas", projectPlanHeader.getPKey(), projectPlanHeader.getPDescription());
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("pmName", projectPlanHeader.getPmName());
-            variables.put("detail", projectPlanDetail);
-            List<String> cc = emailUtils.getListCc(null);
-            projectPlanDetail.forEach( d -> {
-                cc.add(d.getLeaderMail());
-                cc.add(d.getDeveloperMail());
-            });
-            emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
-                    projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
-                    projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream(),
-                    cc.toArray(new String[0]));
+            // processProjectPlanEmail(projectPlanData, projectPlanHeader, projectPlanDetail);
             projectPlanRepository.updateDate(projectPlanHeader.getPKey());
             return true;
         } catch (Exception e) {
             log.error("Error to send project plan", e);
             return false;
         }
+    }
+
+    private void processProjectPlanEmail(ProjectPlanData projectPlanData, ProjectPlanHeader projectPlanHeader, List<ProjectPlanDetail> projectPlanDetail) throws Exception {
+        final String htlmTemplate = "project_plan";
+        String subject = String.format("%s - %s de plan con fechas", projectPlanHeader.getPKey(), projectPlanHeader.getPDescription());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("pmName", projectPlanHeader.getPmName());
+        variables.put("detail", projectPlanDetail);
+        List<String> cc = emailUtils.getListCc(null);
+        projectPlanDetail.forEach(d -> {
+            cc.add(d.getLeaderMail());
+            cc.add(d.getDeveloperMail());
+        });
+        emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
+                projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
+                projectPlanData.getFile().getOriginalFilename(), projectPlanData.getFile().getInputStream(),
+                cc.toArray(new String[0]));
     }
 
     public void sendFile(ProjectPlanData projectPlanData) {
