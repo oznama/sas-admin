@@ -1,6 +1,8 @@
 package com.mexico.sas.nativequeries.api.repository;
 
+import com.mexico.sas.nativequeries.api.model.ProjectAppCat;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
+import com.mexico.sas.nativequeries.api.model.mapper.ProjectAppCatMapper;
 import com.mexico.sas.nativequeries.api.model.mapper.ProjectWihtApplicationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +18,15 @@ import java.util.List;
 @Slf4j
 public class ProjectRepository extends BaseRepository {
 
+    @Value("${query.project.plan.apps.names}")
+    private String queryProjectPlanAppsNames;
+
     @Value("${query.project.field.key}")
     private String fieldProjectKey;
+
     @Value("${query.project.with.applications.fields}")
     private String fieldsProjectWithApplications;
+
     @Value("${query.project.with.applications}")
     private String queryProjectWithApplications;
 
@@ -31,6 +38,10 @@ public class ProjectRepository extends BaseRepository {
 
     @Value("${query.project.monitoring.isnull}")
     private String filterMonitoringIsNull;
+
+    public List<ProjectAppCat> getProjectPlanAppsNames(String pKey) {
+        return query(queryProjectPlanAppsNames.replace(SQLConstants.PROJECT_PKEY_PARAMETER, String.format(SQLConstants.EQUAL_REGEX, pKey)), new ProjectAppCatMapper());
+    }
 
     public Page<ProjectWithApplication> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring, Pageable pageable) {
         log.debug("findProjectsWithApplication Pagged...");

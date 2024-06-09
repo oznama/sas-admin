@@ -11,5 +11,6 @@ public class ProjectPlanData {
     private String password;
     private String pKey;
     private String apps;
+    private String fileName;
     private MultipartFile file;
 }

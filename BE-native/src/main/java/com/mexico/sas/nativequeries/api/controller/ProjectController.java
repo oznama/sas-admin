@@ -1,9 +1,7 @@
 package com.mexico.sas.nativequeries.api.controller;
 
-import com.mexico.sas.nativequeries.api.model.ProjectPlan;
-import com.mexico.sas.nativequeries.api.model.ProjectPlanDetail;
+import com.mexico.sas.nativequeries.api.model.ProjectAppCat;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
-import com.mexico.sas.nativequeries.api.model.ProjectPlanData;
 import com.mexico.sas.nativequeries.api.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -50,6 +48,15 @@ public class ProjectController {
         return ResponseEntity.ok(projectOrder.findProjectsWithApplication(filter, installation, monitoring));
     }
 
+    @GetMapping("apps")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar claves de proyectos con aplicaciones", nickname = "getProjectAppsNames")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = ProjectAppCat.class, responseContainer = "List") })
+    public ResponseEntity<List<ProjectAppCat>> getProjectAppsNames(@RequestParam String pKey) {
+        log.info("Finding projects apps");
+        return ResponseEntity.ok(projectOrder.getProjectAppsCat(pKey));
+    }
+
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos con aplicaciones", nickname = "exportProjectsWithApplications")
     public ResponseEntity<byte[]> exportProjectsWithApplications(@RequestParam(defaultValue = "false") Boolean installation,
@@ -72,45 +79,4 @@ public class ProjectController {
         projectOrder.sendNotificationProjectsWithApplication(installation, monitoring, pKeys);
         return ResponseEntity.ok().build();
     }
-
-
-    @GetMapping("project-plan/check")
-    @ApiOperation(httpMethod = "GET", value = "Servicio para checar las aplicaciones de plan de trabajo", nickname = "checkProjectPlan")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success", response = ProjectPlan.class, responseContainer = "List") })
-    public ResponseEntity<List<ProjectPlan>> checkProjectPlan(@RequestParam String pKey) {
-        log.info("Checking project plan aplications status");
-        return ResponseEntity.ok(projectOrder.checkProjectPlan(pKey));
-    }
-
-    @GetMapping("project-plan/preview")
-    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar vista previa del correo de plan de trabajo", nickname = "getPreviewProjectPlan")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success", response = ProjectPlanDetail.class, responseContainer = "List") })
-    public ResponseEntity<List<ProjectPlanDetail>> getPreviewProjectPlan(@RequestParam String pKey, @RequestParam String apps) {
-        log.info("Getting project plan email preview");
-        return ResponseEntity.ok(projectOrder.getProjectPlanDetail(pKey, apps));
-    }
-
-    @PostMapping(path = "project-plan/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ApiOperation(httpMethod = "POST", value = "Servicio para enviar correo de plan de trabajo", nickname = "sendProjectsWithApplications")
-    public ResponseEntity<?> sendProjectPlan(@ModelAttribute ProjectPlanData projectPlanData) {
-        log.info("Sending project plan with file {}", projectPlanData.getFile().getOriginalFilename());
-        if( projectOrder.sendProjectPlan(projectPlanData) )
-            return ResponseEntity.ok().build();
-        else
-            return ResponseEntity.badRequest().build();
-    }
-
-    // REMOVE When is finished
-    @PostMapping(path = "send/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ApiOperation(httpMethod = "POST", value = "Servicio prueba enviar archivo", nickname = "sendFile")
-    public ResponseEntity<?> sendFile(@ModelAttribute ProjectPlanData projectPlanData) {
-        log.info("Sending file {} with user data: {}",
-                projectPlanData.getFile().getOriginalFilename(), projectPlanData.getUsername());
-        projectOrder.sendFile(projectPlanData);
-        return ResponseEntity.ok().build();
-    }
-
-
 }
