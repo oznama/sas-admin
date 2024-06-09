@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setModalChild } from '../../../store/modal/modalSlice';
-import { displayNotification, encrypt, replaceAccents, styleCheckBox, styleTableRow } from '../../helpers/utils';
-import { projectPlanCheck, projectPlanPreview, projectPlanSendEmail } from '../../services/NativeService';
+import { displayNotification, encrypt, genericErrorMsg, replaceAccents, styleCheckBox, styleTableRow } from '../../helpers/utils';
+import { getProjectApps, projectPlanCheck, projectPlanPreview, projectPlanSendEmail } from '../../services/NativeService';
 import { alertType } from '../custom/alerts/types/types';
+import { changeLoading } from '../../../store/loading/loadingSlice';
 
 export const ProjectPlanModal = () => {
 
@@ -34,42 +35,53 @@ export const ProjectPlanModal = () => {
 
     const [steper, setSteper] = useState(1);
 
+    const [data, setData] = useState([]);
+    const [apps, setApps] = useState([]);
+    const [appCheckAll, setAppCheckAll] = useState(false);
+
     const [showPswd, setShowPswd] = useState(false);
     const [password, setPassword] = useState('');
-
-    const [data, setData] = useState([]);
-
     const [file, setFile] = useState();
 
-    // Fix keys functionality
-    const [allChecked, setAllChecked] = useState(true);
-    const [keys, setKeys] = useState([]);
-    const [allKeys, setAllKeys] = useState([]);
-    const [isCheck, setIsCheck] = useState(true);
+    const [hasErrorResponse, setHasErrorResponse] = useState(false);
 
-    const fetchCheck = () => {
+    const fetchAppsAvailables = () => {
         projectPlanCheck(project.key).then(response => {
+            setApps(response);
+            fetchApps(response);
+        }).catch(error => {
+            console.log(error);
+        })
+    }
+
+    const fetchApps = apps => {
+        getProjectApps(project.key).then(response => {
             const data = response.map(r => ({
                 ...r,
-                checked: allChecked || keys.includes(r.appName)
+                checked: apps.find( d => d === r.appName)
             }));
             setData(data);
+            setAppCheckAll(data.filter( d => d.checked).length === data.length);
         }).catch(error => {
-            console.log('Error to load plan check', error);
+            console.log(error);
         })
     }
 
     const fetchPreview = () => {
-        projectPlanPreview(project.key, 'PMT,CTM').then(response => {
+        projectPlanPreview(project.key, apps.join()).then(response => {
             setData(response);
         }).catch(error => {
-            console.log('Error to load plan review', error);
+            console.log(error);
         })
     }
 
     useEffect(() => {
         if(steper === 1) {
-            fetchCheck();
+            if( apps.length === 0 ) {
+                fetchAppsAvailables();
+            } else {
+                fetchApps(apps);
+            }
         } else if (steper === 2) {
             fetchPreview();
         } else if (steper === 3) {
@@ -77,31 +89,32 @@ export const ProjectPlanModal = () => {
         }
     }, [steper])
 
+    const getApps = () => {
+        let apps = [];
+        data.map( d => apps.push(d.appName) );
+        return apps;
+    }
+
     const toggleAllCheckboxes = () => {
-        const newAllChecked = !allChecked;
-        setAllChecked(newAllChecked);
-        const updatedKeys = newAllChecked ? allKeys : [];
-        setKeys(updatedKeys);
-        const updatedData = data.map(item => ({ ...item, checked: newAllChecked }));
+        const allChecked = !appCheckAll;
+        setAppCheckAll(allChecked);
+        const apps = allChecked ? getApps() : [];
+        setApps(apps);
+        const updatedData = data.map(item => ({ ...item, checked: allChecked }));
         setData(updatedData);
     };
 
-    const toggleCheckbox = (pKey, index) => {
-        const dataUpdated = [...data];
-        dataUpdated[index].checked = !dataUpdated[index].checked;
-
-        const keySelecteds = dataUpdated[index].checked
-            ? [...keys, pKey]
-            : keys.filter(k => k !== pKey);
-
-        setData(dataUpdated);
-        setKeys(keySelecteds);
-
-        if (dataUpdated.every(item => item.checked)) {
-            setAllChecked(true);
-        } else {
-            setAllChecked(false);
-        }
+    const toggleCheckbox = (appName, index) => {
+        const dataUpdated = [...data]; // Getting data
+        dataUpdated[index].checked = !dataUpdated[index].checked; // Update check in array
+        setData(dataUpdated); // Update data state
+        // Add o remove app in apps array
+        const appsUpdated = dataUpdated[index].checked ? [...apps, appName]:
+            apps.filter(app => app !== appName);
+        setApps(appsUpdated);
+        // Set is all is checked
+        const allChecked = dataUpdated.filter( d => d.checked).length === data.length;
+        setAppCheckAll(allChecked);
     };
 
     const onChangePassword = ({ target }) => setPassword(target.value);
@@ -114,23 +127,31 @@ export const ProjectPlanModal = () => {
         const passwordEncrypted = encrypt(password);
         formData.append('password', passwordEncrypted);
         formData.append('pKey', project.key);
-        formData.append('apps', keys);
-        const fileName = replaceAccents(file.name);
-        console.log('fileName', fileName);
-        formData.append('fileName', fileName);
-        formData.append('file', file);
+        formData.append('apps', apps);
+        if( file && file.name ) {
+            const fileName = replaceAccents(file.name);
+            formData.append('fileName', fileName);
+            formData.append('file', file);
+        }
         return formData;
     }
 
     const onSubmit = () => {
+        setHasErrorResponse(false);
+        dispatch( changeLoading(true) );
         projectPlanSendEmail(buildFormData()).then(response => {
-            console.log('Response', response)
-            if(response.code && response.code !== 200) {
+            dispatch( changeLoading(false) );
+            if(response.status && response.status !== 200) {
                 displayNotification(dispatch, 'El correo no ha sido envíado', alertType.error);
+                setHasErrorResponse(true);
             } else {
                 displayNotification(dispatch, '¡Correo envíado correctamente!', alertType.success);
                 dispatch( setModalChild(null));
             }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+            setHasErrorResponse(true);
         })
     }
 
@@ -172,7 +193,7 @@ export const ProjectPlanModal = () => {
                             <th className="text-center fs-6" scope="col">
                                 <input style={styleCheckBox}
                                     type="checkbox"
-                                    checked={allChecked}
+                                    checked={appCheckAll}
                                     onChange={toggleAllCheckboxes}
                                 />
                             </th>
@@ -211,12 +232,12 @@ export const ProjectPlanModal = () => {
             <h5 className="pb-3 card-title fw-bold text-center">Vista previa</h5>
             <section>
                 <label>TO:</label>
-                <p style={styleParagraph }></p>
+                <p style={styleParagraph }>{ project.pmEmail }</p>
                 <label>CC:</label>
                 <p style={ styleParagraph }>{ getCC() }</p>
             </section>
             <div style={stylePreviwer}>
-                PM,
+                { project.projectManager },
                 <p>Te env&iacute;o plan de trabajo y responsable por parte de SAS para este proyecto:</p>
                 {
                     data && data.map( (d, index) => (
@@ -263,8 +284,24 @@ export const ProjectPlanModal = () => {
                     <i className={`bi bi-eye${ showPswd ? '-slash-fill' : '-fill'}`}></i>
                 </span>
             </div>
+            { renderErrors() }
         </div>
     )
+
+    const renderErrors = () => {
+        const errors = [
+            'Contraseña de correo incorrecta.',
+            'Archivo invalido.',
+            'Servicios no disponibles.',
+            'Sin conexión de red'
+        ];
+        return hasErrorResponse && (
+            <div>
+                <label className='text-danger'>Rectifica los siguienes posibles errores:</label>
+                <ul>{ errors.map(e => (<li className='text-danger'>{ e }</li>) ) }</ul>
+            </div>
+        )
+    }
 
     const renderButtons = () => (
         <div className="pt-3 d-flex justify-content-between">
@@ -279,7 +316,7 @@ export const ProjectPlanModal = () => {
                 steper > 0 && btnLabels[steper] && btnLabels[steper].btnFile &&
                 <>
                     <button type="button" className={`btn btn-${ file ? 'success' : 'warning' }`} onClick={ () => inputFile.current.click() }>
-                        { btnLabels[steper].btnFile }&nbsp;&nbsp;<i class="bi bi-upload"></i>
+                        { btnLabels[steper].btnFile }&nbsp;&nbsp;<i className="bi bi-upload"></i>
                     </button>
                     <input type='file' id='file' ref={inputFile} style={{display: 'none'}} accept=".doc, .docx" onChange={ onChangeFile } />
                 </>
@@ -287,7 +324,8 @@ export const ProjectPlanModal = () => {
             {
                 steper > 0 && btnLabels[steper] &&
                 <button type="button" className={`btn btn-${ steper === 3 ? 'primary' : 'link'}`}
-                    onClick={ () => onClickNext() } disabled={ steper === 3 && password.length < passwordMaxLength }>
+                    onClick={ () => onClickNext() }
+                    disabled={ (steper === 1 && !apps.length > 0) || (steper === 3 && password.length < passwordMaxLength) }>
                     { btnLabels[steper].btnNext }&nbsp;
                     { steper !== 3 && '>>'  }
                     { steper === 3 && <span><i className="bi bi-envelope"></i></span> }
@@ -305,7 +343,7 @@ export const ProjectPlanModal = () => {
                     <span className="bi bi-x-lg"></span>
                 </button>
             </div>
-                <div className='px-5 pb-5'>
+            <div className='px-5 pb-5'>
                 { steper === 1 && renderFirstStep() }
                 { steper === 2 && renderSecondStep() }
                 { steper === 3 && renderThirdStep() }

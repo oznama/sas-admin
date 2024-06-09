@@ -62,7 +62,19 @@ export const downloadExcel = async(context, list = []) => {
     return response;
 };
 
+// Project Plan
+
 const projectPlanContext = 'projects/project-plan'
+
+export const getProjectApps = async(pKey) => {
+    const request = {
+        headers: getHeadersSimple()
+    }
+    const url = `projects/apps?pKey=${ pKey }`;
+    const response = await apiNative( url, request );
+    const json = await response.json();
+    return json;
+};
 
 export const projectPlanCheck = async(pKey) => {
     const request = {
@@ -90,6 +102,5 @@ export const projectPlanSendEmail = async(formData) => {
         body: formData
     }
     const response = await apiNative(`${projectPlanContext}/send`, request );
-    const jsonResponse = await response.json();
-    return jsonResponse;
+    return response;
 };

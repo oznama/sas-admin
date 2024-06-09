@@ -227,7 +227,7 @@ export const decrypt = input => {
 
 export const replaceAccents = input => {
     let r = input.replace(/\s/g,"_");
-    r = r.replace(/ñ/g,"n");
+    r = r.replace(/ñ/g,"n").replace(/Ñ/g,"N");
     r = r.replace(/á/g,"a").replace(/Á/g,"A");
     r = r.replace(/é/g,"e").replace(/É/g,"E");
     r = r.replace(/í/g,"i").replace(/Í/g,"I");
