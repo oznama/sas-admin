@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -69,10 +66,11 @@ public class ProjectPlanService {
             cc.add(d.getLeaderMail());
             cc.add(d.getDeveloperMail());
         });
+        List<String> ccWithoutDuplicates = new ArrayList<>(new HashSet<>(cc));
         emailUtils.sendMessage(projectPlanData.getUsername(), crypter.decrypt(projectPlanData.getPassword()),
                 projectPlanHeader.getPmMail(), subject, htlmTemplate, variables,
                 !StringUtils.isEmpty(projectPlanData.getFileName()) ? projectPlanData.getFileName() : "",
                 projectPlanData.getFile() != null ? projectPlanData.getFile().getInputStream() : null,
-                cc.toArray(new String[0]));
+                ccWithoutDuplicates.toArray(new String[0]));
     }
 }
