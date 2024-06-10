@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class ProjectPlanService {
 
     public List<ProjectPlanDetail> getProjectPlanDetail(String pKey, String apps) {
         log.debug("Getting preview applications of project {}", pKey);
-        return projectPlanRepository.getProjectPlanDetail(pKey, List.of(apps.split(SQLConstants.COMMA)));
+        return projectPlanRepository.getProjectPlanDetail(pKey, Arrays.asList(apps.split(SQLConstants.COMMA)));
     }
 
     public boolean sendProjectPlan(ProjectPlanData projectPlanData) {
@@ -43,7 +44,7 @@ public class ProjectPlanService {
             log.debug("Sending project plan of {}", projectPlanData.getPKey());
             ProjectPlanHeader projectPlanHeader = projectPlanRepository.getProjectPlanHeader(projectPlanData.getPKey());
             List<ProjectPlanDetail> projectPlanDetail = projectPlanRepository
-                    .getProjectPlanDetail(projectPlanData.getPKey(), List.of(projectPlanData.getApps().split(SQLConstants.COMMA)));
+                    .getProjectPlanDetail(projectPlanData.getPKey(), Arrays.asList(projectPlanData.getApps().split(SQLConstants.COMMA)));
             if( projectPlanDetail.isEmpty() ) {
                 log.error("Applications {} in project {} not found", projectPlanData.getPKey(), projectPlanData.getApps());
                 return false;
