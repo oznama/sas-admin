@@ -91,6 +91,7 @@ public class EmailUtils {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", smtpAuth);
         props.put("mail.smtp.starttls.enable", starttlsEnabled);
+        props.put("mail.smtp.ssl.trust", host);
         props.put("mail.debug", mailDebug);
 
         sendMessage(from, emailSender, to, subject, templateName, variables, fileName, inputStream, cc);
