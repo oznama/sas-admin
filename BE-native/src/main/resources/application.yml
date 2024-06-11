@@ -39,6 +39,10 @@ spring:
           ssl:
             trust: "${EMAIL_HOST}"
     debug: "${EMAIL_DEBUG_ENABLED}"
+  servlet:
+    multipart:
+      max-file-size: "10MB"
+      max-request-size: "10MB"
 server:
   port: ${REST_NATIVE_SERVER_PORT}
   servlet:
@@ -61,6 +65,10 @@ logging:
     file: "%d{HH:mm:ss} %logger.%M - %msg%n"
   file:
     name: /tmp/sas-native/logs/api-service.log
+
+api:
+  security:
+    cipher-secret: ${SECURITY_CIPHER_SECRET_FT}
 
 management:
   endpoints:

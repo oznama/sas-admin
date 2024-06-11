@@ -7,7 +7,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public class BaseRepository {
@@ -54,7 +57,7 @@ public class BaseRepository {
     protected String inClauseBuilder(List<String> ids) {
         log.debug("Building in clause with {} ids...", ids.size());
         StringBuilder inBuilder = new StringBuilder();
-        ids.forEach( id -> inBuilder.append(String.format(SQLConstants.IN_REGEX, id)).append(","));
+        ids.forEach( id -> inBuilder.append(String.format(SQLConstants.IN_REGEX, id)).append(SQLConstants.COMMA));
         return inBuilder.length() > 0 ? inBuilder.toString().substring(0, inBuilder.length()-1) : "";
     }
 
@@ -80,6 +83,11 @@ public class BaseRepository {
         return jdbcTemplate.queryForObject(query, clazz);
     }
 
+    protected <T> T queryForObject(String query, RowMapper<T> rowMapper) {
+        log.debug("Query for Object: {}", query);
+        return jdbcTemplate.queryForObject(query, rowMapper);
+    }
+
     protected <T> List<T> query(String query, RowMapper<T> rowMapper) {
         log.debug("Query: {}", query);
         return jdbcTemplate.query(query, rowMapper);
@@ -90,4 +98,20 @@ public class BaseRepository {
         return jdbcTemplate.queryForList(query, clazz);
     }
 
+    protected void execute(String query) {
+        jdbcTemplate.execute(query);
+    }
+
+    public static String parseDateText(Date date) {
+        if(date == null) return "";
+        SimpleDateFormat sdf = null;
+        try {
+            sdf = new SimpleDateFormat("d MMMM yyyy", new Locale("es", "ES"));
+            return sdf.format(date).replaceAll(" ", " de ");
+        } catch (Exception e) {
+            log.error("Error to parseDate", e);
+            sdf = new SimpleDateFormat("dd/MM/yyyy");
+            return sdf.format(date);
+        }
+    }
 }

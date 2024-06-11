@@ -28,16 +28,16 @@ public class CrypterTest {
     public void encryptPswdWithJava() throws CustomException {
         final String pswd = "12345678";
         for(int i= 0; i<10; i++) {
-            String cipherPswd = crypter.encrypt(pswd);
+            String cipherPswd = crypter.encrypt(pswd,0);
 //            System.out.println(cipherPswd);
-            assertEquals(crypter.decrypt(cipherPswd), pswd);
+            assertEquals(crypter.decrypt(cipherPswd,0), pswd);
         }
     }
 
     @DisplayName("Spring test decrypt pswd with Java")
     @Test
     public void validatePswdWithJava() throws CustomException {
-        final String cipherPswd = crypter.decrypt("Ea6SCcSRF9rJUxhtMk3bXg==");
+        final String cipherPswd = crypter.decrypt("Ea6SCcSRF9rJUxhtMk3bXg==",0);
         String pswdCorrect = "12345678";
         String pswdWrong = "MyP@ssw0rd";
         assertEquals(cipherPswd, pswdCorrect);

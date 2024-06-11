@@ -1,5 +1,6 @@
 package com.mexico.sas.nativequeries.api.controller;
 
+import com.mexico.sas.nativequeries.api.model.ProjectAppCat;
 import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
 import com.mexico.sas.nativequeries.api.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
@@ -11,10 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,6 +48,15 @@ public class ProjectController {
         return ResponseEntity.ok(projectOrder.findProjectsWithApplication(filter, installation, monitoring));
     }
 
+    @GetMapping("apps")
+    @ApiOperation(httpMethod = "GET", value = "Servicio para recuperar claves de proyectos con aplicaciones", nickname = "getProjectAppsNames")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = ProjectAppCat.class, responseContainer = "List") })
+    public ResponseEntity<List<ProjectAppCat>> getProjectAppsNames(@RequestParam String pKey) {
+        log.info("Finding projects apps");
+        return ResponseEntity.ok(projectOrder.getProjectAppsCat(pKey));
+    }
+
     @GetMapping("export")
     @ApiOperation(httpMethod = "GET", value = "Servicio para exportar proyectos con aplicaciones", nickname = "exportProjectsWithApplications")
     public ResponseEntity<byte[]> exportProjectsWithApplications(@RequestParam(defaultValue = "false") Boolean installation,
@@ -72,6 +79,4 @@ public class ProjectController {
         projectOrder.sendNotificationProjectsWithApplication(installation, monitoring, pKeys);
         return ResponseEntity.ok().build();
     }
-
-
 }

@@ -74,6 +74,7 @@ logging:
 api:
   security:
     cipher-secret: ${SECURITY_CIPHER_SECRET}
+    cipher-secret-ft: ${SECURITY_CIPHER_SECRET_FT}
     jwt:
       secretId: ${JWT_SECRET_ID}
       secretKey: ${JWT_SECRET_KEY}

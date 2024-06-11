@@ -157,6 +157,8 @@ public class ProjectServiceImpl extends LogMovementUtils implements ProjectServi
                 .findFirstMovement(Project.class.getSimpleName(), project.getKey()).getUserName());
         projectFindDto.setCompanyId(project.getCompany().getId());
         projectFindDto.setProjectManagerId(project.getProjectManager().getId());
+        projectFindDto.setProjectManager(project.getProjectManager().getName());
+        projectFindDto.setPmEmail(project.getProjectManager().getEmail());
         projectFindDto.setCreatedBy(buildFullname(employeeService.findEntityById(project.getCreatedBy())));
         projectFindDto.setCreationDate(dateToString(project.getCreationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));
         projectFindDto.setInstallationDate(dateToString(project.getInstallationDate(), GeneralKeys.FORMAT_DDMMYYYY, true));

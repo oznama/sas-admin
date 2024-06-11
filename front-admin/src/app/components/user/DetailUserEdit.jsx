@@ -27,7 +27,7 @@ export const DetailUserEdit = () => {
     const onChangeName = ({ target }) => setName(target.value);
     const [role, setRoles] = useState([]);
 
-    const [roleV, setRoleV] = useState(employeesObj ? employeesObj.role.id:'');
+    const [roleV, setRoleV] = useState(employeesObj && employeesObj.role ? employeesObj.role.id : '' );
 
     const onChangeRoleV = ({ target }) => setRoleV(target.value);
 
@@ -70,10 +70,10 @@ export const DetailUserEdit = () => {
         event.preventDefault()
         const data = new FormData(event.target)
         const request = Object.fromEntries(data.entries());
-        // request['id'] = employeesObj.id;
-        // console.log('request', request);
+        request['id'] = employeesObj.id;
+        console.log('request', request);
         updateUser(request);
-        //dispatch(setRole(request));
+        // dispatch(setRole(request));
         navigate('/users');
     }
 

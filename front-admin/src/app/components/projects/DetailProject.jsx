@@ -14,14 +14,16 @@ import { setCurrentAppTab, setCurrentTab, setProject } from '../../../store/proj
 import { TableApplications } from '../applications/page/TableApplications';
 import { TableLog } from '../custom/TableLog';
 import { TableOrders } from '../orders/page/TableOrders';
+import { setModalChild } from '../../../store/modal/modalSlice';
+import { ProjectPlanModal } from './ProjectPlanModal';
 
 export const DetailProject = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { key } = useParams();
-    const { user, permissions } = useSelector( state => state.auth );
-    const {currentTab, project, projectPaid} = useSelector( state => state.projectReducer );
+    const { permissions } = useSelector( state => state.auth );
+    const {currentTab, project, projectPaid, numApps} = useSelector( state => state.projectReducer );
 
     const [pKey, setPKey] = useState('');
     const [keyError, setKeyError] = useState('');
@@ -174,11 +176,18 @@ export const DetailProject = () => {
         dispatch(setCurrentAppTab(1));
         navigate(`/project/${ key }/application/add`);
     }
+
+    const handleCheckPlan = () => {
+        dispatch(setModalChild(<ProjectPlanModal />))
+    }
     
     const renderAddButton = () => permissions.canCreateProjApp && (
-        <div className="d-flex flex-row-reverse p-2">
+        <div className="d-flex flex-row-reverse gap-3 p-2">
             <button type="button" className="btn btn-primary" onClick={ handleAddApplication }>
                 <span className="bi bi-plus"></span>
+            </button>
+            <button type="button" className="btn btn-success" disabled={ numApps === 0 } onClick={ handleCheckPlan }>
+                Env&iacute;ar plan de trabajo&nbsp;<span className="bi bi-file-earmark"></span>
             </button>
         </div>
     );
@@ -248,11 +257,17 @@ export const DetailProject = () => {
                     onChange={ onChangePKey } onFocus={ () => setKeyError('') } onBlur={ onBlurPKey } />
                 <InputText name='description' label='Descripci&oacute;n' placeholder='Ingresa descripci&oacute;n'  disabled={ key && !project.active }
                     value={ description } required onChange={ onChangeDesc } maxLength={ 255 } />
-                <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ key && !project.active }
-                    value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
+                <div className="row text-start">
+                    <div className='col-6'>
+                        <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ key && !project.active }
+                            value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
+                    </div>
+                    <div className='col-6'>
+                        <DatePicker name='monitoringDate' label="Fecha monitoreo" disabled={ key && !project.active }
+                            value={ monitoringDate } onChange={ (date) => onChangeMonitoringDate(date) } />
+                    </div>
+                </div>
                 <br />
-                <DatePicker name='monitoringDate' label="Fecha monitoreo" disabled={ key && !project.active }
-                    value={ monitoringDate } onChange={ (date) => onChangeMonitoringDate(date) } />
                 { renderCreatedBy() }
                 { renderCreationDate() }
                 <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ key && !project.active } />

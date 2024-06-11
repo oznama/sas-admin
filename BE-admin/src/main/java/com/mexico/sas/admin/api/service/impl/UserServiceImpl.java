@@ -118,7 +118,12 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
 
   @Override
   public UserDto findByEmployeeAndPassword(Employee employee, String password) throws CustomException {
-    UserDto userDto = parse(getUser(employee, crypter.encrypt(password)));
+    log.debug("Login Usuario: {}, password: {}",employee.getEmail(), password);
+    String passwordDecrypt = crypter.decrypt(password, 1);
+    log.debug("Usuario: {}, passwordDecrypted: {}",employee.getEmail(), passwordDecrypt);
+    String passwordEncrypt = crypter.encrypt(passwordDecrypt,0);
+    log.debug("Usuario: {}, passwordEncrypt: {}",employee.getEmail(), passwordEncrypt);
+    UserDto userDto = parse(getUser(employee, passwordEncrypt));
     log.debug("User {} finded", employee.getEmail());
     return userDto;
   }
@@ -167,7 +172,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
   public void resetPswd(Long id) throws CustomException {
     User user = getUser(id);
     String randomPasword = generateRandomPswd();
-    user.setPassword(crypter.encrypt(randomPasword));
+    user.setPassword(crypter.encrypt(randomPasword,0));
     repository.save(user);
     save(User.class.getSimpleName(), user.getId(), CatalogKeys.LOG_DETAIL_UPDATE, I18nResolver.getMessage(I18nKeys.USER_SECURITY_PSWD_RESET));
     log.debug("User {}'s password reset for: {}", user.getId(), randomPasword);
@@ -237,7 +242,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
       user.setCreatedBy(getCurrentUser().getUserId());
       String randomPasword = generateRandomPswd();
       userDto.setPassword(randomPasword);
-      user.setPassword(crypter.encrypt(randomPasword));
+      user.setPassword(crypter.encrypt(randomPasword,0));
     } else {
       throw new BadRequestException(I18nResolver.getMessage(I18nKeys.EMPLOYEE_USER_EXIST, buildFullname(employee)), null);
     }
@@ -245,12 +250,12 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
 
   private String validationUpdate(UserUpdateDto userDto, User user) throws CustomException {
     StringBuilder sb = new StringBuilder();
-    String passwordDecrypted = crypter.decrypt(user.getPassword());
+    String passwordDecrypted = crypter.decrypt(user.getPassword(),0);
     // Validation currentPassword
     if(!StringUtils.isEmpty(userDto.getCurrentPassword()) && !userDto.getCurrentPassword().equals(passwordDecrypted) ) {
       throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_PSWD_CURT_BAD), null);
     } else if(!StringUtils.isEmpty(userDto.getCurrentPassword()) && userDto.getCurrentPassword().equals(passwordDecrypted) && !userDto.getNewPassword().equals(passwordDecrypted) ) {
-      user.setPassword(crypter.encrypt(userDto.getNewPassword()));
+      user.setPassword(crypter.encrypt(userDto.getNewPassword(),0));
       final String masked = "*****%s";
       sb.append(I18nResolver.getMessage(I18nKeys.LOG_GENERAL_UPDATE, "Password",
               String.format(masked, passwordDecrypted.substring(passwordDecrypted.length() - 3)),

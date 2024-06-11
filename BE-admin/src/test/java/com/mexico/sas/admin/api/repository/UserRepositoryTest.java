@@ -31,7 +31,7 @@ public class UserRepositoryTest {
         List<User> users = repository.findAll();
         assertFalse(users.isEmpty());
         users.forEach( user -> {
-            System.out.printf("User: %d, Employee id: %d", user.getId(), user.getEmployeeId());
+            System.out.printf("User: %d, Employee id: %d", user.getId(), user.getEmployee().getId());
         });
     }
 

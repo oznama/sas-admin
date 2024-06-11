@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { alertType } from '../../custom/alerts/types/types';
 import { displayNotification, genericErrorMsg, styleTableRow, styleTableRowBtn } from '../../../helpers/utils';
 import { useEffect, useState } from 'react';
-import { setCurrentAppTab } from '../../../../store/project/projectSlice';
+import { setCurrentAppTab, setNumApps } from '../../../../store/project/projectSlice';
 import { changeLoading } from '../../../../store/loading/loadingSlice';
 
 export const TableApplications = ({ projectId }) => {
@@ -25,7 +25,9 @@ export const TableApplications = ({ projectId }) => {
             if( response.code ) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
-                setApplications(response.filter( r => r.application !== 'total' ));
+                const apps = response.filter( r => r.application !== 'total' );
+                setApplications(apps);
+                dispatch(setNumApps(apps.length));
                 const { amount, tax, total } = response.find( r => r.application === 'total' );
                 setTotalAmount( amount );
                 setTotalTax( tax ) ;

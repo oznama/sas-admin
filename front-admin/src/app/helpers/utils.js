@@ -1,4 +1,5 @@
 import { hide, setMessage } from "../../store/alert/alertSlice";
+import CryptoJS from "crypto-js";
 
 export const mountMax = 99999999;
 export const numberMaxLength = 3;
@@ -199,3 +200,38 @@ export const linkQueryBuilder = (arr, paramName) => {
 }
 
 export const removeCurrencyFormat = value => Number(value.replaceAll(/[^0-9\.-]+/g,""));
+
+const passphrase_ft = import.meta.env.VITE_CRYPTO_KEY_FT;
+
+const cryptoConfig = {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+};
+const secretKey = () => {
+    const sha1Hash = CryptoJS.SHA1(passphrase_ft);
+    const secretAesKey = CryptoJS.lib.WordArray.create(sha1Hash.words.slice(0, 16/4));
+    return secretAesKey;
+}
+
+export const encrypt = input => {
+    const inputByte = CryptoJS.AES.encrypt(input, secretKey(passphrase_ft), cryptoConfig);
+    const inputEncr = inputByte.toString();
+    return inputEncr;
+}
+
+export const decrypt = input => {
+    const inputByte = CryptoJS.AES.decrypt(input, secretKey(passphrase_ft), cryptoConfig);
+    const inputDecr = inputByte.toString(CryptoJS.enc.Utf8);
+    return inputDecr;
+}
+
+export const replaceAccents = input => {
+    let r = input.replace(/\s/g,"_");
+    r = r.replace(/ñ/g,"n").replace(/Ñ/g,"N");
+    r = r.replace(/á/g,"a").replace(/Á/g,"A");
+    r = r.replace(/é/g,"e").replace(/É/g,"E");
+    r = r.replace(/í/g,"i").replace(/Í/g,"I");
+    r = r.replace(/ó/g,"o").replace(/Ó/g,"O");
+    r = r.replace(/ú/g,"u").replace(/Ú/g,"U");
+    return r;
+}

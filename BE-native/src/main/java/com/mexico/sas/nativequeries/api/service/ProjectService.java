@@ -1,7 +1,7 @@
 package com.mexico.sas.nativequeries.api.service;
 
 import com.mexico.sas.nativequeries.api.mail.EmailUtils;
-import com.mexico.sas.nativequeries.api.model.ProjectWithApplication;
+import com.mexico.sas.nativequeries.api.model.*;
 import com.mexico.sas.nativequeries.api.report.ProjectWithApplicationXls;
 import com.mexico.sas.nativequeries.api.repository.ProjectRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +40,11 @@ public class ProjectService {
     public List<String> findProjectsWithApplication(String filter, Boolean installed, Boolean monitoring) {
         log.debug("Finding Projects keys with applications");
         return projectRepository.findProjectsWithApplication(filter, installed, monitoring);
+    }
+
+    public List<ProjectAppCat> getProjectAppsCat(String pKey) {
+        log.debug("Getting Project Apps of project {}", pKey);
+        return projectRepository.getProjectPlanAppsNames(pKey);
     }
 
     public byte[] exportProjectsWithApplication(Boolean installed, Boolean monitoring, List<String> pKeys) {
