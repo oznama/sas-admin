@@ -242,7 +242,7 @@ export const ProjectPlanModal = () => {
                 {
                     data && data.map( (d, index) => (
                         <div>
-                            <b>{d.appName}</b> responsable <b>{d.leader}</b>
+                            <b>{d.appName}</b> responsable <b>{d.developer}</b>
                             <ul>
                                 <li>Inicio {d.startDate}</li>
                                 <li>An&aacute;lisis y dise&ntilde;o {d.designDate}</li>
