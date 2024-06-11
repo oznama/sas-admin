@@ -4,9 +4,88 @@ export const mountMax = 99999999;
 export const numberMaxLength = 3;
 export const taxRate = 0.16;
 
+export const REPORT_MAP = [
+    {
+        reportName: "project_withoutorders",
+        title: 'Proyectos sin ODC',
+        context: 'projects/withoutorders',
+        excel: 'report_ODC'
+    },
+    {
+        reportName: "project_withoutinvoice",
+        title: 'Proyectos Pendientes de cobro',
+        context: 'projects/withoutinvoices',
+        excel: 'invoice_pedings',
+        labels: [
+            { id: '1', value: "Fecha de construcción vencida", styleTitle: 'danger' },
+            { id: '2', value: "Fecha de instalación vencida", styleTitle: 'danger' },
+            { id: '3', value: "Fecha de monitoreo vencida", styleTitle: 'danger' }
+        ],
+        options: [
+            {
+                value: "Construcción",
+                id: '1',
+                orderCanceled: false,
+                percentage: 30,
+
+            },
+            {
+                value: "Instalación",
+                id: '2',
+                orderCanceled: false,
+                percentage: 60,
+
+            },
+            {
+                value: "Monitoreo",
+                id: '3',
+                orderCanceled: false,
+                percentage: 100,
+
+            }
+        ]
+    },
+    {
+        reportName: "project_withinvoice_canceled",
+        title: 'Proyectos con ordenes canceladas',
+        context: 'projects/withoutinvoices',
+        excel: 'invoice_pedings',
+        params: {
+            id: 1,
+            orderCanceled: true,
+            percentage: 100,
+
+        }
+    },
+    {
+        reportName: "project_withoutdates",
+        title: 'Proyectos sin fechas',
+        context: 'projects',
+        excel: 'projects_dates',
+        labels: [
+            { id: '1', value: "Sin fecha de instalación", styleTitle: 'danger' },
+            { id: '2', value: "Sin fecha de monitoreo", styleTitle: 'danger' }
+        ],
+        options: [
+            {
+                id: '1',
+                value: "Sin fecha de instalación",
+                installation: true
+            },
+            {
+                value: "Sin fecha de monitoreo",
+                id: '2',
+                monitoring: true
+
+            }
+        ]
+    },
+]
+
 export const styleTable = { height: '345px' };
 export const styleTableRow = { padding: '1px' };
 export const styleTableRowBtn = { ...styleTableRow, width: '35px' };
+export const styleCheckBox = { height: '16px', width: '16px' };
 
 export const handleText = ( { value, maxLength } ) => value.slice(0, maxLength);
 
@@ -41,7 +120,6 @@ export const handleDateStr = ( strDate ) => {
 }
 
 const convertDateToUTC = ( strDate ) => {
-    console.log( "convertDateToUTC - start", strDate );
     const dateParts = strDate.split("/");
     return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]); 
 };
@@ -110,6 +188,14 @@ export const isNumDec = value => {
     const regex = new RegExp(expression);
     const result = regex.test(value);
     return result;
+}
+
+export const linkQueryBuilder = (arr, paramName) => {
+    let linkQuery='?';
+    for (let i = 0; i < arr.length; i++) {
+        linkQuery+= (i===0 ? '' : '&') + paramName + '=' + arr[i];
+    }
+    return linkQuery;
 }
 
 export const removeCurrencyFormat = value => Number(value.replaceAll(/[^0-9\.-]+/g,""));

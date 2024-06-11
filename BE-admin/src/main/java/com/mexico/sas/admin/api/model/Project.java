@@ -27,6 +27,7 @@ public class Project implements Serializable {
     private String description;
     private Long status;
     private Date installationDate;
+    private Date monitoringDate;
     private BigDecimal amount;
     private BigDecimal tax;
     private BigDecimal total;

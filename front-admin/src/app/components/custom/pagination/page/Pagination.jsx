@@ -51,14 +51,16 @@ export const Pagination = ({
         
         return (
             <li key={ index } className={ classPageItemWithDisabled( pageNumber === currentPage ) } onClick={ () => onPageChange(pageNumber - 1) }>
-                <a className="page-link">{ pageNumber }</a>
+                <a className="page-link" href="#">
+                    <span aria-hidden="true">{ pageNumber }</span>
+                </a>
             </li>
         )
     });
     return (
         <div className="d-flex justify-content-end mt-1">
             <nav aria-label="Page navigation example">
-                <ul className="pagination py-1">
+                <ul className="pagination pt-1">
                     
                     <li className={ classPageItemWithDisabled( currentPage === 1 ) } onClick={ onPrevious }>
                         <a className="page-link" href="#" aria-label="Previous">

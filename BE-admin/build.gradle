@@ -34,6 +34,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-thymeleaf',
+            'org.springframework.boot:spring-boot-starter-mail'
     )
 
     implementation(
@@ -41,13 +42,8 @@ dependencies {
             "io.springfox:springfox-boot-starter:${springFoxVersion}",
             "io.springfox:springfox-swagger-ui:${springFoxVersion}",
             "io.jsonwebtoken:jjwt:${jwtsVersion}",
-            "org.apache.commons:commons-io:${apacheCommonsIoVersion}",
             "com.vladmihalcea:hibernate-types-55:${hibernateTypesVersion}",
-            "org.flywaydb:flyway-core",
-            "org.apache.poi:poi:${apachePoiVersion}",
-            "org.apache.poi:poi-ooxml:${apachePoiVersion}",
-            "net.sf.jasperreports:jasperreports:${jaspereportVersion}",
-            "net.sf.jasperreports:jasperreports-fonts:${jaspereportVersion}"
+            "org.flywaydb:flyway-core"
     )
 
     compileOnly("org.projectlombok:lombok:${lombokVersion}")

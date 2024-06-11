@@ -17,7 +17,8 @@ public class UserUpdateDto implements Serializable {
 
   @JsonIgnore
   private Long id;
-  private String password;
+  private String currentPassword;
+  private String newPassword;
   @ApiModelProperty(notes = "Roles (1 Administrador", example = "1")
   private Long role;
 

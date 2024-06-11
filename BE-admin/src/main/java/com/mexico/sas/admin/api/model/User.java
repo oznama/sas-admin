@@ -31,7 +31,10 @@ public class User implements Serializable {
   @Column(columnDefinition = "timestamp default current_timestamp")
   private Date creationDate;
   private Long createdBy;
-  private Long employeeId;
+
+  @ManyToOne
+  @JoinColumn
+  private Employee employee;
 
   @ManyToOne
   @JoinColumn

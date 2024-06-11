@@ -7,9 +7,11 @@ import { EmployeeRouter } from '../components/employee/EmployeeRouter';
 import { CompanyRouter } from '../components/company/CompanyRouter';
 import { TableOrders } from '../components/orders/page/TableOrders';
 import { ApplicationRouter } from '../components/applicationsCatalog/ApplicationRouter';
-import { adminRouter } from '../components/admin/adminRouter';
+import { AdminRouter } from '../components/admin/adminRouter';
+import { UserRouter } from '../components/user/userRouter';
 import { TableInvoices } from '../components/invoices/page/TableInvoices';
 import { CatalogConexionRouter } from '../components/catalogConexion/catalogConexionRouter';
+import { PageReport } from '../components/reports/PageReport';
 
 
 export const AppRouter = () => (
@@ -26,7 +28,9 @@ export const AppRouter = () => (
         <Route path="role/*" element={ <CatalogConexionRouter catalogId={1000000005}/> } />
         <Route path="companyType/*" element={ <CatalogConexionRouter catalogId={1000000009}/> } />
         <Route path="days/*" element={ <CatalogConexionRouter catalogId={1000000007}/> } />
-        <Route  path="admin/*" element={ <adminRouter />} />
+        <Route  path="admin/*" element={ <AdminRouter />} />
+        <Route  path="users/*" element={ <UserRouter />} />
+        <Route path="reports/:reportName" element={ <PageReport /> } />
 
         <Route path="/" element={ <Navigate to="/home" /> } />
     </Routes>

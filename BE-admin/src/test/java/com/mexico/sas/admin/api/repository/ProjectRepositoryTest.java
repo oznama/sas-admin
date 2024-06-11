@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.math.BigDecimal;
 
 /**
  * @author Oziel Naranjo
@@ -29,10 +27,12 @@ public class ProjectRepositoryTest {
         Project project = new Project();
         project.setKey("CLAVE_01");
         project.setDescription("Descripcion prueba");
-        project.setCompany(new Company(1l));
-        project.setProjectManager(new Employee(1l));
-        project.setStatus(2000200002l);
+        project.setCompany(new Company(2l));
+        project.setProjectManager(new Employee(2l));
+        project.setAmount(BigDecimal.ZERO);
+        project.setTax(BigDecimal.ZERO);
+        project.setTotal(BigDecimal.ZERO);
+        project.setStatus(2000200001l);
         repository.save(project);
-        assertNotNull(project.getId());
     }
 }

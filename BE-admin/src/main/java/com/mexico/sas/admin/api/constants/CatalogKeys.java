@@ -52,4 +52,10 @@ public interface CatalogKeys {
 
     Long HOLYDAYS = 1000000007l;
 
+    // Project-Applicacion status
+    Long PROJ_APP_STATUS = 1000000010L;
+    Long PROJ_APP_STATUS_PENDING = 2001000001L;
+    Long PROJ_APP_STATUS_PROGRESS = 2001000002L;
+    Long PROJ_APP_STATUS_COMPLETE = 2001000003L;
+
 }

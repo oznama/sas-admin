@@ -39,4 +39,13 @@ public interface GeneralKeys {
 
     String FOOTER_TOTAL = "total";
     String ROW_TOTAL = "paid";
+
+    String PENDING_TYPE_DUE = "pendings";
+    String PENDING_TYPE_CRT = "currents";
+    String PEDNING_TYPE_NXT = "futures";
+    String PENDING_TYPE_END = "completes";
+
+    // Email subjects
+    String EMAIL_SUBJECT_USER_CREATED = "Alta de usuario";
+    String EMAIL_SUBJECT_PSWD_RESET = "Password reseteado";
 }

@@ -2,57 +2,132 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { InputText } from "../custom/InputText";
-import { Select } from "../custom/Select";
-import { displayNotification, genericErrorMsg, handleDateStr, numberToString } from "../../helpers/utils";
+import { displayNotification, genericErrorMsg } from "../../helpers/utils";
 import { alertType } from "../custom/alerts/types/types";
 import { TableLog } from "../custom/TableLog";
-import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
-import { save, update, getCatalogById } from '../../services/CatalogService';
-import { DatePicker } from "../custom/DatePicker";
+import 'react-dual-listbox/lib/react-dual-listbox.css';
+import DualListBox from "react-dual-listbox";
+// import { setCatalogName, setCatalogObj, setCatalogParent } from '../../../store/catalog/catalogSlice';
+// import { save, update, getCatalogById } from '../../services/CatalogService';
+import { setRole  } from '../../../store/admin/adminSlice';
+import { update } from '../../services/RoleService';
+import { getRolesPermissions, getRolePermissionsByRoleId, savePermissions, deleteLogic} from "../../services/RolesPermissionsService";
 
 export const DetailAdmin = () => {
-    const { catalogParent } = useSelector( state => state.catalogReducer );
-    const { obj } = useSelector( state => state.catalogReducer );
-    const [title, setTitle] = useState('');
-    const [type, setType] = useState('');
-    const [category, setCategory] = useState('');
-    
-    const [startDate, setStartDate] = useState();
-    
-    const {name} = useParams();
+    const { role } = useSelector( state => state.adminReducer );
+    // const { name } = useParams();
     const { permissions} = useSelector( state => state.auth );
     const [currentTab, setCurrentTab] = useState(1);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
-    const [value, setValue] = useState(obj && obj.value ? obj.value : '');
-    const [description, setDescription] = useState(obj && obj.description ? obj.description : '');
-
-    const onChangeValue = ({ target }) => setValue(target.value);
-    const onChangeDescription = ({ target }) => setDescription(target.value);
-    const onChangeStartDate = date => setStartDate(date);
-
-    const [active, setActive] = useState('');
+    const [name, setName] = useState(role.name);
+    const [description, setDescription] = useState(role.description);
+    const [selected, setSelected] = useState([]);
     
-    const isModeEdit = ((obj.id && !permissions.canEditCat) || (obj.id && !active ));
+    const [totalPermissionByRoles, setTotalPermissionByRoles] = useState(0);  
+    const [permissionByRole, setPermissionByRoles] = useState([]);
+    const [permissionByRoleResp, setPermissionByRolesResp] = useState([]);
+    const [totalPermission, setTotalPermission] = useState(0);  
+    const [permission, setPermission] = useState([]);
+
+    const onChangeValue = ({ target }) => setName(target.value);
+    const onChangeDescription = ({ target }) => setDescription(target.value);
+
+    const [active, setActive] = useState(role.active);
+
+    const options = permission.reduce((acc, role) => {
+        // Extraer el primer elemento de la descripción para obtener la etiqueta del grupo
+        const groupLabel = role.description.split('-')[0];
+        // Verificar si el grupo ya existe en el acumulador
+        const existingGroup = acc.find(group => group.label === groupLabel);
+        // Si el grupo no existe, agregarlo al acumulador
+        if (!existingGroup) {
+            acc.push({
+                label: groupLabel,
+                options: [{ value: role.name, label: role.description }]
+            });
+        } else {
+            // Si el grupo ya existe, agregar la opción al grupo existente
+            existingGroup.options.push({ value: role.name, label: role.description });
+        }
+        
+        return acc;
+    }, []);
+
+
+    const renderDualList = () => {
+        return (
+            <DualListBox
+                options={options}
+                selected={selected}
+                onChange={(newValue) => setSelected(newValue)}
+            />
+        );
+    }
+    
+    const isModeEdit = ((role.id && !permissions.canAdminUsr) || (role.id && !active ));
     
     const onSubmit = event => {
         event.preventDefault()
         const data = new FormData(event.target)
-        const request = Object.fromEntries(data.entries());
-        request.catalogParent = catalogParent;
-        request['value'] = type === 'days' ? startDate : value;
-        if (obj.value){
-            updateChild(request);
-        }else{
-            saveChild(request);
+        const request = { ...Object.fromEntries(data.entries()), id: role.id };
+        deleteMissingIds();
+        printMissingSelected();
+        updateRole(request);
+        dispatch(setRole(request));
+        navigate('/admin');
+    }
+    
+    const selectedNames = selected; // Copia los nombres seleccionados
+
+    const selectedIds = permissionByRoleResp
+        .filter(item => selectedNames.includes(item.name))
+        .map(item => item.idRolePermission);
+
+    const deleteMissingIds = () => {
+        permissionByRoleResp.forEach(item => {
+            if (!selectedIds.includes(item.idRolePermission)) {
+                console.log('dato eliminao: ',item.idRolePermission);
+                deleteChild(item.idRolePermission);
+            }
+        });
+    };
+
+    const permissionNames = permissionByRoleResp.map(item => item.name);
+
+    const printMissingSelected = () => {
+        selected.forEach(name => {
+            if (!permissionNames.includes(name)) {
+                const dsave = permission.find(item => item.name === name);
+                const dato = '{"permissionId":'+dsave.id+', "roleId":'+role.id+'}';
+                const datoJ = JSON.parse(dato);
+                console.log('Dato agregado: ', datoJ);
+                saveChild(datoJ);
+            }
+        });
+    };
+
+
+    const deleteChild = id => {
+        for (let index = 0; index < permissionByRoleResp.length; index++) {
+            deleteLogic(id).then( response => {
+                if(response.code && response.code !== 200) {
+                displayNotification(dispatch, response.message, alertType.error);
+                } else {
+                displayNotification(dispatch, '¡Registro eliminado correctamente!', alertType.success);
+                fetchRoles('');
+                }
+            }).catch(error => {
+                console.log(error);
+                //displayNotification(dispatch, genericErrorMsg, alertType.error);
+            });
         }
-        navigate('/'+type);
+        
     }
 
     const onClickBack = () => {
-        if ( (!permissions.canEditEmp && currentTab == 2) || currentTab === 1 ) {
-        navigate('/'+type)
+        if ( (!permissions.canAdminUsr && currentTab == 2) || currentTab === 1 ) {
+        navigate('/admin')
         } else {
         setCurrentTab(currentTab - 1);
         }
@@ -72,61 +147,59 @@ export const DetailAdmin = () => {
         </ul>
     )
 
-    const saveChild = request => {
-        save(request).then( response => {
-            if(response.code && response.code !== 201) {
-                displayNotification(dispatch, response.message, alertType.error);
-            } else {
-                displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
-                dispatch(setCatalogObj(request));
-            }
-        }).catch(error => {
-            console.log(error);
-            displayNotification(dispatch, genericErrorMsg, alertType.error);
-        });
-    }
-
-    const updateChild = request => {
-        update(obj.id, request).then( response => {
+    const updateRole = request => {
+        update(role.id, request).then( response => {
             if(response.code && response.code !== 201) {
                 displayNotification(dispatch, response.message, alertType.error);
             } else {
                 displayNotification(dispatch, '¡El registro se ha actualizado correctamente!', alertType.success);
-                dispatch(setCatalogObj(request));
+                dispatch(setRole(request));
             }
         }).catch(error => {
             console.log(error);
             displayNotification(dispatch, genericErrorMsg, alertType.error);
         });
     }
+
+    const saveChild = request => {
+        savePermissions(request).then( response => {
+            if(response.code && response.code !== 201) {
+                displayNotification(dispatch, response.message, alertType.error);
+            } else {
+                displayNotification(dispatch, '¡El registro se ha creado correctamente!', alertType.success);
+            }
+        }).catch(error => {
+            console.log(error);
+            displayNotification(dispatch, genericErrorMsg, alertType.error);
+        });
+    }
+
+    const fetchRoles = () => {
+        getRolePermissionsByRoleId(role.id)
+        .then( response => {
+            const idsArray = response.map( item => item.name );
+            setSelected(idsArray);
+            setPermissionByRoles(idsArray);
+            setPermissionByRolesResp(response);
+            setTotalPermissionByRoles(response.totalElements);
+        }).catch( error => {
+            console.log(error);
+        });
+    }
+
+    const fetchAllRoles = () =>{
+        getRolesPermissions()
+        .then( response => {
+            setPermission(response);
+            setTotalPermission(response.totalElements);
+        }).catch( error => {
+            console.log(error);
+        })
+    }
     
     useEffect(() => {
-        if (catalogParent == 1000000005) {
-            setTitle('Puestos de trabajo');
-            setType('role');
-            setCategory('Roles');
-        } else if (catalogParent == 1000000009) {
-            setTitle('Tipos de compañia');
-            setType('companyType');
-            setCategory('Tipo de compañia');
-        } else {
-            setTitle('Días feriados');
-            setType('days');
-            setCategory('Días feriados');
-        }
-        if (catalogParent===1000000007) {
-            setStartDate(handleDateStr(obj.value));
-            dispatch(setCatalogName(startDate));
-        }else if(obj.value){
-            // setValue(obj.value)
-        }
-
-        // fetchSelects()
-        if(obj.status == 2000100001 || obj == {}){
-            setActive(true);
-        }else{
-            setActive(false);
-        }
+        fetchRoles();
+        fetchAllRoles();
     }, [])
     
     const renderDetail = () => {
@@ -134,21 +207,10 @@ export const DetailAdmin = () => {
                 <form className="needs-validation" onSubmit={ onSubmit }>
                     <div className="row text-start">
                         <div className='col-12'>
-                            {
-                                (type !== 'days') && (
-                                    <InputText name='value' label={category} placeholder='Escribe el nombre' 
-                                    // disabled={ obj.value ? true :false} value={ value } required
-                                    disabled={ isModeEdit} value={ value } required 
-                                    onChange={ onChangeValue } maxLength={ 255 } />
-                                )
-                            }
-                            {
-                                (type === 'days') && (
-                                    <DatePicker name="value" label="Día" 
-                                    disabled={isModeEdit } value={ startDate } 
-                                    required onChange={ (date) => onChangeStartDate(date) } excludeDates={ false } />
-                                )
-                            }
+                            <InputText name='name' label='Rol' placeholder='Escribe el nombre' 
+                            // disabled={ obj.value ? true :false} value={ value } required
+                            disabled={ isModeEdit} value={ name } required 
+                            onChange={ onChangeValue } maxLength={ 255 } />
                         </div>
                     </div>
 
@@ -158,10 +220,11 @@ export const DetailAdmin = () => {
                         </div>
                     </div>
                     
+                {renderDualList()}
                     <div className="pt-3 d-flex flex-row-reverse">
-                        {permissions.canEditEmp &&(<button type="submit" className="btn btn-primary" >Guardar</button>)}
+                        {permissions.canAdminUsr &&(<button type="submit" className="btn btn-primary" >Guardar</button>)}
                         &nbsp;
-                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/`+type) }>{permissions.canEditEmp ? 'Cancelar' : 'Regresar'}</button>
+                        <button type="button" className="btn btn-danger" onClick={ () => navigate(`/admin`) }>{permissions.canAdminUsr ? 'Cancelar' : 'Regresar'}</button>
                     </div>
                 </form>
             </div>)
@@ -170,10 +233,10 @@ export const DetailAdmin = () => {
     return (
         <>
         <div className="d-flex d-flex justify-content-center">
-            <h3 className="fs-4 card-title fw-bold mb-4">{`Agregar ${title}`}</h3>
+            <h3 className="fs-4 card-title fw-bold mb-4">{`Agregar Permisos`}</h3>
         </div>
         {renderTabs() }
-        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Aplication' recordId={ value } />) }
+        { currentTab === 1 ? renderDetail() : ( <TableLog tableName='Aplication' recordId={ name } />) }
         </>
     )
 }

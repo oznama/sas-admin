@@ -117,6 +117,7 @@ export const TableProject = ({
         createdBy,
         creationDate,
         installationDate,
+        monitoringDate,
         company,
         projectManager,
         amount,
@@ -134,6 +135,7 @@ export const TableProject = ({
             { permissions.isAdminSas && (<th className="text-start" style={ styleTableRow }>{ company }</th>) }
             <td className="text-start" style={ styleTableRow }>{ projectManager }</td>
             <td className="text-center" style={ styleTableRow }>{ installationDate }</td>
+            <td className="text-center" style={ styleTableRow }>{ monitoringDate }</td>
             <td className="text-end text-primary" style={ styleTableRow }>{ amount }</td>
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ tax }</td>) }
             { permissions.isAdminRoot && (<td className="text-end text-primary" style={ styleTableRow }>{ total }</td>) }
@@ -175,6 +177,7 @@ export const TableProject = ({
                             { permissions.isAdminSas && (<th className="text-center fs-6" scope="col">Empresa</th>) }
                             <th className="text-center fs-6" scope="col">Project Manager</th>
                             <th className="text-center fs-6" scope="col">Instalaci&oacute;n</th>
+                            <th className="text-center fs-6" scope="col">Monitoreo</th>
                             <th className="text-center fs-6" scope="col">Monto</th>
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Iva</th>) }
                             { permissions.isAdminRoot && (<th className="text-center fs-6" scope="col">Total</th>) }

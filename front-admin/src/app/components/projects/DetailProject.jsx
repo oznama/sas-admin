@@ -30,6 +30,7 @@ export const DetailProject = () => {
     const [dateCreated, setDateCreated] = useState();
     const [pm, setPm] = useState('');
     const [installationDate, setInstallationDate] = useState();
+    const [monitoringDate, setMonitoringDate] = useState();
     const [observations, setObservations] = useState('');
     const [pms, setPms] = useState([]);
 
@@ -65,6 +66,7 @@ export const DetailProject = () => {
                   setDateCreated(handleDateStr(response.creationDate));
                   setPm(numberToString(response.projectManagerId, ''));
                   setInstallationDate(handleDateStr(response.installationDate));
+                  setMonitoringDate(handleDateStr(response.monitoringDate));
                   setObservations(response.observations ? response.observations : '');
               }
           }).catch( error => {
@@ -94,6 +96,7 @@ export const DetailProject = () => {
     const onChangeDesc = ({ target }) => setDescription(target.value);
     const onChangeCreatedDate = (date) => setDateCreated(date);
     const onChangeInstallationDate = (date) => setInstallationDate(date);
+    const onChangeMonitoringDate = (date) => setMonitoringDate(date);
     const onChangePm = ({ target }) => setPm(target.value);
     const onChangeObservations = ({ target }) => setObservations(target.value);
 
@@ -247,6 +250,9 @@ export const DetailProject = () => {
                     value={ description } required onChange={ onChangeDesc } maxLength={ 255 } />
                 <DatePicker name='installationDate' label="Fecha instalaci&oacute;n" disabled={ key && !project.active }
                     value={ installationDate } onChange={ (date) => onChangeInstallationDate(date) } />
+                <br />
+                <DatePicker name='monitoringDate' label="Fecha monitoreo" disabled={ key && !project.active }
+                    value={ monitoringDate } onChange={ (date) => onChangeMonitoringDate(date) } />
                 { renderCreatedBy() }
                 { renderCreationDate() }
                 <Select name="projectManagerId" label="Project Manager" options={ pms } value={ pm } required onChange={ onChangePm } disabled={ key && !project.active } />
