@@ -68,7 +68,7 @@ logging:
 
 api:
   security:
-    cipher-secret: ${SECURITY_CIPHER_SECRET}
+    cipher-secret: ${SECURITY_CIPHER_SECRET_FT}
 
 management:
   endpoints:

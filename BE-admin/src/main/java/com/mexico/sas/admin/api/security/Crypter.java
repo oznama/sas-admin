@@ -31,6 +31,9 @@ public class Crypter {
     @Value("${api.security.cipher-secret}")
     private String secret;
 
+    @Value("${api.security.cipher-secret-ft}")
+    private String secretFt;
+
     private SecretKeySpec secretKey;
     private byte[] key;
     private final String ALGORITHM = "AES";
@@ -39,7 +42,7 @@ public class Crypter {
      *
      * @throws CustomException
      */
-    public void prepareSecretKey() throws CustomException {
+    public void prepareSecretKey(String secret) throws CustomException {
         try {
             key = secret.getBytes(StandardCharsets.UTF_8);
             MessageDigest sha = MessageDigest.getInstance("SHA-1");
@@ -58,8 +61,8 @@ public class Crypter {
      * @return
      * @throws CustomException
      */
-    public String encrypt(String strToEncrypt) throws CustomException {
-        prepareSecretKey();
+    public String encrypt(String strToEncrypt, int origin) throws CustomException {
+        prepareSecretKey(origin == 1 ? secretFt : secret);
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -76,10 +79,10 @@ public class Crypter {
      * @return
      * @throws CustomException
      */
-    public String decrypt(String strToDecrypt) throws CustomException {
+    public String decrypt(String strToDecrypt, int origin) throws CustomException {
         if(StringUtils.isEmpty(strToDecrypt))
             throw new BadRequestException(I18nResolver.getMessage(I18nKeys.VALIDATION_PASSWORD_REQUIRED), null);
-        prepareSecretKey();
+        prepareSecretKey(origin == 1 ? secretFt : secret);
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
