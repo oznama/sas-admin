@@ -118,7 +118,7 @@ public class UserServiceImpl extends LogMovementUtils implements UserService {
 
   @Override
   public UserDto findByEmployeeAndPassword(Employee employee, String password) throws CustomException {
-    UserDto userDto = parse(getUser(employee, password));
+    UserDto userDto = parse(getUser(employee, crypter.encrypt(password)));
     log.debug("User {} finded", employee.getEmail());
     return userDto;
   }

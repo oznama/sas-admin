@@ -53,7 +53,7 @@ public class SSOServiceImpl extends Utils implements SSOService {
   private SSOResponseDto buildSSOResponse(SSORequestDto ssoRequestDto) throws CustomException {
     SSOResponseDto ssoResponseDto = new SSOResponseDto();
     Employee employee = employeeService.findEntityByEmail(ssoRequestDto.getEmail());
-    UserDto userDto = userService.findByEmployeeAndPassword(employee, ssoRequestDto.getPassword());
+    UserDto userDto = userService.findByEmployeeAndPassword(employee,  ssoRequestDto.getPassword());
     ssoResponseDto.setUser(getSSOUserDto(userDto, employee));
     ssoResponseDto.setAccessToken(customJWT.getToken(ssoRequestDto.getEmail()));
     return ssoResponseDto;

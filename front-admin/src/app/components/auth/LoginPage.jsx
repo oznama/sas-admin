@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Footer } from '../custom/Footer';
 import { login } from '../../../store/auth/authSlice';
 import { doLogin } from '../../services/AuthService';
-import { encrypt, genericErrorMsg } from '../../helpers/utils';
+import {  genericErrorMsg } from '../../helpers/utils';
 import logo from '../../../assets/img/SAS_logo.png';
 import { setProject } from '../../../store/project/projectSlice';
 import { useState } from 'react';
@@ -20,9 +20,9 @@ export const LoginPage = () => {
         event.preventDefault();
         const data = new FormData(event.target);
         const request = Object.fromEntries(data.entries());
-        const passwordEncryp = encrypt(request.password);
-        const jsonRequest = { ...request, password: passwordEncryp};
-        doLogin(jsonRequest).then( response => {
+        //const passwordEncryp = encrypt(request.password);
+        //const jsonRequest = { ...request, password: passwordEncryp};
+        doLogin(request).then( response => {
             if( response.code ) {
                 setErrorMessage(response.message);
             } else {
