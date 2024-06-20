@@ -39,7 +39,6 @@ export const ProjectPlanModal = () => {
     const [apps, setApps] = useState([]);
     const [appCheckAll, setAppCheckAll] = useState(false);
 
-    const [showPswd, setShowPswd] = useState(false);
     const [password, setPassword] = useState('');
     const [file, setFile] = useState();
 
@@ -266,23 +265,14 @@ export const ProjectPlanModal = () => {
         </div>
     )
 
-    const onClickShowPassword = () => {
-        setShowPswd(!showPswd);
-        pswRef.current.focus();
-    }
-
     const renderThirdStep = () => (
         <div>
             <h4>El correo ser&aacute; env&iacute;ado con la cuenta</h4>
             <h5 className='text-center text-success'>{ user.email }</h5>
             <label>Contrase&ntilde;a de tu correo</label>
             <div className="input-group mb-3">
-                <input ref={pswRef} className="form-control" name="password" required
-                    type={ showPswd ? 'text' : 'password' }
+                <input ref={pswRef} className="form-control" name="password" type="password" required
                     value={ password } onChange={ onChangePassword } />
-                <span className="input-group-text" onClick={ onClickShowPassword }>
-                    <i className={`bi bi-eye${ showPswd ? '-slash-fill' : '-fill'}`}></i>
-                </span>
             </div>
             { renderErrors() }
         </div>
