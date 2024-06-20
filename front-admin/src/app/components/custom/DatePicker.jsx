@@ -56,7 +56,8 @@ export const DatePicker = ({
     <>
         <label className="form-label">{ label }</label>
         <br/>
-        <DatePickerReact className="form-control padding-short" name={ name } disabled={ disabled } required={ required }
+        <DatePickerReact className="form-control padding-short" wrapperClassName="w-100"
+          name={ name } disabled={ disabled } required={ required }
           selected={ value } onChange={ onChange } locale='es' dateFormat='dd/MM/yyyy' autoComplete='off'
           minDate={ minDate } maxDate={ maxDate } excludeDates={ holyDates } readOnly={ readOnly } />
           {/* filterDate={ filterWeekends } */}
