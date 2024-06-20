@@ -46,7 +46,7 @@ export const TableProject = ({
 
     useEffect(() => {
         fetchProjects(currentPage, filter);
-    }, [currentPage]);
+    }, []);
 
     const onPaginationClick = page => {
         setCurrentPage(page);

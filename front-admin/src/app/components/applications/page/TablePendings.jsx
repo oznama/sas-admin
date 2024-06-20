@@ -61,11 +61,11 @@ export const TablePendings = ({
 
     useEffect(() => {
         fetchProjects(currentPage, filter);
-    }, [currentPage]);
+    }, []);
 
     const onPaginationClick = page => {
         setCurrentPage(page);
-        fetchProjects(currentPage, filter);
+        fetchProjects(page, filter);
     }
 
     const onClean = () => {
